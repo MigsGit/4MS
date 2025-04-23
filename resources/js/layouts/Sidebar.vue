@@ -11,29 +11,26 @@ const useAuth = useAuthStore();
                     <!-- <i class="fas fa-tachometer-alt" icon="fa-tachometer-alt"></i>&nbsp;Dashboard get_bulletin_pages_by_id-->
                 </router-link>
                 <div class="sb-sidenav-menu-heading">User Access</div>
-                <!-- <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Man' }">
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Man' }">
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Man
-                </router-link> -->
-                <!-- <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'ticket' }">
+                </router-link>
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Material' }">
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Material
                 </router-link>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'ticket' }">
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Machine' }">
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Machine
                 </router-link>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'ticket' }">
-                    <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Machine
-                </router-link>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'ticket' }">
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Method' }">
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Method
                 </router-link>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'ticket' }">
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Environment' }">
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Environment
                 </router-link>
-                <div class="sb-sidenav-menu-heading">Admin</div>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'user_master' }">
+                <!-- <div class="sb-sidenav-menu-heading">Admin</div> -->
+                 <!-- <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'User Master' }">
                     <i class="fas fa-user"></i>&nbsp; User Master
                 </router-link>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'setting_procedure_list' }">
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Settings' }">
                     <i class="fas fa-tasks"></i>&nbsp; Settings
                 </router-link> -->
             </div>

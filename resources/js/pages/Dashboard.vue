@@ -21,7 +21,32 @@
                             </div>
                         </div>
                         <div class="row">
-                           
+                            <!-- <div class="col-xl-3 col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-body">
+                                        <h4><font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Man</h4>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center justify-content-between">
+                                        <router-link class="small text-white stretched-link" :to="{ name: 'Man' }">
+                                            View Details
+                                        </router-link>
+                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-body">
+                                        <h4><font-awesome-icon class="nav-icon" icon="fa-cog" />&nbsp;Settings</h4>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center justify-content-between">
+                                        <router-link class="small text-white stretched-link" :to="{ name: 'Settings' }">
+                                            View Details
+                                        </router-link>
+                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div> -->
                         </div>
                     </div>
             </div>
