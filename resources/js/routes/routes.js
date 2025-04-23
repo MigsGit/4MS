@@ -5,13 +5,18 @@ import Dashboard from '../../js/pages/Dashboard.vue'
 console.log('routes');
 export default [
     {
-        path: '/',
-        component: Dashboard,
+        path: '/4M',
+        component: '4M',
+        components: {
+            default: IndexComponent,
+            dashboard: Dashboard,
+        },
         children: [
             {
-                path: '/',
+                path: 'dashboard',
+                name: 'dashboard',
                 component: Dashboard,
             },
         ]
-    },
+    }
 ];

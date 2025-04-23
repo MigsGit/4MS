@@ -11,9 +11,9 @@ const useAuth = useAuthStore();
                     <!-- <i class="fas fa-tachometer-alt" icon="fa-tachometer-alt"></i>&nbsp;Dashboard get_bulletin_pages_by_id-->
                 </router-link>
                 <div class="sb-sidenav-menu-heading">User Access</div>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'ticket' }">
+                <!-- <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Man' }">
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Man
-                </router-link>
+                </router-link> -->
                 <!-- <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'ticket' }">
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Material
                 </router-link>
