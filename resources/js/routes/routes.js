@@ -6,6 +6,7 @@ import Material from '../../js/pages/Material.vue'
 import Machine from '../../js/pages/Machine.vue'
 import Method from '../../js/pages/Method.vue'
 import Environment from '../../js/pages/Environment.vue'
+import UserMaster from '../../js/pages/UserMaster.vue'
 
 console.log('routes');
 export default [
@@ -51,6 +52,11 @@ export default [
                 path: 'environment',
                 name: 'Environment',
                 component: Environment,
+            },
+            {
+                path: 'user_master',
+                name: 'UserMaster',
+                component: UserMaster,
             },
         ]
     }

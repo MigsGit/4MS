@@ -26,11 +26,11 @@ const useAuth = useAuthStore();
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Environment' }">
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Environment
                 </router-link>
-                <!-- <div class="sb-sidenav-menu-heading">Admin</div> -->
-                 <!-- <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'User Master' }">
+                <div class="sb-sidenav-menu-heading">Admin</div>
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }">
                     <i class="fas fa-user"></i>&nbsp; User Master
                 </router-link>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Settings' }">
+                <!--  <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Settings' }">
                     <i class="fas fa-tasks"></i>&nbsp; Settings
                 </router-link> -->
             </div>

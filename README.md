@@ -36,9 +36,9 @@ php artisan migrate:status
 npm i @fortawesome/fontawesome-svg-core
 npm i @fortawesome/vue-fontawesome
 npm i @fortawesome/free-solid-svg-icons
-```
-
-```
 npm i @vueform/multiselect
+
+#if the npm error with permission
+sudo chown -R 1000:1000 "/home/administrator/.npm"
 
 ```
