@@ -24,7 +24,7 @@ const logoutSession = async () => {
 <template>
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
-        <span class="navbar-brand ps-3" >4M System </span>
+        <span class="navbar-brand ps-2" >4M CMS</span>
         <!-- Sidebar Toggle-->
         <a id="sidebarToggle" style="cursor: pointer;"><i class="fas fa-bars"></i></a>
         <!-- Navbar Search-->
@@ -34,11 +34,5 @@ const logoutSession = async () => {
                 <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
             </div>
         </form>
-        <!-- Navbar-->
-        <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-            <li class="nav-item dropdown">
-                <a class="nav-link" id="navbarDropdown" @click="logoutSession()" style="cursor: pointer;"><i class="fas fa-user fa-fw"></i></a>
-            </li>
-        </ul>
     </nav>
 </template>

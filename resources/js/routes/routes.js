@@ -1,6 +1,7 @@
 import IndexComponent from '../../js/pages/IndexComponent.vue'
 import Unauthorized from '../../js/pages/Unauthorized.vue'
 import Dashboard from '../../js/pages/Dashboard.vue'
+import Ecr from '../../js/pages/Ecr.vue'
 import Man from '../../js/pages/Man.vue'
 import Material from '../../js/pages/Material.vue'
 import Machine from '../../js/pages/Machine.vue'
@@ -22,6 +23,11 @@ export default [
                 path: 'dashboard',
                 name: 'dashboard',
                 component: Dashboard,
+            },
+            {
+                path: 'ecr',
+                name: 'Ecr',
+                component: Ecr,
             },
             {
                 path: 'man',

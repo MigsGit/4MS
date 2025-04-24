@@ -17,6 +17,8 @@ import 'vue-toast-notification/dist/theme-bootstrap.css'
 // /* Startbootstrap-sb-admin template */
 import "startbootstrap-sb-admin/dist/css/styles.css";
 import "startbootstrap-sb-admin/dist/js/scripts.js";
+
+import 'bootstrap/dist/css/bootstrap.min.css' //Need to run collapse // npm install bootstrap@v5.3.5
 import "startbootstrap-sb-admin/dist/js/datatables-simple-demo.js"
 /* Local JS extensions */
 import router from "../js/routes";
