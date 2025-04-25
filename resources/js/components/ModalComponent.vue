@@ -39,18 +39,18 @@
 
     //Parent Modal Reference
     //Required to inistialized the modal to the child components
-    const modal_ref = ref(null);
+    const modalRef = ref(null);
     let modal_instance = null;
 
     onMounted(() => {
-        modal_instance = new Modal(modal_ref.value);
+        modal_instance = new Modal(modalRef.value);
     });
 
     const showModal = () => modal_instance?.show();
     const hideModal = () => modal_instance?.hide();
 
     // Expose modal functions and ref to the parent
-    defineExpose({ showModal, hideModal, modal_ref });
+    defineExpose({ showModal, hideModal, modalRef });
 </script>
 
 <style lang="scss" scoped>

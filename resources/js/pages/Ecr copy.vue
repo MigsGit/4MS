@@ -15,120 +15,127 @@
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR" @add-event="" ref="modalSaveEcr">
         <template #body>
                 <div class="row">
-                    <div class="input flex-nowrap mb-2 input-group-sm">
+                    <!-- const frm_ecr = ref({
+                        category: null,
+                        customer_name: null,
+                        part_name: null,
+                        product_line: null,
+                        section: null,
+
+                        internal_external: null,
+                        part_number: null,
+                        device_name: null,
+                        customer_ec_no: null,
+                        date_of_request: null,
+                    }); -->
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <input type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
                     <div class="col-sm-6">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Category:</span>
-                            <select v-model="frmEcr.category" class="form-select form-select-sm" aria-describedby="addon-wrapping">
+                            <select v-model="category" class="form-select form-select-sm" aria-describedby="addon-wrapping">
                                 <option value="" selected disabled>Select</option>
-                                <option value="Man">Man</option>
-                                <option value="Material">Material</option>
-                                <option value="Machine">Machine</option>
-                                <option value="Method">Method</option>
-                                <option value="Environment">Environment</option>
+                                <option value="N/A" >N/A</option>
                             </select>
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Customer Name:</span>
-                            <input v-model="frmEcr.customerName" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                            <input v-model="customer_name" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Part Name:</span>
-                            <input v-model="frmEcr.partName" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <input v-model="part_name" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Product Line:</span>
-                            <input v-model="frmEcr.productLine" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <input v-model="product_line" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Section:</span>
-                            <input v-model="frmEcr.section" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <input v-model="section" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Internal / External:</span>
-                            <select v-model="frmEcr.internalExternal" class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                <option value="" selected disabled>Select</option>
-                                <option value="Internal">Internal</option>
-                                <option value="External">External</option>
+                            <select v-model="internal_external" class="form-select form-select-sm" aria-describedby="addon-wrapping">
+                                <option value="" selected disabled>N/A</option>
                             </select>
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Part Number:</span>
-                            <input v-model="frmEcr.partNumber" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <input v-model="part_number" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Device Name:</span>
-                            <input v-model="frmEcr.deviceName" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <input v-model="device_name" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Customer EC No. (If any):</span>
-                            <input v-model="frmEcr.customerEcNo" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <input v-model="customer_ec_no" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Date of Request:</span>
-                            <input v-model="frmEcr.dateOfRequest" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <input v-model="date_of_request" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                     </div>
                 </div>
                 <!-- Description of Change / Reason for Change -->
                 <div class="card mb-2">
-                    <h5 class="mb-0">
-                        <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
-                            Description of Change / Reason for Change
-                        </button>
-                    </h5>
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                                Description of Change / Reason for Change
+                            </button>
+                        </h5>
                     <div id="collapse1" class="collapse" data-bs-parent="#accordionMain">
-                        <div class="card-body shadow">
-                            <div class="row">
-                                <div class="col-12">
-                                    <button @click="addRowSaveDocuments"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button>
-                                </div>
-                                <div class="col-12 overflow-auto">
-                                    <table class="table table-responsive">
-                                        <thead>
-                                            <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col" style="width: 60%;">Description of Change</th>
-                                            <th scope="col" style="width: 60%;">Reason of Change</th>
-                                            <th scope="col">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr >
-                                                <td>
-                                                1
-                                                </td>
-                                                <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                    <!-- <MultiselectElement
-                                                        v-model="frmEcr.rowSaveDocument.approverName"
-                                                        :close-on-select="true"
-                                                        :searchable="true"
-                                                        :options="edocsVar.optApproverName"
-                                                    /> -->
-                                                </td>
-                                                <td>
-                                                    <button class="btn btn-danger btn-sm" type="button" data-item-process="add">
-                                                        <li class="fa fa-trash"></li>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="card-body shadow">
+                                <div class="row">
+                    <div class="col-12">
+                        <button @click="addRowSaveDocuments"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button>
+                    </div>
+                    <div class="col-12 overflow-auto">
+                        <table class="table table-responsive">
+                            <thead>
+                                <tr>
+                                <th scope="col">#</th>
+                                <th scope="col" style="width: 30%;">Description of Change</th>
+                                <th scope="col" style="width: 30%;">Reason of Change</th>
+                                <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr >
+                                    <td>
+                                    1
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
+                                            <option value="" selected disabled>N/A</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
+                                            <option value="" selected disabled>N/A</option>
+                                        </select>
+                                        <!-- <MultiselectElement
+                                            v-model="rowSaveDocument.approverName"
+                                            :close-on-select="true"
+                                            :searchable="true"
+                                            :options="edocsVar.optApproverName"
+                                        /> -->
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                            <li class="fa fa-trash"></li>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                             </div>
-                        </div>
                     </div>
                 </div>
                 <!-- QA Dispositions -->
@@ -169,7 +176,7 @@
                                                         <option value="" selected disabled>N/A</option>
                                                     </select>
                                                     <!-- <MultiselectElement
-                                                        v-model="frmEcr.rowSaveDocument.approverName"
+                                                        v-model="rowSaveDocument.approverName"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="edocsVar.optApproverName"
@@ -227,7 +234,7 @@
                                                         <option value="" selected disabled>N/A</option>
                                                     </select>
                                                     <!-- <MultiselectElement
-                                                        v-model="frmEcr.rowSaveDocument.approverName"
+                                                        v-model="rowSaveDocument.approverName"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="edocsVar.optApproverName"
@@ -290,7 +297,7 @@
                                                         <option value="" selected disabled>N/A</option>
                                                     </select>
                                                     <!-- <MultiselectElement
-                                                        v-model="frmEcr.rowSaveDocument.approverName"
+                                                        v-model="rowSaveDocument.approverName"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="edocsVar.optApproverName"
@@ -325,29 +332,28 @@
 <script setup>
 import {ref , onMounted} from 'vue';
 import ModalComponent from '../components/ModalComponent.vue';
-    const frmEcr = ref({
+    //variable_dsad
+    //button asdAsd
+    //class asdAsd
+    //Modal asdAsd
+    //function asdAsd
+    const frm_ecr = ref({
         category: null,
-        customerName: null,
-        partName: null,
-        productLine: null,
+        customer_name: null,
+        part_name: null,
+        product_line: null,
         section: null,
-        internalExternal: null,
-        partNumber: null,
-        deviceName: null,
-        customerEcNo: null,
-        dateOfRequest: null,
+        internal_external: null,
+        part_number: null,
+        device_name: null,
+        customer_ec_no: null,
+        date_of_request: null,
     });
 
-    const modalSaveEcr = ref(null);
-    const modal = {};
+    const modal_save_ecr = ref(null);
+    const modal = {
 
-    onMounted( ()=>{
-        //ModalRef inside the ModalComponent.vue
-        //Do not name the Modal it is same new Modal js clas
-        modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
-        modal.SaveEcr.show();
-    })
-
+    };
 
     const frmSaveEcr = async () => {
         await axios.post('/api/save_document',{
@@ -358,6 +364,14 @@ import ModalComponent from '../components/ModalComponent.vue';
             console.log(err);
         });
     }
+
+    onMounted( ()=>{
+        //ModalRef inside the ModalComponent.vue
+        //Do not name the Modal it is same new Modal js clas
+        modal.SaveEcr = new Modal(modal_save_ecr.value.modal_ref,{ keyboard: false });
+
+        modal.SaveEcr.show();
+    })
 
 
 
