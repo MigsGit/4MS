@@ -103,9 +103,22 @@
                                                 1
                                                 </td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
+                                                    <!-- nmodify -->
+                                                    <MultiselectElement
+                                                        v-model="frmEcrReasonRows.descriptionOfChange"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.optDropdownMasterDetails"
+                                                    />
+                                                    <!-- <MultiselectElement
+                                                        v-model="frmEcrReasonRows.descriptionOfChange"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVarsss.optDropdownMasterDetails"
+                                                        label="label"
+                                                        track-by="value"
+                                                    /> -->
+
                                                 </td>
                                                 <td>
                                                     <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
@@ -325,6 +338,18 @@
 <script setup>
 import {ref , onMounted} from 'vue';
 import ModalComponent from '../components/ModalComponent.vue';
+
+import ecr from '../../js/composables/ecr.js';
+
+    const {
+        modal,
+        ecrVar,
+        frmEcrReasonRows,
+        getDropdownMasterByOpt,
+    } = ecr();
+
+
+    //ref state
     const frmEcr = ref({
         category: null,
         customerName: null,
@@ -339,27 +364,40 @@ import ModalComponent from '../components/ModalComponent.vue';
     });
 
     const modalSaveEcr = ref(null);
-    const modal = {};
+
+    let descriptionOfChangeParams = {
+        tblReference : 'ecr_doc',
+        // optDescriptionOfChange: frmEcrReasonRows.descriptionOfChange,
+    };
+
+    let reasonOfChangeParams = {
+        tblReference : 'ecr_roc',
+        // optDescriptionOfChange: frmEcrReasonRows.descriptionOfChange,
+    };
+
+    const ecrVarsss = {
+        optDropdownMasterDetails: [],
+    }
+
+    getDropdownMasterByOpt(descriptionOfChangeParams);
 
     onMounted( ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
         modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modal.SaveEcr.show();
+        console.log('test',modal.SaveEcr);
     })
 
-
-    const frmSaveEcr = async () => {
-        await axios.post('/api/save_document',{
-               name: frmEcr.value,
-        }).then((response) => {
-            console.log(response);
-        }).catch((err) => {
-            console.log(err);
-        });
-    }
-
-
+    // const frmSaveEcr = async () => {
+    //     await axios.post('/api/save_document',{
+    //            name: frmEcr.value,
+    //     }).then((response) => {
+    //         console.log(response);
+    //     }).catch((err) => {
+    //         console.log(err);
+    //     });
+    // }
 
 </script>
 

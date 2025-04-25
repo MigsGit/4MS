@@ -22,6 +22,8 @@ window._ = _;
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+window.baseUrl = process.env.MIX_API_BASE_URL;
+window.axios.defaults.baseURL = baseUrl;
 
 window.Modal = Modal;
 window.Toast = useToast;

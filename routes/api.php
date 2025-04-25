@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EcrController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EdocsController;
 use App\Http\Controllers\SettingsController;
@@ -23,4 +24,7 @@ use App\Http\Controllers\SettingsController;
 
 Route::controller(SettingsController::class)->group(function () {
     Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
+});
+Route::controller(EcrController::class)->group(function () {
+    Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
 });
