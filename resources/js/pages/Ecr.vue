@@ -222,25 +222,29 @@
                                                 1
                                                 </td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                    <!-- <MultiselectElement
-                                                        v-model="frmEcr.rowSaveDocument.approverName"
+                                                    <MultiselectElement
+                                                        v-model="frmEcrOtherDispoRows.requestedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
-                                                        :options="edocsVar.optApproverName"
-                                                    /> -->
+                                                        :options="ecrVar.requestedBy"
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
+                                                    <MultiselectElement
+                                                        v-model="frmEcrOtherDispoRows.technicalEvaluation"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.technicalEvaluation"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <MultiselectElement
+                                                        v-model="frmEcrOtherDispoRows.reviewedBy"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.reviewedBy"
+                                                    />
+
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-danger btn-sm" type="button" data-item-process="add">
@@ -337,6 +341,7 @@ import ecr from '../../js/composables/ecr.js';
         ecrVar,
         frmEcrReasonRows,
         frmEcrQadRows,
+        frmEcrOtherDispoRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
     } = ecr();
@@ -358,23 +363,32 @@ import ecr from '../../js/composables/ecr.js';
 
     const modalSaveEcr = ref(null);
 
-    let descriptionOfChangeParams = {
+    const descriptionOfChangeParams = {
         tblReference : 'ecr_doc',
         globalVar: ecrVar.optDescriptionOfChange,
     };
 
-    let reasonOfChangeParams = {
+    const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
     };
-    let qadCheckedByParams = {
+    const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
     };
-    let qadApprovedByInternalParams = {
+    const qadApprovedByInternalParams = {
         globalVar: ecrVar.optQadApprovedByInternal,
     };
-    let qadApprovedByExternalParams = {
+    const qadApprovedByExternalParams = {
         globalVar: ecrVar.optQadApprovedByExternal,
+    };
+    const otherDispoRequestedByParams = {
+        globalVar: ecrVar.requestedBy,
+    };
+    const otherDispoTechnicalEvaluationParams = {
+        globalVar: ecrVar.technicalEvaluation,
+    };
+    const otherDispoReviewedByParams = {
+        globalVar: ecrVar.reviewedBy,
     };
 
     onMounted( ()=>{
@@ -388,6 +402,9 @@ import ecr from '../../js/composables/ecr.js';
     getRapidxUserByIdOpt(qadCheckedByParams);
     getRapidxUserByIdOpt(qadApprovedByInternalParams);
     getRapidxUserByIdOpt(qadApprovedByExternalParams);
+    getRapidxUserByIdOpt(otherDispoRequestedByParams);
+    getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+    getRapidxUserByIdOpt(otherDispoReviewedByParams);
 
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({

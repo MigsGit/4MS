@@ -15,6 +15,9 @@ export default function ecr()
         optQadCheckedBy: [],
         optQadApprovedByInternal: [],
         optQadApprovedByExternal: [],
+        requestedBy: [],
+        technicalEvaluation: [],
+        reviewedBy: [],
     });
     //Ref State
     const frmEcrReasonRows = ref([
@@ -23,12 +26,19 @@ export default function ecr()
             reasonOfChange: [],
         },
     ]);
-    //qadApprovedByInternal
+    //
     const frmEcrQadRows = ref([
         {
             qadCheckedBy: [],
             qadApprovedByInternal: [],
             qadApprovedByExternal: [],
+        },
+    ]);
+    const frmEcrOtherDispoRows = ref([
+        {
+            requestedBy: [],
+            technicalEvaluation: [],
+            reviewedBy: [],
         },
     ]);
 
@@ -71,6 +81,7 @@ export default function ecr()
         ecrVar,
         frmEcrReasonRows,
         frmEcrQadRows,
+        frmEcrOtherDispoRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
     };

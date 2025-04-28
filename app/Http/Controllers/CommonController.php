@@ -29,7 +29,8 @@ class CommonController extends Controller
             $relations = [];
 
             $conditions = [
-                'department_id' => 22
+                'department_id' => 22,
+                'user_stat' => 1,
             ];
             // $query->where('deleted_at',NULL);
 
