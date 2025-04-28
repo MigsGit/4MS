@@ -12,12 +12,23 @@ export default function ecr()
     const ecrVar = reactive({
         optDescriptionOfChange: [],
         optReasonOfChange: [],
+        optQadCheckedBy: [],
+        optQadApprovedByInternal: [],
+        optQadApprovedByExternal: [],
     });
     //Ref State
     const frmEcrReasonRows = ref([
         {
-            descriptionOfChange: [], //descriptionOfChange
-            reasonOfChange: [], //descriptionOfChange
+            descriptionOfChange: [],
+            reasonOfChange: [],
+        },
+    ]);
+    //qadApprovedByInternal
+    const frmEcrQadRows = ref([
+        {
+            qadCheckedBy: [],
+            qadApprovedByInternal: [],
+            qadApprovedByExternal: [],
         },
     ]);
 
@@ -39,15 +50,28 @@ export default function ecr()
                     label: value.dropdown_masters_details
                 }
             }));
-
         });
-
+    }
+    const getRapidxUserByIdOpt = async (params) => {
+        //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
+        await axiosFetchData(params, `api/get_rapidx_user_by_id_opt`, (response) => { //url
+            let data = response.data;
+            let rapidxUserById = data.rapidxUserById;
+                params.globalVar.splice(0, params.globalVar.length, ...rapidxUserById.map((value) => {
+                return {
+                    value: value.id,
+                    label: value.name
+                }
+            }));
+        });
     }
 
     return {
         modal,
         ecrVar,
         frmEcrReasonRows,
+        frmEcrQadRows,
         getDropdownMasterByOpt,
+        getRapidxUserByIdOpt,
     };
 }

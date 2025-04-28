@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EcrController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EdocsController;
+use App\Http\Controllers\CommonController;
 use App\Http\Controllers\SettingsController;
 
 /*
@@ -22,6 +23,9 @@ use App\Http\Controllers\SettingsController;
 //     return $request->user();
 // });
 
+Route::controller(CommonController::class)->group(function () {
+    Route::get('get_rapidx_user_by_id_opt', 'getRapidxUserByIdOpt')->name('get_rapidx_user_by_id_opt');
+});
 Route::controller(SettingsController::class)->group(function () {
     Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
 });

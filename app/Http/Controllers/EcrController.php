@@ -25,10 +25,11 @@ class EcrController extends Controller
             ];
 
             $conditions = [
-                'table_reference' => $request->tblReference
+                'table_reference' => $request->tblReference,
+                'deleted_at' => NULL,
             ];
 
-            $dropdownMasterByOpt = $this->resourceInterface->read(DropdownMaster::class,$data,$relations,$conditions);
+            $dropdownMasterByOpt = $this->resourceInterface->readWithRelationsConditions(DropdownMaster::class,$data,$relations,$conditions);
             $dropdownMasterByOpt = $dropdownMasterByOpt[0]->dropdown_master_details;
            return response()->json(['is_success' => 'true','dropdownMasterByOpt' => $dropdownMasterByOpt]);
         } catch (Exception $e) {

@@ -2,15 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use Helpers;
 use Mail;
+use Helpers;
+use App\Models\RapidxUser;
 use App\Models\UserAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Interfaces\CommonInterface;
+use App\Interfaces\ResourceInterface;
 
 
 class CommonController extends Controller
 {
+    protected $resourceInterface;
+    protected $commonInterface;
+    public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
+        $this->resourceInterface = $resourceInterface;
+        $this->commonInterface = $commonInterface;
+    }
+    public function getRapidxUserByIdOpt(Request $request){
+        try {
+            // return $rapidx_user_by_id = RapidxUser::where('id',625)->get(); //relationship to systemone by emp_no
+            $rapidxUserById = RapidxUser::where('department_id',22)->get(); //22 QAD
+            $data = [];
+
+            $relations = [];
+
+            $conditions = [
+                'department_id' => 22
+            ];
+            // $query->where('deleted_at',NULL);
+
+            $rapidxUserById = $this->resourceInterface->readWithRelationsConditions(RapidxUser::class,$data,$relations,$conditions);
+            $rapidxUserById = $rapidxUserById;
+            return response()->json(['is_success' => 'true','rapidxUserById'=>$rapidxUserById]);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
     public function check_access(Request $request){
         // $found_key = array_search("32", array_column($_SESSION['rapidx_user_accesses'], 'module_id')); // * 32 is the id of this module on RAPIDX
         // $found_key = in_array("32", array_column($_SESSION['rapidx_user_accesses'], 'module_id')); // * 32 is the id of this module on RAPIDX
@@ -52,13 +81,6 @@ class CommonController extends Controller
 
 
         }
-    }
-
-    public function decryptVariable(Request $request){
-        
-    }
-    public function decrypt_id(Request $request){
-        return Helpers::decryptId($request->Id);
     }
 
     public function send_mail($mail_filename, $data, $request, $admin_email, $user_email, $subject){

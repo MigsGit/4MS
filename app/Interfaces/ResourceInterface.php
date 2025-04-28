@@ -15,10 +15,8 @@ interface ResourceInterface
     // public function update($model,$id,array $data);
     // public function updateWithConditions($model,array $data,array $conditions);
     // public function readByID($model,$id);
-    public function read($model,array $data,array $relations,array $conditions);
-
+    public function readWithRelationsConditions($model,array $data,array $relations,array $conditions);
     // public function readAllWithConditions(array $conditions);
-    // public function readAllRelationsAndConditions(array $relations,array $conditions);
     // public function delete($id);
     // public function inactive($id);
 

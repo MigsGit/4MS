@@ -8,7 +8,7 @@ use Throwable;
 
 class ResourceService implements ResourceInterface
 {
-    public function read($model,$data=null,$relations=null,$conditions=null){
+    public function readWithRelationsConditions($model,$data=null,$relations=null,$conditions=null){
         try {
             $query = $model::query();
             if($data != null){
@@ -31,7 +31,6 @@ class ResourceService implements ResourceInterface
                 }
             }
 
-            $query->whereNull('deleted_at');
             // return $model;
             return $query->get();
         } catch (Throwable $e) {

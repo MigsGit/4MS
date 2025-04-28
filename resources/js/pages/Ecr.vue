@@ -87,7 +87,7 @@
                                 <div class="col-12">
                                     <button @click="addEcrReasonRows"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button>
                                 </div>
-                                <div class="col-12 overflow-auto">
+                                <div class="col-12 overflow-auto" style="height: 300px;">
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
@@ -132,7 +132,7 @@
                     </div>
                 </div>
                 <!-- QA Dispositions -->
-                <div class="card mb-2">
+                <div class="card mb-2 h-100">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
                                 QA Dispositions
@@ -141,10 +141,11 @@
                     <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
                         <div class="card-body shadow">
                             <div class="row">
+                                <!-- style="height: 200px;-->
                                 <div class="col-12">
                                     <span class="input-group-text" id="addon-wrapping">Agreed By: </span>
                                 </div>
-                                <div class="col-12 overflow-auto">
+                                <div class="col-12 overflow-auto" style="height: 300px;">
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
@@ -160,25 +161,28 @@
                                                 1
                                                 </td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                    <!-- <MultiselectElement
-                                                        v-model="frmEcr.rowSaveDocument.approverName"
+                                                    <MultiselectElement
+                                                        v-model="frmEcrQadRows.qadCheckedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
-                                                        :options="edocsVar.optApproverName"
-                                                    /> -->
+                                                        :options="ecrVar.optQadCheckedBy"
+                                                    />
                                                 </td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
+                                                    <MultiselectElement
+                                                        v-model="frmEcrQadRows.qadApprovedByInternal"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.optQadApprovedByInternal"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <MultiselectElement
+                                                        v-model="frmEcrQadRows.qadApprovedByExternal"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.optQadApprovedByExternal"
+                                                    />
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -201,7 +205,7 @@
                                 <div class="col-12">
                                     <button @click="addRowSaveDocuments"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Validator</button>
                                 </div>
-                                <div class="col-12 overflow-auto">
+                                <div class="col-12 overflow-auto" style="height: 300px;">
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
@@ -264,7 +268,7 @@
                                 <div class="col-12">
                                     <button @click="addRowSaveDocuments"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI Approvers</button>
                                 </div>
-                                <div class="col-12 overflow-auto">
+                                <div class="col-12 overflow-auto" style="height: 300px;">
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
@@ -332,7 +336,9 @@ import ecr from '../../js/composables/ecr.js';
         modal,
         ecrVar,
         frmEcrReasonRows,
+        frmEcrQadRows,
         getDropdownMasterByOpt,
+        getRapidxUserByIdOpt,
     } = ecr();
 
 
@@ -361,6 +367,15 @@ import ecr from '../../js/composables/ecr.js';
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
     };
+    let qadCheckedByParams = {
+        globalVar: ecrVar.optQadCheckedBy,
+    };
+    let qadApprovedByInternalParams = {
+        globalVar: ecrVar.optQadApprovedByInternal,
+    };
+    let qadApprovedByExternalParams = {
+        globalVar: ecrVar.optQadApprovedByExternal,
+    };
 
     onMounted( ()=>{
         //ModalRef inside the ModalComponent.vue
@@ -370,6 +385,9 @@ import ecr from '../../js/composables/ecr.js';
     })
     getDropdownMasterByOpt(descriptionOfChangeParams);
     getDropdownMasterByOpt(reasonOfChangeParams);
+    getRapidxUserByIdOpt(qadCheckedByParams);
+    getRapidxUserByIdOpt(qadApprovedByInternalParams);
+    getRapidxUserByIdOpt(qadApprovedByExternalParams);
 
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
