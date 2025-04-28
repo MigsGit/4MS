@@ -85,7 +85,7 @@
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
-                                    <button @click="addRowSaveDocuments"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button>
+                                    <button @click="addEcrReasonRows"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button>
                                 </div>
                                 <div class="col-12 overflow-auto">
                                     <table class="table table-responsive">
@@ -98,27 +98,17 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr >
+                                            <tr v-for="(frmEcrReasonRows, index) in frmEcrReasonRows" :key="frmEcrReasonRows.index">
                                                 <td>
-                                                1
+                                                    {{index+1}}
                                                 </td>
                                                 <td>
-                                                    <!-- nmodify -->
                                                     <MultiselectElement
                                                         v-model="frmEcrReasonRows.descriptionOfChange"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optDescriptionOfChange"
                                                     />
-                                                    <!-- <MultiselectElement
-                                                        v-model="frmEcrReasonRows.descriptionOfChange"
-                                                        :close-on-select="true"
-                                                        :searchable="true"
-                                                        :options="ecrVarsss.optDropdownMasterDetails"
-                                                        label="label"
-                                                        track-by="value"
-                                                    /> -->
-
                                                 </td>
                                                 <td>
                                                     <MultiselectElement
@@ -129,7 +119,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                    <button @click="removeEcrReasonRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                                         <li class="fa fa-trash"></li>
                                                     </button>
                                                 </td>
@@ -364,27 +354,33 @@ import ecr from '../../js/composables/ecr.js';
 
     let descriptionOfChangeParams = {
         tblReference : 'ecr_doc',
-        // optDescriptionOfChange: frmEcrReasonRows.descriptionOfChange,
+        globalVar: ecrVar.optDescriptionOfChange,
     };
 
     let reasonOfChangeParams = {
         tblReference : 'ecr_roc',
-        // optDescriptionOfChange: frmEcrReasonRows.descriptionOfChange,
+        globalVar: ecrVar.optReasonOfChange,
     };
-
-    const ecrVarsss = {
-        optDropdownMasterDetails: [],
-    }
 
     onMounted( ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
         modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modal.SaveEcr.show();
-        console.log('test',modal.SaveEcr);
     })
-    getDropdownMasterByOpt(descriptionOfChangeParams,ecrVar.optDescriptionOfChange);
-    getDropdownMasterByOpt(reasonOfChangeParams,ecrVar.optReasonOfChange);
+    getDropdownMasterByOpt(descriptionOfChangeParams);
+    getDropdownMasterByOpt(reasonOfChangeParams);
+
+    const addEcrReasonRows = async () => {
+        frmEcrReasonRows.value.push({
+            descriptionOfChange: [], //descriptionOfChange
+            reasonOfChange: [], //descriptionOfChange
+        });
+
+    }
+    const removeEcrReasonRows = async (index) => {
+        frmEcrReasonRows.value.splice(index,1);
+    }
 
     // const frmSaveEcr = async () => {
     //     await axios.post('/api/save_document',{
