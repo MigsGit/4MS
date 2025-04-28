@@ -108,7 +108,7 @@
                                                         v-model="frmEcrReasonRows.descriptionOfChange"
                                                         :close-on-select="true"
                                                         :searchable="true"
-                                                        :options="ecrVar.optDropdownMasterDetails"
+                                                        :options="ecrVar.optDescriptionOfChange"
                                                     />
                                                     <!-- <MultiselectElement
                                                         v-model="frmEcrReasonRows.descriptionOfChange"
@@ -121,15 +121,12 @@
 
                                                 </td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                    <!-- <MultiselectElement
-                                                        v-model="frmEcr.rowSaveDocument.approverName"
+                                                    <MultiselectElement
+                                                        v-model="frmEcrReasonRows.reasonOfChange"
                                                         :close-on-select="true"
                                                         :searchable="true"
-                                                        :options="edocsVar.optApproverName"
-                                                    /> -->
+                                                        :options="ecrVar.optReasonOfChange"
+                                                    />
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-danger btn-sm" type="button" data-item-process="add">
@@ -379,8 +376,6 @@ import ecr from '../../js/composables/ecr.js';
         optDropdownMasterDetails: [],
     }
 
-    getDropdownMasterByOpt(descriptionOfChangeParams);
-
     onMounted( ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
@@ -388,6 +383,8 @@ import ecr from '../../js/composables/ecr.js';
         modal.SaveEcr.show();
         console.log('test',modal.SaveEcr);
     })
+    getDropdownMasterByOpt(descriptionOfChangeParams,ecrVar.optDescriptionOfChange);
+    getDropdownMasterByOpt(reasonOfChangeParams,ecrVar.optReasonOfChange);
 
     // const frmSaveEcr = async () => {
     //     await axios.post('/api/save_document',{
