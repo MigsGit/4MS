@@ -12,12 +12,18 @@ export default function ecr()
     const ecrVar = reactive({
         optDescriptionOfChange: [],
         optReasonOfChange: [],
+
         optQadCheckedBy: [],
         optQadApprovedByInternal: [],
         optQadApprovedByExternal: [],
+
         requestedBy: [],
         technicalEvaluation: [],
         reviewedBy: [],
+
+        preparedBy: [],
+        checkedBy: [],
+        approvedBy: [],
     });
     //Ref State
     const frmEcrReasonRows = ref([
@@ -39,6 +45,13 @@ export default function ecr()
             requestedBy: [],
             technicalEvaluation: [],
             reviewedBy: [],
+        },
+    ]);
+    const frmEcrPmiApproverRows = ref([
+        {
+            preparedBy: [],
+            checkedBy: [],
+            approvedBy: [],
         },
     ]);
 
@@ -82,6 +95,7 @@ export default function ecr()
         frmEcrReasonRows,
         frmEcrQadRows,
         frmEcrOtherDispoRows,
+        frmEcrPmiApproverRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
     };

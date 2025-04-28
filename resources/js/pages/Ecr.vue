@@ -289,25 +289,29 @@
                                                 1
                                                 </td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
-                                                    <!-- <MultiselectElement
-                                                        v-model="frmEcr.rowSaveDocument.approverName"
+                                                    <MultiselectElement
+                                                        v-model="frmEcrPmiApproverRows.preparedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
-                                                        :options="edocsVar.optApproverName"
-                                                    /> -->
+                                                        :options="ecrVar.preparedBy"
+                                                    />
+
                                                 </td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                                                        <option value="" selected disabled>N/A</option>
-                                                    </select>
+                                                    <MultiselectElement
+                                                        v-model="frmEcrPmiApproverRows.checkedBy"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.checkedBy"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <MultiselectElement
+                                                        v-model="frmEcrPmiApproverRows.approvedBy"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.approvedBy"
+                                                    />
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-danger btn-sm" type="button" data-item-process="add">
@@ -342,6 +346,7 @@ import ecr from '../../js/composables/ecr.js';
         frmEcrReasonRows,
         frmEcrQadRows,
         frmEcrOtherDispoRows,
+        frmEcrPmiApproverRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
     } = ecr();
@@ -390,6 +395,15 @@ import ecr from '../../js/composables/ecr.js';
     const otherDispoReviewedByParams = {
         globalVar: ecrVar.reviewedBy,
     };
+    const pmiApproverPreparedByParams = {
+        globalVar: ecrVar.preparedBy,
+    };
+    const pmiApproverCheckedByParams = {
+        globalVar: ecrVar.checkedBy,
+    };
+    const pmiApproverApprovedByParams = {
+        globalVar: ecrVar.approvedBy,
+    };
 
     onMounted( ()=>{
         //ModalRef inside the ModalComponent.vue
@@ -405,6 +419,9 @@ import ecr from '../../js/composables/ecr.js';
     getRapidxUserByIdOpt(otherDispoRequestedByParams);
     getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
     getRapidxUserByIdOpt(otherDispoReviewedByParams);
+    getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+    getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+    getRapidxUserByIdOpt(pmiApproverApprovedByParams);
 
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
