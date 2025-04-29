@@ -18,6 +18,11 @@
                     <div class="input flex-nowrap mb-2 input-group-sm">
                             <input type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
+
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Customer Name:</span>
+                        <input v-model="frmEcr.ecrNo" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                    </div>
                     <div class="col-sm-6">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Category:</span>
@@ -70,7 +75,7 @@
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Date of Request:</span>
-                            <input v-model="frmEcr.dateOfRequest" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <input v-model="frmEcr.dateOfRequest" type="date" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                     </div>
                 </div>
@@ -355,6 +360,7 @@
     } = ecr();
     //ref state
     const frmEcr = ref({
+        ecrNo: '1',
         category: '1',
         customerName: 'test',
         partName: 'test',
@@ -364,7 +370,7 @@
         partNumber: 'test',
         deviceName: 'test',
         customerEcNo: 'test',
-        dateOfRequest: 'test',
+        dateOfRequest: '',
     });
     const modalSaveEcr = ref(null);
     //constant object params
@@ -457,13 +463,14 @@
 
         //Append form data
         [
+            ["ecr_no", frmEcr.value.ecrNo],
             ["category", frmEcr.value.category],
             ["customer_name", frmEcr.value.customerName],
             ["part_name", frmEcr.value.partName],
             ["productLine", frmEcr.value.productLine],
             ["section", frmEcr.value.section],
             ["internal_external", frmEcr.value.internalExternal],
-            ["part_number", frmEcr.value.partNumber],
+            ["part_no", frmEcr.value.partNumber],
             ["device_name", frmEcr.value.deviceName],
             ["customer_ec_no", frmEcr.value.customerEcNo],
             ["date_of_request", frmEcr.value.dateOfRequest],

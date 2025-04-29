@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ecr;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\DropdownMaster;
+use App\Http\Requests\EcrRequest;
+use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
+use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
 
 class EcrController extends Controller
@@ -36,11 +39,14 @@ class EcrController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
-    public function saveEcr(Request $request){
-        return $request->all() ;
+    public function saveEcr(Request $request, EcrRequest $ecrRequest){
+
+        
+        //TODO: Make ECR Table
         date_default_timezone_set('Asia/Manila');
         DB::beginTransaction();
         try {
+
             DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

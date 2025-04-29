@@ -2,8 +2,9 @@
 namespace App\Services;
 use Helpers;
 
-use App\Interfaces\ResourceInterface;
 use Throwable;
+use Illuminate\Support\Facades\DB;
+use App\Interfaces\ResourceInterface;
 
 
 class ResourceService implements ResourceInterface
@@ -34,6 +35,39 @@ class ResourceService implements ResourceInterface
             // return $model;
             return $query->get();
         } catch (Throwable $e) {
+            throw $e;
+        }
+    }
+    public function create($model,array $data){
+        date_default_timezone_set('Asia/Manila');
+
+        DB::beginTransaction();
+        try {
+            $data_id = $model::insertGetId($data);
+            DB::commit();
+            return ['is_success' => 'true','data_id' => $data_id];
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function  updateConditions($model,array $conditions,array $data){
+        date_default_timezone_set('Asia/Manila');
+        DB::beginTransaction();
+        try {
+            if( isset( $data_id ) ){ //edit
+                return 'edit';
+                $model::where('id',$id)->update($data);
+                $data_id = $id;
+            }else{ //add
+                return 'add';
+                $insert_by_id = $model::insertGetId($data);
+                $data_id = $insert_by_id;
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true','data_id'=>$data_id]);
+        } catch (Exception $e) {
+            DB::rollback();
             throw $e;
         }
     }

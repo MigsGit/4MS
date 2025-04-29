@@ -9,8 +9,11 @@ interface ResourceInterface
      *
      * @return void
      */
-    // public function create($model,array $data);
+    public function create($model,array $data);
+    public function updateConditions($model,array $conditions,array $data);
+
     // public function createOrUpdate( $model,$data_id,array $data);
+
     // public function read($model);
     // public function update($model,$id,array $data);
     // public function updateWithConditions($model,array $data,array $conditions);
