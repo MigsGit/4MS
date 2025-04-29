@@ -67,7 +67,7 @@ export default function ecr()
                 You must mutate the array (not replace it) so Vue detects and updates it reactively.
                 Use .splice() to update its contents.
             */
-                params.globalVar.splice(0, params.globalVar.length, ...dropdownMasterByOpt.map((value) => {
+            params.globalVar.splice(0, params.globalVar.length, ...dropdownMasterByOpt.map((value) => {
                 return {
                     value: value.id,
                     label: value.dropdown_masters_details

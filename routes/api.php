@@ -30,5 +30,6 @@ Route::controller(SettingsController::class)->group(function () {
     Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
 });
 Route::controller(EcrController::class)->group(function () {
+    Route::post('save_ecr', 'saveEcr')->name('save_ecr');
     Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
 });

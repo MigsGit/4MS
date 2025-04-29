@@ -12,7 +12,7 @@
             </div>
         </div>
     </div>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR" @add-event="" ref="modalSaveEcr">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR" @add-event="frmSaveEcr()" ref="modalSaveEcr">
         <template #body>
                 <div class="row">
                     <div class="input flex-nowrap mb-2 input-group-sm">
@@ -203,23 +203,23 @@
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
-                                    <button @click="addRowSaveDocuments"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Validator</button>
+                                    <button @click="btnAddEcrOtherDispoRows()" test="dasd" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Validator</button>
                                 </div>
                                 <div class="col-12 overflow-auto" style="height: 300px;">
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col" style="width: 30%;">Requested By</th>
+                                            <th scope="col" style="width: 30%;">Requested Bysss</th>
                                             <th scope="col" style="width: 30%;">Technical Evaluation / Engineering</th>
                                             <th scope="col" style="width: 30%;">Reviewed By / Section Heads</th>
                                             <th scope="col">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr >
+                                            <tr  v-for="(frmEcrOtherDispoRows, index) in frmEcrOtherDispoRows" :key="frmEcrOtherDispoRows.index">
                                                 <td>
-                                                1
+                                                   {{ index+1 }}
                                                 </td>
                                                 <td>
                                                     <MultiselectElement
@@ -247,7 +247,7 @@
 
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                    <button @click="btnRemoveEcrOtherDispoRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                                         <li class="fa fa-trash"></li>
                                                     </button>
                                                 </td>
@@ -270,7 +270,7 @@
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
-                                    <button @click="addRowSaveDocuments"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI Approvers</button>
+                                    <button @click="btnAddEcrPmiApproverRows"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI Approvers</button>
                                 </div>
                                 <div class="col-12 overflow-auto" style="height: 300px;">
                                     <table class="table table-responsive">
@@ -284,9 +284,10 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr >
+
+                                            <tr  v-for="(frmEcrPmiApproverRows,index) in frmEcrPmiApproverRows" :key="frmEcrPmiApproverRows.index">
                                                 <td>
-                                                1
+                                                    {{ index+1 }}
                                                 </td>
                                                 <td>
                                                     <MultiselectElement
@@ -314,7 +315,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                    <button @click="btnRemoveEcrPmiApproverRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                                         <li class="fa fa-trash"></li>
                                                     </button>
                                                 </td>
@@ -335,11 +336,13 @@
 </template>
 
 <script setup>
-import {ref , onMounted} from 'vue';
-import ModalComponent from '../components/ModalComponent.vue';
+    import {ref , onMounted} from 'vue';
+    import ModalComponent from '../components/ModalComponent.vue';
 
-import ecr from '../../js/composables/ecr.js';
-
+    import ecr from '../../js/composables/ecr.js';
+    import useForm from '../../js/composables/utils/useForm.js'
+    const { axiosSaveData } = useForm();; // Call the useFetch function
+    //composables export function
     const {
         modal,
         ecrVar,
@@ -350,29 +353,25 @@ import ecr from '../../js/composables/ecr.js';
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
     } = ecr();
-
-
     //ref state
     const frmEcr = ref({
-        category: null,
-        customerName: null,
-        partName: null,
-        productLine: null,
-        section: null,
-        internalExternal: null,
-        partNumber: null,
-        deviceName: null,
-        customerEcNo: null,
-        dateOfRequest: null,
+        category: '1',
+        customerName: 'test',
+        partName: 'test',
+        productLine: 'test',
+        section: 'test',
+        internalExternal: '2',
+        partNumber: 'test',
+        deviceName: 'test',
+        customerEcNo: 'test',
+        dateOfRequest: 'test',
     });
-
     const modalSaveEcr = ref(null);
-
+    //constant object params
     const descriptionOfChangeParams = {
         tblReference : 'ecr_doc',
         globalVar: ecrVar.optDescriptionOfChange,
     };
-
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
@@ -404,7 +403,6 @@ import ecr from '../../js/composables/ecr.js';
     const pmiApproverApprovedByParams = {
         globalVar: ecrVar.approvedBy,
     };
-
     onMounted( ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
@@ -425,24 +423,103 @@ import ecr from '../../js/composables/ecr.js';
 
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
-            descriptionOfChange: [], //descriptionOfChange
-            reasonOfChange: [], //descriptionOfChange
+            descriptionOfChange: [],
+            reasonOfChange: [],
         });
 
     }
     const removeEcrReasonRows = async (index) => {
         frmEcrReasonRows.value.splice(index,1);
     }
+    const btnAddEcrOtherDispoRows = async () => {
+        frmEcrOtherDispoRows.value.push({
+            requestedBy: [],
+            technicalEvaluation: [],
+            reviewedBy: [],
+        });
+    }
+    const btnRemoveEcrOtherDispoRows = async (index) => {
+        frmEcrOtherDispoRows.value.splice(index,1);
+    }
+    const btnAddEcrPmiApproverRows = async () => {
+        frmEcrPmiApproverRows.value.push({
+            preparedBy: [],
+            checkedBy: [],
+            approvedBy: [],
+        });
+    }
+    const btnRemoveEcrPmiApproverRows = async (index) => {
+        frmEcrPmiApproverRows.value.splice(index,1);
+    }
 
-    // const frmSaveEcr = async () => {
-    //     await axios.post('/api/save_document',{
-    //            name: frmEcr.value,
-    //     }).then((response) => {
-    //         console.log(response);
-    //     }).catch((err) => {
-    //         console.log(err);
-    //     });
-    // }
+    const frmSaveEcr = async () => {
+        let formData = new FormData();
+
+        //Append form data
+        [
+            ["category", frmEcr.value.category],
+            ["customer_name", frmEcr.value.customerName],
+            ["part_name", frmEcr.value.partName],
+            ["productLine", frmEcr.value.productLine],
+            ["section", frmEcr.value.section],
+            ["internal_external", frmEcr.value.internalExternal],
+            ["part_number", frmEcr.value.partNumber],
+            ["device_name", frmEcr.value.deviceName],
+            ["customer_ec_no", frmEcr.value.customerEcNo],
+            ["date_of_request", frmEcr.value.dateOfRequest],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+
+        for (let index = 0; index < frmEcrReasonRows.value.length; index++) {
+            const descriptionOfChange = frmEcrReasonRows.value[index].descriptionOfChange;
+            const reasonOfChange = frmEcrReasonRows.value[index].reasonOfChange;
+            [
+                ["description_of_change[]", descriptionOfChange],
+                ["reason_of_change[]", reasonOfChange],
+            ].forEach(([key, value]) =>
+                formData.append(key, value)
+            );
+        }
+
+        [
+            ["qad_approved_by_external", frmEcrQadRows.value.qadApprovedByExternal],
+            ["qad_approved_by_internal", frmEcrQadRows.value.qadApprovedByInternal],
+            ["qad_checked_by", frmEcrQadRows.value.qadCheckedBy],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+
+        for (let index = 0; index < frmEcrOtherDispoRows.value.length; index++) {
+            const requestedBy = frmEcrOtherDispoRows.value[index].requestedBy;
+            const technicalEvaluation = frmEcrOtherDispoRows.value[index].technicalEvaluation;
+            const reviewedBy = frmEcrOtherDispoRows.value[index].reviewedBy;
+            [
+                ["requested_by[]", requestedBy],
+                ["technical_evaluation[]", technicalEvaluation],
+                ["reviewed_by[]", reviewedBy],
+            ].forEach(([key, value]) =>
+                formData.append(key, value)
+            );
+        }
+        for (let index = 0; index < frmEcrPmiApproverRows.value.length; index++) {
+            const preparedBy = frmEcrPmiApproverRows.value[index].preparedBy;
+            const checkedBy = frmEcrPmiApproverRows.value[index].checkedBy;
+            const approvedBy = frmEcrPmiApproverRows.value[index].approvedBy;
+            [
+                ["prepared_by[]", preparedBy],
+                ["checked_by[]", checkedBy],
+                ["approved_by[]", approvedBy],
+            ].forEach(([key, value]) =>
+                formData.append(key, value)
+            );
+        }
+
+        axiosSaveData(formData,'api/save_ecr', (response) =>{
+            // tblEdocs.value.dt.draw();
+            console.log(response);
+        });
+    }
 
 </script>
 

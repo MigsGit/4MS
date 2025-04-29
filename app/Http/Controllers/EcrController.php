@@ -36,4 +36,16 @@ class EcrController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
+    public function saveEcr(Request $request){
+        return $request->all() ;
+        date_default_timezone_set('Asia/Manila');
+        DB::beginTransaction();
+        try {
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
 }
