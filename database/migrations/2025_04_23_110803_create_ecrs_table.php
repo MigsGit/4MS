@@ -16,6 +16,8 @@ class CreateEcrsTable extends Migration
         Schema::create('ecrs', function (Blueprint $table) {
             $table->id();
             $table->string('ecr_no');
+            $table->string('status')->default('FA')->comment('FA - For Approval | DO- Done');
+            $table->string('approval_status')->default('RB');
             $table->string('category');
             $table->string('internal_external');
             $table->string('customer_name');

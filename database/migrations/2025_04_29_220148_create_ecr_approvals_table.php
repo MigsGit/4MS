@@ -15,6 +15,15 @@ class CreateEcrApprovalsTable extends Migration
     {
         Schema::create('ecr_approvals', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
+            //manually inject relationship in MYSQL relation view
+            $table->unsignedBigInteger('rapidx_user_id')->unique()->comment('Rapidx User Id');
+            //MYSQL restrict this function if different database
+            // $table->foreignId('rapidx_users_id')->references('id')->on('rapidx.users')->comment ='Rapidx User Id';
+            $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
+            $table->string('type')->default('RB');
+            $table->bigInteger('counter');
+            $table->longText('remarks');
             $table->timestamps();
             $table->softDeletes();
             /*

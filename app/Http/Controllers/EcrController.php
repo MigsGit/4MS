@@ -41,7 +41,9 @@ class EcrController extends Controller
     }
     public function saveEcr(Request $request, EcrRequest $ecrRequest){
 
-        
+        $ecr =  $this->resourceInterface->create( Ecr::class,$ecrRequest->validated());
+
+        return $ecr['data_id'];
         //TODO: Make ECR Table
         date_default_timezone_set('Asia/Manila');
         DB::beginTransaction();
