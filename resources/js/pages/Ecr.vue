@@ -48,17 +48,8 @@
                             <input v-model="frmEcr.productLine" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
-                            <Multiselect
-                                v-model="model.test"
-                                :options="options.test"
-                                placeholder="Select an option"
-                                :searchable="true"
-                                :close-on-select="true"
-                            />
-
-                            {{ model.test }}
-                            <!-- <span class="input-group-text" id="addon-wrapping">Section:</span>
-                            <input v-model="frmEcr.section" type="text" class="form-control" aria-describedby="addon-wrapping"> -->
+                            <span class="input-group-text" id="addon-wrapping">Section:</span>
+                            <input v-model="frmEcr.section" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                     </div>
                     <div class="col-sm-6">
@@ -120,7 +111,7 @@
                                                 <td>
                                                     <Multiselect
                                                         v-model="frmEcrReasonRows.descriptionOfChange"
-                                                        :options="ecrVars.optDescriptionOfChange"
+                                                        :options="ecrVar.optDescriptionOfChange"
                                                         placeholder="Select an option"
                                                         :searchable="true"
                                                         :close-on-select="true"
@@ -358,7 +349,10 @@
     import ModalComponent from '../components/ModalComponent.vue';
     import ecr from '../../js/composables/ecr.js';
     import useForm from '../../js/composables/utils/useForm.js'
-    const { axiosSaveData } = useForm();; // Call the useFetch function
+    import useFetch from '../../js/composables/utils/useFetch.js';
+    const { axiosSaveData } = useForm(); // Call the useFetch function
+    const { axiosFetchData } = useFetch();
+
 
     //composables export function
     const {
@@ -368,7 +362,7 @@
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
-        // getDropdownMasterByOpt,
+        getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
     } = ecr();
     //ref state
@@ -385,19 +379,11 @@
         customerEcNo: 'test',
         dateOfRequest: '',
     });
-    const ecrVars = ref({
-        optDescriptionOfChange: [],
-        optReasonOfChange: [],
-    });
-    const frmEcrReasonRowsx = ref({
-        descriptionOfChange: '',
-        reasonOfChange: '',
-    });
     const modalSaveEcr = ref(null);
     //constant object params
     const descriptionOfChangeParams = {
         tblReference : 'ecr_doc',
-        globalVar: ecrVars.value.optDescriptionOfChange,
+        globalVar: ecrVar.optDescriptionOfChange,
     };
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
@@ -430,65 +416,49 @@
     const pmiApproverApprovedByParams = {
         globalVar: ecrVar.approvedBy,
     };
-    const model = ref({
-        test:null
-    })
-    const options = ref({
-        test:[]
-    })
-    const testSection = async () => {
-        // Simulate API response
-        const dropdownMasterByOpt = [
-            {
-            id: 2,
-            dropdown_masters_details: "test 2"
-            },
-            {
-            id: 3,
-            dropdown_masters_details: "test test"
-            }
-        ]
+    // const getDropdownMasterByOpt = async (params) => {
+    //     //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
+    //     await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
+    //         let data = response.data;
+    //         let dropdownMasterByOpt = data.dropdownMasterByOpt;
+    //         console.log(dropdownMasterByOpt);
+    //         /*
+    //             Multiple option element base on globalVar
+    //             This only reassigns the local globalVar.
+    //             It does NOT modify the original ecrVar.optDropdownMasterDetails, because in Vue's reactive, reassigning won't trigger reactivity.
+    //             You must mutate the array (not replace it) so Vue detects and updates it reactively.
+    //             Use .splice() to update its contents.
+    //         */
 
-        options.value.test = [
-            { value: '', label: '-Select-', disabled: true },
-            { value: 'N/A', label: 'N/A' },
-            ...dropdownMasterByOpt.map(item => ({
-            value: item.id,
-            label: item.dropdown_masters_details
-            }))
-        ]
-        model.value.test = 2;
-
-    }
-    const getDropdownMasterByOpt = async () => {
-        const dropdownMasterByOpt = [
-            { id: 2, dropdown_masters_details: 'test 2' },
-            { id: 3, dropdown_masters_details: 'test test' }
-        ]
-
-
-        ecrVars.value.optDescriptionOfChange = [
-            { value: '', label: '-Select-', disabled: true },
-            { value: 'N/A', label: 'N/A' },
-            ...dropdownMasterByOpt.map(item => ({
-            value: item.id,
-            label: item.dropdown_masters_details
-            }))
-        ]
-        frmEcrReasonRows.descriptionOfChange = 2 // pre-selected value
-    }
+    //         // params.globalVar.splice(0, params.globalVar.length,
+    //         //         // { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
+    //         //         ...dropdownMasterByOpt.map((value) => {
+    //         //         return {
+    //         //             value: value.id,
+    //         //             label: value.dropdown_masters_details
+    //         //         }
+    //         //     }),
+    //         // );
+    //         ecrVar.optDescriptionOfChange = [
+    //             { value: '', label: '-Select-', disabled: true },
+    //             { value: 'N/A', label: 'N/A' },
+    //             ...dropdownMasterByOpt.map(item => ({
+    //             value: item.id,
+    //             label: item.dropdown_masters_details
+    //             }))
+    //         ]
+    //         frmEcrReasonRows.value.descriptionOfChange = 3 // pre-selected value
+    //     });
+    // }
 
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
         modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modal.SaveEcr.show();
-        testSection();
-        // getDropdownMasterByOpt(reasonOfChangeParams);
-        await getDropdownMasterByOpt();
-        console.log('meron',frmEcrReasonRows.descriptionOfChange);
     })
-
+    getDropdownMasterByOpt(descriptionOfChangeParams);
+    getDropdownMasterByOpt(reasonOfChangeParams);
     getRapidxUserByIdOpt(qadCheckedByParams);
     getRapidxUserByIdOpt(qadApprovedByInternalParams);
     getRapidxUserByIdOpt(qadApprovedByExternalParams);
@@ -504,7 +474,6 @@
             descriptionOfChange: '',
             reasonOfChange: [],
         });
-
     }
 
     const removeEcrReasonRows = async (index) => {
