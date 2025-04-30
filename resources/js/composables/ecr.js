@@ -8,6 +8,7 @@ export default function ecr()
     const modal = {
         SaveEcr : null,
     };
+
     //Reactive State
     const ecrVar = reactive({
         optDescriptionOfChange: [],
@@ -28,11 +29,11 @@ export default function ecr()
     //Ref State
     const frmEcrReasonRows = ref([
         {
-            descriptionOfChange: [],
-            reasonOfChange: [],
+            descriptionOfChange: '',
+            reasonOfChange: '',
         },
     ]);
-    //
+
     const frmEcrQadRows = ref([
         {
             qadCheckedBy: [],
@@ -55,11 +56,13 @@ export default function ecr()
         },
     ]);
 
+
+
     const getDropdownMasterByOpt = async (params) => {
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
         await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
             let data = response.data;
-            let dropdownMasterByOpt = data.dropdownMasterByOpt;
+            // let dropdownMasterByOpt = data.dropdownMasterByOpt;
             /*
                 Multiple option element base on globalVar
                 This only reassigns the local globalVar.
@@ -67,25 +70,55 @@ export default function ecr()
                 You must mutate the array (not replace it) so Vue detects and updates it reactively.
                 Use .splice() to update its contents.
             */
-            params.globalVar.splice(0, params.globalVar.length, ...dropdownMasterByOpt.map((value) => {
-                return {
-                    value: value.id,
-                    label: value.dropdown_masters_details
-                }
-            }));
+
+            const dropdownMasterByOpt = [
+                { id: 2, dropdown_masters_details: 'test 2' },
+                { id: 3, dropdown_masters_details: 'test test' }
+            ]
+
+            // params.globalVar.splice(0, params.globalVar.length,
+            //         // { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
+            //         ...dropdownMasterByOpt.map((value) => {
+            //         return {
+            //             value: value.id,
+            //             label: value.dropdown_masters_details
+            //         }
+            //     }),
+            // );
+            params.globalVar.splice(0, params.globalVar.length,
+                    // { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
+                    ...dropdownMasterByOpt.map((value) => {
+                    return {
+                        value: value.id,
+                        label: value.dropdown_masters_details
+                    }
+                }),
+
+            );
+            frmEcrReasonRows.value.descriptionOfChange = 2 // pre-selected value
         });
     }
+    /*
+        if (!frmEcrReasonRows.reasonOfChange || frmEcrReasonRows.reasonOfChange.value === '') {
+    alert("Please select a valid option.");
+    return;
+}
+    */
     const getRapidxUserByIdOpt = async (params) => {
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
         await axiosFetchData(params, `api/get_rapidx_user_by_id_opt`, (response) => { //url
             let data = response.data;
+
             let rapidxUserById = data.rapidxUserById;
-                params.globalVar.splice(0, params.globalVar.length, ...rapidxUserById.map((value) => {
+                params.globalVar.splice(0,
+                    { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
+                    ...rapidxUserById.map((value) => {
                 return {
                     value: value.id,
                     label: value.name
                 }
-            }));
+            })
+        );
         });
     }
 
@@ -96,7 +129,7 @@ export default function ecr()
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
-        getDropdownMasterByOpt,
+        // getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
     };
 }

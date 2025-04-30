@@ -25,7 +25,7 @@ export default function useFetch ()
                 params: params,
                 transformRequest: [(data, headers) => {
                     headers['Authorization'] = 'Bearer your-token';
-                    console.log('Request config modified before sending:', headers);
+                    // console.log('Request config modified before sending:', headers);
                     isModalLoadingComponent.value = true;
                 }]
 

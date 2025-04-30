@@ -1,21 +1,53 @@
-<template>
-    <div class="container-fluid px-4">
-        <div class="card mt-5"  style="width: 100%;">
-            <div class="card-body overflow-auto">
-                <div class="container-fluid px-4">
-                    <h1 class="mt-4">Material
-                    </h1>
-                    <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Material</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup>
+import { ref, onMounted } from 'vue'
+import Multiselect from 'vue-multiselect'
 
+const options = ref({
+    test: []
+})
+const selectedOption = ref({
+    test:''
+})
+
+const loadOptions = async () => {
+  // Simulate API response
+  const dropdownMasterByOpt = [
+    { id: 2, dropdown_masters_details: 'test 2' },
+    { id: 3, dropdown_masters_details: 'test test' }
+  ]
+
+  // Transform and assign to options
+  options.value.test.splice(0, options.value.test.length,
+    { value: '', label: '-Select-', disabled: true },
+    { value: 'N/A', label: 'N/A' },
+    ...dropdownMasterByOpt.map(item => ({
+      value: item.id,
+      label: item.dropdown_masters_details
+    }))
+  )
+
+  // Set selected value if needed
+  selectedOption.value.test = { value: 2, label: 'test 2' } // pre-selected value
+}
+
+onMounted(() => {
+  loadOptions()
+})
 </script>
 
+<template>
+  <Multiselect
+    v-model="selectedOption.test"
+    :options="options.test"
+    placeholder="Select an option"
+    label="label"
+    track-by="value"
+    :searchable="true"
+    :close-on-select="true"
+  />
+  {{selectedOption.test}}
+</template>
 
+<style scoped>
+@import "vue-multiselect/dist/vue-multiselect.min.css";
+</style>

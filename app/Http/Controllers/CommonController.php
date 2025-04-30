@@ -36,6 +36,9 @@ class CommonController extends Controller
 
             $rapidxUserById = $this->resourceInterface->readWithRelationsConditions(RapidxUser::class,$data,$relations,$conditions);
             $rapidxUserById = $rapidxUserById;
+            // $arr_merge_group = array_merge(...array_map(function($item) {
+            //     return (array) $item;
+            // }, $arr_group_by1));
             return response()->json(['is_success' => 'true','rapidxUserById'=>$rapidxUserById]);
         } catch (Exception $e) {
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);

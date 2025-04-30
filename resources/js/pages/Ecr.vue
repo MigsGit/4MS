@@ -48,8 +48,17 @@
                             <input v-model="frmEcr.productLine" type="text" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
-                            <span class="input-group-text" id="addon-wrapping">Section:</span>
-                            <input v-model="frmEcr.section" type="text" class="form-control" aria-describedby="addon-wrapping">
+                            <Multiselect
+                                v-model="model.test"
+                                :options="options.test"
+                                placeholder="Select an option"
+                                :searchable="true"
+                                :close-on-select="true"
+                            />
+
+                            {{ model.test }}
+                            <!-- <span class="input-group-text" id="addon-wrapping">Section:</span>
+                            <input v-model="frmEcr.section" type="text" class="form-control" aria-describedby="addon-wrapping"> -->
                         </div>
                     </div>
                     <div class="col-sm-6">
@@ -103,24 +112,28 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(frmEcrReasonRows, index) in frmEcrReasonRows" :key="frmEcrReasonRows.index">
+
+                                            <tr v-for="(frmEcrReasonRow, index) in frmEcrReasonRows" :key="frmEcrReasonRows.index">
                                                 <td>
                                                     {{index+1}}
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrReasonRows.descriptionOfChange"
-                                                        :close-on-select="true"
+                                                        :options="ecrVars.optDescriptionOfChange"
+                                                        placeholder="Select an option"
                                                         :searchable="true"
-                                                        :options="ecrVar.optDescriptionOfChange"
+                                                        :close-on-select="true"
                                                     />
+                                                    {{ frmEcrReasonRows.descriptionOfChange }}
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrReasonRows.reasonOfChange"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optReasonOfChange"
+                                                        placeholder="Select an option"
                                                     />
                                                 </td>
                                                 <td>
@@ -166,7 +179,7 @@
                                                 1
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrQadRows.qadCheckedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -174,7 +187,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrQadRows.qadApprovedByInternal"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -182,7 +195,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrQadRows.qadApprovedByExternal"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -227,7 +240,7 @@
                                                    {{ index+1 }}
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrOtherDispoRows.requestedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -235,7 +248,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrOtherDispoRows.technicalEvaluation"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -243,7 +256,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrOtherDispoRows.reviewedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -295,7 +308,7 @@
                                                     {{ index+1 }}
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrPmiApproverRows.preparedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -304,7 +317,7 @@
 
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrPmiApproverRows.checkedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -312,7 +325,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <MultiselectElement
+                                                    <Multiselect
                                                         v-model="frmEcrPmiApproverRows.approvedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -341,12 +354,12 @@
 </template>
 
 <script setup>
-    import {ref , onMounted} from 'vue';
+    import {ref , onMounted, beforeMounted} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
-
     import ecr from '../../js/composables/ecr.js';
     import useForm from '../../js/composables/utils/useForm.js'
     const { axiosSaveData } = useForm();; // Call the useFetch function
+
     //composables export function
     const {
         modal,
@@ -355,7 +368,7 @@
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
-        getDropdownMasterByOpt,
+        // getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
     } = ecr();
     //ref state
@@ -372,11 +385,19 @@
         customerEcNo: 'test',
         dateOfRequest: '',
     });
+    const ecrVars = ref({
+        optDescriptionOfChange: [],
+        optReasonOfChange: [],
+    });
+    const frmEcrReasonRowsx = ref({
+        descriptionOfChange: '',
+        reasonOfChange: '',
+    });
     const modalSaveEcr = ref(null);
     //constant object params
     const descriptionOfChangeParams = {
         tblReference : 'ecr_doc',
-        globalVar: ecrVar.optDescriptionOfChange,
+        globalVar: ecrVars.value.optDescriptionOfChange,
     };
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
@@ -409,14 +430,65 @@
     const pmiApproverApprovedByParams = {
         globalVar: ecrVar.approvedBy,
     };
-    onMounted( ()=>{
+    const model = ref({
+        test:null
+    })
+    const options = ref({
+        test:[]
+    })
+    const testSection = async () => {
+        // Simulate API response
+        const dropdownMasterByOpt = [
+            {
+            id: 2,
+            dropdown_masters_details: "test 2"
+            },
+            {
+            id: 3,
+            dropdown_masters_details: "test test"
+            }
+        ]
+
+        options.value.test = [
+            { value: '', label: '-Select-', disabled: true },
+            { value: 'N/A', label: 'N/A' },
+            ...dropdownMasterByOpt.map(item => ({
+            value: item.id,
+            label: item.dropdown_masters_details
+            }))
+        ]
+        model.value.test = 2;
+
+    }
+    const getDropdownMasterByOpt = async () => {
+        const dropdownMasterByOpt = [
+            { id: 2, dropdown_masters_details: 'test 2' },
+            { id: 3, dropdown_masters_details: 'test test' }
+        ]
+
+
+        ecrVars.value.optDescriptionOfChange = [
+            { value: '', label: '-Select-', disabled: true },
+            { value: 'N/A', label: 'N/A' },
+            ...dropdownMasterByOpt.map(item => ({
+            value: item.id,
+            label: item.dropdown_masters_details
+            }))
+        ]
+        frmEcrReasonRows.descriptionOfChange = 2 // pre-selected value
+    }
+
+    onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
         modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modal.SaveEcr.show();
+        testSection();
+        // getDropdownMasterByOpt(reasonOfChangeParams);
+        await getDropdownMasterByOpt();
+        console.log('meron',frmEcrReasonRows.descriptionOfChange);
     })
-    getDropdownMasterByOpt(descriptionOfChangeParams);
-    getDropdownMasterByOpt(reasonOfChangeParams);
+
     getRapidxUserByIdOpt(qadCheckedByParams);
     getRapidxUserByIdOpt(qadApprovedByInternalParams);
     getRapidxUserByIdOpt(qadApprovedByExternalParams);
@@ -429,11 +501,12 @@
 
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
-            descriptionOfChange: [],
+            descriptionOfChange: '',
             reasonOfChange: [],
         });
 
     }
+
     const removeEcrReasonRows = async (index) => {
         frmEcrReasonRows.value.splice(index,1);
     }
@@ -530,4 +603,7 @@
 
 </script>
 
+<style scoped>
+
+</style>
 

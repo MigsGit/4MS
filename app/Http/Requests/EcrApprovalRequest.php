@@ -27,9 +27,9 @@ class EcrApprovalRequest extends FormRequest
             'requested_by' => 'required',
             'technical_evaluation' => 'required',
             'reviewed_by' => 'required',
-            'qad_approved_by_external' => 'required',
-            'qad_approved_by_internal' => 'required',
-            'qad_checked_by' => 'required',
+            // 'qad_approved_by_external' => 'required',
+            // 'qad_approved_by_internal' => 'required',
+            // 'qad_checked_by' => 'required',
         ];
     }
 }
