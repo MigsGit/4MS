@@ -1,4 +1,4 @@
-import { ref, inject,reactive } from 'vue'
+import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
 
 export default function ecr()
@@ -8,6 +8,7 @@ export default function ecr()
     const modal = {
         SaveEcr : null,
     };
+
 
     //Reactive State
     const ecrVar = reactive({
@@ -36,9 +37,9 @@ export default function ecr()
 
     const frmEcrQadRows = ref([
         {
-            qadCheckedBy: [],
-            qadApprovedByInternal: [],
-            qadApprovedByExternal: [],
+            qadCheckedBy: '',
+            qadApprovedByInternal: '',
+            qadApprovedByExternal: '',
         },
     ]);
     const frmEcrOtherDispoRows = ref([
@@ -56,77 +57,54 @@ export default function ecr()
         },
     ]);
 
-    // const getDropdownMasterByOpt = async (params) => {
-    //     //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
-    //     await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
-    //         let data = response.data;
-    //         // let dropdownMasterByOpt = data.dropdownMasterByOpt;
-    //         /*
-    //             Multiple option element base on globalVar
-    //             This only reassigns the local globalVar.
-    //             It does NOT modify the original ecrVar.optDropdownMasterDetails, because in Vue's reactive, reassigning won't trigger reactivity.
-    //             You must mutate the array (not replace it) so Vue detects and updates it reactively.
-    //             Use .splice() to update its contents.
-    //         */
-
-    //         params.globalVar.splice(0, params.globalVar.length,
-    //                 // { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
-    //                 ...dropdownMasterByOpt.map((value) => {
-    //                 return {
-    //                     value: value.id,
-    //                     label: value.dropdown_masters_details
-    //                 }
-    //             }),
-    //         );
-    //         frmEcrReasonRows.value.descriptionOfChange = 1 // pre-selected value
-    //     });
-    // }
     const getDropdownMasterByOpt = async (params) => {
-        //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
+        console.log('globalVar',params)
         await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
             let data = response.data;
             let dropdownMasterByOpt = data.dropdownMasterByOpt;
-            console.log(dropdownMasterByOpt);
-            /*
+             /*
                 Multiple option element base on globalVar
                 This only reassigns the local globalVar.
                 It does NOT modify the original ecrVar.optDropdownMasterDetails, because in Vue's reactive, reassigning won't trigger reactivity.
                 You must mutate the array (not replace it) so Vue detects and updates it reactively.
                 Use .splice() to update its contents.
             */
-            ecrVar.optDescriptionOfChange = [
-                { value: '', label: '-Select-', disabled: true },
-                { value: 'N/A', label: 'N/A' },
-                ...dropdownMasterByOpt.map(item => ({
-                value: item.id,
-                label: item.dropdown_masters_details
-                }))
-            ]
-            frmEcrReasonRows.value.descriptionOfChange = 3 // pre-selected value
+            params.globalVar.splice(0, params.globalVar.length,
+                { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
+                { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
+                    ...dropdownMasterByOpt.map((value) => {
+                    return {
+                        value: value.id,
+                        label: value.dropdown_masters_details
+                    }
+                }),
+            );
+            params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
         });
     }
 
-    /*
-        if (!frmEcrReasonRows.reasonOfChange || frmEcrReasonRows.reasonOfChange.value === '') {
-    alert("Please select a valid option.");
-    return;
-}
-    */
     const getRapidxUserByIdOpt = async (params) => {
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
+
         await axiosFetchData(params, `api/get_rapidx_user_by_id_opt`, (response) => { //url
             let data = response.data;
 
             let rapidxUserById = data.rapidxUserById;
-                params.globalVar.splice(0,
-                    { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
+            console.log('rapidxUserById',rapidxUserById);
+
+            params.globalVar.splice(0, params.globalVar.length,
+                { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
+                { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
                     ...rapidxUserById.map((value) => {
-                return {
-                    value: value.id,
-                    label: value.name
-                }
-            })
-        );
+                    return {
+                        value: value.id,
+                        label: value.name
+                    }
+                }),
+            );
+            params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
+            // frmEcrReasonRows.value.descriptionOfChange = 1 // pre-selected value
+
         });
     }
 

@@ -116,7 +116,6 @@
                                                         :searchable="true"
                                                         :close-on-select="true"
                                                     />
-                                                    {{ frmEcrReasonRows.descriptionOfChange }}
                                                 </td>
                                                 <td>
                                                     <Multiselect
@@ -345,13 +344,11 @@
 </template>
 
 <script setup>
-    import {ref , onMounted, beforeMounted} from 'vue';
+    import {ref , onMounted, beforeMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
     import ecr from '../../js/composables/ecr.js';
     import useForm from '../../js/composables/utils/useForm.js'
-    import useFetch from '../../js/composables/utils/useFetch.js';
     const { axiosSaveData } = useForm(); // Call the useFetch function
-    const { axiosFetchData } = useFetch();
 
 
     //composables export function
@@ -379,95 +376,84 @@
         customerEcNo: 'test',
         dateOfRequest: '',
     });
+
     const modalSaveEcr = ref(null);
     //constant object params
-    const descriptionOfChangeParams = {
+    const descriptionOfChangeParams ={
         tblReference : 'ecr_doc',
         globalVar: ecrVar.optDescriptionOfChange,
+        formModel: toRef(frmEcrReasonRows.value,'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
+        formModel: toRef(frmEcrReasonRows.value,'reasonOfChange'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
+        formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const qadApprovedByInternalParams = {
         globalVar: ecrVar.optQadApprovedByInternal,
+        formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const qadApprovedByExternalParams = {
         globalVar: ecrVar.optQadApprovedByExternal,
+        formModel: toRef(frmEcrQadRows.value,'qadApprovedByExternal'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const otherDispoRequestedByParams = {
         globalVar: ecrVar.requestedBy,
+        formModel: toRef(frmEcrOtherDispoRows.value,'otherDispoRequestedBy'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const otherDispoTechnicalEvaluationParams = {
         globalVar: ecrVar.technicalEvaluation,
+        formModel: toRef(frmEcrOtherDispoRows.value,'otherDispoTechnicalEvaluation'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const otherDispoReviewedByParams = {
         globalVar: ecrVar.reviewedBy,
+        formModel: toRef(frmEcrOtherDispoRows.value,'otherDispoReviewedBy'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const pmiApproverPreparedByParams = {
         globalVar: ecrVar.preparedBy,
+        formModel: toRef(frmEcrPmiApproverRows.value,'pmiApproverPreparedBy'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const pmiApproverCheckedByParams = {
         globalVar: ecrVar.checkedBy,
+        formModel: toRef(frmEcrPmiApproverRows.value,'pmiApproverCheckedBy'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
     const pmiApproverApprovedByParams = {
         globalVar: ecrVar.approvedBy,
+        formModel: toRef(frmEcrPmiApproverRows.value,'pmiApproverApprovedBy'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
     };
-    // const getDropdownMasterByOpt = async (params) => {
-    //     //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
-    //     await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
-    //         let data = response.data;
-    //         let dropdownMasterByOpt = data.dropdownMasterByOpt;
-    //         console.log(dropdownMasterByOpt);
-    //         /*
-    //             Multiple option element base on globalVar
-    //             This only reassigns the local globalVar.
-    //             It does NOT modify the original ecrVar.optDropdownMasterDetails, because in Vue's reactive, reassigning won't trigger reactivity.
-    //             You must mutate the array (not replace it) so Vue detects and updates it reactively.
-    //             Use .splice() to update its contents.
-    //         */
-
-    //         // params.globalVar.splice(0, params.globalVar.length,
-    //         //         // { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
-    //         //         ...dropdownMasterByOpt.map((value) => {
-    //         //         return {
-    //         //             value: value.id,
-    //         //             label: value.dropdown_masters_details
-    //         //         }
-    //         //     }),
-    //         // );
-    //         ecrVar.optDescriptionOfChange = [
-    //             { value: '', label: '-Select-', disabled: true },
-    //             { value: 'N/A', label: 'N/A' },
-    //             ...dropdownMasterByOpt.map(item => ({
-    //             value: item.id,
-    //             label: item.dropdown_masters_details
-    //             }))
-    //         ]
-    //         frmEcrReasonRows.value.descriptionOfChange = 3 // pre-selected value
-    //     });
-    // }
-
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
         modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modal.SaveEcr.show();
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
+        await getRapidxUserByIdOpt(qadCheckedByParams);
+        await getRapidxUserByIdOpt(qadApprovedByInternalParams);
+        await getRapidxUserByIdOpt(qadApprovedByExternalParams);
+        await getRapidxUserByIdOpt(otherDispoRequestedByParams);
+        await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+        await getRapidxUserByIdOpt(otherDispoReviewedByParams);
+        await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+        await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+        await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
     })
-    getDropdownMasterByOpt(descriptionOfChangeParams);
-    getDropdownMasterByOpt(reasonOfChangeParams);
-    getRapidxUserByIdOpt(qadCheckedByParams);
-    getRapidxUserByIdOpt(qadApprovedByInternalParams);
-    getRapidxUserByIdOpt(qadApprovedByExternalParams);
-    getRapidxUserByIdOpt(otherDispoRequestedByParams);
-    getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
-    getRapidxUserByIdOpt(otherDispoReviewedByParams);
-    getRapidxUserByIdOpt(pmiApproverPreparedByParams);
-    getRapidxUserByIdOpt(pmiApproverCheckedByParams);
-    getRapidxUserByIdOpt(pmiApproverApprovedByParams);
+
 
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
@@ -569,6 +555,7 @@
             console.log(response);
         });
     }
+
 
 </script>
 
