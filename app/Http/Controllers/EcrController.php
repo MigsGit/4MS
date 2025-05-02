@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Ecr;
+use App\Models\EcrDetail;
 use App\Models\EcrApproval;
 use App\Models\PmiApproval;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
+use App\Http\Requests\EcrDetailRequest;
 
 
 
@@ -44,21 +46,38 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function saveEcr(Request $request, EcrRequest $ecrRequest){
+    public function saveEcr(Request $request, EcrRequest $ecrRequest,EcrDetailRequest $ecrDetailRequest){
         date_default_timezone_set('Asia/Manila');
         try {
+            //TODO: DELETE, Auto Increment Ctrl Number, InsertById
             DB::beginTransaction();
+            $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request){
+                return [
+                    'ecrs_id' =>  1,
+                    'description_of_change' => $description_of_change,
+                    'reason_of_change' => $request->reason_of_change[$index],
+                    'created_at' => now(),
+                ];
+            });
+            DB::commit();
+            foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
+               $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
+            }
+            return 'true';
+            
             $ctr = 0; //assigned counter
-            $ecr_approval_types = [
+            //Requested by, Engg, Heads, QA Approval
+            return $ecr_approval_types = [
                 'OTRB' => $request->requested_by,
                 'OTTE' => $request->technical_evaluation,
                 'OTRVB' => $request->reviewed_by,
                 'QA' => [$request->qad_checked_by,$request->qad_approved_by_internal,$request->qad_approved_by_external],
             ];
-            $ecrApprovalRequest = collect($ecr_approval_types)->flatMap(function ($users,$type) use ($request,&$ctr){
-                    return collect($users)->map(function ($userId) use ($request,$type,&$ctr){
+            $ecrApprovalRequest = collect($ecr_approval_types)->flatMap(function ($users,$type) use ($request,&$ctr,$ecr_id){
+                    return collect($users)->map(function ($userId) use ($request,$type,&$ctr,$ecr_id){
                         return [
                             'ecrs_id' =>  1,
+                            // 'ecrs_id' =>  $ecr_id,
                             'rapidx_user_id' => $userId,
                             'type' => $type,
                             'counter' => $ctr,
@@ -68,8 +87,9 @@ class EcrController extends Controller
                     });
 
             })->toArray();
-            return $ecr =  EcrApproval::insert($ecrApprovalRequest);
+            $ecr =  EcrApproval::insert($ecrApprovalRequest);
 
+            //PMI Approvers
             $types = [
                 'PB' => $request->prepared_by,
                 'CB' => $request->checked_by,
@@ -83,6 +103,7 @@ class EcrController extends Controller
                     //return array users id, defined type by use keyword,
                     return [
                         'ecrs_id' => 1,
+                         // 'ecrs_id' =>  $ecr_id,
                         'rapidx_user_id' => $userId,
                         'type' => $type,
                         'counter' => $ctr++,

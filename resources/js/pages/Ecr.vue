@@ -128,7 +128,7 @@
                                                 </td>
                                                 <td>
                                                     <button @click="removeEcrReasonRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
-                                                        <li class="fa fa-trash"></li>
+                                                        <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -256,7 +256,7 @@
                                                 </td>
                                                 <td>
                                                     <button @click="btnRemoveEcrOtherDispoRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
-                                                        <li class="fa fa-trash"></li>
+                                                        <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -324,7 +324,7 @@
                                                 </td>
                                                 <td>
                                                     <button @click="btnRemoveEcrPmiApproverRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
-                                                        <li class="fa fa-trash"></li>
+                                                        <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -383,7 +383,7 @@
         tblReference : 'ecr_doc',
         globalVar: ecrVar.optDescriptionOfChange,
         formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
-        selectedVal: 'N/A',
+        selectedVal: '',
     };
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
