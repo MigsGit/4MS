@@ -1,14 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
 use App\Models\Ecr;
 use App\Models\EcrApproval;
+use App\Models\PmiApproval;
+use Illuminate\Http\Request;
 use App\Models\DropdownMaster;
 use App\Http\Requests\EcrRequest;
+use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
+use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
 
 
@@ -40,56 +41,63 @@ class EcrController extends Controller
             $dropdownMasterByOpt = $dropdownMasterByOpt[0]->dropdown_master_details;
            return response()->json(['is_success' => 'true','dropdownMasterByOpt' => $dropdownMasterByOpt]);
         } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+            throw $e;
         }
     }
     public function saveEcr(Request $request, EcrRequest $ecrRequest){
-
-        // $ecr =  $this->resourceInterface->create( Ecr::class,$ecrRequest->validated());
-
-
-        // return $ecr_id =  $ecr['data_id'];
-
-
-        //TODO: Make ECR Table
         date_default_timezone_set('Asia/Manila');
         try {
-            // return $request->requested_by;
-            foreach ($request->requested_by as $key => $requestedByValue) {
-                $ecrApprovalRequest = [
-                    'ecrs_id' =>  1,
-                    'rapidx_user_id' => $requestedByValue,
-                    'type' => 'OTHER',
-                    'counter' => $key,
-                    'remarks' => $request->remarks,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ];
-                // return $ecrApprovalRequest;
-                // $ecr =  $this->resourceInterface->create( EcrApproval::class,$ecrApprovalRequest);
-            }
-            return $request->prepared_by;
-            foreach ($request->prepared_by as $key => $preparedByValue) {
-                $ecrApprovalRequest = [
-                    'ecrs_id' =>  1,
-                    'rapidx_user_id' => $preparedByValue,
-                    'type' => 'QA',
-                    'counter' => $key,
-                    'remarks' => $request->remarks,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ];
-                // return $ecrApprovalRequest;
-                // $ecr =  $this->resourceInterface->create( EcrApproval::class,$ecrApprovalRequest);
-            }
+            DB::beginTransaction();
+            $ctr = 0; //assigned counter
+            $ecr_approval_types = [
+                'OTRB' => $request->requested_by,
+                'OTTE' => $request->technical_evaluation,
+                'OTRVB' => $request->reviewed_by,
+                'QA' => [$request->qad_checked_by,$request->qad_approved_by_internal,$request->qad_approved_by_external],
+            ];
+            $ecrApprovalRequest = collect($ecr_approval_types)->flatMap(function ($users,$type) use ($request,&$ctr){
+                    return collect($users)->map(function ($userId) use ($request,$type,&$ctr){
+                        return [
+                            'ecrs_id' =>  1,
+                            'rapidx_user_id' => $userId,
+                            'type' => $type,
+                            'counter' => $ctr,
+                            'remarks' => $request->remarks,
+                            'created_at' => now(),
+                        ];
+                    });
 
-            /*
-                'rapidx_user_id' => $request->technical_evaluation,
-                'rapidx_user_id' => $request->reviewed_by,
-             */
+            })->toArray();
+            return $ecr =  EcrApproval::insert($ecrApprovalRequest);
 
+            $types = [
+                'PB' => $request->prepared_by,
+                'CB' => $request->checked_by,
+                'AB' => $request->approved_by,
+            ];
 
+            $pmiApprovalRequest = collect($types)->flatMap(function ($users,$type) use ($request,&$ctr){
+                //return array users id as array value
+                return collect($users)->map(function ($userId) use ($type, $request,&$ctr) {
+                    // $type as a array name
+                    //return array users id, defined type by use keyword,
+                    return [
+                        'ecrs_id' => 1,
+                        'rapidx_user_id' => $userId,
+                        'type' => $type,
+                        'counter' => $ctr++,
+                        'remarks' => $request->remarks,
+                        'created_at' => now(),
+                    ];
+                });
+            })->toArray();
+
+            $ecr =  PmiApproval::insert($pmiApprovalRequest);
+            DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+            DB::rollback();
+            throw $e;
         }
     }
 }

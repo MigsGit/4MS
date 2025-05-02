@@ -393,17 +393,17 @@
     };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
-        formModel: toRef(frmEcrQadRows.value[0],'qadCheckedBy'),
+        formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
         selectedVal: '',
     };
     const qadApprovedByInternalParams = {
         globalVar: ecrVar.optQadApprovedByInternal,
-        formModel: toRef(frmEcrQadRows.value[0],'qadApprovedByInternal'),
+        formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
         selectedVal: '',
     };
     const qadApprovedByExternalParams = {
         globalVar: ecrVar.optQadApprovedByExternal,
-        formModel: toRef(frmEcrQadRows.value[0],'qadApprovedByExternal'),
+        formModel: toRef(frmEcrQadRows.value,'qadApprovedByExternal'),
         selectedVal: '',
     };
     const otherDispoRequestedByParams = {
@@ -486,7 +486,6 @@
     }
     const frmSaveEcr = async () => {
         let formData = new FormData();
-
         //Append form data
         [
             ["ecr_no", frmEcr.value.ecrNo],

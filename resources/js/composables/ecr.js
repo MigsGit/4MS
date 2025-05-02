@@ -70,7 +70,7 @@ export default function ecr()
             */
             params.globalVar.splice(0, params.globalVar.length,
                 { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
-                { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
+                { value: 0, label: 'N/A' }, // Push "N/A" option at the start
                     ...dropdownMasterByOpt.map((value) => {
                     return {
                         value: value.id,
@@ -90,7 +90,7 @@ export default function ecr()
             let rapidxUserById = data.rapidxUserById;
             params.globalVar.splice(0, params.globalVar.length,
                 { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
-                { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
+                { value: 0, label: 'N/A' }, // Push "N/A" option at the start
                     ...rapidxUserById.map((value) => {
                     return {
                         value: value.id,

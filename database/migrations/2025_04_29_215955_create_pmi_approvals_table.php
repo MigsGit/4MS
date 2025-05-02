@@ -21,7 +21,7 @@ class CreatePmiApprovalsTable extends Migration
             $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
             $table->string('type')->default('RB');
             $table->bigInteger('counter');
-            $table->longText('remarks');
+            $table->longText('remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -23,26 +23,9 @@ class CreateEcrApprovalsTable extends Migration
             $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
             $table->string('type')->default('RB');
             $table->bigInteger('counter');
-            $table->longText('remarks');
+            $table->longText('remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            /*
-                //ECR Detail
-                description_of_change[]: 1
-                reason_of_change[]: 3
-                //ECR Other Approver
-                requested_by[]: 149
-                technical_evaluation[]: 564
-                reviewed_by[]: 121
-                //ECR QA Approver
-                qad_approved_by_external: 263
-                qad_approved_by_internal: 14
-                qad_checked_by: 121
-                //PMI Approver
-                prepared_by[]: 833
-                checked_by[]: 833
-                approved_by[]: 689
-            */
         });
     }
 
