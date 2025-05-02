@@ -104,13 +104,13 @@
                                         </thead>
                                         <tbody>
 
-                                            <tr v-for="(frmEcrReasonRow, index) in frmEcrReasonRows" :key="frmEcrReasonRows.index">
+                                            <tr v-for="(frmEcrReasonRow, index) in frmEcrReasonRows" :key="frmEcrReasonRow.index">
                                                 <td>
                                                     {{index+1}}
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        v-model="frmEcrReasonRows.descriptionOfChange"
+                                                        v-model="frmEcrReasonRow.descriptionOfChange"
                                                         :options="ecrVar.optDescriptionOfChange"
                                                         placeholder="Select an option"
                                                         :searchable="true"
@@ -119,7 +119,7 @@
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        v-model="frmEcrReasonRows.reasonOfChange"
+                                                        v-model="frmEcrReasonRow.reasonOfChange"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optReasonOfChange"
@@ -225,13 +225,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr  v-for="(frmEcrOtherDispoRow, index) in frmEcrOtherDispoRows" :key="frmEcrOtherDispoRows.index">
+                                            <tr  v-for="(frmEcrOtherDispoRow, index) in frmEcrOtherDispoRows" :key="frmEcrOtherDispoRow.index">
                                                 <td>
                                                    {{ index+1 }}
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        v-model="frmEcrOtherDispoRows.requestedBy"
+                                                        v-model="frmEcrOtherDispoRow.requestedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.requestedBy"
@@ -239,7 +239,7 @@
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        v-model="frmEcrOtherDispoRows.technicalEvaluation"
+                                                        v-model="frmEcrOtherDispoRow.technicalEvaluation"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.technicalEvaluation"
@@ -247,7 +247,7 @@
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        v-model="frmEcrOtherDispoRows.reviewedBy"
+                                                        v-model="frmEcrOtherDispoRow.reviewedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.reviewedBy"
@@ -299,7 +299,7 @@
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        v-model="frmEcrPmiApproverRows.preparedBy"
+                                                        v-model="frmEcrPmiApproverRow.preparedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.preparedBy"
@@ -308,7 +308,7 @@
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        v-model="frmEcrPmiApproverRows.checkedBy"
+                                                        v-model="frmEcrPmiApproverRow.checkedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.checkedBy"
@@ -316,7 +316,7 @@
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        v-model="frmEcrPmiApproverRows.approvedBy"
+                                                        v-model="frmEcrPmiApproverRow.approvedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.approvedBy"
@@ -338,7 +338,7 @@
             </template>
             <template #footer>
                 <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+                <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
             </template>
     </ModalComponent>
 </template>
@@ -382,58 +382,58 @@
     const descriptionOfChangeParams ={
         tblReference : 'ecr_doc',
         globalVar: ecrVar.optDescriptionOfChange,
-        formModel: toRef(frmEcrReasonRows.value,'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
-        selectedVal: '',
+        formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: 'N/A',
     };
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
-        formModel: toRef(frmEcrReasonRows.value,'reasonOfChange'),
+        formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
         selectedVal: '',
     };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
-        formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
+        formModel: toRef(frmEcrQadRows.value[0],'qadCheckedBy'),
         selectedVal: '',
     };
     const qadApprovedByInternalParams = {
         globalVar: ecrVar.optQadApprovedByInternal,
-        formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
+        formModel: toRef(frmEcrQadRows.value[0],'qadApprovedByInternal'),
         selectedVal: '',
     };
     const qadApprovedByExternalParams = {
         globalVar: ecrVar.optQadApprovedByExternal,
-        formModel: toRef(frmEcrQadRows.value,'qadApprovedByExternal'),
+        formModel: toRef(frmEcrQadRows.value[0],'qadApprovedByExternal'),
         selectedVal: '',
     };
     const otherDispoRequestedByParams = {
         globalVar: ecrVar.requestedBy,
-        formModel: toRef(frmEcrOtherDispoRows.value,'requestedBy'),
+        formModel: toRef(frmEcrOtherDispoRows.value[0],'requestedBy'),
         selectedVal: '',
     };
     const otherDispoTechnicalEvaluationParams = {
         globalVar: ecrVar.technicalEvaluation,
-        formModel: toRef(frmEcrOtherDispoRows.value,'technicalEvaluation'),
+        formModel: toRef(frmEcrOtherDispoRows.value[0],'technicalEvaluation'),
         selectedVal: '',
     };
     const otherDispoReviewedByParams = {
         globalVar: ecrVar.reviewedBy,
-        formModel: toRef(frmEcrOtherDispoRows.value,'reviewedBy'),
+        formModel: toRef(frmEcrOtherDispoRows.value[0],'reviewedBy'),
         selectedVal: '',
     };
     const pmiApproverPreparedByParams = {
         globalVar: ecrVar.preparedBy,
-        formModel: toRef(frmEcrPmiApproverRows.value,'preparedBy'),
+        formModel: toRef(frmEcrPmiApproverRows.value[0],'preparedBy'),
         selectedVal: '',
     };
     const pmiApproverCheckedByParams = {
         globalVar: ecrVar.checkedBy,
-        formModel: toRef(frmEcrPmiApproverRows.value,'checkedBy'),
+        formModel: toRef(frmEcrPmiApproverRows.value[0],'checkedBy'),
         selectedVal: '',
     };
     const pmiApproverApprovedByParams = {
         globalVar: ecrVar.approvedBy,
-        formModel: toRef(frmEcrPmiApproverRows.value,'approvedBy'),
+        formModel: toRef(frmEcrPmiApproverRows.value[0],'approvedBy'),
         selectedVal: '',
     };
     onMounted( async ()=>{
@@ -454,11 +454,10 @@
         await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
     })
 
-
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
             descriptionOfChange: '',
-            reasonOfChange: [],
+            reasonOfChange: '',
         });
     }
 
@@ -485,7 +484,6 @@
     const btnRemoveEcrPmiApproverRows = async (index) => {
         frmEcrPmiApproverRows.value.splice(index,1);
     }
-
     const frmSaveEcr = async () => {
         let formData = new FormData();
 

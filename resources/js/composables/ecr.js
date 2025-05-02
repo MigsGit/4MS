@@ -58,7 +58,6 @@ export default function ecr()
     ]);
 
     const getDropdownMasterByOpt = async (params) => {
-        console.log('globalVar',params)
         await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
             let data = response.data;
             let dropdownMasterByOpt = data.dropdownMasterByOpt;
@@ -89,8 +88,6 @@ export default function ecr()
             let data = response.data;
 
             let rapidxUserById = data.rapidxUserById;
-            console.log('rapidxUserById',params);
-
             params.globalVar.splice(0, params.globalVar.length,
                 { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
                 { value: 'N/A', label: 'N/A' }, // Push "N/A" option at the start
@@ -101,7 +98,7 @@ export default function ecr()
                     }
                 }),
             );
-            params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
+            params.formModel.value = 564; //Make sure the data type is correct | String or Array
         });
     }
 

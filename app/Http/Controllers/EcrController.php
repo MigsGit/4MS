@@ -1,15 +1,19 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Ecr;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
+use App\Models\Ecr;
+use App\Models\EcrApproval;
 use App\Models\DropdownMaster;
 use App\Http\Requests\EcrRequest;
-use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
-use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
+
+
+
+
 
 class EcrController extends Controller
 {
@@ -41,18 +45,50 @@ class EcrController extends Controller
     }
     public function saveEcr(Request $request, EcrRequest $ecrRequest){
 
-        $ecr =  $this->resourceInterface->create( Ecr::class,$ecrRequest->validated());
+        // $ecr =  $this->resourceInterface->create( Ecr::class,$ecrRequest->validated());
 
-        return $ecr['data_id'];
+
+        // return $ecr_id =  $ecr['data_id'];
+
+
         //TODO: Make ECR Table
         date_default_timezone_set('Asia/Manila');
-        DB::beginTransaction();
         try {
+            // return $request->requested_by;
+            foreach ($request->requested_by as $key => $requestedByValue) {
+                $ecrApprovalRequest = [
+                    'ecrs_id' =>  1,
+                    'rapidx_user_id' => $requestedByValue,
+                    'type' => 'OTHER',
+                    'counter' => $key,
+                    'remarks' => $request->remarks,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+                // return $ecrApprovalRequest;
+                // $ecr =  $this->resourceInterface->create( EcrApproval::class,$ecrApprovalRequest);
+            }
+            return $request->prepared_by;
+            foreach ($request->prepared_by as $key => $preparedByValue) {
+                $ecrApprovalRequest = [
+                    'ecrs_id' =>  1,
+                    'rapidx_user_id' => $preparedByValue,
+                    'type' => 'QA',
+                    'counter' => $key,
+                    'remarks' => $request->remarks,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+                // return $ecrApprovalRequest;
+                // $ecr =  $this->resourceInterface->create( EcrApproval::class,$ecrApprovalRequest);
+            }
 
-            DB::commit();
+            /*
+                'rapidx_user_id' => $request->technical_evaluation,
+                'rapidx_user_id' => $request->reviewed_by,
+             */
+
+
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
-            DB::rollback();
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
