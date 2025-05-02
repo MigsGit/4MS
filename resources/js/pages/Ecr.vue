@@ -225,7 +225,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr  v-for="(frmEcrOtherDispoRows, index) in frmEcrOtherDispoRows" :key="frmEcrOtherDispoRows.index">
+                                            <tr  v-for="(frmEcrOtherDispoRow, index) in frmEcrOtherDispoRows" :key="frmEcrOtherDispoRows.index">
                                                 <td>
                                                    {{ index+1 }}
                                                 </td>
@@ -293,7 +293,7 @@
                                         </thead>
                                         <tbody>
 
-                                            <tr  v-for="(frmEcrPmiApproverRows,index) in frmEcrPmiApproverRows" :key="frmEcrPmiApproverRows.index">
+                                            <tr  v-for="(frmEcrPmiApproverRow,index) in frmEcrPmiApproverRows" :key="frmEcrPmiApproverRows.index">
                                                 <td>
                                                     {{ index+1 }}
                                                 </td>
@@ -388,52 +388,52 @@
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
-        formModel: toRef(frmEcrReasonRows.value,'reasonOfChange'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrReasonRows.value,'reasonOfChange'),
         selectedVal: '',
     };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
-        formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
         selectedVal: '',
     };
     const qadApprovedByInternalParams = {
         globalVar: ecrVar.optQadApprovedByInternal,
-        formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
         selectedVal: '',
     };
     const qadApprovedByExternalParams = {
         globalVar: ecrVar.optQadApprovedByExternal,
-        formModel: toRef(frmEcrQadRows.value,'qadApprovedByExternal'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrQadRows.value,'qadApprovedByExternal'),
         selectedVal: '',
     };
     const otherDispoRequestedByParams = {
         globalVar: ecrVar.requestedBy,
-        formModel: toRef(frmEcrOtherDispoRows.value,'otherDispoRequestedBy'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrOtherDispoRows.value,'requestedBy'),
         selectedVal: '',
     };
     const otherDispoTechnicalEvaluationParams = {
         globalVar: ecrVar.technicalEvaluation,
-        formModel: toRef(frmEcrOtherDispoRows.value,'otherDispoTechnicalEvaluation'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrOtherDispoRows.value,'technicalEvaluation'),
         selectedVal: '',
     };
     const otherDispoReviewedByParams = {
         globalVar: ecrVar.reviewedBy,
-        formModel: toRef(frmEcrOtherDispoRows.value,'otherDispoReviewedBy'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrOtherDispoRows.value,'reviewedBy'),
         selectedVal: '',
     };
     const pmiApproverPreparedByParams = {
         globalVar: ecrVar.preparedBy,
-        formModel: toRef(frmEcrPmiApproverRows.value,'pmiApproverPreparedBy'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrPmiApproverRows.value,'preparedBy'),
         selectedVal: '',
     };
     const pmiApproverCheckedByParams = {
         globalVar: ecrVar.checkedBy,
-        formModel: toRef(frmEcrPmiApproverRows.value,'pmiApproverCheckedBy'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrPmiApproverRows.value,'checkedBy'),
         selectedVal: '',
     };
     const pmiApproverApprovedByParams = {
         globalVar: ecrVar.approvedBy,
-        formModel: toRef(frmEcrPmiApproverRows.value,'pmiApproverApprovedBy'), // Good Practice create a reactive reference to a property inside an object
+        formModel: toRef(frmEcrPmiApproverRows.value,'approvedBy'),
         selectedVal: '',
     };
     onMounted( async ()=>{

@@ -44,16 +44,16 @@ export default function ecr()
     ]);
     const frmEcrOtherDispoRows = ref([
         {
-            requestedBy: [],
-            technicalEvaluation: [],
-            reviewedBy: [],
+            requestedBy: '',
+            technicalEvaluation: '',
+            reviewedBy: '',
         },
     ]);
     const frmEcrPmiApproverRows = ref([
         {
-            preparedBy: [],
-            checkedBy: [],
-            approvedBy: [],
+            preparedBy: '',
+            checkedBy: '',
+            approvedBy: '',
         },
     ]);
 
@@ -85,12 +85,11 @@ export default function ecr()
 
     const getRapidxUserByIdOpt = async (params) => {
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
-
         await axiosFetchData(params, `api/get_rapidx_user_by_id_opt`, (response) => { //url
             let data = response.data;
 
             let rapidxUserById = data.rapidxUserById;
-            console.log('rapidxUserById',rapidxUserById);
+            console.log('rapidxUserById',params);
 
             params.globalVar.splice(0, params.globalVar.length,
                 { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
@@ -103,8 +102,6 @@ export default function ecr()
                 }),
             );
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
-            // frmEcrReasonRows.value.descriptionOfChange = 1 // pre-selected value
-
         });
     }
 
