@@ -7,7 +7,8 @@
     <title>4M</title>
     {{-- @vite(['resources/css/app.css','resources/js/app.js']) --}}
     <link rel="stylesheet" href="{{ asset('/public/css/app.css') }}">
-    {{-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> --}}
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
 </head>
 <body class="font-sans antialiased sb-nav-fixed">
     <div  id="app">

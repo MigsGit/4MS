@@ -20,11 +20,53 @@ use App\Http\Requests\EcrDetailRequest;
 
 class EcrController extends Controller
 {
+
+
     protected $resourceInterface;
     protected $commonInterface;
     public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
+    }
+
+    public function loadEcr(Request $request){
+        // return 'true' ;
+        $data = [];
+        $relations = [];
+        $conditions = [];
+
+        $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+        return DataTables($ecr)
+        ->addColumn('get_actions',function ($row){
+            $result = '';
+            $result .= '<center>';
+            $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+            $result .= '</center>';
+            return $result;
+            return $result;
+        })
+        ->rawColumns(['get_actions'])
+        ->make(true);
+        /*
+          $table->string('ecr_no');
+            $table->string('status')->default('FA')->comment('FA - For Approval | DO- Done');
+            $table->string('approval_status')->default('RB');
+            $table->string('category');
+            $table->string('internal_external');
+            $table->string('customer_name');
+            $table->string('part_no');
+            $table->string('part_name');
+            $table->string('device_name');
+            $table->string('productLine'); //dropdown or session
+            $table->string('section'); //dropdown or session
+            $table->string('customer_ec_no');
+            $table->date('date_of_request');
+        */
+        try {
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
     }
     public function getDropdownMasterByOpt(Request $request){
         try {
@@ -64,7 +106,7 @@ class EcrController extends Controller
                $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
             }
             return 'true';
-            
+
             $ctr = 0; //assigned counter
             //Requested by, Engg, Heads, QA Approval
             return $ecr_approval_types = [

@@ -24,7 +24,7 @@ class CreateEcrsTable extends Migration
             $table->string('part_no');
             $table->string('part_name');
             $table->string('device_name');
-            $table->string('productLine'); //dropdown or session
+            $table->string('product_line'); //dropdown or session
             $table->string('section'); //dropdown or session
             $table->string('customer_ec_no');
             $table->date('date_of_request');

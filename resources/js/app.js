@@ -1,11 +1,11 @@
 import './bootstrap'
 import {createApp} from 'vue'
-// // import IndexComponent from './pages/IndexComponent.vue'
 import AppTemplate from '../js/pages/AppTemplate.vue';
 import { pinia } from '../js/stores';
-// /*
-//  * Vendors/Plugins
-// */
+/*
+ * Vendors/Plugins
+*/
+//npm i @fortawesome/fontawesome-free@5.15.4
 import { library } from '@fortawesome/fontawesome-svg-core'; /* import the fontawesome core | npm i @fortawesome/fontawesome-svg-core*/
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'; /* import font awesome icon component | npm i @fortawesome/vue-fontawesome*/
 import { fas } from '@fortawesome/free-solid-svg-icons'; /* import entire style | npm i @fortawesome/free-solid-svg-icons*/
@@ -17,7 +17,6 @@ import Multiselect from '@vueform/multiselect'; //npm i @vueform/multiselect
 
 // import Multiselect from 'vue-multiselect' // I didnt use this, this is an object type of multiselect
 import '@vueform/multiselect/themes/default.css'; //multiselect css is required
-
 import 'vue-toast-notification/dist/theme-bootstrap.css';
 
 // /* Startbootstrap-sb-admin template */
