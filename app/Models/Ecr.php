@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\EcrApproval;
+use App\Models\PmiApproval;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -20,5 +21,9 @@ class Ecr extends Model
     public function ecr_approvals()
     {
         return $this->hasMany(EcrApproval::class, 'ecrs_id', 'id');
+    }
+    public function pmi_approvals()
+    {
+        return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id');
     }
 }

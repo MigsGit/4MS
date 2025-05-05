@@ -78,6 +78,8 @@ class EcrController extends Controller
         try {
             //TODO: DELETE, Auto Increment Ctrl Number, InsertById
             DB::beginTransaction();
+            return 'true';
+
             $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request){
                 return [
                     'ecrs_id' =>  1,
@@ -90,7 +92,6 @@ class EcrController extends Controller
             foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
                $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
             }
-            return 'true';
 
             $ctr = 0; //assigned counter
             //Requested by, Engg, Heads, QA Approval
@@ -155,6 +156,7 @@ class EcrController extends Controller
             $relations = [
                 'ecr_details',
                 'ecr_approvals',
+                'pmi_approvals',
             ];
             $conditions = [
                 'id' => $request->ecr_id
@@ -162,7 +164,11 @@ class EcrController extends Controller
 
             $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
             $ecrApprovalCollection = collect($ecr[0]->ecr_approvals)->groupBy('type')->toArray();
-            return response()->json(['is_success' => 'true', 'ecr' => $ecr[0] , 'ecrApprovalCollection' => $ecrApprovalCollection]);
+            $pmiApprovalCollection = collect($ecr[0]->pmi_approvals)->groupBy('type')->toArray();
+            return response()->json(['is_success' => 'true', 'ecr' => $ecr[0] ,
+                'ecrApprovalCollection' => $ecrApprovalCollection,
+                'pmiApprovalCollection'=>$pmiApprovalCollection
+            ]);
         } catch (Exception $e) {
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }

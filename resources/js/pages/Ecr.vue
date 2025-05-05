@@ -510,15 +510,15 @@ import { forEach } from 'lodash';
         // modal.SaveEcr.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
-        // await getRapidxUserByIdOpt(qadCheckedByParams);
-        // await getRapidxUserByIdOpt(qadApprovedByInternalParams);
-        // await getRapidxUserByIdOpt(qadApprovedByExternalParams);
+        await getRapidxUserByIdOpt(qadCheckedByParams);
+        await getRapidxUserByIdOpt(qadApprovedByInternalParams);
+        await getRapidxUserByIdOpt(qadApprovedByExternalParams);
         await getRapidxUserByIdOpt(otherDispoRequestedByParams);
         await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
         await getRapidxUserByIdOpt(otherDispoReviewedByParams);
-        // await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
-        // await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
-        // await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
+        await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+        await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+        await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
     })
     const getEcrById = async (ecrId) => {
         let params = {
@@ -541,28 +541,65 @@ import { forEach } from 'lodash';
             frmEcr.value.customerEcNo = ecr.customer_ec_no;
             frmEcr.value.dateOfRequest = ecr.date_of_request;
 
-            let ecrApprovalCollection = data.ecrApprovalCollection;
-            let requestedBy = ecrApprovalCollection.OTRB;
-            let technicalEvaluation = ecrApprovalCollection.OTTE;
-            let reviewedBy = ecrApprovalCollection.OTRVB;
+            //ECR Approval
             frmEcrOtherDispoRows.value = [];
-            // Find the key with the longest array
-            // Loops through all keys using Object.keys()
-            // Compares array lengths using .reduce()
-            // Returns the key and array with the highest length
-            const maxKey = Object.keys(ecrApprovalCollection).reduce((a, b) =>
-                ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
-            );
-            ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
-                frmEcrOtherDispoRows.value.push({
-                    requestedBy: requestedBy[index] === undefined ? 0: requestedBy[index].rapidx_user_id ,
-                    reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
-                    technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
+            frmEcrQadRows.value = [];
+            frmEcrPmiApproverRows.value = [];
+            let ecrApprovalCollection = data.ecrApprovalCollection;
+            let pmiApprovalCollection = data.pmiApprovalCollection;
+
+            if (ecrApprovalCollection.length != 0){
+                let requestedBy = ecrApprovalCollection.OTRB;
+                let technicalEvaluation = ecrApprovalCollection.OTTE;
+                let reviewedBy = ecrApprovalCollection.OTRVB;
+                let qaCheckedBy = ecrApprovalCollection.QA;
+                // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
+                 // Exclude 'QA' from keys
+                const ecrApprovalCollectionFiltered = Object.keys(ecrApprovalCollection).filter(key => key !== 'QA');
+                const maxKey = ecrApprovalCollectionFiltered.reduce((a, b) =>
+                    ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
+                );
+                ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
+                    frmEcrOtherDispoRows.value.push({
+                        requestedBy: requestedBy[index] === undefined ? 0: requestedBy[index].rapidx_user_id ,
+                        reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
+                        technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
+                    });
+                    console.log('pmiApprovalCollection',maxKey);
                 });
-            });
+                //QA Approval
+                if (qaCheckedBy.length != 0){
+                    frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
+                    frmEcrQadRows.value.qadApprovedByInternal = qaCheckedBy[1].rapidx_user_id === undefined ? 0: qaCheckedBy[1].rapidx_user_id; //nmodify
+                    frmEcrQadRows.value.qadApprovedByExternal = qaCheckedBy[2].rapidx_user_id === undefined ? 0: qaCheckedBy[2].rapidx_user_id; //nmodify
+                }
 
+            }
+
+
+
+
+
+            //PMI Approval
+            if (pmiApprovalCollection.length != 0){
+                let preparedBy = pmiApprovalCollection.PB;
+                let checkedBy = pmiApprovalCollection.CB                ;
+                let approvedBy = pmiApprovalCollection.AB                ;
+                // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
+                const maxKey = Object.keys(pmiApprovalCollection).reduce((a, b) =>
+                    pmiApprovalCollection[a].length > pmiApprovalCollection[b].length ? a : b
+                );
+                console.log('pmiApprovalCollection',pmiApprovalCollection[maxKey]);
+
+                pmiApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
+                    frmEcrPmiApproverRows.value.push({
+                        preparedBy: preparedBy[index] === undefined ? 0: preparedBy[index].rapidx_user_id ,
+                        checkedBy: checkedBy[index] === undefined ? 0: checkedBy[index].rapidx_user_id ,
+                        approvedBy:approvedBy[index] === undefined ? 0: approvedBy[index].rapidx_user_id,
+                    });
+                });
+            }
             modal.SaveEcr.show();
-
         });
     }
     const addEcrReasonRows = async () => {
