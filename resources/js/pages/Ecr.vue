@@ -51,7 +51,7 @@
         <template #body>
                 <div class="row">
                     <div class="input flex-nowrap mb-2 input-group-sm">
-                            <input type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
+                            <input  v-model="frmEcr.ecrId" type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
 
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -174,67 +174,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- QA Dispositions -->
-                <div class="card mb-2 h-100">
-                        <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
-                                QA Dispositions
-                            </button>
-                        </h5>
-                    <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
-                        <div class="card-body shadow">
-                            <div class="row">
-                                <!-- style="height: 200px;-->
-                                <div class="col-12">
-                                    <span class="input-group-text" id="addon-wrapping">Agreed By: </span>
-                                </div>
-                                <div class="col-12 overflow-auto" style="height: 300px;">
-                                    <table class="table table-responsive">
-                                        <thead>
-                                            <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col" style="width: 30%;">Senior Supervisor</th>
-                                            <th scope="col" style="width: 30%;">QMS Senior Manager</th>
-                                            <th scope="col" style="width: 30%;">External</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr >
-                                                <td>
-                                                1
-                                                </td>
-                                                <td>
-                                                    <Multiselect
-                                                        v-model="frmEcrQadRows.qadCheckedBy"
-                                                        :close-on-select="true"
-                                                        :searchable="true"
-                                                        :options="ecrVar.optQadCheckedBy"
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <Multiselect
-                                                        v-model="frmEcrQadRows.qadApprovedByInternal"
-                                                        :close-on-select="true"
-                                                        :searchable="true"
-                                                        :options="ecrVar.optQadApprovedByInternal"
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <Multiselect
-                                                        v-model="frmEcrQadRows.qadApprovedByExternal"
-                                                        :close-on-select="true"
-                                                        :searchable="true"
-                                                        :options="ecrVar.optQadApprovedByExternal"
-                                                    />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <!-- Others Disposition -->
                 <div class="card mb-2">
                         <h5 class="mb-0">
@@ -293,6 +232,67 @@
                                                     <button @click="btnRemoveEcrOtherDispoRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <!-- QA Dispositions -->
+                 <div class="card mb-2 h-100">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
+                                QA Dispositions
+                            </button>
+                        </h5>
+                    <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
+                        <div class="card-body shadow">
+                            <div class="row">
+                                <!-- style="height: 200px;-->
+                                <div class="col-12">
+                                    <span class="input-group-text" id="addon-wrapping">Agreed By: </span>
+                                </div>
+                                <div class="col-12 overflow-auto" style="height: 300px;">
+                                    <table class="table table-responsive">
+                                        <thead>
+                                            <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col" style="width: 30%;">Senior Supervisor</th>
+                                            <th scope="col" style="width: 30%;">QMS Senior Manager</th>
+                                            <th scope="col" style="width: 30%;">External</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr >
+                                                <td>
+                                                1
+                                                </td>
+                                                <td>
+                                                    <Multiselect
+                                                        v-model="frmEcrQadRows.qadCheckedBy"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.optQadCheckedBy"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <Multiselect
+                                                        v-model="frmEcrQadRows.qadApprovedByInternal"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.optQadApprovedByInternal"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <Multiselect
+                                                        v-model="frmEcrQadRows.qadApprovedByExternal"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.optQadApprovedByExternal"
+                                                    />
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -386,6 +386,7 @@
     const { axiosSaveData } = useForm(); // Call the useFetch function
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
+import { forEach } from 'lodash';
     DataTable.use(DataTablesCore)
     //composables export function
     const {
@@ -397,19 +398,21 @@
         frmEcrPmiApproverRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
+        axiosFetchData
     } = ecr();
     //ref state
     const frmEcr = ref({
-        ecrNo: '1',
-        category: '1',
-        customerName: 'test',
-        partName: 'test',
-        productLine: 'test',
-        section: 'test',
-        internalExternal: '2',
-        partNumber: 'test',
-        deviceName: 'test',
-        customerEcNo: 'test',
+        ecrId: '',
+        ecrNo: '',
+        category: '',
+        customerName: '',
+        partName: '',
+        productLine: '',
+        section: '',
+        internalExternal: '',
+        partNumber: '',
+        deviceName: '',
+        customerEcNo: '',
         dateOfRequest: '',
     });
     const modalSaveEcr = ref(null);
@@ -419,6 +422,15 @@
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
+            createdCell(cell){
+                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
+                if(btnGetEcrId != null){
+                    btnGetEcrId.addEventListener('click',function(){
+                        let ecrId = this.getAttribute('ecr-id');
+                        getEcrById(ecrId);
+                    });
+                }
+            }
         } ,
         {   data: 'status'} ,
         {   data: 'ecr_no'} ,
@@ -438,13 +450,13 @@
         tblReference : 'ecr_doc',
         globalVar: ecrVar.optDescriptionOfChange,
         formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
-        selectedVal: '',
+        selectedVal: 0,
     };
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
         formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
-        selectedVal: '',
+        selectedVal: 0,
     };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
@@ -498,32 +510,75 @@
         // modal.SaveEcr.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
-        await getRapidxUserByIdOpt(qadCheckedByParams);
+        // await getRapidxUserByIdOpt(qadCheckedByParams);
         // await getRapidxUserByIdOpt(qadApprovedByInternalParams);
         // await getRapidxUserByIdOpt(qadApprovedByExternalParams);
-        // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
-        // await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
-        // await getRapidxUserByIdOpt(otherDispoReviewedByParams);
+        await getRapidxUserByIdOpt(otherDispoRequestedByParams);
+        await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+        await getRapidxUserByIdOpt(otherDispoReviewedByParams);
         // await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
         // await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
         // await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
     })
+    const getEcrById = async (ecrId) => {
+        let params = {
+            ecr_id : ecrId
+        }
+        axiosFetchData(params,'api/get_ecr_by_id',function(response){
+            let data = response.data;
+            let ecr = data.ecr;
 
+            frmEcr.value.ecrId =ecr.ecrs_id;
+            frmEcr.value.ecrNo =ecr.ecr_no;;
+            frmEcr.value.category = ecr.category;
+            frmEcr.value.customerName = ecr.customer_name;
+            frmEcr.value.partNumber = ecr.part_no;
+            frmEcr.value.partName = ecr.part_name;
+            frmEcr.value.productLine = ecr.product_line;
+            frmEcr.value.section = ecr.section;
+            frmEcr.value.internalExternal = ecr.internal_external;
+            frmEcr.value.deviceName = ecr.device_name;
+            frmEcr.value.customerEcNo = ecr.customer_ec_no;
+            frmEcr.value.dateOfRequest = ecr.date_of_request;
+
+            let ecrApprovalCollection = data.ecrApprovalCollection;
+            let requestedBy = ecrApprovalCollection.OTRB;
+            let technicalEvaluation = ecrApprovalCollection.OTTE;
+            let reviewedBy = ecrApprovalCollection.OTRVB;
+            frmEcrOtherDispoRows.value = [];
+            // Find the key with the longest array
+            // Loops through all keys using Object.keys()
+            // Compares array lengths using .reduce()
+            // Returns the key and array with the highest length
+            const maxKey = Object.keys(ecrApprovalCollection).reduce((a, b) =>
+                ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
+            );
+            ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
+                frmEcrOtherDispoRows.value.push({
+                    requestedBy: requestedBy[index] === undefined ? 0: requestedBy[index].rapidx_user_id ,
+                    reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
+                    technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
+                });
+            });
+
+            modal.SaveEcr.show();
+
+        });
+    }
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
             descriptionOfChange: '',
             reasonOfChange: '',
         });
     }
-
     const removeEcrReasonRows = async (index) => {
         frmEcrReasonRows.value.splice(index,1);
     }
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({
-            requestedBy: [],
-            technicalEvaluation: [],
-            reviewedBy: [],
+            requestedBy: '',
+            technicalEvaluation: '',
+            reviewedBy: '',
         });
     }
     const btnRemoveEcrOtherDispoRows = async (index) => {

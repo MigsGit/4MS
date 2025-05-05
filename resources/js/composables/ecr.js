@@ -98,7 +98,7 @@ export default function ecr()
                     }
                 }),
             );
-            params.formModel.value = 564; //Make sure the data type is correct | String or Array
+            params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
         });
     }
 
@@ -111,5 +111,6 @@ export default function ecr()
         frmEcrPmiApproverRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
+        axiosFetchData,
     };
 }

@@ -47,21 +47,6 @@ class EcrController extends Controller
         })
         ->rawColumns(['get_actions'])
         ->make(true);
-        /*
-          $table->string('ecr_no');
-            $table->string('status')->default('FA')->comment('FA - For Approval | DO- Done');
-            $table->string('approval_status')->default('RB');
-            $table->string('category');
-            $table->string('internal_external');
-            $table->string('customer_name');
-            $table->string('part_no');
-            $table->string('part_name');
-            $table->string('device_name');
-            $table->string('productLine'); //dropdown or session
-            $table->string('section'); //dropdown or session
-            $table->string('customer_ec_no');
-            $table->date('date_of_request');
-        */
         try {
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
@@ -161,6 +146,25 @@ class EcrController extends Controller
         } catch (Exception $e) {
             DB::rollback();
             throw $e;
+        }
+    }
+    public function getEcrById(Request $request){
+        try {
+            // return 'true' ;
+            $data = [];
+            $relations = [
+                'ecr_details',
+                'ecr_approvals',
+            ];
+            $conditions = [
+                'id' => $request->ecr_id
+            ];
+
+            $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+            $ecrApprovalCollection = collect($ecr[0]->ecr_approvals)->groupBy('type')->toArray();
+            return response()->json(['is_success' => 'true', 'ecr' => $ecr[0] , 'ecrApprovalCollection' => $ecrApprovalCollection]);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
 }

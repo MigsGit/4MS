@@ -10,7 +10,7 @@
                     <div class="modal-body">
                         <slot name="body"></slot>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer justify-content-between">
                         <slot name="footer"></slot>
                     </div>
                 </form>
