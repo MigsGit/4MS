@@ -71,26 +71,42 @@ class EcrController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
-    public function loadEcrDetails(Request $request){
+    public function loadEcrDetailsByEcrId(Request $request){
         // return 'true' ;
 
         try {
             $data = [];
-            $relations = [];
+            $relations = [
+                'dropdown_master_detail_description_of_change',
+                'dropdown_master_detail_reason_of_change',
+            ];
             $conditions = [
-
+                'ecrs_id' => $request->ecr_id
             ];
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-details-id='".$row->id."' id='btnGetEcrDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
                 $result .= '</center>';
                 return $result;
+            })
+            ->addColumn('reason_of_change',function ($row){
+                $result = '';
+                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details;
                 return $result;
             })
-            ->rawColumns(['get_actions'])
+            ->addColumn('description_of_change',function ($row){
+                $result = '';
+                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details;
+                return $result;
+            })
+            ->rawColumns([
+                'get_actions',
+                'reason_of_change',
+                'description_of_change',
+            ])
             ->make(true);
         } catch (Exception $e) {
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);

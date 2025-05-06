@@ -47,7 +47,7 @@
             </div>
         </div>
     </div>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Ecr Detail" @add-event="" ref="modalSaveMan">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Man" @add-event="" ref="modalSaveMan">
         <template #body>
             <div class="row">
                 <div class="card">
@@ -55,9 +55,9 @@
                         <DataTable
                         width="100%" cellspacing="0"
                         class="table table-bordered mt-2"
-                        ref="tblEcrByStatus"
+                        ref="tblEcrDetails"
                         :columns="tblEcrDetailColumns"
-                        ajax="api/load_ecr_details"
+                        ajax="api/load_ecr_details_by_ecr_id"
                         :options="{
                             serverSide: true, //Serverside true will load the network
                             columnDefs:[
@@ -81,12 +81,13 @@
                     </div>
                 </div>
             </div>
+            TODO: Add Man,Man Details,Special Acceptance
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man" @add-event="" ref="modalSaveEcrDetail">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="" ref="modalSaveEcrDetail">
         <template #body>
             <div class="row">
                 <div class="input flex-nowrap mb-2 input-group-sm">
@@ -169,6 +170,7 @@
     window.DataTable = DataTable.use(DataTablesCore)
 
     const tblEcrByStatus = ref(null);
+    const tblEcrDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
     const modal = {}
@@ -181,8 +183,9 @@
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
-                        // let ecrId = this.getAttribute('ecr-id');
-
+                        let ecrId = this.getAttribute('ecr-id');
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
+                        modal.SaveMan.show();
                     });
                 }
             }
@@ -205,11 +208,11 @@
             orderable: false,
             searchable: false,
             createdCell(cell){
-                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
-                if(btnGetEcrId != null){
-                    btnGetEcrId.addEventListener('click',function(){
-                        // let ecrId = this.getAttribute('ecr-id');
-
+                let btnGetEcrDetailsId = cell.querySelector('#btnGetEcrDetailsId');
+                if(btnGetEcrDetailsId != null){
+                    btnGetEcrDetailsId.addEventListener('click',function(){
+                        let ecrDetailsId = this.getAttribute('ecr-details-id');
+                        modal.SaveEcrDetail.show();
                     });
                 }
             }
@@ -227,8 +230,8 @@
     onMounted( async ()=>{
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
-        modal.SaveMan.show();
-        // modal.SaveEcrDetail.show()
+        // modal.SaveMan.show();
+        // modal.SaveEcrDetail.show();
         // tblEcrByStatus.value.dt.ajax.url("api/load_ecr_by_status?status="+'AP').draw()
     })
 </script>
