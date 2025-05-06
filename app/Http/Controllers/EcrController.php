@@ -71,6 +71,31 @@ class EcrController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
+    public function loadEcrDetails(Request $request){
+        // return 'true' ;
+
+        try {
+            $data = [];
+            $relations = [];
+            $conditions = [
+
+            ];
+            $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
+            return DataTables($ecrDetail)
+            ->addColumn('get_actions',function ($row){
+                $result = '';
+                $result .= '<center>';
+                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= '</center>';
+                return $result;
+                return $result;
+            })
+            ->rawColumns(['get_actions'])
+            ->make(true);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
     public function getDropdownMasterByOpt(Request $request){
         try {
             $data = [];

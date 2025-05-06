@@ -52,8 +52,3 @@
     // Expose modal functions and ref to the parent
     defineExpose({ showModal, hideModal, modalRef });
 </script>
-
-<style lang="scss" scoped>
-
-
-</style>

@@ -33,6 +33,7 @@ Route::controller(EcrController::class)->group(function () {
     Route::post('save_ecr', 'saveEcr')->name('save_ecr');
     Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
     Route::get('load_ecr', 'loadEcr')->name('load_ecr');
-    Route::get('load_ecr_by_status', 'loadEcrByStatus')->name('loadEcrByStatus');
+    Route::get('load_ecr_by_status', 'loadEcrByStatus')->name('load_ecr_by_status');
+    Route::get('load_ecr_details', 'loadEcrDetails')->name('load_ecr_details');
     Route::get('get_ecr_by_id', 'getEcrById')->name('get_ecr_by_id');
 });
