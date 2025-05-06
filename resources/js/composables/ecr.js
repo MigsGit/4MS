@@ -8,8 +8,6 @@ export default function ecr()
     const modal = {
         SaveEcr : null,
     };
-
-
     //Reactive State
     const ecrVar = reactive({
         optDescriptionOfChange: [],
@@ -28,6 +26,20 @@ export default function ecr()
         approvedBy: [],
     });
     //Ref State
+    const frmEcr = ref({
+        ecrId: '',
+        ecrNo: '',
+        category: '',
+        customerName: '',
+        partName: '',
+        productLine: '',
+        section: '',
+        internalExternal: '',
+        partNumber: '',
+        deviceName: '',
+        customerEcNo: '',
+        dateOfRequest: '',
+    });
     const frmEcrReasonRows = ref([
         {
             descriptionOfChange: '',
@@ -103,10 +115,97 @@ export default function ecr()
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
         });
     }
+    const getEcrById = async (ecrId) => {
+        let params = {
+            ecr_id : ecrId
+        }
+        axiosFetchData(params,'api/get_ecr_by_id',function(response){
+            let data = response.data;
+            let ecr = data.ecr;
+
+            frmEcr.value.ecrId =ecr.ecrs_id;
+            frmEcr.value.ecrNo =ecr.ecr_no;;
+            frmEcr.value.category = ecr.category;
+            frmEcr.value.customerName = ecr.customer_name;
+            frmEcr.value.partNumber = ecr.part_no;
+            frmEcr.value.partName = ecr.part_name;
+            frmEcr.value.productLine = ecr.product_line;
+            frmEcr.value.section = ecr.section;
+            frmEcr.value.internalExternal = ecr.internal_external;
+            frmEcr.value.deviceName = ecr.device_name;
+            frmEcr.value.customerEcNo = ecr.customer_ec_no;
+            frmEcr.value.dateOfRequest = ecr.date_of_request;
+
+            //Multiselect
+            frmEcrReasonRows.value = [];
+            frmEcrOtherDispoRows.value = [];
+            frmEcrQadRows.value = [];
+            frmEcrPmiApproverRows.value = [];
+            let ecrApprovalCollection = data.ecrApprovalCollection;
+            let pmiApprovalCollection = data.pmiApprovalCollection;
+            let ecrDetails = ecr.ecr_details;
+            //Reasons
+            if (ecrDetails.length != 0){
+                ecrDetails.forEach((ecrDetailsEl,index) =>{
+                    frmEcrReasonRows.value.push({
+                        descriptionOfChange : ecrDetailsEl.description_of_change,
+                        reasonOfChange : ecrDetailsEl.reason_of_change
+                    });
+                })
+            }
+            //ECR Approval
+            if (ecrApprovalCollection.length != 0){
+                let requestedBy = ecrApprovalCollection.OTRB;
+                let technicalEvaluation = ecrApprovalCollection.OTTE;
+                let reviewedBy = ecrApprovalCollection.OTRVB;
+                let qaCheckedBy = ecrApprovalCollection.QA;
+                // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
+                 // Exclude 'QA' from keys
+                const ecrApprovalCollectionFiltered = Object.keys(ecrApprovalCollection).filter(key => key !== 'QA');
+                const maxKey = ecrApprovalCollectionFiltered.reduce((a, b) =>
+                    ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
+                );
+                ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
+                    frmEcrOtherDispoRows.value.push({
+                        requestedBy: requestedBy[index] === undefined ? 0: requestedBy[index].rapidx_user_id ,
+                        reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
+                        technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
+                    });
+                });
+                //QA Approval
+                if (qaCheckedBy.length != 0){
+                    frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
+                    frmEcrQadRows.value.qadApprovedByInternal = qaCheckedBy[1].rapidx_user_id === undefined ? 0: qaCheckedBy[1].rapidx_user_id; //nmodify
+                    frmEcrQadRows.value.qadApprovedByExternal = qaCheckedBy[2].rapidx_user_id === undefined ? 0: qaCheckedBy[2].rapidx_user_id; //nmodify
+                }
+
+            }
+            //PMI Approval
+            if (pmiApprovalCollection.length != 0){
+                let preparedBy = pmiApprovalCollection.PB;
+                let checkedBy = pmiApprovalCollection.CB                ;
+                let approvedBy = pmiApprovalCollection.AB                ;
+                // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
+                const maxKey = Object.keys(pmiApprovalCollection).reduce((a, b) =>
+                    pmiApprovalCollection[a].length > pmiApprovalCollection[b].length ? a : b
+                );
+
+                pmiApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
+                    frmEcrPmiApproverRows.value.push({
+                        preparedBy: preparedBy[index] === undefined ? 0: preparedBy[index].rapidx_user_id ,
+                        checkedBy: checkedBy[index] === undefined ? 0: checkedBy[index].rapidx_user_id ,
+                        approvedBy:approvedBy[index] === undefined ? 0: approvedBy[index].rapidx_user_id,
+                    });
+                });
+            }
+            modal.SaveEcr.show();
+        });
+    }
 
     return {
         modal,
         ecrVar,
+        frmEcr,
         frmEcrReasonRows,
         frmEcrQadRows,
         frmEcrOtherDispoRows,
@@ -114,5 +213,6 @@ export default function ecr()
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,
+        getEcrById,
     };
 }

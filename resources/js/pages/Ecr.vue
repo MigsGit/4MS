@@ -162,7 +162,7 @@
                     </div>
                 </div>
                 <!-- Description of Change / Reason for Change -->
-                <div class="card mb-2">
+                <!-- <div class="card mb-2">
                     <h5 class="mb-0">
                         <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
                             Description of Change / Reason for Change
@@ -220,7 +220,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
+                <EcrChangeComponent :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+                </EcrChangeComponent>
                 <!-- Others Disposition -->
                 <div class="card mb-2">
                         <h5 class="mb-0">
@@ -428,40 +430,29 @@
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
+    import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import ecr from '../../js/composables/ecr.js';
     import useForm from '../../js/composables/utils/useForm.js'
-    const { axiosSaveData } = useForm(); // Call the useFetch function
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
-    import { forEach } from 'lodash';
-    DataTable.use(DataTablesCore)
+    DataTable.use(DataTablesCore);
+
+    const { axiosSaveData } = useForm(); // Call the useFetch function
     //composables export function
     const {
         modal,
         ecrVar,
+        frmEcr,
         frmEcrReasonRows,
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
-        axiosFetchData
+        axiosFetchData,
+        getEcrById,
     } = ecr();
     //ref state
-    const frmEcr = ref({
-        ecrId: '',
-        ecrNo: '',
-        category: '',
-        customerName: '',
-        partName: '',
-        productLine: '',
-        section: '',
-        internalExternal: '',
-        partNumber: '',
-        deviceName: '',
-        customerEcNo: '',
-        dateOfRequest: '',
-    });
     const modalSaveEcr = ref(null);
     const tblEcr = ref(null);
     const tblEcrColumns = [
@@ -566,94 +557,7 @@
         await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
         await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
     })
-    const getEcrById = async (ecrId) => {
-        let params = {
-            ecr_id : ecrId
-        }
-        axiosFetchData(params,'api/get_ecr_by_id',function(response){
-            let data = response.data;
-            let ecr = data.ecr;
-
-            frmEcr.value.ecrId =ecr.ecrs_id;
-            frmEcr.value.ecrNo =ecr.ecr_no;;
-            frmEcr.value.category = ecr.category;
-            frmEcr.value.customerName = ecr.customer_name;
-            frmEcr.value.partNumber = ecr.part_no;
-            frmEcr.value.partName = ecr.part_name;
-            frmEcr.value.productLine = ecr.product_line;
-            frmEcr.value.section = ecr.section;
-            frmEcr.value.internalExternal = ecr.internal_external;
-            frmEcr.value.deviceName = ecr.device_name;
-            frmEcr.value.customerEcNo = ecr.customer_ec_no;
-            frmEcr.value.dateOfRequest = ecr.date_of_request;
-
-            //Multiselect
-            frmEcrReasonRows.value = [];
-            frmEcrOtherDispoRows.value = [];
-            frmEcrQadRows.value = [];
-            frmEcrPmiApproverRows.value = [];
-            let ecrApprovalCollection = data.ecrApprovalCollection;
-            let pmiApprovalCollection = data.pmiApprovalCollection;
-            let ecrDetails = ecr.ecr_details;
-            //Reasons
-            if (ecrDetails.length != 0){
-                ecrDetails.forEach((ecrDetailsEl,index) =>{
-                    console.log('description_of_change',ecrDetailsEl.description_of_change);
-                    frmEcrReasonRows.value.push({
-                        descriptionOfChange : ecrDetailsEl.description_of_change,
-                        reasonOfChange : ecrDetailsEl.reason_of_change
-                    });
-                })
-            }
-            //ECR Approval
-            if (ecrApprovalCollection.length != 0){
-                let requestedBy = ecrApprovalCollection.OTRB;
-                let technicalEvaluation = ecrApprovalCollection.OTTE;
-                let reviewedBy = ecrApprovalCollection.OTRVB;
-                let qaCheckedBy = ecrApprovalCollection.QA;
-                // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
-                 // Exclude 'QA' from keys
-                const ecrApprovalCollectionFiltered = Object.keys(ecrApprovalCollection).filter(key => key !== 'QA');
-                const maxKey = ecrApprovalCollectionFiltered.reduce((a, b) =>
-                    ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
-                );
-                ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
-                    frmEcrOtherDispoRows.value.push({
-                        requestedBy: requestedBy[index] === undefined ? 0: requestedBy[index].rapidx_user_id ,
-                        reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
-                        technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
-                    });
-                });
-                //QA Approval
-                if (qaCheckedBy.length != 0){
-                    frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
-                    frmEcrQadRows.value.qadApprovedByInternal = qaCheckedBy[1].rapidx_user_id === undefined ? 0: qaCheckedBy[1].rapidx_user_id; //nmodify
-                    frmEcrQadRows.value.qadApprovedByExternal = qaCheckedBy[2].rapidx_user_id === undefined ? 0: qaCheckedBy[2].rapidx_user_id; //nmodify
-                }
-
-            }
-            //PMI Approval
-            if (pmiApprovalCollection.length != 0){
-                let preparedBy = pmiApprovalCollection.PB;
-                let checkedBy = pmiApprovalCollection.CB                ;
-                let approvedBy = pmiApprovalCollection.AB                ;
-                // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
-                const maxKey = Object.keys(pmiApprovalCollection).reduce((a, b) =>
-                    pmiApprovalCollection[a].length > pmiApprovalCollection[b].length ? a : b
-                );
-                console.log('pmiApprovalCollection',pmiApprovalCollection[maxKey]);
-
-                pmiApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
-                    frmEcrPmiApproverRows.value.push({
-                        preparedBy: preparedBy[index] === undefined ? 0: preparedBy[index].rapidx_user_id ,
-                        checkedBy: checkedBy[index] === undefined ? 0: checkedBy[index].rapidx_user_id ,
-                        approvedBy:approvedBy[index] === undefined ? 0: approvedBy[index].rapidx_user_id,
-                    });
-                });
-            }
-            modal.SaveEcr.show();
-        });
-    }
+    //Functions
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
             descriptionOfChange: '',
@@ -745,7 +649,7 @@
                 formData.append(key, value)
             );
         }
-
+        //TODO: Save Successfully
         axiosSaveData(formData,'api/save_ecr', (response) =>{
             // tblEdocs.value.dt.draw();
             console.log(response);

@@ -93,7 +93,6 @@
                 <div class="input flex-nowrap mb-2 input-group-sm">
                         <input   type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
                 </div>
-
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">Customer Name:</span>
                     <input  type="text" class="form-control form-control" aria-describedby="addon-wrapping">
@@ -154,6 +153,66 @@
                     </div>
                 </div>
             </div>
+                <!-- Description of Change / Reason for Change -->
+                <div class="card mb-2">
+                    <h5 class="mb-0">
+                        <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                            Description of Change / Reason for Change
+                        </button>
+                    </h5>
+                    <div id="collapse1" class="collapse" data-bs-parent="#accordionMain">
+                        <div class="card-body shadow">
+                            <div class="row">
+                                <div class="col-12">
+                                    <button @click="addEcrReasonRows"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button>
+                                </div>
+                                <div class="col-12 overflow-auto" style="height: 300px;">
+                                    <table class="table table-responsive">
+                                        <thead>
+                                            <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col" style="width: 60%;">Description of Change</th>
+                                            <th scope="col" style="width: 60%;">Reason of Change</th>
+                                            <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <tr v-for="(frmEcrReasonRow, index) in frmEcrReasonRows" :key="frmEcrReasonRow.index">
+                                                <td>
+                                                    {{index+1}}
+                                                </td>
+                                                <td>
+                                                    <Multiselect
+                                                        v-model="frmEcrReasonRow.descriptionOfChange"
+                                                        :options="ecrVar.optDescriptionOfChange"
+                                                        placeholder="Select an option"
+                                                        :searchable="true"
+                                                        :close-on-select="true"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <Multiselect
+                                                        v-model="frmEcrReasonRow.reasonOfChange"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.optReasonOfChange"
+                                                        placeholder="Select an option"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <button @click="removeEcrReasonRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                        <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
