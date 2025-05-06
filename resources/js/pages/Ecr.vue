@@ -26,7 +26,7 @@
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
-                                    // {orderable:false,target:[0]}
+                                    {orderable:false,target:[0]}
                                 ]
                             }"
                         >
@@ -66,7 +66,7 @@
                                 :options="{
                                     serverSide: true, //Serverside true will load the network
                                     columnDefs:[
-                                        // {orderable:false,target:[0]}
+                                        {orderable:false,target:[0]}
                                     ]
                                 }"
                             >
