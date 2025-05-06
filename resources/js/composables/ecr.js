@@ -70,7 +70,7 @@ export default function ecr()
             */
             params.globalVar.splice(0, params.globalVar.length,
                 { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
-                // { value: 0, label: 'N/A' }, // Push "N/A" option at the start
+                { value: 0, label: 'N/A' }, // Push "N/A" option at the start
                     ...dropdownMasterByOpt.map((value) => {
                     return {
                         value: value.id,
@@ -78,6 +78,8 @@ export default function ecr()
                     }
                 }),
             );
+            console.log('selectedVal',params.selectedVal);
+
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
         });
     }

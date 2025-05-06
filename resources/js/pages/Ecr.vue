@@ -21,7 +21,7 @@
                             width="100%" cellspacing="0"
                             class="table mt-2"
                             ref="tblEcr"
-                            :columns="columns"
+                            :columns="tblEcrColumns"
                             ajax="api/load_ecr"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
@@ -61,7 +61,7 @@
                                 width="100%" cellspacing="0"
                                 class="table mt-2"
                                 ref="tblEcr"
-                                :columns="columns"
+                                :columns="tblEcrColumns"
                                 ajax="api/load_ecr"
                                 :options="{
                                     serverSide: true, //Serverside true will load the network
@@ -464,8 +464,7 @@
     });
     const modalSaveEcr = ref(null);
     const tblEcr = ref(null);
-    // <font-awesome-icon class='nav-icon' icon='fas fa-trash' />
-    const columns = [
+    const tblEcrColumns = [
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
@@ -497,13 +496,13 @@
         tblReference : 'ecr_doc',
         globalVar: ecrVar.optDescriptionOfChange,
         formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
-        selectedVal: 0,
+        selectedVal: '',
     };
     const reasonOfChangeParams = {
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
         formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
-        selectedVal: 0,
+        selectedVal: '',
     };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
@@ -588,13 +587,25 @@
             frmEcr.value.customerEcNo = ecr.customer_ec_no;
             frmEcr.value.dateOfRequest = ecr.date_of_request;
 
-            //ECR Approval
+            //Multiselect
+            frmEcrReasonRows.value = [];
             frmEcrOtherDispoRows.value = [];
             frmEcrQadRows.value = [];
             frmEcrPmiApproverRows.value = [];
             let ecrApprovalCollection = data.ecrApprovalCollection;
             let pmiApprovalCollection = data.pmiApprovalCollection;
-
+            let ecrDetails = ecr.ecr_details;
+            //Reasons
+            if (ecrDetails.length != 0){
+                ecrDetails.forEach((ecrDetailsEl,index) =>{
+                    console.log('description_of_change',ecrDetailsEl.description_of_change);
+                    frmEcrReasonRows.value.push({
+                        descriptionOfChange : ecrDetailsEl.description_of_change,
+                        reasonOfChange : ecrDetailsEl.reason_of_change
+                    });
+                })
+            }
+            //ECR Approval
             if (ecrApprovalCollection.length != 0){
                 let requestedBy = ecrApprovalCollection.OTRB;
                 let technicalEvaluation = ecrApprovalCollection.OTTE;
