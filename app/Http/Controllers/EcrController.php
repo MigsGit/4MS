@@ -13,15 +13,8 @@ use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\EcrDetailRequest;
-
-
-
-
-
 class EcrController extends Controller
 {
-
-
     protected $resourceInterface;
     protected $commonInterface;
     public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
@@ -35,6 +28,31 @@ class EcrController extends Controller
         $relations = [];
         $conditions = [];
 
+        $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+        return DataTables($ecr)
+        ->addColumn('get_actions',function ($row){
+            $result = '';
+            $result .= '<center>';
+            $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+            $result .= '</center>';
+            return $result;
+            return $result;
+        })
+        ->rawColumns(['get_actions'])
+        ->make(true);
+        try {
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
+    public function loadEcrByStatus(Request $request){
+        // return 'true' ;
+        $data = [];
+        $relations = [];
+        $conditions = [
+            'status' => $request->status
+        ];
         $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
         return DataTables($ecr)
         ->addColumn('get_actions',function ($row){

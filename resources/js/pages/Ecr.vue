@@ -2,47 +2,94 @@
     <div class="container-fluid px-4">
         <h4 class="mt-4">ENGINEERING CHANGE REQUEST</h4>
         <div class="card mt-5"  style="width: 100%;">
-            <div class="card-body overflow-auto">
-                <div class="container-fluid px-4">
-                    <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Engineering Change Request</li>
-                    </ol>
-                    <div class="table-responsive">
-                    <!-- id="dataTable" -->
-                    <!-- <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    </table> -->
-                    <DataTable
-                        width="100%" cellspacing="0"
-                        class="table table-bordered mt-2"
-                        ref="tblEcr"
-                        :columns="columns"
-                        ajax="api/load_ecr"
-                        :options="{
-                            serverSide: true, //Serverside true will load the network
-                            columnDefs:[
-                                // {orderable:false,target:[0]}
-                            ]
-                        }"
-                    >
-                        <thead>
-                            <tr>
-                                <th>Action</th>
-                                <th>Status</th>
-                                <th>ECR Ctrl No.</th>
-                                <th>Category</th>
-                                <th>Internal or External</th>
-                                <th>Customer Name</th>
-                                <th>Part Number</th>
-                                <th>Part Name</th>
-                                <th>Device Name</th>
-                                <th>Product Line</th>
-                                <th>Section</th>
-                                <th>Customer Ec. No</th>
-                                <th>Date Of Request</th>
-                            </tr>
-                        </thead>
-                    </DataTable>
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active .menuTab" id="Pending-tab" data-bs-toggle="tab" href="#menu1" role="tab" aria-controls="menu1" aria-selected="true">For Approval</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link .menuTab" id="Completed-tab" data-bs-toggle="tab" href="#menu2" role="tab" aria-controls="menu2" aria-selected="false">QA Approval</a>
+                </li>
+            </ul>
+            <div class="tab-content mt-2" id="myTabContent">
+                <div class="tab-pane fade show active" id="menu1" role="tabpanel" aria-labelledby="menu1-tab">
+                    <div class="container-fluid px-4">
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Engineering Change Request</li>
+                        </ol>
+                        <div class="table-responsive">
+                        <DataTable
+                            width="100%" cellspacing="0"
+                            class="table mt-2"
+                            ref="tblEcr"
+                            :columns="columns"
+                            ajax="api/load_ecr"
+                            :options="{
+                                serverSide: true, //Serverside true will load the network
+                                columnDefs:[
+                                    // {orderable:false,target:[0]}
+                                ]
+                            }"
+                        >
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                    <th>ECR Ctrl No.</th>
+                                    <th>Category</th>
+                                    <th>Internal or External</th>
+                                    <th>Customer Name</th>
+                                    <th>Part Number</th>
+                                    <th>Part Name</th>
+                                    <th>Device Name</th>
+                                    <th>Product Line</th>
+                                    <th>Section</th>
+                                    <th>Customer Ec. No</th>
+                                    <th>Date Of Request</th>
+                                </tr>
+                            </thead>
+                        </DataTable>
+                    </div>
+                    </div>
                 </div>
+                <div class="tab-pane fade" id="menu2" role="tabpanel" aria-labelledby="menu1-tab">
+                    <div class="container-fluid px-4">
+                            <ol class="breadcrumb mb-4">
+                                <li class="breadcrumb-item active">Engineering Change Request 2</li>
+                            </ol>
+                            <div class="table-responsive">
+                            <DataTable
+                                width="100%" cellspacing="0"
+                                class="table mt-2"
+                                ref="tblEcr"
+                                :columns="columns"
+                                ajax="api/load_ecr"
+                                :options="{
+                                    serverSide: true, //Serverside true will load the network
+                                    columnDefs:[
+                                        // {orderable:false,target:[0]}
+                                    ]
+                                }"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Status</th>
+                                        <th>ECR Ctrl No.</th>
+                                        <th>Category</th>
+                                        <th>Internal or External</th>
+                                        <th>Customer Name</th>
+                                        <th>Part Number</th>
+                                        <th>Part Name</th>
+                                        <th>Device Name</th>
+                                        <th>Product Line</th>
+                                        <th>Section</th>
+                                        <th>Customer Ec. No</th>
+                                        <th>Date Of Request</th>
+                                    </tr>
+                                </thead>
+                            </DataTable>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -386,7 +433,7 @@
     const { axiosSaveData } = useForm(); // Call the useFetch function
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
-import { forEach } from 'lodash';
+    import { forEach } from 'lodash';
     DataTable.use(DataTablesCore)
     //composables export function
     const {
@@ -565,7 +612,6 @@ import { forEach } from 'lodash';
                         reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
                         technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
                     });
-                    console.log('pmiApprovalCollection',maxKey);
                 });
                 //QA Approval
                 if (qaCheckedBy.length != 0){
@@ -575,11 +621,6 @@ import { forEach } from 'lodash';
                 }
 
             }
-
-
-
-
-
             //PMI Approval
             if (pmiApprovalCollection.length != 0){
                 let preparedBy = pmiApprovalCollection.PB;

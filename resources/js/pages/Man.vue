@@ -14,9 +14,9 @@
                     <DataTable
                         width="100%" cellspacing="0"
                         class="table table-bordered mt-2"
-                        ref="tblEcr"
+                        ref="tblEcrByStatus"
                         :columns="columns"
-                        ajax="api/load_ecr"
+                        ajax="api/load_ecr_by_status?status=AP"
                         :options="{
                             serverSide: true, //Serverside true will load the network
                             columnDefs:[
@@ -66,11 +66,15 @@
 </template>
 
 <script setup>
+    import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
-    DataTable.use(DataTablesCore)
-const columns = [
+    window.DataTable = DataTable.use(DataTablesCore)
+
+    const tblEcrByStatus = ref(null);
+
+    const columns = [
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
@@ -97,6 +101,10 @@ const columns = [
         {   data: 'customer_ec_no'} ,
         {   data: 'date_of_request'} ,
     ];
+
+    onMounted( async ()=>{
+        // tblEcrByStatus.value.dt.ajax.url("api/load_ecr_by_status?status="+'AP').draw()
+    })
 </script>
 
 

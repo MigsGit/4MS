@@ -28,9 +28,9 @@ import "startbootstrap-sb-admin/dist/js/datatables-simple-demo.js"
 /* Local JS extensions */
 import router from "../js/routes";
 
-import DataTable from 'datatables.net-vue3';
-import DataTablesCore from 'datatables.net-bs5';
-DataTable.use(DataTablesCore)
+// import DataTable from 'datatables.net-vue3';
+// import DataTablesCore from 'datatables.net-bs5';
+// DataTable.use(DataTablesCore)
 
 createApp(AppTemplate)
 .use(pinia)
