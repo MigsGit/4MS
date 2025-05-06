@@ -1,74 +1,87 @@
 import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
 
-export default function ecr()
-{
-    const { axiosFetchData } = useFetch(); // Call  the useFetch function
-    //Constant Object
-    const modal = {
-        SaveEcr : null,
-    };
-    //Reactive State
-    const ecrVar = reactive({
-        optDescriptionOfChange: [],
-        optReasonOfChange: [],
+const { axiosFetchData } = useFetch(); // Call  the useFetch function
+//Constant Object
+const modal = {
+    // SaveEcr : null,
+};
+//Reactive State
+const ecrVar = reactive({
+    optDescriptionOfChange: [],
+    optReasonOfChange: [],
 
-        optQadCheckedBy: [],
-        optQadApprovedByInternal: [],
-        optQadApprovedByExternal: [],
+    optQadCheckedBy: [],
+    optQadApprovedByInternal: [],
+    optQadApprovedByExternal: [],
 
-        requestedBy: [],
-        technicalEvaluation: [],
-        reviewedBy: [],
+    requestedBy: [],
+    technicalEvaluation: [],
+    reviewedBy: [],
 
-        preparedBy: [],
-        checkedBy: [],
-        approvedBy: [],
-    });
-    //Ref State
-    const frmEcr = ref({
-        ecrId: '',
-        ecrNo: '',
-        category: '',
-        customerName: '',
-        partName: '',
-        productLine: '',
-        section: '',
-        internalExternal: '',
-        partNumber: '',
-        deviceName: '',
-        customerEcNo: '',
-        dateOfRequest: '',
-    });
-    const frmEcrReasonRows = ref([
-        {
-            descriptionOfChange: '',
-            reasonOfChange: '',
-        },
-    ]);
+    preparedBy: [],
+    checkedBy: [],
+    approvedBy: [],
+});
+//Ref State
+const frmEcr = ref({
+    ecrId: '',
+    ecrNo: '',
+    category: '',
+    customerName: '',
+    partName: '',
+    productLine: '',
+    section: '',
+    internalExternal: '',
+    partNumber: '',
+    deviceName: '',
+    customerEcNo: '',
+    dateOfRequest: '',
+});
 
-    const frmEcrQadRows = ref([
-        {
-            qadCheckedBy: '',
-            qadApprovedByInternal: '',
-            qadApprovedByExternal: '',
-        },
-    ]);
-    const frmEcrOtherDispoRows = ref([
-        {
-            requestedBy: '',
-            technicalEvaluation: '',
-            reviewedBy: '',
-        },
-    ]);
-    const frmEcrPmiApproverRows = ref([
-        {
-            preparedBy: '',
-            checkedBy: '',
-            approvedBy: '',
-        },
-    ]);
 
+const frmEcrReasonRows = ref([
+    {
+        descriptionOfChange: '',
+        reasonOfChange: '',
+    },
+]);
+
+const frmEcrQadRows = ref([
+    {
+        qadCheckedBy: '',
+        qadApprovedByInternal: '',
+        qadApprovedByExternal: '',
+    },
+]);
+const frmEcrOtherDispoRows = ref([
+    {
+        requestedBy: '',
+        technicalEvaluation: '',
+        reviewedBy: '',
+    },
+]);
+const frmEcrPmiApproverRows = ref([
+    {
+        preparedBy: '',
+        checkedBy: '',
+        approvedBy: '',
+    },
+]);
+
+const descriptionOfChangeParams ={
+    tblReference : 'ecr_doc',
+    globalVar: ecrVar.optDescriptionOfChange,
+    formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
+    selectedVal: '',
+};
+const reasonOfChangeParams = {
+    tblReference : 'ecr_roc',
+    globalVar: ecrVar.optReasonOfChange,
+    formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
+    selectedVal: '',
+};
+export default function useEcr(){
     const getDropdownMasterByOpt = async (params) => {
         await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
             let data = response.data;
@@ -95,7 +108,6 @@ export default function ecr()
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
         });
     }
-
     const getRapidxUserByIdOpt = async (params) => {
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
         await axiosFetchData(params, `api/get_rapidx_user_by_id_opt`, (response) => { //url
@@ -210,6 +222,8 @@ export default function ecr()
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
+        descriptionOfChangeParams,
+        reasonOfChangeParams,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,

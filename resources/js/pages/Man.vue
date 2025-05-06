@@ -153,66 +153,9 @@
                     </div>
                 </div>
             </div>
-                <!-- Description of Change / Reason for Change -->
-                <div class="card mb-2">
-                    <h5 class="mb-0">
-                        <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
-                            Description of Change / Reason for Change
-                        </button>
-                    </h5>
-                    <div id="collapse1" class="collapse" data-bs-parent="#accordionMain">
-                        <div class="card-body shadow">
-                            <div class="row">
-                                <div class="col-12">
-                                    <button @click="addEcrReasonRows"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button>
-                                </div>
-                                <div class="col-12 overflow-auto" style="height: 300px;">
-                                    <table class="table table-responsive">
-                                        <thead>
-                                            <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col" style="width: 60%;">Description of Change</th>
-                                            <th scope="col" style="width: 60%;">Reason of Change</th>
-                                            <th scope="col">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-
-                                            <tr v-for="(frmEcrReasonRow, index) in frmEcrReasonRows" :key="frmEcrReasonRow.index">
-                                                <td>
-                                                    {{index+1}}
-                                                </td>
-                                                <td>
-                                                    <Multiselect
-                                                        v-model="frmEcrReasonRow.descriptionOfChange"
-                                                        :options="ecrVar.optDescriptionOfChange"
-                                                        placeholder="Select an option"
-                                                        :searchable="true"
-                                                        :close-on-select="true"
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <Multiselect
-                                                        v-model="frmEcrReasonRow.reasonOfChange"
-                                                        :close-on-select="true"
-                                                        :searchable="true"
-                                                        :options="ecrVar.optReasonOfChange"
-                                                        placeholder="Select an option"
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <button @click="removeEcrReasonRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
-                                                        <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Description of Change / Reason for Change -->
+            <EcrChangeComponent :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+            </EcrChangeComponent>
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -224,15 +167,28 @@
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
+    import EcrChangeComponent from '../components/EcrChangeComponent.vue';
+    import useEcr from '../../js/composables/ecr.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
-    window.DataTable = DataTable.use(DataTablesCore)
+    DataTable.use(DataTablesCore)
 
+    //composables export function
+    const {
+        modal,
+        ecrVar,
+        frmEcrReasonRows,
+        descriptionOfChangeParams,
+        reasonOfChangeParams,
+        getDropdownMasterByOpt,
+        axiosFetchData,
+    } = useEcr();
+
+    //ref state
     const tblEcrByStatus = ref(null);
     const tblEcrDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
-    const modal = {}
 
     const columns = [
         {   data: 'get_actions',
@@ -271,6 +227,7 @@
                 if(btnGetEcrDetailsId != null){
                     btnGetEcrDetailsId.addEventListener('click',function(){
                         let ecrDetailsId = this.getAttribute('ecr-details-id');
+                        getEcrDetailsId(ecrDetailsId);
                         modal.SaveEcrDetail.show();
                     });
                 }
@@ -285,10 +242,35 @@
         {   data: 'remarks'} ,
     ];
 
+    const getEcrDetailsId = async (ecrDetailsId) => {
+        let params = {
+            ecrDetailsId : ecrDetailsId
+        }
+        axiosFetchData(params,'api/get_ecr_details_id',function(response){
+            let ecrDetails = response.data.ecrDetail;
+
+            frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
+            frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
+            // console.log(ecrDetails.dropdown_master_detail_description_of_change.id);
+            return;
+            frmEcrReasonRows.value = [];
+            //Reasons
+            if (ecrDetails.length != 0){
+                ecrDetails.forEach((ecrDetailsEl,index) =>{
+                    frmEcrReasonRows.value.push({
+                        descriptionOfChange : ecrDetailsEl.description_of_change,
+                        reasonOfChange : ecrDetailsEl.reason_of_change
+                    });
+                })
+            }
+        });
+    }
 
     onMounted( async ()=>{
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
         // modal.SaveMan.show();
         // modal.SaveEcrDetail.show();
         // tblEcrByStatus.value.dt.ajax.url("api/load_ecr_by_status?status="+'AP').draw()

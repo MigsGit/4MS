@@ -26,8 +26,6 @@ window.Modal = Modal;
 window.Toast = useToast;
 window.Swal = Swal;
 
-
-
 try {
     window.$ = $;
 

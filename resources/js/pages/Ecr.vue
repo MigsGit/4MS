@@ -431,7 +431,7 @@
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
-    import ecr from '../../js/composables/ecr.js';
+    import useEcr from '../../js/composables/ecr.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
@@ -447,11 +447,14 @@
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
+        descriptionOfChangeParams,
+        reasonOfChangeParams,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrById,
-    } = ecr();
+    } = useEcr();
+
     //ref state
     const modalSaveEcr = ref(null);
     const tblEcr = ref(null);
@@ -483,18 +486,18 @@
         {   data: 'date_of_request'} ,
     ];
     //constant object params
-    const descriptionOfChangeParams ={
-        tblReference : 'ecr_doc',
-        globalVar: ecrVar.optDescriptionOfChange,
-        formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
-        selectedVal: '',
-    };
-    const reasonOfChangeParams = {
-        tblReference : 'ecr_roc',
-        globalVar: ecrVar.optReasonOfChange,
-        formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
-        selectedVal: '',
-    };
+    // const descriptionOfChangeParams ={
+    //     tblReference : 'ecr_doc',
+    //     globalVar: ecrVar.optDescriptionOfChange,
+    //     formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
+    //     selectedVal: '',
+    // };
+    // const reasonOfChangeParams = {
+    //     tblReference : 'ecr_roc',
+    //     globalVar: ecrVar.optReasonOfChange,
+    //     formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
+    //     selectedVal: '',
+    // };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
         formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),

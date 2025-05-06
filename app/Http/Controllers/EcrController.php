@@ -73,7 +73,6 @@ class EcrController extends Controller
     }
     public function loadEcrDetailsByEcrId(Request $request){
         // return 'true' ;
-
         try {
             $data = [];
             $relations = [
@@ -227,6 +226,24 @@ class EcrController extends Controller
             return response()->json(['is_success' => 'true', 'ecr' => $ecr[0] ,
                 'ecrApprovalCollection' => $ecrApprovalCollection,
                 'pmiApprovalCollection'=>$pmiApprovalCollection
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
+    public function getEcrDetailsId(Request $request){
+        try {
+            $data = [];
+            $conditions = [
+                'id' => $request->ecrDetailsId
+            ];
+
+            $relations = [
+                'dropdown_master_detail_description_of_change',
+                'dropdown_master_detail_reason_of_change',
+            ];
+            $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
+            return response()->json(['is_success' => 'true', 'ecrDetail' => $ecrDetail[0] ,
             ]);
         } catch (Exception $e) {
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
