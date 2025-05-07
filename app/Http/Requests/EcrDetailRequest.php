@@ -24,8 +24,12 @@ class EcrDetailRequest extends FormRequest
     public function rules()
     {
         return [
-            'description_of_change' => 'required',
-            'reason_of_change' => 'required',
+            // 'description_of_change' => 'required',
+            // 'reason_of_change' => 'required',
+            'change_imp_date' => 'required',
+            'doc_sub_date' => 'required',
+            'doc_to_be_sub' => 'required',
+            'remarks',
         ];
     }
 }

@@ -1,95 +1,104 @@
 import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
 
-const { axiosFetchData } = useFetch(); // Call  the useFetch function
-//Constant Object
-const modal = {
-    // SaveEcr : null,
-};
-//Reactive State
-const ecrVar = reactive({
-    optDescriptionOfChange: [],
-    optReasonOfChange: [],
-
-    optQadCheckedBy: [],
-    optQadApprovedByInternal: [],
-    optQadApprovedByExternal: [],
-
-    requestedBy: [],
-    technicalEvaluation: [],
-    reviewedBy: [],
-
-    preparedBy: [],
-    checkedBy: [],
-    approvedBy: [],
-});
-//Ref State
-const frmEcr = ref({
-    ecrId: '',
-    ecrNo: '',
-    category: '',
-    customerName: '',
-    partName: '',
-    productLine: '',
-    section: '',
-    internalExternal: '',
-    partNumber: '',
-    deviceName: '',
-    customerEcNo: '',
-    dateOfRequest: '',
-});
-
-const frmEcrDetails = ref({
-    typeOfPart: '',
-    changeImpDate: '',
-    docSubDate: '',
-    docToBeSub: '',
-    remarks: '',
-});
-
-
-const frmEcrReasonRows = ref([
-    {
-        descriptionOfChange: '',
-        reasonOfChange: '',
-    },
-]);
-
-const frmEcrQadRows = ref([
-    {
-        qadCheckedBy: '',
-        qadApprovedByInternal: '',
-        qadApprovedByExternal: '',
-    },
-]);
-const frmEcrOtherDispoRows = ref([
-    {
-        requestedBy: '',
-        technicalEvaluation: '',
-        reviewedBy: '',
-    },
-]);
-const frmEcrPmiApproverRows = ref([
-    {
-        preparedBy: '',
-        checkedBy: '',
-        approvedBy: '',
-    },
-]);
-
-const descriptionOfChangeParams ={
-    tblReference : 'ecr_doc',
-    globalVar: ecrVar.optDescriptionOfChange,
-    formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
-    selectedVal: '',
-};
-const reasonOfChangeParams = {
-    tblReference : 'ecr_roc',
-    globalVar: ecrVar.optReasonOfChange,
-    formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
-    selectedVal: '',
-};
 export default function useEcr(){
+    const { axiosFetchData } = useFetch(); // Call  the useFetch function
+
+    //Constant Object
+    const modal = {
+        // SaveEcr : null,
+    };
+    //Reactive State
+    const ecrVar = reactive({
+        optDescriptionOfChange: [],
+        optReasonOfChange: [],
+
+        optQadCheckedBy: [],
+        optQadApprovedByInternal: [],
+        optQadApprovedByExternal: [],
+
+        requestedBy: [],
+        technicalEvaluation: [],
+        reviewedBy: [],
+
+        preparedBy: [],
+        checkedBy: [],
+        approvedBy: [],
+
+        optTypeOfPart: [],
+    });
+    //Ref State
+    const frmEcr = ref({
+        ecrId: '',
+        ecrNo: '',
+        category: '',
+        customerName: '',
+        partName: '',
+        productLine: '',
+        section: '',
+        internalExternal: '',
+        partNumber: '',
+        deviceName: '',
+        customerEcNo: '',
+        dateOfRequest: '',
+    });
+    const frmEcrDetails = ref({
+        ecrDetailsId: '',
+        ecrsId: '',
+        typeOfPart: '',
+        changeImpDate: '',
+        docSubDate: '',
+        docToBeSub: 'test',
+        remarks: 'test',
+    });
+    const frmEcrReasonRows = ref([
+        {
+            descriptionOfChange: '',
+            reasonOfChange: '',
+        },
+    ]);
+    const frmEcrQadRows = ref([
+        {
+            qadCheckedBy: '',
+            qadApprovedByInternal: '',
+            qadApprovedByExternal: '',
+        },
+    ]);
+    const frmEcrOtherDispoRows = ref([
+        {
+            requestedBy: '',
+            technicalEvaluation: '',
+            reviewedBy: '',
+        },
+    ]);
+    const frmEcrPmiApproverRows = ref([
+        {
+            preparedBy: '',
+            checkedBy: '',
+            approvedBy: '',
+        },
+    ]);
+
+    //Obj Params
+    const descriptionOfChangeParams ={
+        tblReference : 'ecr_doc',
+        globalVar: ecrVar.optDescriptionOfChange,
+        formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
+        selectedVal: '',
+    };
+    const reasonOfChangeParams = {
+        tblReference : 'ecr_roc',
+        globalVar: ecrVar.optReasonOfChange,
+        formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
+        selectedVal: '',
+    };
+    const typeOfPartParams = {
+        tblReference : 'type_of_part',
+        globalVar: ecrVar.optTypeOfPart,
+        formModel: toRef(frmEcrDetails.typeOfPart,'reasonOfChange'),
+        selectedVal: '',
+    }
+
     const getDropdownMasterByOpt = async (params) => {
         await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
             let data = response.data;
@@ -103,7 +112,7 @@ export default function useEcr(){
             */
             params.globalVar.splice(0, params.globalVar.length,
                 { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
-                { value: 0, label: 'N/A' }, // Push "N/A" option at the start
+                // { value: 0, label: 'N/A' }, // Push "N/A" option at the start
                     ...dropdownMasterByOpt.map((value) => {
                     return {
                         value: value.id,
@@ -233,6 +242,7 @@ export default function useEcr(){
         frmEcrPmiApproverRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
+        typeOfPartParams,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,

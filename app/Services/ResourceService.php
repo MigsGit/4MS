@@ -85,20 +85,41 @@ class ResourceService implements ResourceInterface
         date_default_timezone_set('Asia/Manila');
         DB::beginTransaction();
         try {
-            if( isset( $data_id ) ){ //edit
-                return 'edit';
-                $model::where('id',$id)->update($data);
-                $data_id = $id;
-            }else{ //add
-                return 'add';
-                $insert_by_id = $model::insertGetId($data);
-                $data_id = $insert_by_id;
+            // return 'edit';
+            $query = $model::query();
+            if($conditions != null){
+                foreach ($conditions as $key => $value) {
+                    $query->where($key, $value);
+                    // $query->where('column1'=>'1');
+                    // $query->where('column2'=>'2');
+                }
             }
+            $query->update($data);
             DB::commit();
-            return response()->json(['is_success' => 'true','data_id'=>$data_id]);
+            return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
             throw $e;
         }
     }
+    // public function  updateConditions($model,array $conditions,array $data){
+    //     date_default_timezone_set('Asia/Manila');
+    //     DB::beginTransaction();
+    //     try {
+    //         if( isset( $data_id ) ){ //edit
+    //             return 'edit';
+    //             $model::where('id',$id)->update($data);
+    //             $data_id = $id;
+    //         }else{ //add
+    //             return 'add';
+    //             $insert_by_id = $model::insertGetId($data);
+    //             $data_id = $insert_by_id;
+    //         }
+    //         DB::commit();
+    //         return response()->json(['is_success' => 'true','data_id'=>$data_id]);
+    //     } catch (Exception $e) {
+    //         DB::rollback();
+    //         throw $e;
+    //     }
+    // }
 }

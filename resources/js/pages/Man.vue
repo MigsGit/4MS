@@ -91,18 +91,23 @@
         <template #body>
             <div class="row">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-                        <input type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                    <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
+                    <input v-model="frmEcrDetails.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                 </div>
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
-                    <input  type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                    <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                 </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
-                        <select v-model="frmEcrDetails.typeOfPart"  class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                        </select>
+                        <Multiselect
+                            v-model="frmEcrDetails.typeOfPart"
+                            :options="ecrVar.optTypeOfPart"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
@@ -110,13 +115,13 @@
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Docs To Be Submitted</span>
-                        <input v-model="frmEcrDetails.docSubDate" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                        <input v-model="frmEcrDetails.docToBeSub" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
                  </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Docs Submission Date:</span>
-                        <input v-model="frmEcrDetails.docToBeSub"  type="date" class="form-control" aria-describedby="addon-wrapping">
+                        <input v-model="frmEcrDetails.docSubDate"  type="date" class="form-control" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Remarks:</span>
@@ -140,10 +145,12 @@
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
+    import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore)
 
+    const { axiosSaveData } = useForm(); // Call the useFetch function
     //composables export function
     const {
         modal,
@@ -152,6 +159,7 @@
         frmEcrReasonRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
+        typeOfPartParams,
         getDropdownMasterByOpt,
         axiosFetchData,
     } = useEcr();
@@ -215,11 +223,14 @@
         {   data: 'remarks'} ,
     ];
 
+
+
     onMounted( async ()=>{
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
+        await getDropdownMasterByOpt(typeOfPartParams);
     })
 
     const getEcrDetailsId = async (ecrDetailsId) => {
@@ -228,22 +239,35 @@
         }
         axiosFetchData(params,'api/get_ecr_details_id',function(response){
             let ecrDetails = response.data.ecrDetail;
+            console.log('ecrDetailsId',ecrDetailsId);
 
-            frmEcrReasonRows.value = [];
+            frmEcrDetails.value.ecrDetailsId = ecrDetailsId;
+            frmEcrDetails.value.changeImpDate =ecrDetails.change_imp_date
+            frmEcrDetails.value.docSubDate =ecrDetails.doc_sub_date
+            frmEcrDetails.value.docToBeSub =ecrDetails.doc_to_be_sub
+            frmEcrDetails.value.remarks =ecrDetails.remarks
+            frmEcrReasonRows.value.typeOfPart = ecrDetails.dropdown_master_detail_description_of_change.id;
             frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
             frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
-            // console.log(ecrDetails.dropdown_master_detail_description_of_change.id);
-            return;
+            console.log('ecrDetails',ecrDetails);
         });
     }
     const saveEcrDetails = async () => {
-        console.log('saveEcrDetails');
-        return;
-        axiosSaveData(formData,saveApi, (response) =>{
+        let formData = new FormData();
+        //Append form data
+        [
+            ["ecr_details_id", frmEcrDetails.value.ecrDetailsId],
+            ["change_imp_date", frmEcrDetails.value.changeImpDate],
+            ["doc_sub_date", frmEcrDetails.value.docSubDate],
+            ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
+            ["remarks", frmEcrDetails.value.remarks],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_ecr_details', (response) =>{
             console.log(response);
         });
     }
-
 </script>
 
 

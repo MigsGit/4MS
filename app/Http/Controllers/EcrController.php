@@ -249,4 +249,17 @@ class EcrController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
+   public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
+       date_default_timezone_set('Asia/Manila');
+       try {
+            $ecrDetailRequestValidated = $ecrDetailRequest->validated();
+            $conditions = [
+                'id' => $request->ecr_details_id
+            ];
+            return $this->resourceInterface->updateConditions(EcrDetail::class,$conditions,$ecrDetailRequestValidated);
+            return response()->json(['is_success' => 'true']);
+       } catch (Exception $e) {
+            throw $e;
+       }
+   }
 }
