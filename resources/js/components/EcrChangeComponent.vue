@@ -10,7 +10,7 @@
             <div class="card-body shadow">
                 <div class="row">
                     <div class="col-12">
-                        <!-- <button @click="addEcrReasonRows"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button> -->
+                        <button @click="addEcrReasonRows"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Reason</button>
                     </div>
                     <div class="col-12 overflow-auto" style="height: 300px;">
                         <table class="table table-responsive">
@@ -47,9 +47,9 @@
                                         />
                                     </td>
                                     <td>
-                                        <!-- <button @click="removeEcrReasonRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                        <button @click="removeEcrReasonRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                             <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
-                                        </button> -->
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -75,6 +75,16 @@
         },
 
     })
+       //Functions
+       const addEcrReasonRows = async () => {
+        frmEcrReasonRows.value.push({
+            descriptionOfChange: '',
+            reasonOfChange: '',
+        });
+    }
+    const removeEcrReasonRows = async (index) => {
+        frmEcrReasonRows.value.splice(index,1);
+    }
     // console.log('test',test);
 
 </script>

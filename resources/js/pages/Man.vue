@@ -246,7 +246,7 @@
             frmEcrDetails.value.docSubDate =ecrDetails.doc_sub_date
             frmEcrDetails.value.docToBeSub =ecrDetails.doc_to_be_sub
             frmEcrDetails.value.remarks =ecrDetails.remarks
-            frmEcrReasonRows.value.typeOfPart = ecrDetails.dropdown_master_detail_description_of_change.id;
+            frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
             frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
             frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
             console.log('ecrDetails',ecrDetails);
@@ -258,6 +258,7 @@
         [
             ["ecr_details_id", frmEcrDetails.value.ecrDetailsId],
             ["change_imp_date", frmEcrDetails.value.changeImpDate],
+            ["type_of_part", frmEcrDetails.value.typeOfPart],
             ["doc_sub_date", frmEcrDetails.value.docSubDate],
             ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
             ["remarks", frmEcrDetails.value.remarks],

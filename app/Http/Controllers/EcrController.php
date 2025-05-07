@@ -241,6 +241,7 @@ class EcrController extends Controller
             $relations = [
                 'dropdown_master_detail_description_of_change',
                 'dropdown_master_detail_reason_of_change',
+                'dropdown_master_detail_type_of_part',
             ];
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
             return response()->json(['is_success' => 'true', 'ecrDetail' => $ecrDetail[0] ,
@@ -253,6 +254,7 @@ class EcrController extends Controller
        date_default_timezone_set('Asia/Manila');
        try {
             $ecrDetailRequestValidated = $ecrDetailRequest->validated();
+            $ecrDetailRequestValidated['remarks'] = $request->remarks;
             $conditions = [
                 'id' => $request->ecr_details_id
             ];

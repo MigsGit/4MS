@@ -500,16 +500,7 @@
         await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
         await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
     })
-    //Functions
-    const addEcrReasonRows = async () => {
-        frmEcrReasonRows.value.push({
-            descriptionOfChange: '',
-            reasonOfChange: '',
-        });
-    }
-    const removeEcrReasonRows = async (index) => {
-        frmEcrReasonRows.value.splice(index,1);
-    }
+ 
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({
             requestedBy: '',

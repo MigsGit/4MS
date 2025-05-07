@@ -17,10 +17,6 @@ class EcrDetail extends Model
     {
         return $this->hasOne(DropdownMasterDetail::class, 'id', $column);
     }
-    // public function dropdown_master_details()
-    // {
-    //     return $this->hasOne(DropdownMasterDetail::class, 'id','description_of_change');
-    // }
     public function dropdown_master_detail_description_of_change()
     {
        return $this->dropdown_master_detail('description_of_change');
@@ -28,5 +24,9 @@ class EcrDetail extends Model
     public function dropdown_master_detail_reason_of_change()
     {
        return $this->dropdown_master_detail('reason_of_change');
+    }
+    public function dropdown_master_detail_type_of_part()
+    {
+       return $this->dropdown_master_detail('type_of_part');
     }
 }
