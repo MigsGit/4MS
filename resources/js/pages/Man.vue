@@ -87,69 +87,40 @@
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="" ref="modalSaveEcrDetail">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
         <template #body>
             <div class="row">
-                <div class="input flex-nowrap mb-2 input-group-sm">
-                        <input   type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
+                        <input type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                 </div>
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
-                    <span class="input-group-text" id="addon-wrapping">Customer Name:</span>
+                    <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
                     <input  type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                 </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Category:</span>
-                        <select  class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                            <option value="" selected disabled>Select</option>
-                            <option value="Man">Man</option>
-                            <option value="Material">Material</option>
-                            <option value="Machine">Machine</option>
-                            <option value="Method">Method</option>
-                            <option value="Environment">Environment</option>
+                        <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
+                        <select v-model="frmEcrDetails.typeOfPart"  class="form-select form-select-sm" aria-describedby="addon-wrapping">
                         </select>
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Customer Name:</span>
-                        <input type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                        <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
+                        <input v-model="frmEcrDetails.changeImpDate" type="date" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Part Name:</span>
-                        <input  type="text" class="form-control" aria-describedby="addon-wrapping">
+                        <span class="input-group-text" id="addon-wrapping">Docs To Be Submitted</span>
+                        <input v-model="frmEcrDetails.docSubDate" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Product Line:</span>
-                        <input  type="text" class="form-control" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Section:</span>
-                        <input  type="text" class="form-control" aria-describedby="addon-wrapping">
-                    </div>
-                </div>
+                 </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Internal / External:</span>
-                        <select  class="form-select form-select-sm" aria-describedby="addon-wrapping">
-                            <option value="" selected disabled>Select</option>
-                            <option value="Internal">Internal</option>
-                            <option value="External">External</option>
-                        </select>
+                        <span class="input-group-text" id="addon-wrapping">Docs Submission Date:</span>
+                        <input v-model="frmEcrDetails.docToBeSub"  type="date" class="form-control" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Part Number:</span>
-                        <input  type="text" class="form-control" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Device Name:</span>
-                        <input type="text" class="form-control" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Customer EC No. (If any):</span>
-                        <input  type="text" class="form-control" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Date of Request:</span>
-                        <input type="date" class="form-control" aria-describedby="addon-wrapping">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <input v-model="frmEcrDetails.remarks"  type="text" class="form-control" aria-describedby="addon-wrapping">
                     </div>
                 </div>
             </div>
@@ -177,6 +148,7 @@
     const {
         modal,
         ecrVar,
+        frmEcrDetails,
         frmEcrReasonRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
@@ -218,6 +190,7 @@
         {   data: 'customer_ec_no'} ,
         {   data: 'date_of_request'} ,
     ];
+
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -242,6 +215,13 @@
         {   data: 'remarks'} ,
     ];
 
+    onMounted( async ()=>{
+        modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
+        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
+    })
+
     const getEcrDetailsId = async (ecrDetailsId) => {
         let params = {
             ecrDetailsId : ecrDetailsId
@@ -249,32 +229,21 @@
         axiosFetchData(params,'api/get_ecr_details_id',function(response){
             let ecrDetails = response.data.ecrDetail;
 
+            frmEcrReasonRows.value = [];
             frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
             frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
             // console.log(ecrDetails.dropdown_master_detail_description_of_change.id);
             return;
-            frmEcrReasonRows.value = [];
-            //Reasons
-            if (ecrDetails.length != 0){
-                ecrDetails.forEach((ecrDetailsEl,index) =>{
-                    frmEcrReasonRows.value.push({
-                        descriptionOfChange : ecrDetailsEl.description_of_change,
-                        reasonOfChange : ecrDetailsEl.reason_of_change
-                    });
-                })
-            }
+        });
+    }
+    const saveEcrDetails = async () => {
+        console.log('saveEcrDetails');
+        return;
+        axiosSaveData(formData,saveApi, (response) =>{
+            console.log(response);
         });
     }
 
-    onMounted( async ()=>{
-        modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
-        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
-        await getDropdownMasterByOpt(descriptionOfChangeParams);
-        await getDropdownMasterByOpt(reasonOfChangeParams);
-        // modal.SaveMan.show();
-        // modal.SaveEcrDetail.show();
-        // tblEcrByStatus.value.dt.ajax.url("api/load_ecr_by_status?status="+'AP').draw()
-    })
 </script>
 
 

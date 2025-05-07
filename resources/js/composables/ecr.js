@@ -39,6 +39,14 @@ const frmEcr = ref({
     dateOfRequest: '',
 });
 
+const frmEcrDetails = ref({
+    typeOfPart: '',
+    changeImpDate: '',
+    docSubDate: '',
+    docToBeSub: '',
+    remarks: '',
+});
+
 
 const frmEcrReasonRows = ref([
     {
@@ -218,6 +226,7 @@ export default function useEcr(){
         modal,
         ecrVar,
         frmEcr,
+        frmEcrDetails,
         frmEcrReasonRows,
         frmEcrQadRows,
         frmEcrOtherDispoRows,
