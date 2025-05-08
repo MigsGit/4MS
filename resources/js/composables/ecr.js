@@ -99,6 +99,16 @@ export default function useEcr(){
         selectedVal: '',
     }
 
+     //Functions
+    const addEcrReasonRows = async () => {
+        frmEcrReasonRows.value.push({
+            descriptionOfChange: '',
+            reasonOfChange: '',
+        });
+    }
+    const removeEcrReasonRows = async (index) => {
+        frmEcrReasonRows.value.splice(index,1);
+    }
     const getDropdownMasterByOpt = async (params) => {
         await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
             let data = response.data;
@@ -125,6 +135,7 @@ export default function useEcr(){
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
         });
     }
+
     const getRapidxUserByIdOpt = async (params) => {
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
         await axiosFetchData(params, `api/get_rapidx_user_by_id_opt`, (response) => { //url
@@ -142,6 +153,8 @@ export default function useEcr(){
                 }),
             );
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
+            console.log('selectedVal',params.selectedVal);
+
         });
     }
     const getEcrById = async (ecrId) => {
@@ -230,7 +243,6 @@ export default function useEcr(){
             modal.SaveEcr.show();
         });
     }
-
     return {
         modal,
         ecrVar,
@@ -247,5 +259,7 @@ export default function useEcr(){
         getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrById,
+        addEcrReasonRows,
+        removeEcrReasonRows,
     };
 }

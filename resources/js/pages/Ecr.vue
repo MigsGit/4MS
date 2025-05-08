@@ -13,6 +13,7 @@
             <div class="tab-content mt-2" id="myTabContent">
                 <div class="tab-pane fade show active" id="menu1" role="tabpanel" aria-labelledby="menu1-tab">
                     <div class="container-fluid px-4">
+                        <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI Approvers</button>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Engineering Change Request</li>
                         </ol>
@@ -161,7 +162,7 @@
                         </div>
                     </div>
                 </div>
-                <EcrChangeComponent :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+                <EcrChangeComponent  @remove-ecr-reason-rows-event="removeEcrReasonRows(index)" @add-ecr-reason-rows-event="addEcrReasonRows()":frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
                 </EcrChangeComponent>
                 <!-- Others Disposition -->
                 <div class="card mb-2">
@@ -198,6 +199,8 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.requestedBy"
+                                                        @change="onUserChange(otherDispoTechnicalEvaluationParams)"
+
                                                     />
                                                 </td>
                                                 <td>
@@ -206,6 +209,8 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.technicalEvaluation"
+                                                        @change="onUserChange(otherDispoReviewedByParams)"
+
                                                     />
                                                 </td>
                                                 <td>
@@ -214,6 +219,8 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.reviewedBy"
+                                                        @change="onUserChange(qadCheckedByParams)"
+
                                                     />
 
                                                 </td>
@@ -265,22 +272,25 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optQadCheckedBy"
-                                                    />
-                                                </td>
+                                                        @change="onUserChange(qadApprovedByInternalParams)"
+                                                        />
+                                                    </td>
                                                 <td>
                                                     <Multiselect
                                                         v-model="frmEcrQadRows.qadApprovedByInternal"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optQadApprovedByInternal"
-                                                    />
-                                                </td>
+                                                        @change="onUserChange(qadApprovedByExternalParams)"
+                                                        />
+                                                    </td>
                                                 <td>
                                                     <Multiselect
                                                         v-model="frmEcrQadRows.qadApprovedByExternal"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optQadApprovedByExternal"
+                                                        @change="onUserChange(pmiApproverPreparedByParams)"
                                                     />
                                                 </td>
                                             </tr>
@@ -327,6 +337,8 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.preparedBy"
+                                                        @change="onUserChange(pmiApproverCheckedByParams)"
+
                                                     />
 
                                                 </td>
@@ -336,6 +348,7 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.checkedBy"
+                                                        @change="onUserChange(pmiApproverApprovedByParams)"
                                                     />
                                                 </td>
                                                 <td>
@@ -393,6 +406,8 @@
         getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrById,
+        addEcrReasonRows,
+        removeEcrReasonRows,
     } = useEcr();
 
     //ref state
@@ -407,7 +422,17 @@
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrId = this.getAttribute('ecr-id');
+                        getRapidxUserByIdOpt(otherDispoRequestedByParams);
+                        getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+                        getRapidxUserByIdOpt(otherDispoReviewedByParams);
+                        getRapidxUserByIdOpt(qadCheckedByParams);
+                        getRapidxUserByIdOpt(qadApprovedByInternalParams);
+                        getRapidxUserByIdOpt(qadApprovedByExternalParams);
+                        getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+                        getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+                        getRapidxUserByIdOpt(pmiApproverApprovedByParams);
                         getEcrById(ecrId);
+
                     });
                 }
             }
@@ -425,19 +450,8 @@
         {   data: 'customer_ec_no'} ,
         {   data: 'date_of_request'} ,
     ];
+
     //constant object params
-    // const descriptionOfChangeParams ={
-    //     tblReference : 'ecr_doc',
-    //     globalVar: ecrVar.optDescriptionOfChange,
-    //     formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
-    //     selectedVal: '',
-    // };
-    // const reasonOfChangeParams = {
-    //     tblReference : 'ecr_roc',
-    //     globalVar: ecrVar.optReasonOfChange,
-    //     formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
-    //     selectedVal: '',
-    // };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
         formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
@@ -483,6 +497,15 @@
         formModel: toRef(frmEcrPmiApproverRows.value[0],'approvedBy'),
         selectedVal: '',
     };
+    const btnEcr = async () => {
+        modal.SaveEcr.show();
+        await getRapidxUserByIdOpt(otherDispoRequestedByParams);
+    }
+    const onUserChange = async (selectedParams)=>{
+        console.log('pmiApproverPreparedByParams',selectedParams);
+        await getRapidxUserByIdOpt(selectedParams);
+    }
+
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
@@ -490,17 +513,18 @@
         // modal.SaveEcr.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
-        await getRapidxUserByIdOpt(qadCheckedByParams);
-        await getRapidxUserByIdOpt(qadApprovedByInternalParams);
-        await getRapidxUserByIdOpt(qadApprovedByExternalParams);
-        await getRapidxUserByIdOpt(otherDispoRequestedByParams);
-        await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
-        await getRapidxUserByIdOpt(otherDispoReviewedByParams);
-        await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
-        await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
-        await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
+        // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
+        // await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+        // await getRapidxUserByIdOpt(otherDispoReviewedByParams);
+        // await getRapidxUserByIdOpt(qadCheckedByParams);
+        // await getRapidxUserByIdOpt(qadApprovedByInternalParams);
+        // await getRapidxUserByIdOpt(qadApprovedByExternalParams);
+        // await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+        // await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+        // await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
     })
- 
+
+    //Functions
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({
             requestedBy: '',

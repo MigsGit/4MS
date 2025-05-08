@@ -78,6 +78,7 @@ class EcrController extends Controller
             $relations = [
                 'dropdown_master_detail_description_of_change',
                 'dropdown_master_detail_reason_of_change',
+                'dropdown_master_detail_type_of_part',
             ];
             $conditions = [
                 'ecrs_id' => $request->ecr_id
@@ -93,18 +94,24 @@ class EcrController extends Controller
             })
             ->addColumn('reason_of_change',function ($row){
                 $result = '';
-                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details;
+                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? '';
                 return $result;
             })
             ->addColumn('description_of_change',function ($row){
                 $result = '';
-                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details;
+                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details ?? '';
+                return $result;
+            })
+            ->addColumn('type_of_part',function ($row){
+                $result = '';
+                $result .= $row->dropdown_master_detail_type_of_part->dropdown_masters_details ?? '';
                 return $result;
             })
             ->rawColumns([
                 'get_actions',
                 'reason_of_change',
                 'description_of_change',
+                'type_of_part',
             ])
             ->make(true);
         } catch (Exception $e) {
@@ -131,13 +138,12 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function saveEcr(Request $request, EcrRequest $ecrRequest,EcrDetailRequest $ecrDetailRequest){
+    public function saveEcr(Request $request, EcrRequest $ecrRequest){
         date_default_timezone_set('Asia/Manila');
         try {
-            //TODO: DELETE, Auto Increment Ctrl Number, InsertById
+            //TODO: EDIT ecr_no, DELETE, Auto Increment Ctrl Number, InsertById, N/A in Dropdown
             DB::beginTransaction();
-            return 'true';
-
+            return;
             $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request){
                 return [
                     'ecrs_id' =>  1,
@@ -146,14 +152,14 @@ class EcrController extends Controller
                     'created_at' => now(),
                 ];
             });
-            DB::commit();
+
             foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
                $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
             }
 
             $ctr = 0; //assigned counter
             //Requested by, Engg, Heads, QA Approval
-            return $ecr_approval_types = [
+            $ecr_approval_types = [
                 'OTRB' => $request->requested_by,
                 'OTTE' => $request->technical_evaluation,
                 'OTRVB' => $request->reviewed_by,
@@ -253,7 +259,7 @@ class EcrController extends Controller
    public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
        date_default_timezone_set('Asia/Manila');
        try {
-            $ecrDetailRequestValidated = $ecrDetailRequest->validated();
+            return $ecrDetailRequestValidated = $ecrDetailRequest->validated();
             $ecrDetailRequestValidated['remarks'] = $request->remarks;
             $conditions = [
                 'id' => $request->ecr_details_id
