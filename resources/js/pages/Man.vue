@@ -9,40 +9,41 @@
                     </ol>
                     <div class="table-responsive">
                     <!-- id="dataTable" -->
-                    <!-- <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <!-- <table class="table" id="dataTable" width="100%" cellspacing="0">
                     </table> -->
-                    <DataTable
-                        width="100%" cellspacing="0"
-                        class="table table-bordered mt-2"
-                        ref="tblEcrByStatus"
-                        :columns="columns"
-                        ajax="api/load_ecr_by_status?status=AP"
-                        :options="{
-                            serverSide: true, //Serverside true will load the network
-                            columnDefs:[
-                                // {orderable:false,target:[0]}
-                            ]
-                        }"
-                    >
-                        <thead>
-                            <tr>
-                                <th>Action</th>
-                                <th>Status</th>
-                                <th>ECR Ctrl No.</th>
-                                <th>Category</th>
-                                <th>Internal or External</th>
-                                <th>Customer Name</th>
-                                <th>Part Number</th>
-                                <th>Part Name</th>
-                                <th>Device Name</th>
-                                <th>Product Line</th>
-                                <th>Section</th>
-                                <th>Customer Ec. No</th>
-                                <th>Date Of Request</th>
-                            </tr>
-                        </thead>
-                    </DataTable>
-                </div>
+                        <DataTable
+                            width="100%" cellspacing="0"
+                            class="table mt-2"
+                            ref="tblEcrByStatus"
+                            :columns="columns"
+                            ajax="api/load_ecr_by_status?status=AP"
+                            :options="{
+                                serverSide: true, //Serverside true will load the network
+                                columnDefs:[
+                                    // {orderable:false,target:[0]}
+                                ]
+                            }"
+                        >
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                    <th>ECR Ctrl No.</th>
+                                    <th>Category</th>
+                                    <th>Internal or External</th>
+                                    <th>Customer Name</th>
+                                    <th>Part Number</th>
+                                    <th>Part Name</th>
+                                    <th>Device Name</th>
+                                    <th>Product Line</th>
+                                    <th>Section</th>
+                                    <th>Customer Ec. No</th>
+                                    <th>Date Of Request</th>
+                                </tr>
+                            </thead>
+                        </DataTable>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -54,7 +55,7 @@
                     <div class="card-body overflow-auto">
                         <DataTable
                         width="100%" cellspacing="0"
-                        class="table table-bordered mt-2"
+                        class="table  table-responsive mt-2"
                         ref="tblEcrDetails"
                         :columns="tblEcrDetailColumns"
                         ajax="api/load_ecr_details_by_ecr_id"
@@ -81,7 +82,44 @@
                     </div>
                 </div>
             </div>
-            TODO: Add Man,Man Details,Special Acceptance
+            <div class="row mt-3">
+                <div class="card">
+                    <div class="card-body overflow-auto">
+                        <DataTable
+                        width="100%" cellspacing="0"
+                        class="table mt-2"
+                        ref="tblManDetails"
+                        :columns="tblManColumns"
+                        ajax="api/load_man_by_ecr_id"
+                        :options="{
+                            serverSide: true, //Serverside true will load the network
+                            columnDefs:[
+                                // {orderable:false,target:[0]}
+                            ]
+                        }"
+                    >
+                        <thead>
+                            <tr>
+                                <th> Action </th>
+                               <th> First Assign </th>
+                               <th> Long Interval </th>
+                               <th> Change </th>
+                               <th> Process Name </th>
+                               <th> Working Time </th>
+                               <th> Qc Inspector /Operator </th>
+                               <th> Trainer </th>
+                               <th> Trainer SampleSize </th>
+                               <th> Trainer Result </th>
+                               <th> Lqc Supervisor </th>
+                               <th> Lqc SampleSize </th>
+                               <th> Lqc Result </th>
+                               <th> Process Change Factor </th>
+                            </tr>
+                        </thead>
+                    </DataTable>
+                    </div>
+                </div>
+            </div>
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -297,6 +335,7 @@
     //ref state
     const tblEcrByStatus = ref(null);
     const tblEcrDetails = ref(null);
+    const tblManDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
     const modalSaveManDetails = ref(null);
@@ -329,24 +368,6 @@
         {   data: 'customer_ec_no'} ,
         {   data: 'date_of_request'} ,
     ];
-
-
-    const qcInspectorOperatorParams = {
-        globalVar: manVar.optUserMaster,
-        formModel: toRef(frmMan.value,'qcInspectorOperator'),
-        selectedVal: '',
-    };
-    const trainerParams = {
-        globalVar: manVar.optUserMaster,
-        formModel: toRef(frmMan.value,'qcInspectorOperator'),
-        selectedVal: '',
-    };
-    const qcSupervisor1Params = {
-        globalVar: manVar.optUserMaster,
-        formModel: toRef(frmMan.value,'qcInspectorOperator'),
-        selectedVal: '',
-    };
-
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -370,12 +391,60 @@
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
     ];
+    const tblManColumns = [
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnManDetailsId = cell.querySelector('#btnManDetailsId');
+                if(btnManDetailsId != null){
+                    btnManDetailsId.addEventListener('click',function(){
+                        let manDetailsId = this.getAttribute('man-details-id');
+                        console.log(manDetailsId);
+                        getSaveManId(ecrDetailsId);
+                        modal.SaveManDetails.show();
+                    });
+                }
+            }
+        } ,
+        {   data: 'first_assign'} ,
+        {   data: 'long_interval'} ,
+        {   data: 'change'} ,
+        {   data: 'process_name'} ,
+        {   data: 'working_time'} ,
+        {   data: 'qc_inspector_operator'} ,
+        {   data: 'trainer'} ,
+        {   data: 'trainer_sample_size'} ,
+        {   data: 'trainer_result'} ,
+        {   data: 'lqc_supervisor'} ,
+        {   data: 'lqc_sample_size'} ,
+        {   data: 'lqc_result'} ,
+        {   data: 'process_change_factor'} ,
+    ];
+
+    const qcInspectorOperatorParams = {
+        globalVar: manVar.optUserMaster,
+        formModel: toRef(frmMan.value,'qcInspectorOperator'),
+        selectedVal: '',
+    };
+    const trainerParams = {
+        globalVar: manVar.optUserMaster,
+        formModel: toRef(frmMan.value,'qcInspectorOperator'),
+        selectedVal: '',
+    };
+    const qcSupervisor1Params = {
+        globalVar: manVar.optUserMaster,
+        formModel: toRef(frmMan.value,'qcInspectorOperator'),
+        selectedVal: '',
+    };
+
+
 
     onMounted( async ()=>{
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveManDetails = new Modal(modalSaveManDetails.value.modalRef,{ keyboard: false });
-        modal.SaveManDetails.show();
+        // modal.SaveManDetails.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -384,7 +453,8 @@
 
     })
 
-    const getEcrDetailsId = async (ecrDetailsId) => {
+    const getEcrDetailsId = async (ecrDetailsId) =>
+    {
         let params = {
             ecrDetailsId : ecrDetailsId
         }
@@ -401,6 +471,15 @@
             frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
             frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
             console.log('ecrDetails',ecrDetails);
+        });
+    }
+    const getSaveManById = async (manId) =>
+    {
+        let params = {
+            manId : manId
+        }
+        axiosFetchData(params,'api/get_save_man_by_id',function(response){
+         console.log(response);
         });
     }
     const saveEcrDetails = async () => {

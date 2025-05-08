@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class EcrDetail extends Model
 {
     /**
-     * Get the user associated with the EcrDetail
+     * Get the DropdownDetail associated with the EcrDetail
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */

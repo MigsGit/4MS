@@ -32,5 +32,38 @@ class ManController extends Controller
 
         }
     }
+    public function loadManByEcrId(Request $request){
+        try {
+            $data = [];
+            $relations = [
+                'rapidx_user_qc_inspector_operator'
+            ];
+            $conditions = [
+                // 'ecrs_id' => $request->ecr_id
+            ];
+            $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(Man::class,$data,$relations,$conditions);
+            return DataTables($ecrDetail)
+            ->addColumn('get_actions',function ($row){
+                $result = '';
+                $result .= '<center>';
+                $result .= "<button class='btn btn-outline-info btn-sm mr-1' man-details-id='".$row->id."' id='btnManDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= '</center>';
+                return $result;
+            })
+            ->addColumn('qc_inspector_operator',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user_qc_inspector_operator->name;
+                return $result;
+            })
+            ->rawColumns([
+                'get_actions',
+                'qc_inspector_operator',
+            ])
+            ->make(true);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
+
 }
 
