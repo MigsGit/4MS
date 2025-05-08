@@ -16,30 +16,22 @@ class CreateManTable extends Migration
         Schema::create('man', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
-            $table->foreignId('reason_of_change')->references('id')->on('dropdown_master_details')->comment ='EDropdownMasterDetails Id';
-            $table->unsignedBigInteger('rapidx_user_id')->unique()->comment('Rapidx User Id');
-            $table->longText('type_of_part')->nullable();
-            $table->date('change_imp_date')->nullable();
+            // $table->unsignedBigInteger('rapidx_user_id')->unique()->comment('Rapidx User Id');
+            $table->string('first_assign');
+            $table->string('long_interval');
+            $table->string('change');
+            $table->longText('process_name');
+            $table->time('working_time');
+            $table->bigInteger('qc_inspector_operator')->comment('Rapidx User Id');
+            $table->bigInteger('trainer')->nullable()->comment('Rapidx User Id');
+            $table->integer('trainer_sample_size')->nullable();
+            $table->string('trainer_result')->nullable();
+            $table->bigInteger('lqc_supervisor')->nullable()->comment('Rapidx User Id');
+            $table->integer('lqc_sample_size')->nullable();
+            $table->string('lqc_result')->nullable();
+            $table->longText('process_change_factor')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            /*
-            first_assign //s
-            long_interval //s
-            change //s
-            process_name //l
-            working_time time
-            trainer //big
-
-            qc_inspector_operator //big
-            trainer_sample_size //int
-            trainer_result //s
-
-            lqc_supervisor //big
-            lqc_sample_size //int
-            lqc_result //s
-
-            process_change_factor //l
-             */
         });
     }
 

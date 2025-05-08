@@ -138,7 +138,7 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Details" @add-event="" ref="modalSaveManDetails">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Details" @add-event="saveManDetails" ref="modalSaveManDetails">
         <template #body>
             <div class="row">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -189,10 +189,10 @@
                         <input v-model="frmMan.workingTime" type="time" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Trainer:</span>
+                        <span class="input-group-text" id="addon-wrapping">Qc Inspector/ Operator:</span>
                         <Multiselect
-                            v-model="frmMan.trainer"
-                            :options="manVar.optYesNo"
+                            v-model="frmMan.qcInspectorOperator"
+                            :options="manVar.optUserMaster"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -206,10 +206,10 @@
                  </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Qc Inspector/ Operator:</span>
+                        <span class="input-group-text" id="addon-wrapping">Trainer:</span>
                         <Multiselect
-                            v-model="frmMan.qcInspectorOperator"
-                            :options="manVar.optYesNo"
+                            v-model="frmMan.trainer"
+                            :options="manVar.optUserMaster"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -217,7 +217,7 @@
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Trainer Sample Size:</span>
-                        <input v-model="frmMan.lqc_supervisor" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input v-model="frmMan.trainerSampleSize" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Trainer Result:</span>
@@ -233,7 +233,7 @@
                         <span class="input-group-text" id="addon-wrapping">LQC Supervisor:</span>
                         <Multiselect
                             v-model="frmMan.lqcSupervisor"
-                            :options="manVar.optYesNo"
+                            :options="manVar.optUserMaster"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -285,6 +285,7 @@
         reasonOfChangeParams,
         typeOfPartParams,
         getDropdownMasterByOpt,
+        getRapidxUserByIdOpt,
         axiosFetchData,
     } = useEcr();
 
@@ -329,6 +330,23 @@
         {   data: 'date_of_request'} ,
     ];
 
+
+    const qcInspectorOperatorParams = {
+        globalVar: manVar.optUserMaster,
+        formModel: toRef(frmMan.value,'qcInspectorOperator'),
+        selectedVal: '',
+    };
+    const trainerParams = {
+        globalVar: manVar.optUserMaster,
+        formModel: toRef(frmMan.value,'qcInspectorOperator'),
+        selectedVal: '',
+    };
+    const qcSupervisor1Params = {
+        globalVar: manVar.optUserMaster,
+        formModel: toRef(frmMan.value,'qcInspectorOperator'),
+        selectedVal: '',
+    };
+
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -361,6 +379,9 @@
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
+        await getRapidxUserByIdOpt(qcInspectorOperatorParams);
+
+
     })
 
     const getEcrDetailsId = async (ecrDetailsId) => {
@@ -402,16 +423,23 @@
     const saveManDetails = async () => {
         let formData = new FormData();
         //Append form data
-        // [
-        //     ["ecr_details_id", frmEcrDetails.value.ecrDetailsId],
-        //     ["change_imp_date", frmEcrDetails.value.changeImpDate],
-        //     ["type_of_part", frmEcrDetails.value.typeOfPart],
-        //     ["doc_sub_date", frmEcrDetails.value.docSubDate],
-        //     ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
-        //     ["remarks", frmEcrDetails.value.remarks],
-        // ].forEach(([key, value]) =>
-        //     formData.append(key, value)
-        // );
+        [
+            ["first_assign", frmMan.value.firstAssign],
+            ["long_interval", frmMan.value.longInterval],
+            ["change", frmMan.value.change],
+            ["process_name", frmMan.value.processName],
+            ["working_time", frmMan.value.workingTime],
+            ["trainer", frmMan.value.trainer],
+            ["qc_inspector_operator", frmMan.value.qcInspectorOperator],
+            ["trainer_sample_size", frmMan.value.trainerSampleSize],
+            ["trainer_result", frmMan.value.trainerResult],
+            ["lqc_supervisor", frmMan.value.lqcSupervisor],
+            ["lqc_sample_size", frmMan.value.lqcSampleSize],
+            ["lqc_result", frmMan.value.lqcResult],
+            ["process_change_factor", frmMan.value.processChangeFactor],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
         axiosSaveData(formData,'api/save_man', (response) =>{
             console.log(response);
         });

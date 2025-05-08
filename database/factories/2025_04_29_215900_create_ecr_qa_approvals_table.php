@@ -18,7 +18,23 @@ class CreateEcrQaApprovalsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
             /*
-           
+            firstAssign //s
+            longInterval //s
+            change //s
+            processName //l
+            workingTime //time
+            trainer //big
+
+            qcInspectorOperator //big
+            trainerSampleSize //int
+            trainerResult //s
+
+            lqcSupervisor //big
+            lqcSampleSize //int
+            lqcResult //s
+
+            processChangeFactor
+
 
 
             */
