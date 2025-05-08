@@ -17,6 +17,11 @@ class CreateEcrQaApprovalsTable extends Migration
             $table->id();
             $table->timestamps();
             $table->softDeletes();
+            /*
+           
+
+
+            */
         });
     }
 

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class ManController extends Controller
 {
-    public function asdd(Request $request){
+    public function saveMan(Request $request){
         return 'true' ;
         try {
             return response()->json(['is_success' => 'true']);

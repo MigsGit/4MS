@@ -95,11 +95,11 @@
             <div class="row">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-                    <input v-model="frmEcrDetails.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                    <input v-model="frmEcrDetails.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
-                    <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                    <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -114,21 +114,144 @@
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
-                        <input v-model="frmEcrDetails.changeImpDate" type="date" class="form-control form-control" aria-describedby="addon-wrapping">
+                        <input v-model="frmEcrDetails.changeImpDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Docs To Be Submitted</span>
-                        <input v-model="frmEcrDetails.docToBeSub" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                        <input v-model="frmEcrDetails.docToBeSub" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                  </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Docs Submission Date:</span>
-                        <input v-model="frmEcrDetails.docSubDate"  type="date" class="form-control" aria-describedby="addon-wrapping">
+                        <input v-model="frmEcrDetails.docSubDate"  type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Remarks:</span>
-                        <input v-model="frmEcrDetails.remarks"  type="text" class="form-control" aria-describedby="addon-wrapping">
+                        <input v-model="frmEcrDetails.remarks"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+        </template>
+    </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Details" @add-event="" ref="modalSaveManDetails">
+        <template #body>
+            <div class="row">
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                    <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
+                    <input type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                </div>
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                    <span class="input-group-text" id="addon-wrapping">Man Id:</span>
+                    <input type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">F:</span>
+                        <Multiselect
+                            v-model="frmMan.firstAssign"
+                            :options="manVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">L:</span>
+                        <Multiselect
+                            v-model="frmMan.longInterval"
+                            :options="manVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">C:</span>
+                        <Multiselect
+                            v-model="frmMan.change"
+                            :options="manVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Process Name:</span>
+                        <input v-model="frmMan.processName" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Working Time</span>
+                        <input v-model="frmMan.workingTime" type="time" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Trainer:</span>
+                        <Multiselect
+                            v-model="frmMan.trainer"
+                            :options="manVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Process Change Factor:</span>
+                        <textarea v-model="frmMan.processChangeFactor" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </textarea>
+                    </div>
+                 </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Qc Inspector/ Operator:</span>
+                        <Multiselect
+                            v-model="frmMan.qcInspectorOperator"
+                            :options="manVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Trainer Sample Size:</span>
+                        <input v-model="frmMan.lqc_supervisor" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Trainer Result:</span>
+                        <Multiselect
+                            v-model="frmMan.trainerResult"
+                            :options="manVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">LQC Supervisor:</span>
+                        <Multiselect
+                            v-model="frmMan.lqcSupervisor"
+                            :options="manVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">LQC Sample Size:</span>
+                        <input v-model="frmMan.lqcSampleSize" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">LQC Result:</span>
+                        <Multiselect
+                            v-model="frmMan.lqcResult"
+                            :options="manVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
                     </div>
                 </div>
             </div>
@@ -145,6 +268,7 @@
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
+    import useMan from '../../js/composables/man.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
@@ -164,11 +288,17 @@
         axiosFetchData,
     } = useEcr();
 
+    const {
+        frmMan,
+        manVar,
+    } = useMan();
+
     //ref state
     const tblEcrByStatus = ref(null);
     const tblEcrDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
+    const modalSaveManDetails = ref(null);
 
     const columns = [
         {   data: 'get_actions',
@@ -223,11 +353,11 @@
         {   data: 'remarks'} ,
     ];
 
-
-
     onMounted( async ()=>{
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modal.SaveManDetails = new Modal(modalSaveManDetails.value.modalRef,{ keyboard: false });
+        modal.SaveManDetails.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -266,6 +396,23 @@
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_ecr_details', (response) =>{
+            console.log(response);
+        });
+    }
+    const saveManDetails = async () => {
+        let formData = new FormData();
+        //Append form data
+        // [
+        //     ["ecr_details_id", frmEcrDetails.value.ecrDetailsId],
+        //     ["change_imp_date", frmEcrDetails.value.changeImpDate],
+        //     ["type_of_part", frmEcrDetails.value.typeOfPart],
+        //     ["doc_sub_date", frmEcrDetails.value.docSubDate],
+        //     ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
+        //     ["remarks", frmEcrDetails.value.remarks],
+        // ].forEach(([key, value]) =>
+        //     formData.append(key, value)
+        // );
+        axiosSaveData(formData,'api/save_man', (response) =>{
             console.log(response);
         });
     }

@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EcrController;
+use App\Http\Controllers\ManController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EdocsController;
 use App\Http\Controllers\CommonController;
@@ -28,6 +29,9 @@ Route::controller(CommonController::class)->group(function () {
 });
 Route::controller(SettingsController::class)->group(function () {
     Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
+});
+Route::controller(ManController::class)->group(function () {
+    Route::post('save_man', 'saveMan')->name('save_man');
 });
 Route::controller(EcrController::class)->group(function () {
     Route::post('save_ecr', 'saveEcr')->name('save_ecr');
