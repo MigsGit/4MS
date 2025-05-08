@@ -299,6 +299,11 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- TODO ECR | 4M Requirement Add Edit Sr. Sup |  View Manager
+                        <div class="card-footer justify-content-end">
+                            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-eye" />&nbsp;     View</button>
+                        </div> -->
                     </div>
                 </div>
                 <!-- PMI Approvers -->
