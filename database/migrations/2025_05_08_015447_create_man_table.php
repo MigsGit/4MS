@@ -16,7 +16,6 @@ class CreateManTable extends Migration
         Schema::create('man', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
-            // $table->unsignedBigInteger('rapidx_user_id')->unique()->comment('Rapidx User Id');
             $table->string('first_assign');
             $table->string('long_interval');
             $table->string('change');

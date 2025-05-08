@@ -143,11 +143,11 @@
             <div class="row">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-                    <input type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    <input v-model="frmMan.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">Man Id:</span>
-                    <input type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    <input  v-model="frmMan.manId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -223,7 +223,7 @@
                         <span class="input-group-text" id="addon-wrapping">Trainer Result:</span>
                         <Multiselect
                             v-model="frmMan.trainerResult"
-                            :options="manVar.optYesNo"
+                            :options="manVar.optResult"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -247,7 +247,7 @@
                         <span class="input-group-text" id="addon-wrapping">LQC Result:</span>
                         <Multiselect
                             v-model="frmMan.lqcResult"
-                            :options="manVar.optYesNo"
+                            :options="manVar.optJudgment"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -424,6 +424,7 @@
         let formData = new FormData();
         //Append form data
         [
+            ["ecrs_id", frmMan.value.ecrsId],
             ["first_assign", frmMan.value.firstAssign],
             ["long_interval", frmMan.value.longInterval],
             ["change", frmMan.value.change],
