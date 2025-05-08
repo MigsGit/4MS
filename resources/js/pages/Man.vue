@@ -400,8 +400,7 @@
                 if(btnManDetailsId != null){
                     btnManDetailsId.addEventListener('click',function(){
                         let manDetailsId = this.getAttribute('man-details-id');
-                        console.log(manDetailsId);
-                        getSaveManId(ecrDetailsId);
+                        getManById(manDetailsId);
                         modal.SaveManDetails.show();
                     });
                 }
@@ -473,13 +472,30 @@
             console.log('ecrDetails',ecrDetails);
         });
     }
-    const getSaveManById = async (manId) =>
+    const getManById = async (manId) =>
     {
         let params = {
             manId : manId
         }
-        axiosFetchData(params,'api/get_save_man_by_id',function(response){
-         console.log(response);
+        axiosFetchData(params,'api/get_man_by_id',function(response){
+            let data = response.data;
+            let man = data.man;
+
+            frmMan.value.firstAssign = man.first_assign;
+            frmMan.value.longInterval = man.long_interval;
+            frmMan.value.change = man.change;
+            frmMan.value.processName = man.process_name;
+            frmMan.value.workingTime = man.working_time;
+            frmMan.value.qcInspectorOperator = man.qc_inspector_operator;
+            man.trainer;
+            man.trainer_sample_size;
+            man.trainer_result;
+            man.lqc_supervisor;
+            man.lqc_sample_size;
+            man.lqc_result;
+            man.process_change_factor;
+
+
         });
     }
     const saveEcrDetails = async () => {
@@ -522,6 +538,8 @@
         );
         axiosSaveData(formData,'api/save_man', (response) =>{
             console.log(response);
+
+
         });
     }
 </script>

@@ -61,7 +61,22 @@ class ManController extends Controller
             ])
             ->make(true);
         } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+            throw $e;
+
+        }
+    }
+    public function getManById(Request $request){
+        try {
+            $data = [];
+            $relations = [
+            ];
+            $conditions = [
+                'id' => $request->manId
+            ];
+            $man = $this->resourceInterface->readWithRelationsConditionsActive(Man::class,$data,$relations,$conditions);
+            return response()->json(['is_success' => 'true','man'=>$man[0]]);
+        } catch (Exception $e) {
+            throw $e;
         }
     }
 

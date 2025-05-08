@@ -33,6 +33,7 @@ Route::controller(SettingsController::class)->group(function () {
 Route::controller(ManController::class)->group(function () {
     Route::post('save_man', 'saveMan')->name('save_man');
     Route::get('load_man_by_ecr_id', 'loadManByEcrId')->name('load_man_by_ecr_id');
+    Route::get('get_man_by_id', 'getManById')->name('get_man_by_id');
 });
 Route::controller(EcrController::class)->group(function () {
     Route::post('save_ecr', 'saveEcr')->name('save_ecr');

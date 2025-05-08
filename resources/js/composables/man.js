@@ -3,9 +3,9 @@ import useFetch from './utils/useFetch';
 
 export default function useMan(){
     const frmMan = ref ({
-        firstAssign : 'N/A',
-        longInterval : 'N/A',
-        change : 'N/A',
+        firstAssign : '',
+        longInterval : '',
+        change : '',
         processName : '',
         workingTime : '',
         trainer : '',
