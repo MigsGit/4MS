@@ -23,4 +23,12 @@ class Man extends Model
     {
        return $this->rapidx_user('qc_inspector_operator');
     }
+    public function rapidx_user_trainer()
+    {
+       return $this->rapidx_user('trainer');
+    }
+    public function rapidx_user_lqc_supervisor()
+    {
+       return $this->rapidx_user('lqc_supervisor');
+    }
 }

@@ -32,7 +32,6 @@ class ManController extends Controller
                 $manRequestValidated['lqc_sample_size'] = $request->lqc_sample_size;
                 $manRequestValidated['lqc_result'] = $request->lqc_result;
                 $manRequestValidated['process_change_factor'] = $request->process_change_factor;
-                // return $manRequestValidated;
                 $conditions = [
                     'id' => $request->man_id
                 ];
@@ -52,7 +51,9 @@ class ManController extends Controller
         try {
             $data = [];
             $relations = [
-                'rapidx_user_qc_inspector_operator'
+                'rapidx_user_qc_inspector_operator',
+                'rapidx_user_trainer',
+                'rapidx_user_lqc_supervisor',
             ];
             $conditions = [
                 // 'ecrs_id' => $request->ecr_id
@@ -68,12 +69,58 @@ class ManController extends Controller
             })
             ->addColumn('qc_inspector_operator',function ($row){
                 $result = '';
-                $result .= $row->rapidx_user_qc_inspector_operator->name;
+                $result .= $row->rapidx_user_qc_inspector_operator->name ?? null;
+                return $result;
+            })
+            ->addColumn('trainer',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user_trainer->name ?? null;
+                return $result;
+            })
+            ->addColumn('lqc_supervisor',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user_lqc_supervisor->name ?? null;
+                return $result;
+            })
+            ->addColumn('trainer_result',function ($row){
+                $result = '';
+                switch ($row->trainer_result) {
+                    case 'OK':
+                        $bgColor = 'bg-success text-white';
+                        break;
+                    case 'NG':
+                        $bgColor = 'bg-danger text-white';
+                        break;
+                    default:
+                        $bgColor = 'bg-secondary text-white';
+                        break;
+                }
+                $result .='<span class="badge '.$bgColor.'"> '.$row->trainer_result.' </span>';
+                return $result;
+            })
+            ->addColumn('lqc_result',function ($row){
+                $result = '';
+                switch ($row->lqc_result) {
+                    case 'PASSED':
+                        $bgColor = 'bg-success text-white';
+                        break;
+                    case 'FAILED':
+                        $bgColor = 'bg-danger text-white';
+                        break;
+                    default:
+                        $bgColor = 'bg-secondary text-white';
+                        break;
+                }
+                $result .='<span class="badge '.$bgColor.'"> '.$row->lqc_result.' </span>';
                 return $result;
             })
             ->rawColumns([
                 'get_actions',
                 'qc_inspector_operator',
+                'trainer',
+                'trainer_result',
+                'lqc_supervisor',
+                'lqc_result',
             ])
             ->make(true);
         } catch (Exception $e) {
