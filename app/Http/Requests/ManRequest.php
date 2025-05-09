@@ -31,6 +31,8 @@ class ManRequest extends FormRequest
             'process_name' => 'required',
             'working_time' => 'required',
             'qc_inspector_operator' => 'required',
+            'trainer' => 'required',
+            'lqc_supervisor' => 'required',
         ];
     }
 }

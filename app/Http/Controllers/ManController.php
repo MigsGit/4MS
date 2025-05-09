@@ -19,11 +19,27 @@ class ManController extends Controller
         $this->commonInterface = $commonInterface;
     }
     public function saveMan(Request $request,ManRequest $manRequest){
-        date_default_timezone_set('Asia/Manila');
-        DB::beginTransaction();
         try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $manModel = Man::class;
             $manRequestValidated = $manRequest->validated();
-            $this->resourceInterface->create(Man::class,$manRequestValidated);
+            if ( isset($request->man_id) ){ //Edit
+                $manRequestValidated['trainer'] = $request->trainer;
+                $manRequestValidated['trainer_sample_size'] = $request->trainer_sample_size;
+                $manRequestValidated['trainer_result'] = $request->trainer_result;
+                $manRequestValidated['lqc_supervisor'] = $request->lqc_supervisor;
+                $manRequestValidated['lqc_sample_size'] = $request->lqc_sample_size;
+                $manRequestValidated['lqc_result'] = $request->lqc_result;
+                $manRequestValidated['process_change_factor'] = $request->process_change_factor;
+                // return $manRequestValidated;
+                $conditions = [
+                    'id' => $request->man_id
+                ];
+                $this->resourceInterface->updateConditions($manModel,$conditions,$manRequestValidated);
+            }else{ //Add
+                $this->resourceInterface->create($manModel,$manRequestValidated);
+            }
             DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

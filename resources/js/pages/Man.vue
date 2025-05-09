@@ -8,9 +8,6 @@
                         <li class="breadcrumb-item active">Man</li>
                     </ol>
                     <div class="table-responsive">
-                    <!-- id="dataTable" -->
-                    <!-- <table class="table" id="dataTable" width="100%" cellspacing="0">
-                    </table> -->
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
@@ -43,7 +40,6 @@
                             </thead>
                         </DataTable>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -84,6 +80,11 @@
             </div>
             <div class="row mt-3">
                 <div class="card">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <button @click="addManDetails()" test="dasd" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
+                        </div>
+                    </div>
                     <div class="card-body overflow-auto">
                         <DataTable
                         width="100%" cellspacing="0"
@@ -131,10 +132,6 @@
              <EcrChangeComponent :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
             <div class="row">
-                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                    <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-                    <input v-model="frmEcrDetails.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                </div>
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
                     <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
@@ -349,6 +346,7 @@
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrId = this.getAttribute('ecr-id');
+                        frmMan.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
                         modal.SaveMan.show();
                     });
@@ -437,8 +435,6 @@
         selectedVal: '',
     };
 
-
-
     onMounted( async ()=>{
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
@@ -451,6 +447,10 @@
 
 
     })
+
+   const addManDetails = async () => {
+        modal.SaveManDetails.show();
+   }
 
     const getEcrDetailsId = async (ecrDetailsId) =>
     {
@@ -481,19 +481,20 @@
             let data = response.data;
             let man = data.man;
 
+            frmMan.value.manId = man.id;
             frmMan.value.firstAssign = man.first_assign;
             frmMan.value.longInterval = man.long_interval;
             frmMan.value.change = man.change;
             frmMan.value.processName = man.process_name;
             frmMan.value.workingTime = man.working_time;
             frmMan.value.qcInspectorOperator = man.qc_inspector_operator;
-            man.trainer;
-            man.trainer_sample_size;
-            man.trainer_result;
-            man.lqc_supervisor;
-            man.lqc_sample_size;
-            man.lqc_result;
-            man.process_change_factor;
+            frmMan.value.trainer = man.trainer;
+            frmMan.value.trainerSampleSize = man.trainer_sample_size;
+            frmMan.value.trainerResult = man.trainer_result;
+            frmMan.value.lqcSupervisor = man.lqc_supervisor;
+            frmMan.value.lqcSampleSize = man.lqc_sample_size;
+            frmMan.value.lqcResult = man.lqc_result;
+            frmMan.value.processChangeFactor = man.process_change_factor;
 
 
         });
@@ -520,6 +521,7 @@
         //Append form data
         [
             ["ecrs_id", frmMan.value.ecrsId],
+            ["man_id", frmMan.value.manId],
             ["first_assign", frmMan.value.firstAssign],
             ["long_interval", frmMan.value.longInterval],
             ["change", frmMan.value.change],
