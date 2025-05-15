@@ -45,4 +45,5 @@ Route::controller(EcrController::class)->group(function () {
     Route::get('load_ecr_requirements', 'loadEcrRequirements')->name('load_ecr_requirements');
     Route::get('get_ecr_by_id', 'getEcrById')->name('get_ecr_by_id');
     Route::get('get_ecr_details_id', 'getEcrDetailsId')->name('get_ecr_details_id');
+    Route::get('ecr_req_decision_change', 'ecrReqDecisionChange')->name('ecr_req_decision_change');
 });

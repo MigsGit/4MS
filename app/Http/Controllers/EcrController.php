@@ -139,13 +139,13 @@ class EcrController extends Controller
                 $ecrRequirementMatch = $ecrRequirementCollection->firstWhere('classification_requirements_id', $row->id);
                 $classificationRequirementsId = $ecrRequirementMatch['classification_requirements_id'] ?? '';
                 $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
-                
+
                 $cSelected = $ecrRequirementMatch['decision'] === 'C' ? 'selected' : '';
                 $xSelected = $ecrRequirementMatch['decision'] === 'X' ? 'selected' : '';
 
                 $result = '';
                 $result .= '<center>';
-                $result .= "<select class='form-select' ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$classificationRequirementsId."' id='btnGetEcrDetailsId'>";
+                $result .= "<select  id='btnChangeEcrReqDecision' class='form-select' ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
                 $result .=  "<option value='' disabled> --Select an option -- </option>";
                 $result .=  "<option value='C' ".$cSelected."> √ </option>";
                 $result .=  "<option value='X' ".$xSelected."> X </option>";
@@ -299,6 +299,34 @@ class EcrController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
+    public function ecrReqDecisionChange(Request $request){
+        try {
+            if( isset($request->ecr_req_id) ){ //edit
+                $conditions = [
+                    'id' => $request->ecr_req_id
+                ];
+                $data = [
+                    'classification_requirements_id' => $request->classification_requirement_id,
+                    'decision' => $request->ecr_req_value,
+                ];
+
+                $this->resourceInterface->updateConditions(EcrRequirement::class,$conditions,$data);
+            }else{ //add
+                $data = [
+                    'classification_requirements_id' => $request->classification_requirement_id,
+                    'decision' => $request->ecr_req_value,
+                    'ecrs_id' => 1,
+                ];
+                $this->resourceInterface->create(EcrRequirement::class,$data);
+            }
+
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+
+            throw $e;
+        }
+    }
+
    public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
        date_default_timezone_set('Asia/Manila');
        try {

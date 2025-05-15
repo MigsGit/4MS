@@ -395,7 +395,7 @@
                         :options="{
                             serverSide: true, //Serverside true will load the network
                             columnDefs:[
-                                {orderable:false,target:[2]}
+                                {orderable:false,target:[3]}
                             ]
                         }"
                     >
@@ -493,7 +493,27 @@
         {   data: 'requirement'} ,
         {   data: 'details'} ,
         {   data: 'evidence'} ,
-        {   data: 'get_actions', },
+        {   data: 'get_actions',
+            createdCell(cell){
+                let btnChangeEcrReqDecision = cell.querySelector('#btnChangeEcrReqDecision');
+                if(btnChangeEcrReqDecision != null){
+                    btnChangeEcrReqDecision.addEventListener('change',function(){
+                        let ecrReqId = this.getAttribute('ecr-requirements-id');
+                        let ecrReqValue = this.value;
+                        let classificationRequirementId = this.getAttribute('classification-requirement-id');
+                        console.log('ecrReqId',ecrReqId);
+                        console.log('ecrReqValue',ecrReqValue);
+                        console.log('classificationRequirementId',classificationRequirementId);
+                        let selectedParams = {
+                            ecr_req_id : ecrReqId,
+                            ecr_req_value : ecrReqValue,
+                            classification_requirement_id : classificationRequirementId,
+                        }
+                        ecrReqDecisionChange(selectedParams);
+                    });
+                }
+            }
+        }
     ];
 
     //constant object params
@@ -549,6 +569,14 @@
     const onUserChange = async (selectedParams)=>{
         console.log('pmiApproverPreparedByParams',selectedParams);
         await getRapidxUserByIdOpt(selectedParams);
+    }
+    const ecrReqDecisionChange = async (selectedParams)=>{
+        console.log('ecrReqDecisionChange',selectedParams);
+
+        axiosFetchData(selectedParams,'api/ecr_req_decision_change',function(response){
+            console.log(response);
+
+        });
     }
 
     onMounted( async ()=>{
