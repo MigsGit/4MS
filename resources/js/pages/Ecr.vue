@@ -383,6 +383,38 @@
                 <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
             </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR" @add-event="frmSaveEcr()" ref="modalSaveEcr">
+        <template #body>
+                <div class="row">
+                    <DataTable
+                            width="100%" cellspacing="0"
+                            class="table mt-2"
+                            ref="tblEcrRequirements"
+                            :columns="tblEcrRequirements"
+                            ajax="api/load_ecr_requirements"
+                            :options="{
+                                serverSide: true, //Serverside true will load the network
+                                columnDefs:[
+                                    {orderable:false,target:[3]}
+                                ]
+                            }"
+                        >
+                            <thead>
+                                <tr>
+                                    <th>Requirement</th>
+                                    <th>Details</th>
+                                    <th>Evidence</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </DataTable>
+                </div>
+            </template>
+            <template #footer>
+                <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
+            </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -418,6 +450,7 @@
     //ref state
     const modalSaveEcr = ref(null);
     const tblEcr = ref(null);
+    const tblEcrRequirements = ref(null);
     const tblEcrColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -454,6 +487,15 @@
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
         {   data: 'date_of_request'} ,
+    ];
+    const tblEcrRequirements = [
+        {   data: 'requirement'} ,
+        {   data: 'details'} ,
+        {   data: 'evidence'} ,
+        {   data: 'input',
+            orderable: false,
+            searchable: false,
+        } ,
     ];
 
     //constant object params

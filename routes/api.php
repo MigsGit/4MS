@@ -41,8 +41,8 @@ Route::controller(EcrController::class)->group(function () {
     Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
     Route::get('load_ecr', 'loadEcr')->name('load_ecr');
     Route::get('load_ecr_by_status', 'loadEcrByStatus')->name('load_ecr_by_status');
-    Route::get('get_ecr_by_id', 'getEcrById')->name('get_ecr_by_id');
-
     Route::get('load_ecr_details_by_ecr_id', 'loadEcrDetailsByEcrId')->name('load_ecr_details_by_ecr_id');
+    Route::get('load_ecr_requirements', 'loadEcrRequirements')->name('load_ecr_requirements');
+    Route::get('get_ecr_by_id', 'getEcrById')->name('get_ecr_by_id');
     Route::get('get_ecr_details_id', 'getEcrDetailsId')->name('get_ecr_details_id');
 });
