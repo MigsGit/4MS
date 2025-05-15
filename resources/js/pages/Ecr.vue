@@ -383,36 +383,36 @@
                 <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
             </template>
     </ModalComponent>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR" @add-event="frmSaveEcr()" ref="modalSaveEcr">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
                 <div class="row">
                     <DataTable
-                            width="100%" cellspacing="0"
-                            class="table mt-2"
-                            ref="tblEcrRequirements"
-                            :columns="tblEcrRequirements"
-                            ajax="api/load_ecr_requirements"
-                            :options="{
-                                serverSide: true, //Serverside true will load the network
-                                columnDefs:[
-                                    {orderable:false,target:[3]}
-                                ]
-                            }"
-                        >
-                            <thead>
-                                <tr>
-                                    <th>Requirement</th>
-                                    <th>Details</th>
-                                    <th>Evidence</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </DataTable>
+                        width="100%" cellspacing="0"
+                        class="table mt-2"
+                        ref="tblEcrRequirements"
+                        :columns="tblEcrRequirementsColumns"
+                        ajax="api/load_ecr_requirements"
+                        :options="{
+                            serverSide: true, //Serverside true will load the network
+                            columnDefs:[
+                                {orderable:false,target:[2]}
+                            ]
+                        }"
+                    >
+                        <thead>
+                            <tr>
+                                <th>Requirement</th>
+                                <th>Details</th>
+                                <th>Evidence</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </DataTable>
                 </div>
             </template>
             <template #footer>
                 <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
+                <!-- <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button> -->
             </template>
     </ModalComponent>
 </template>
@@ -449,6 +449,7 @@
 
     //ref state
     const modalSaveEcr = ref(null);
+    const modalEcrRequirements = ref(null);
     const tblEcr = ref(null);
     const tblEcrRequirements = ref(null);
     const tblEcrColumns = [
@@ -488,14 +489,11 @@
         {   data: 'customer_ec_no'} ,
         {   data: 'date_of_request'} ,
     ];
-    const tblEcrRequirements = [
+    const tblEcrRequirementsColumns = [
         {   data: 'requirement'} ,
         {   data: 'details'} ,
         {   data: 'evidence'} ,
-        {   data: 'input',
-            orderable: false,
-            searchable: false,
-        } ,
+        {   data: 'get_actions', },
     ];
 
     //constant object params
@@ -557,7 +555,8 @@
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
         modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
-        // modal.SaveEcr.show();
+        modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modal.EcrRequirements.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         // await getRapidxUserByIdOpt(otherDispoRequestedByParams);

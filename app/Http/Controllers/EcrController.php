@@ -7,12 +7,15 @@ use App\Models\EcrApproval;
 use App\Models\PmiApproval;
 use Illuminate\Http\Request;
 use App\Models\DropdownMaster;
+use App\Models\EcrRequirement;
 use App\Http\Requests\EcrRequest;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\EcrDetailRequest;
+use App\Models\ClassificationRequirement;
+
 class EcrController extends Controller
 {
     protected $resourceInterface;
@@ -112,6 +115,46 @@ class EcrController extends Controller
                 'reason_of_change',
                 'description_of_change',
                 'type_of_part',
+            ])
+            ->make(true);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
+    public function loadEcrRequirements(Request $request){
+        try {
+            $data = [];
+            $relations = [];
+            $conditions = [];
+            $ecr_req_data = [];
+            $ecr_req_relations = [];
+            $ecr_req_conditions = [
+                'ecrs_id' => 1,
+            ];
+            $classificationRequirement = $this->resourceInterface->readWithRelationsConditionsActive(ClassificationRequirement::class,$data,$relations,$conditions);
+            $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,$ecr_req_data,$ecr_req_relations,$ecr_req_conditions);
+            return DataTables($classificationRequirement)
+            ->addColumn('get_actions',function ($row) use($ecrRequirement) {
+                $ecrRequirementCollection = collect($ecrRequirement);
+                $ecrRequirementMatch = $ecrRequirementCollection->firstWhere('classification_requirements_id', $row->id);
+                $classificationRequirementsId = $ecrRequirementMatch['classification_requirements_id'] ?? '';
+                $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
+                
+                $cSelected = $ecrRequirementMatch['decision'] === 'C' ? 'selected' : '';
+                $xSelected = $ecrRequirementMatch['decision'] === 'X' ? 'selected' : '';
+
+                $result = '';
+                $result .= '<center>';
+                $result .= "<select class='form-select' ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$classificationRequirementsId."' id='btnGetEcrDetailsId'>";
+                $result .=  "<option value='' disabled> --Select an option -- </option>";
+                $result .=  "<option value='C' ".$cSelected."> √ </option>";
+                $result .=  "<option value='X' ".$xSelected."> X </option>";
+                $result .=  "</select>";
+                $result .= '</center>';
+                return $result;
+            })
+            ->rawColumns([
+                'get_actions',
             ])
             ->make(true);
         } catch (Exception $e) {
