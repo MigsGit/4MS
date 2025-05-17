@@ -8,12 +8,13 @@
                         <li class="breadcrumb-item active">Man</li>
                     </ol>
                     <div class="table-responsive">
+                        <!-- :ajax="api/load_ecr_by_status?status=AP" -->
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
                             ref="tblEcrByStatus"
                             :columns="columns"
-                            ajax="api/load_ecr_by_status?status=AP"
+                            ajax="api/load_ecr_by_status?category=Man"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[

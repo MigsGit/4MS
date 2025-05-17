@@ -702,7 +702,6 @@
         await getRapidxUserByIdOpt(otherDispoRequestedByParams);
     }
     const onUserChange = async (selectedParams)=>{
-        console.log('pmiApproverPreparedByParams',selectedParams);
         await getRapidxUserByIdOpt(selectedParams);
     }
     const ecrReqDecisionChange = async (selectedParams,varParams)=>{

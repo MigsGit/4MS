@@ -54,7 +54,8 @@ class EcrController extends Controller
         $data = [];
         $relations = [];
         $conditions = [
-            'status' => $request->status
+            // 'status' => $request->status,
+            'category' => $request->category
         ];
         $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
         return DataTables($ecr)
@@ -124,8 +125,6 @@ class EcrController extends Controller
     public function loadEcrRequirements(Request $request){
         try {
             //TODO: Get ECR Id When opening modal
-            //TODO: Load Table based on Classification, Man , Material
-
             $data = [];
             $relations = [];
             $conditions = [
@@ -195,10 +194,11 @@ class EcrController extends Controller
         try {
             //TODO: EDIT ecr_no, DELETE, Auto Increment Ctrl Number, InsertById, N/A in Dropdown
             DB::beginTransaction();
-            return;
-            $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request){
+            // return;
+            $ecr_id = 2;
+            $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request,$ecr_id){
                 return [
-                    'ecrs_id' =>  1,
+                    'ecrs_id' =>  $ecr_id,
                     'description_of_change' => $description_of_change,
                     'reason_of_change' => $request->reason_of_change[$index],
                     'created_at' => now(),
@@ -220,8 +220,7 @@ class EcrController extends Controller
             $ecrApprovalRequest = collect($ecr_approval_types)->flatMap(function ($users,$type) use ($request,&$ctr,$ecr_id){
                     return collect($users)->map(function ($userId) use ($request,$type,&$ctr,$ecr_id){
                         return [
-                            'ecrs_id' =>  1,
-                            // 'ecrs_id' =>  $ecr_id,
+                            'ecrs_id' =>  $ecr_id,
                             'rapidx_user_id' => $userId,
                             'type' => $type,
                             'counter' => $ctr,
@@ -231,8 +230,7 @@ class EcrController extends Controller
                     });
 
             })->toArray();
-            $ecr =  EcrApproval::insert($ecrApprovalRequest);
-
+            EcrApproval::insert($ecrApprovalRequest);
             //PMI Approvers
             $types = [
                 'PB' => $request->prepared_by,
@@ -240,13 +238,13 @@ class EcrController extends Controller
                 'AB' => $request->approved_by,
             ];
 
-            $pmiApprovalRequest = collect($types)->flatMap(function ($users,$type) use ($request,&$ctr){
+            $pmiApprovalRequest = collect($types)->flatMap(function ($users,$type) use ($request,&$ctr,$ecr_id){
                 //return array users id as array value
-                return collect($users)->map(function ($userId) use ($type, $request,&$ctr) {
+                return collect($users)->map(function ($userId) use ($type, $request,&$ctr,$ecr_id) {
                     // $type as a array name
                     //return array users id, defined type by use keyword,
                     return [
-                        'ecrs_id' => 1,
+                        'ecrs_id' => $ecr_id,
                          // 'ecrs_id' =>  $ecr_id,
                         'rapidx_user_id' => $userId,
                         'type' => $type,
@@ -257,7 +255,7 @@ class EcrController extends Controller
                 });
             })->toArray();
 
-            $ecr =  PmiApproval::insert($pmiApprovalRequest);
+            PmiApproval::insert($pmiApprovalRequest);
             DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

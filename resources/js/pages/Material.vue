@@ -1,53 +1,188 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import Multiselect from 'vue-multiselect'
-
-const options = ref({
-    test: []
-})
-const selectedOption = ref({
-    test:''
-})
-
-const loadOptions = async () => {
-  // Simulate API response
-  const dropdownMasterByOpt = [
-    { id: 2, dropdown_masters_details: 'test 2' },
-    { id: 3, dropdown_masters_details: 'test test' }
-  ]
-
-  // Transform and assign to options
-  options.value.test.splice(0, options.value.test.length,
-    { value: '', label: '-Select-', disabled: true },
-    { value: 'N/A', label: 'N/A' },
-    ...dropdownMasterByOpt.map(item => ({
-      value: item.id,
-      label: item.dropdown_masters_details
-    }))
-  )
-
-  // Set selected value if needed
-  selectedOption.value.test = { value: 2, label: 'test 2' } // pre-selected value
-}
-
-onMounted(() => {
-  loadOptions()
-})
-</script>
-
 <template>
-  <Multiselect
-    v-model="selectedOption.test"
-    :options="options.test"
-    placeholder="Select an option"
-    label="label"
-    track-by="value"
-    :searchable="true"
-    :close-on-select="true"
-  />
-  {{selectedOption.test}}
-</template>
+    <div class="container-fluid px-4">
+        <h4 class="mt-4">Material</h4>
+        <div class="card mt-5"  style="width: 100%;">
+            <div class="card-body overflow-auto">
+                <div class="container-fluid px-4">
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item active">Man</li>
+                    </ol>
+                    <div class="table-responsive">
+                        <DataTable
+                            width="100%" cellspacing="0"
+                            class="table mt-2"
+                            ref="tblEcrByStatus"
+                            :columns="columns"
+                            ajax="api/load_ecr_by_status?category=Material&&status=AP"
+                            :options="{
+                                serverSide: true, //Serverside true will load the network
+                                columnDefs:[
+                                    // {orderable:false,target:[0]}
+                                ]
+                            }"
+                        >
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                    <th>ECR Ctrl No.</th>
+                                    <th>Category</th>
+                                    <th>Internal or External</th>
+                                    <th>Customer Name</th>
+                                    <th>Part Number</th>
+                                    <th>Part Name</th>
+                                    <th>Device Name</th>
+                                    <th>Product Line</th>
+                                    <th>Section</th>
+                                    <th>Customer Ec. No</th>
+                                    <th>Date Of Request</th>
+                                </tr>
+                            </thead>
+                        </DataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  -->
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Material" @add-event="" ref="modalSaveMaterial">
+        <template #body>
+            <div class="row">
+                <div class="card">
+                    <div class="card-body overflow-auto">
+                        <DataTable
+                        width="100%" cellspacing="0"
+                        class="table  table-responsive mt-2"
+                        ref="tblEcrDetails"
+                        :columns="tblEcrDetailColumns"
+                        ajax="api/load_ecr_details_by_ecr_id"
+                        :options="{
+                            serverSide: true, //Serverside true will load the network
+                            columnDefs:[
+                                // {orderable:false,target:[0]}
+                            ]
+                        }"
+                    >
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th> Description Of Change</th>
+                                <th> Reason Of Change</th>
+                                <th> Type Of Part</th>
+                                <th> Change Imp Date</th>
+                                <th> Doc Sub Date</th>
+                                <th> Doc To Be Sub</th>
+                                <th> Remarks</th>
+                            </tr>
+                        </thead>
+                    </DataTable>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        </template>
+    </ModalComponent>
+<!--  -->
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
+        <template #body>
+             <!-- Description of Change / Reason for Change -->
+             <EcrChangeComponent :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+            </EcrChangeComponent>
+            <div class="row">
 
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+        </template>
+    </ModalComponent>
+</template>
+<script setup>
+    import {ref , onMounted,reactive, toRef} from 'vue';
+    import ModalComponent from '../../js/components/ModalComponent.vue';
+    import EcrChangeComponent from '../components/EcrChangeComponent.vue';
+    import useEcr from '../../js/composables/ecr.js';
+    import DataTable from 'datatables.net-vue3';
+    import DataTablesCore from 'datatables.net-bs5';
+    DataTable.use(DataTablesCore)
+
+    const {
+        modal,
+        ecrVar,
+        frmEcrReasonRows,
+    } = useEcr();
+    const modalSaveEcrDetail = ref(null);
+    const modalSaveMaterial = ref(null);
+    const tblEcrDetails = ref(null);
+
+    //Columns
+    const columns = [
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
+                if(btnGetEcrId != null){
+                    btnGetEcrId.addEventListener('click',function(){
+                        let ecrId = this.getAttribute('ecr-id');
+                        // frmMan.value.ecrsId = ecrId;
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
+                        modal.SaveMaterial.show();
+                    });
+                }
+            }
+        } ,
+        {   data: 'status'} ,
+        {   data: 'ecr_no'} ,
+        {   data: 'category'} ,
+        {   data: 'internal_external'} ,
+        {   data: 'customer_name'} ,
+        {   data: 'part_no'} ,
+        {   data: 'part_name'} ,
+        {   data: 'device_name'} ,
+        {   data: 'product_line'} ,
+        {   data: 'section'} ,
+        {   data: 'customer_ec_no'} ,
+        {   data: 'date_of_request'} ,
+    ];
+    const tblEcrDetailColumns = [
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnGetEcrDetailsId = cell.querySelector('#btnGetEcrDetailsId');
+                if(btnGetEcrDetailsId != null){
+                    btnGetEcrDetailsId.addEventListener('click',function(){
+                        let ecrDetailsId = this.getAttribute('ecr-details-id');
+                        // getEcrDetailsId(ecrDetailsId);
+                        modal.SaveEcrDetail.show();
+                    });
+                }
+            }
+        } ,
+        {   data: 'description_of_change'} ,
+        {   data: 'reason_of_change'} ,
+        {   data: 'type_of_part'} ,
+        {   data: 'change_imp_date'} ,
+        {   data: 'doc_sub_date'} ,
+        {   data: 'doc_to_be_sub'} ,
+        {   data: 'remarks'} ,
+    ];
+
+    onMounted( async ()=>{
+        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
+        // modal.SaveEcrDetail.show();
+    })
+
+    //Functions
+    const saveEcrDetails = async () =>{
+
+    }
+</script>
 <style scoped>
 @import "vue-multiselect/dist/vue-multiselect.min.css";
 </style>
