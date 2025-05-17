@@ -123,9 +123,14 @@ class EcrController extends Controller
     }
     public function loadEcrRequirements(Request $request){
         try {
+            //TODO: Get ECR Id When opening modal
+            //TODO: Load Table based on Classification, Man , Material
+
             $data = [];
             $relations = [];
-            $conditions = [];
+            $conditions = [
+                'classifications_id' => $request->category
+            ];
             $ecr_req_data = [];
             $ecr_req_relations = [];
             $ecr_req_conditions = [
@@ -137,16 +142,20 @@ class EcrController extends Controller
             ->addColumn('get_actions',function ($row) use($ecrRequirement) {
                 $ecrRequirementCollection = collect($ecrRequirement);
                 $ecrRequirementMatch = $ecrRequirementCollection->firstWhere('classification_requirements_id', $row->id);
-                $classificationRequirementsId = $ecrRequirementMatch['classification_requirements_id'] ?? '';
                 $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
-
                 $cSelected = $ecrRequirementMatch['decision'] === 'C' ? 'selected' : '';
                 $xSelected = $ecrRequirementMatch['decision'] === 'X' ? 'selected' : '';
-
+                if($ecrRequirementId === ''){
+                    $isValid = "is-invalid";
+                    $emptySelected = "selected";
+                }else{
+                    $isValid = "is-valid";
+                    $emptySelected = "";
+                }
                 $result = '';
                 $result .= '<center>';
-                $result .= "<select  id='btnChangeEcrReqDecision' class='form-select' ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
-                $result .=  "<option value='' disabled> --Select an option -- </option>";
+                $result .= "<select id='btnChangeEcrReqDecision' class='form-select btn-change-ecr-req-decision ".$isValid."' ref=btnChangeEcrReqDecision ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
+                $result .=  "<option value='' ".$emptySelected." disabled> --Select-- </option>";
                 $result .=  "<option value='C' ".$cSelected."> √ </option>";
                 $result .=  "<option value='X' ".$xSelected."> X </option>";
                 $result .=  "</select>";
@@ -301,6 +310,7 @@ class EcrController extends Controller
     }
     public function ecrReqDecisionChange(Request $request){
         try {
+
             if( isset($request->ecr_req_id) ){ //edit
                 $conditions = [
                     'id' => $request->ecr_req_id
@@ -315,7 +325,7 @@ class EcrController extends Controller
                 $data = [
                     'classification_requirements_id' => $request->classification_requirement_id,
                     'decision' => $request->ecr_req_value,
-                    'ecrs_id' => 1,
+                    'ecrs_id' => 1, //TODO: Get ECR Id from Params
                 ];
                 $this->resourceInterface->create(EcrRequirement::class,$data);
             }
