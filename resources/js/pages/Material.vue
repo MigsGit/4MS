@@ -197,6 +197,214 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- QA Dispositions -->
+                        <div class="card mb-2">
+                            <h5 class="mb-0">
+                                <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
+                                    Approval:
+                                </button>
+                            </h5>
+                            <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
+                                <div class="card-body shadow">
+                                    <div class="row">
+                                        <div class="col-12 overflow-auto">
+                                            <table class="table table-responsive">
+                                                <thead>
+                                                    <tr>
+                                                    <th scope="col" style="width: 10%;">Section</th>
+                                                    <th scope="col" style="width: 30%;">Prepared by</th>
+                                                    <th scope="col" style="width: 30%;">Checked by</th>
+                                                    <th scope="col" style="width: 30%;">Approved By</th>
+                                                    </tr>
+                                                </thead>
+                                                <!-- @change="onUserChange(qadApprovedByInternalParams)" -->
+                                                <tbody>
+                                                    <tr >
+                                                        <td>
+                                                            Purchasing
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.prCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.prCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.prApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                    <tr >
+                                                        <td>
+                                                            Conformed: PPC
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.ppcCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.ppcCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.ppcApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                    <tr >
+                                                        <td>
+                                                            EMS
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.emsCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.emsCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.emsApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                    <tr >
+                                                        <td>
+                                                            QC
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.qcCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.qcCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.qcApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                    <tr >
+                                                        <td>
+                                                            Engineering
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.enggCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.enggCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.enggApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                    <tr >
+                                                        <td>
+                                                            QA
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.qaCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.qaCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.qaApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.optRapidxUser"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- TODO ECR | 4M Requirement View Manager Ni-an
+                                <div class="card-footer justify-content-end">
+                                    <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-eye" />&nbsp;     View</button>
+                                </div> -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
