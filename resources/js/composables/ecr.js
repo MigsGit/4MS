@@ -1,12 +1,16 @@
 import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
+import useForm from "./utils/useForm";
 
 export default function useEcr(){
     const { axiosFetchData } = useFetch(); // Call  the useFetch function
+    const  {
+        axiosSaveData
+    } = useForm();
 
     //Constant Object
     const modal = {
-        // SaveEcr : null,
+        SaveEcrDetail : null,
     };
     //Reactive State
     const ecrVar = reactive({
@@ -78,6 +82,8 @@ export default function useEcr(){
             approvedBy: '',
         },
     ]);
+    const tblEcrDetails = ref(null);
+
 
     //Obj Params
     const descriptionOfChangeParams ={
@@ -98,8 +104,7 @@ export default function useEcr(){
         formModel: toRef(frmEcrDetails.typeOfPart,'reasonOfChange'),
         selectedVal: '',
     }
-
-     //Functions
+    //Functions
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
             descriptionOfChange: '',
@@ -130,12 +135,10 @@ export default function useEcr(){
                     }
                 }),
             );
-            console.log('selectedVal',params.selectedVal);
 
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
         });
     }
-
     const getRapidxUserByIdOpt = async (params) => {
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
         await axiosFetchData(params, `api/get_rapidx_user_by_id_opt`, (response) => { //url
@@ -243,6 +246,44 @@ export default function useEcr(){
             modal.SaveEcr.show();
         });
     }
+    const getEcrDetailsId = async (ecrDetailsId) =>
+    {
+        let params = {
+            ecrDetailsId : ecrDetailsId
+        }
+        axiosFetchData(params,'api/get_ecr_details_id',function(response){
+            let ecrDetails = response.data.ecrDetail;
+            console.log('ecrDetailsId',ecrDetailsId);
+
+            frmEcrDetails.value.ecrDetailsId = ecrDetailsId;
+            frmEcrDetails.value.changeImpDate =ecrDetails.change_imp_date
+            frmEcrDetails.value.docSubDate =ecrDetails.doc_sub_date
+            frmEcrDetails.value.docToBeSub =ecrDetails.doc_to_be_sub
+            frmEcrDetails.value.remarks =ecrDetails.remarks
+            frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
+            frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
+            frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
+            console.log('ecrDetails',ecrDetails);
+        });
+    }
+    const saveEcrDetails = async () => {
+        let formData = new FormData();
+        //Append form data
+        [
+            ["ecr_details_id", frmEcrDetails.value.ecrDetailsId],
+            ["change_imp_date", frmEcrDetails.value.changeImpDate],
+            ["type_of_part", frmEcrDetails.value.typeOfPart],
+            ["doc_sub_date", frmEcrDetails.value.docSubDate],
+            ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
+            ["remarks", frmEcrDetails.value.remarks],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_ecr_details', (response) =>{
+            tblEcrDetails.value.dt.draw();
+            modal.SaveEcrDetail.hide();
+        });
+    }
     return {
         modal,
         ecrVar,
@@ -255,11 +296,14 @@ export default function useEcr(){
         descriptionOfChangeParams,
         reasonOfChangeParams,
         typeOfPartParams,
+        tblEcrDetails,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrById,
         addEcrReasonRows,
         removeEcrReasonRows,
+        getEcrDetailsId,
+        saveEcrDetails,
     };
 }

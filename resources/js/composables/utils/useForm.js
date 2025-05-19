@@ -23,8 +23,8 @@ export default function useForm ()
             if (typeof responseCallback === "function") {
                 responseCallback(response);
                 Swal.fire({
-                    title: "System Alert !",
-                    text: "Save Successfully",
+                    title: "Saved!",
+                    text: "",
                     icon: "success",
                     timer: 1000,
                     showConfirmButton: false

@@ -560,7 +560,6 @@
     const tblEcr = ref(null);
     const tblEcrManRequirements = ref(null);
     const tblEcrMatRequirements = ref(null);
-
     const tblEcrColumns = [
         {   data: 'get_actions',
             orderable: false,

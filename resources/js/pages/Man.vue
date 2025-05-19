@@ -315,6 +315,7 @@
     const {
         modal,
         ecrVar,
+        tblEcrDetails,
         frmEcrDetails,
         frmEcrReasonRows,
         descriptionOfChangeParams,
@@ -323,6 +324,7 @@
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,
+        getEcrDetailsId,
     } = useEcr();
 
     const {
@@ -332,7 +334,7 @@
 
     //ref state
     const tblEcrByStatus = ref(null);
-    const tblEcrDetails = ref(null);
+    // const tblEcrDetails = ref(null);
     const tblManDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
@@ -449,29 +451,8 @@
 
     })
 
-   const addManDetails = async () => {
-        modal.SaveManDetails.show();
-   }
-
-    const getEcrDetailsId = async (ecrDetailsId) =>
-    {
-        let params = {
-            ecrDetailsId : ecrDetailsId
-        }
-        axiosFetchData(params,'api/get_ecr_details_id',function(response){
-            let ecrDetails = response.data.ecrDetail;
-            console.log('ecrDetailsId',ecrDetailsId);
-
-            frmEcrDetails.value.ecrDetailsId = ecrDetailsId;
-            frmEcrDetails.value.changeImpDate =ecrDetails.change_imp_date
-            frmEcrDetails.value.docSubDate =ecrDetails.doc_sub_date
-            frmEcrDetails.value.docToBeSub =ecrDetails.doc_to_be_sub
-            frmEcrDetails.value.remarks =ecrDetails.remarks
-            frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
-            frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
-            frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
-            console.log('ecrDetails',ecrDetails);
-        });
+    const addManDetails = async () => {
+            modal.SaveManDetails.show();
     }
     const getManById = async (manId) =>
     {
@@ -500,23 +481,7 @@
 
         });
     }
-    const saveEcrDetails = async () => {
-        let formData = new FormData();
-        //Append form data
-        [
-            ["ecr_details_id", frmEcrDetails.value.ecrDetailsId],
-            ["change_imp_date", frmEcrDetails.value.changeImpDate],
-            ["type_of_part", frmEcrDetails.value.typeOfPart],
-            ["doc_sub_date", frmEcrDetails.value.docSubDate],
-            ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
-            ["remarks", frmEcrDetails.value.remarks],
-        ].forEach(([key, value]) =>
-            formData.append(key, value)
-        );
-        axiosSaveData(formData,'api/save_ecr_details', (response) =>{
-            console.log(response);
-        });
-    }
+    //saveEcrDetails
     const saveManDetails = async () => {
         let formData = new FormData();
         //Append form data
@@ -541,8 +506,6 @@
         );
         axiosSaveData(formData,'api/save_man', (response) =>{
             console.log(response);
-
-
         });
     }
 </script>

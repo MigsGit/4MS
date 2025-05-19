@@ -79,19 +79,159 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
+                            <input v-model="frmMaterial.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                            </div>
+                            <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                <span class="input-group-text" id="addon-wrapping">Man Id:</span>
+                                <input  v-model="frmMaterial.manId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Parts/Direct Material:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.firstAssign"
+                                        :options="manVar.optYesNo"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">MSDS:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.msds"
+                                        :options="manVar.optYesNo"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">ICP:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.icp"
+                                        :options="manVar.optYesNo"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">GP:</span>
+                                    <input v-model="frmMaterial.gp" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Qoutation</span>
+                                    <input v-model="frmMaterial.qoutation" type="time" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">COC:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.coc"
+                                        :options="manVar.optUserMaster"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Material Sample:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.material_sample"
+                                        :options="manVar.optUserMaster"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Supplier:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.trainer"
+                                        :options="manVar.optUserMaster"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Product Color:</span>
+                                    <input v-model="frmMaterial.product_color" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">ROH:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.rohs"
+                                        :options="manVar.optResult"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                                    <textarea v-model="frmMaterial.remarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                                    </textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
         </template>
     </ModalComponent>
-<!--  -->
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
         <template #body>
              <!-- Description of Change / Reason for Change -->
              <EcrChangeComponent :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
             <div class="row">
-
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                    <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
+                    <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
+                        <Multiselect
+                            v-model="frmEcrDetails.typeOfPart"
+                            :options="ecrVar.optTypeOfPart"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
+                        <input v-model="frmEcrDetails.changeImpDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Docs To Be Submitted</span>
+                        <input v-model="frmEcrDetails.docToBeSub" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                 </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Docs Submission Date:</span>
+                        <input v-model="frmEcrDetails.docSubDate"  type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <input v-model="frmEcrDetails.remarks"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
             </div>
         </template>
         <template #footer>
@@ -105,6 +245,8 @@
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
+    import useMaterial from '../../js/composables/material.js';
+    import useMan from '../../js/composables/man.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore)
@@ -112,11 +254,31 @@
     const {
         modal,
         ecrVar,
+        tblEcrDetails,
+        frmEcrDetails,
         frmEcrReasonRows,
+        descriptionOfChangeParams,
+        reasonOfChangeParams,
+        typeOfPartParams,
+        getDropdownMasterByOpt,
+        getRapidxUserByIdOpt,
+        axiosFetchData,
+        getEcrDetailsId,
+        saveEcrDetails,
     } = useEcr();
+
+    const {
+        frmMaterial,
+    } = useMaterial();
+
+    const {
+        manVar,
+    } = useMan();
+
     const modalSaveEcrDetail = ref(null);
     const modalSaveMaterial = ref(null);
-    const tblEcrDetails = ref(null);
+
+    // tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id").draw();
 
     //Columns
     const columns = [
@@ -128,7 +290,7 @@
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrId = this.getAttribute('ecr-id');
-                        // frmMan.value.ecrsId = ecrId;
+                        // frmMaterial.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
                         modal.SaveMaterial.show();
                     });
@@ -157,7 +319,7 @@
                 if(btnGetEcrDetailsId != null){
                     btnGetEcrDetailsId.addEventListener('click',function(){
                         let ecrDetailsId = this.getAttribute('ecr-details-id');
-                        // getEcrDetailsId(ecrDetailsId);
+                        getEcrDetailsId(ecrDetailsId);
                         modal.SaveEcrDetail.show();
                     });
                 }
@@ -175,14 +337,9 @@
     onMounted( async ()=>{
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
-        // modal.SaveEcrDetail.show();
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
+        await getDropdownMasterByOpt(typeOfPartParams);
     })
+    </script>
 
-    //Functions
-    const saveEcrDetails = async () =>{
-
-    }
-</script>
-<style scoped>
-@import "vue-multiselect/dist/vue-multiselect.min.css";
-</style>

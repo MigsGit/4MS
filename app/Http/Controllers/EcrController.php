@@ -338,12 +338,12 @@ class EcrController extends Controller
    public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
        date_default_timezone_set('Asia/Manila');
        try {
-            return $ecrDetailRequestValidated = $ecrDetailRequest->validated();
+            $ecrDetailRequestValidated = $ecrDetailRequest->validated();
             $ecrDetailRequestValidated['remarks'] = $request->remarks;
             $conditions = [
                 'id' => $request->ecr_details_id
             ];
-            return $this->resourceInterface->updateConditions(EcrDetail::class,$conditions,$ecrDetailRequestValidated);
+            $this->resourceInterface->updateConditions(EcrDetail::class,$conditions,$ecrDetailRequestValidated);
             return response()->json(['is_success' => 'true']);
        } catch (Exception $e) {
             throw $e;
