@@ -88,15 +88,15 @@
                             <input v-model="frmMaterial.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                             </div>
                             <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                <span class="input-group-text" id="addon-wrapping">Man Id:</span>
-                                <input  v-model="frmMaterial.manId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                                <span class="input-group-text" id="addon-wrapping">Material Id:</span>
+                                <input  v-model="frmMaterial.materialId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                             </div>
                             <div class="col-sm-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Parts/Direct Material:</span>
                                     <Multiselect
-                                        v-model="frmMaterial.firstAssign"
-                                        :options="manVar.optYesNo"
+                                        v-model="frmMaterial.pdMaterial"
+                                        :options="manVar.optCheck"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -128,50 +128,9 @@
                                 </div>
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Qoutation</span>
-                                    <input v-model="frmMaterial.qoutation" type="time" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                                </div>
-                                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                    <span class="input-group-text" id="addon-wrapping">COC:</span>
                                     <Multiselect
-                                        v-model="frmMaterial.coc"
-                                        :options="manVar.optUserMaster"
-                                        placeholder="Select an option"
-                                        :searchable="true"
-                                        :close-on-select="true"
-                                    />
-                                </div>
-                                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                    <span class="input-group-text" id="addon-wrapping">Material Sample:</span>
-                                    <Multiselect
-                                        v-model="frmMaterial.material_sample"
-                                        :options="manVar.optUserMaster"
-                                        placeholder="Select an option"
-                                        :searchable="true"
-                                        :close-on-select="true"
-                                    />
-                                </div>
-
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                    <span class="input-group-text" id="addon-wrapping">Supplier:</span>
-                                    <Multiselect
-                                        v-model="frmMaterial.trainer"
-                                        :options="manVar.optUserMaster"
-                                        placeholder="Select an option"
-                                        :searchable="true"
-                                        :close-on-select="true"
-                                    />
-                                </div>
-                                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                    <span class="input-group-text" id="addon-wrapping">Product Color:</span>
-                                    <input v-model="frmMaterial.product_color" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                                </div>
-                                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                    <span class="input-group-text" id="addon-wrapping">ROH:</span>
-                                    <Multiselect
-                                        v-model="frmMaterial.rohs"
-                                        :options="manVar.optResult"
+                                        v-model="frmMaterial.qoutation"
+                                        :options="manVar.optCheck"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -181,6 +140,60 @@
                                     <span class="input-group-text" id="addon-wrapping">Remarks:</span>
                                     <textarea v-model="frmMaterial.remarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                                     </textarea>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Supplier:</span>
+                                    <!-- :options="materialVar.optDropdownSetting" -->
+                                    <Multiselect
+                                        v-model="frmMaterial.materialSupplier"
+                                        :options="manVar.optResult"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Product Color:</span>
+                                    <!-- :options="materialVar.optDropdownSetting" -->
+                                    <Multiselect
+                                        v-model="frmMaterial.materialColor"
+                                        :options="manVar.optResult"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">ROHS:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.rohs"
+                                        :options="manVar.optResult"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Material Sample:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.materialSample"
+                                        :options="manVar.optCheck"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
+                                </div>
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">COC:</span>
+                                    <Multiselect
+                                        v-model="frmMaterial.coc"
+                                        :options="manVar.optCheck"
+                                        placeholder="Select an option"
+                                        :searchable="true"
+                                        :close-on-select="true"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -268,6 +281,7 @@
     } = useEcr();
 
     const {
+        materialVar,
         frmMaterial,
     } = useMaterial();
 
@@ -278,7 +292,19 @@
     const modalSaveEcrDetail = ref(null);
     const modalSaveMaterial = ref(null);
 
-    // tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id").draw();
+    //Params
+    const materialSupplierParams = {
+        tblReference : 'material_supplier',
+        globalVar: materialVar.optDropdownSetting,
+        formModel: toRef(frmMaterial.value,'materialSupplier'),
+        selectedVal: '',
+    };
+    const materialColorParams = {
+        tblReference : 'material_color',
+        globalVar: materialVar.optDropdownSetting,
+        formModel: toRef(frmMaterial.value,'materialColor'),
+        selectedVal: '',
+    };
 
     //Columns
     const columns = [
@@ -290,7 +316,7 @@
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrId = this.getAttribute('ecr-id');
-                        // frmMaterial.value.ecrsId = ecrId;
+                        frmMaterial.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
                         modal.SaveMaterial.show();
                     });
@@ -340,6 +366,8 @@
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
+        // await getDropdownMasterByOpt(materialSupplierParams);
+        // await getDropdownMasterByOpt(materialColorParams);
     })
     </script>
 

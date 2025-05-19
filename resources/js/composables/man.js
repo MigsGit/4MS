@@ -5,7 +5,7 @@ export default function useMan(){
     const frmMan = ref ({
         firstAssign : '',
         longInterval : '',
-        change : '',
+        pdMaterial : '',
         processName : '',
         workingTime : '',
         trainer : '',
@@ -37,6 +37,12 @@ export default function useMan(){
             {"value":"N/A","label":"N/A"},
             {"value":"PASSED","label":"PASSED"},
             {"value":"FAILED","label":"FAILED"},
+        ],
+        optCheck : [
+            {"value":"","label":"-Select an option-"},
+            {"value":"N/A","label":"N/A"},
+            {"value":"C","label":"√"},
+            {"value":"X","label":"X"},
         ]
     })
 
