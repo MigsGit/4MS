@@ -45,7 +45,7 @@
         </div>
     </div>
     <!--  -->
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Material" @add-event="" ref="modalSaveMaterial">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Material" @add-event="saveMaterial" ref="modalSaveMaterial">
         <template #body>
             <div class="row">
                 <div class="card">
@@ -197,7 +197,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- QA Dispositions -->
+                        <!-- Material Approval -->
                         <div class="card mb-2">
                             <h5 class="mb-0">
                                 <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
@@ -411,6 +411,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -465,6 +466,7 @@
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
+    import useForm from '../../js/composables/utils/useForm.js'
     import useEcr from '../../js/composables/ecr.js';
     import useMaterial from '../../js/composables/material.js';
     import useMan from '../../js/composables/man.js';
@@ -496,6 +498,11 @@
     const {
         manVar,
     } = useMan();
+
+    const {
+        axiosSaveData
+    } = useForm(); // Call the useFetch function
+
 
     const modalSaveEcrDetail = ref(null);
     const modalSaveMaterial = ref(null);
@@ -577,5 +584,31 @@
         // await getDropdownMasterByOpt(materialSupplierParams);
         // await getDropdownMasterByOpt(materialColorParams);
     })
-    </script>
+
+    //Functions
+
+    const saveMaterial = async () =>{
+        let formData = new FormData();
+        //Append form data
+        [
+            ["ecrs_id", frmMaterial.value.ecrsId],
+            ["material_id", frmMaterial.value.materialId],
+            ["pd_material", frmMaterial.value.pdMaterial],
+            ["msds", frmMaterial.value.msds],
+            ["icp", frmMaterial.value.icp],
+            ["qoutation", frmMaterial.value.qoutation],
+            ["material_supplier", frmMaterial.value.materialSupplier],
+            ["material_color", frmMaterial.value.materialColor],
+            ["rohs", frmMaterial.value.rohs],
+            ["material_sample", frmMaterial.value.materialSample],
+            ["coc", frmMaterial.value.coc],
+            ["remarks", frmMaterial.value.remarks],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_material', (response) =>{
+            console.log(response);
+        });
+    }
+</script>
 

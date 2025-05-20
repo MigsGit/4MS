@@ -7,6 +7,7 @@ use App\Http\Controllers\ManController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EdocsController;
 use App\Http\Controllers\CommonController;
+use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SettingsController;
 
 /*
@@ -30,11 +31,7 @@ Route::controller(CommonController::class)->group(function () {
 Route::controller(SettingsController::class)->group(function () {
     Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
 });
-Route::controller(ManController::class)->group(function () {
-    Route::post('save_man', 'saveMan')->name('save_man');
-    Route::get('load_man_by_ecr_id', 'loadManByEcrId')->name('load_man_by_ecr_id');
-    Route::get('get_man_by_id', 'getManById')->name('get_man_by_id');
-});
+
 Route::controller(EcrController::class)->group(function () {
     Route::post('save_ecr', 'saveEcr')->name('save_ecr');
     Route::post('save_ecr_details', 'saveEcrDetails')->name('save_ecr_details');
@@ -46,4 +43,14 @@ Route::controller(EcrController::class)->group(function () {
     Route::get('get_ecr_by_id', 'getEcrById')->name('get_ecr_by_id');
     Route::get('get_ecr_details_id', 'getEcrDetailsId')->name('get_ecr_details_id');
     Route::get('ecr_req_decision_change', 'ecrReqDecisionChange')->name('ecr_req_decision_change');
+});
+
+Route::controller(ManController::class)->group(function () {
+    Route::post('save_man', 'saveMan')->name('save_man');
+    Route::get('load_man_by_ecr_id', 'loadManByEcrId')->name('load_man_by_ecr_id');
+    Route::get('get_man_by_id', 'getManById')->name('get_man_by_id');
+});
+
+Route::controller(MaterialController::class)->group(function () {
+    Route::post('save_material', 'saveMaterial')->name('save_material');
 });
