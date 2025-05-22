@@ -14,30 +14,17 @@ class CreateMaterialsTable extends Migration
     public function up()
     {
         Schema::create('materials', function (Blueprint $table) {
-            /*
-            "ecrs_id" => 'required',
-            "pd_material" => 'required',
-            "msds" => 'required',
-            "icp" => 'required',
-            "qoutation" => 'required',
-            "material_supplier" => 'required',
-            "material_color" => 'required',
-            "material_sample" => 'required',
-            "coc" => 'required',
-            // "rohs" => 'required',
-            // "remarks" => 'required',
-            */
             $table->id();
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
-            $table->string('msds');
             $table->string('icp');
+            $table->string('pd_material');
             $table->string('msds');
-            $table->string('qoutation');
             $table->string('qoutation');
             $table->string('coc');
-            $table->bigInteger('material_color');
-            $table->bigInteger('material_sample');
-            $table->string('rohs');
+            $table->string('material_sample');
+            $table->foreignId('material_supplier')->references('id')->on('dropdown_master_details')->comment ='DropdownMasterDetails Id';
+            $table->foreignId('material_color')->references('id')->on('dropdown_master_details')->comment ='DropdownMasterDetails Id';
+            $table->string('rohs')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

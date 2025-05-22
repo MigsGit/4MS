@@ -58,4 +58,5 @@ Route::controller(ManController::class)->group(function () {
 
 Route::controller(MaterialController::class)->group(function () {
     Route::post('save_material', 'saveMaterial')->name('save_material');
+    Route::get('get_material_ecr_by_id', 'getMaterialEcrById')->name('get_material_ecr_by_id');
 });

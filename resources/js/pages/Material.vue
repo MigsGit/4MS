@@ -44,8 +44,8 @@
             </div>
         </div>
     </div>
-    <!--  -->
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Material" @add-event="saveMaterial" ref="modalSaveMaterial">
+    <!-- saveMaterial() -->
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Material" @add-event="" ref="modalSaveMaterial">
         <template #body>
             <div class="row">
                 <div class="card">
@@ -136,19 +136,13 @@
                                         :close-on-select="true"
                                     />
                                 </div>
-                                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                    <span class="input-group-text" id="addon-wrapping">Remarks:</span>
-                                    <textarea v-model="frmMaterial.remarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                                    </textarea>
-                                </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Supplier:</span>
-                                    <!-- :options="materialVar.optDropdownSetting" -->
                                     <Multiselect
                                         v-model="frmMaterial.materialSupplier"
-                                        :options="manVar.optResult"
+                                        :options="materialVar.materialSupplier"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -156,10 +150,9 @@
                                 </div>
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Product Color:</span>
-                                    <!-- :options="materialVar.optDropdownSetting" -->
                                     <Multiselect
                                         v-model="frmMaterial.materialColor"
-                                        :options="manVar.optResult"
+                                        :options="materialVar.materialColor"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -411,7 +404,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+            <button @click="saveMaterial()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -510,13 +503,13 @@
     //Params
     const materialSupplierParams = {
         tblReference : 'material_supplier',
-        globalVar: materialVar.optDropdownSetting,
+        globalVar: materialVar.materialSupplier,
         formModel: toRef(frmMaterial.value,'materialSupplier'),
         selectedVal: '',
     };
     const materialColorParams = {
         tblReference : 'material_color',
-        globalVar: materialVar.optDropdownSetting,
+        globalVar: materialVar.materialColor,
         formModel: toRef(frmMaterial.value,'materialColor'),
         selectedVal: '',
     };
@@ -533,6 +526,7 @@
                         let ecrId = this.getAttribute('ecr-id');
                         frmMaterial.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
+                        getMaterialEcrById(ecrId);
                         modal.SaveMaterial.show();
                     });
                 }
@@ -581,12 +575,34 @@
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
-        // await getDropdownMasterByOpt(materialSupplierParams);
-        // await getDropdownMasterByOpt(materialColorParams);
+        await getDropdownMasterByOpt(materialSupplierParams);
+        await getDropdownMasterByOpt(materialColorParams);
     })
 
     //Functions
+    const getMaterialEcrById = async (ecrId) => {
+        let apiParams = {
+            ecrId : ecrId
+        }
+        axiosFetchData(apiParams,'api/get_material_ecr_by_id',function(response){
+            let data = response.data;
+            let material = data.material[0];
 
+            frmMaterial.value.ecrsId = material.ecrs_id;
+            frmMaterial.value.materialId = material.id;
+            frmMaterial.value.pdMaterial = material.pd_material;
+            frmMaterial.value.msds = material.msds;
+            frmMaterial.value.icp = material.icp;
+            frmMaterial.value.qoutation = material.qoutation;
+            frmMaterial.value.materialSupplier = material.material_supplier;
+            frmMaterial.value.materialColor = material.material_color;
+            frmMaterial.value.rohs = material.rohs;
+            frmMaterial.value.materialSample = material.material_sample;
+            frmMaterial.value.coc = material.coc;
+            frmMaterial.value.remarks = material.remarks;
+            console.log(material);
+        });
+    }
     const saveMaterial = async () =>{
         let formData = new FormData();
         //Append form data
@@ -602,7 +618,6 @@
             ["rohs", frmMaterial.value.rohs],
             ["material_sample", frmMaterial.value.materialSample],
             ["coc", frmMaterial.value.coc],
-            ["remarks", frmMaterial.value.remarks],
         ].forEach(([key, value]) =>
             formData.append(key, value)
         );

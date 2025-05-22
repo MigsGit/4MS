@@ -29,12 +29,11 @@ class MaterialRequest extends FormRequest
             "msds" => 'required',
             "icp" => 'required',
             "qoutation" => 'required',
-            // "material_supplier" => 'required',
-            // "material_color" => 'required',
-            // "material_sample" => 'required',
+            "material_sample" => 'required',
+            "material_supplier" => 'required',
+            "material_color" => 'required',
             "coc" => 'required',
             // "rohs" => 'required',
-            // "remarks" => 'required',
         ];
     }
 }

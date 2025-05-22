@@ -17,31 +17,35 @@ class MaterialController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-    public function saveMaterial(Request $request, MaterialRequest $materialRequest){
+    public function saveMaterial(Request $request,MaterialRequest  $materialRequest){
         date_default_timezone_set('Asia/Manila');
         try {
-            $materialRequest = $materialRequest->validated();
-            $materialRequest ['material_supplier'] = 1;
-            $materialRequest ['material_color'] = 1;
-            $materialRequest ['material_sample'] = 1;
-            return $materialRequest;
-            $this->resourceInterface->create(Material::class,$materialRequest);
-            /*
-                 "ecrs_id" => 'required',
-                "pd_material" => 'required',
-                "msds" => 'required',
-                "icp" => 'required',
-                "qoutation" => 'required',
-                // "material_supplier" => 'required',
-                // "material_color" => 'required',
-                // "material_sample" => 'required',
-                "coc" => 'required',
-                // "rohs" => 'required',
-                // "remarks" => 'required',
-            */
+
+            if ( isset($request->material_id)){
+
+            }else{
+                $materialRequest = $materialRequest->validated();
+                $this->resourceInterface->create(Material::class,$materialRequest);
+            }
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;
         }
     }
+
+    public function getMaterialEcrById(Request $request){
+        try {
+            $conditions = [
+                'ecrs_id' => $request->ecrId,
+            ];
+            $material = $this->resourceInterface->readWithRelationsConditionsActive(Material::class,[],[],$conditions);
+            return response()->json([
+                'is_success' => 'true',
+                'material' => $material,
+            ]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
 }

@@ -2,8 +2,9 @@ import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
 
 export default function useMaterial(){
-    const materialVar = ref({
-        optDropdownSetting : '',
+    const materialVar = reactive({
+        materialSupplier : [],
+        materialColor : [],
     });
     const frmMaterial = ref ({
         ecrsId : 'N/A',
