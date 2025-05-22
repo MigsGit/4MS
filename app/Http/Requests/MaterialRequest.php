@@ -28,6 +28,7 @@ class MaterialRequest extends FormRequest
             "pd_material" => 'required',
             "msds" => 'required',
             "icp" => 'required',
+            "gp" => 'required',
             "qoutation" => 'required',
             "material_sample" => 'required',
             "material_supplier" => 'required',

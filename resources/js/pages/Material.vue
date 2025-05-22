@@ -11,7 +11,7 @@
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
-                            ref="tblEcrByStatus"
+                            ref="tblEcrByCategoryStatus"
                             :columns="columns"
                             ajax="api/load_ecr_by_status?category=Material&&status=AP"
                             :options="{
@@ -499,6 +499,7 @@
 
     const modalSaveEcrDetail = ref(null);
     const modalSaveMaterial = ref(null);
+    const tblEcrByCategoryStatus = ref(null);
 
     //Params
     const materialSupplierParams = {
@@ -593,6 +594,7 @@
             frmMaterial.value.pdMaterial = material.pd_material;
             frmMaterial.value.msds = material.msds;
             frmMaterial.value.icp = material.icp;
+            frmMaterial.value.gp = material.gp;
             frmMaterial.value.qoutation = material.qoutation;
             frmMaterial.value.materialSupplier = material.material_supplier;
             frmMaterial.value.materialColor = material.material_color;
@@ -612,6 +614,7 @@
             ["pd_material", frmMaterial.value.pdMaterial],
             ["msds", frmMaterial.value.msds],
             ["icp", frmMaterial.value.icp],
+            ["gp", frmMaterial.value.gp],
             ["qoutation", frmMaterial.value.qoutation],
             ["material_supplier", frmMaterial.value.materialSupplier],
             ["material_color", frmMaterial.value.materialColor],
@@ -623,6 +626,8 @@
         );
         axiosSaveData(formData,'api/save_material', (response) =>{
             console.log(response);
+            modal.SaveMaterial.hide();
+            tblEcrByCategoryStatus.value.dt.draw();
         });
     }
 </script>

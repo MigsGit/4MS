@@ -17,6 +17,7 @@ class CreateMaterialsTable extends Migration
             $table->id();
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
             $table->string('icp');
+            $table->string('gp');
             $table->string('pd_material');
             $table->string('msds');
             $table->string('qoutation');

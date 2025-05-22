@@ -21,10 +21,15 @@ class MaterialController extends Controller
         date_default_timezone_set('Asia/Manila');
         try {
 
-            if ( isset($request->material_id)){
+            $materialRequest = $materialRequest->validated();
 
+            if ( isset($request->material_id)){
+                $conditions = [
+                   'id' => $request->material_id
+                ];
+                $this->resourceInterface->updateConditions(Material::class,$conditions,$materialRequest);
             }else{
-                $materialRequest = $materialRequest->validated();
+                $materialRequest['created_at'] = now();
                 $this->resourceInterface->create(Material::class,$materialRequest);
             }
             return response()->json(['is_success' => 'true']);
