@@ -13,7 +13,7 @@
             <div class="tab-content mt-2" id="myTabContent">
                 <div class="tab-pane fade show active" id="menu1" role="tabpanel" aria-labelledby="menu1-tab">
                     <div class="container-fluid px-4">
-                        <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI Approvers</button>
+                        <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create ECR</button>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Engineering Change Request</li>
                         </ol>

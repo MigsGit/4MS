@@ -27,9 +27,16 @@
 </template>
 
 <script setup>
-    import {onMounted, ref, reactive, inject , watch, nextTick} from 'vue'
-
-    import Swal from 'sweetalert2'
+     import {
+        onMounted,
+        ref,
+    } from 'vue'
+    import ModalComponent from '../components/ModalComponent.vue';
+    import useSettings from '../composables/settings.js';
+    import useForm from '../../js/composables/utils/useForm.js'
+    import DataTable from 'datatables.net-vue3';
+    import DataTablesCore from 'datatables.net-bs5';
+    DataTable.use(DataTablesCore);
 
 </script>
 <style lang="scss" scoped>
