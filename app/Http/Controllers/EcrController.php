@@ -334,7 +334,6 @@ class EcrController extends Controller
             throw $e;
         }
     }
-
    public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
        date_default_timezone_set('Asia/Manila');
        try {

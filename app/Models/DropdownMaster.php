@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DropdownMaster extends Model
 {
     /**
-     * Get DropdownMaster
+     * Get DropdownMaster Details
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

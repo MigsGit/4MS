@@ -156,7 +156,6 @@ export default function useEcr(){
             );
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
             console.log('selectedVal',params.selectedVal);
-
         });
     }
     const getEcrById = async (ecrId) => {

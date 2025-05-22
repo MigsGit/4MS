@@ -210,7 +210,6 @@
                                                         :searchable="true"
                                                         :options="ecrVar.technicalEvaluation"
                                                         @change="onUserChange(otherDispoReviewedByParams)"
-
                                                     />
                                                 </td>
                                                 <td>

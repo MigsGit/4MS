@@ -8,6 +8,7 @@ import Machine from '../../js/pages/Machine.vue'
 import Method from '../../js/pages/Method.vue'
 import Environment from '../../js/pages/Environment.vue'
 import UserMaster from '../../js/pages/UserMaster.vue'
+import DropdownMaster from '../../js/pages/DropdownMaster.vue'
 
 console.log('routes');
 export default [
@@ -63,6 +64,11 @@ export default [
                 path: 'user_master',
                 name: 'UserMaster',
                 component: UserMaster,
+            },
+            {
+                path: 'dropdown_master',
+                name: 'DropdownMaster',
+                component: DropdownMaster,
             },
         ]
     }

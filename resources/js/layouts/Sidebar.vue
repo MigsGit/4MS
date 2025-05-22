@@ -33,6 +33,9 @@ const useAuth = useAuthStore();
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }">
                     <i class="fas fa-user"></i>&nbsp; User Master
                 </router-link>
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'DropdownMaster' }">
+                    <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Dropdown Master
+                </router-link>
                 <!--  <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Settings' }">
                     <i class="fas fa-tasks"></i>&nbsp; Settings
                 </router-link> -->

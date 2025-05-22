@@ -30,6 +30,8 @@ Route::controller(CommonController::class)->group(function () {
 });
 Route::controller(SettingsController::class)->group(function () {
     Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
+    Route::get('load_dropdown_master_details', 'loadDropdownMasterDetails')->name('load_dropdown_master_details');
+    Route::get('get_dropdown_master', 'getDropdownMaster')->name('get_dropdown_master');
 });
 
 Route::controller(EcrController::class)->group(function () {

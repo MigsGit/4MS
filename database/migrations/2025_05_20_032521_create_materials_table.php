@@ -35,10 +35,9 @@ class CreateMaterialsTable extends Migration
             $table->string('qoutation');
             $table->string('qoutation');
             $table->string('coc');
-
             $table->bigInteger('material_color');
             $table->bigInteger('material_sample');
-            $table->bigInteger('rohs');
+            $table->string('rohs');
             $table->timestamps();
             $table->softDeletes();
         });
