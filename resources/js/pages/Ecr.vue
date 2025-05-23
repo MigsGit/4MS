@@ -23,7 +23,7 @@
                             class="table mt-2"
                             ref="tblEcr"
                             :columns="tblEcrColumns"
-                            ajax="api/load_ecr"
+                            ajax="api/load_ecr?status=IA"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -55,7 +55,7 @@
                 <div class="tab-pane fade" id="menu2" role="tabpanel" aria-labelledby="menu1-tab">
                     <div class="container-fluid px-4">
                             <ol class="breadcrumb mb-4">
-                                <li class="breadcrumb-item active">Engineering Change Request 2</li>
+                                <li class="breadcrumb-item active">QA Approval</li>
                             </ol>
                             <div class="table-responsive">
                             <DataTable
@@ -63,7 +63,7 @@
                                 class="table mt-2"
                                 ref="tblEcr"
                                 :columns="tblEcrColumns"
-                                ajax="api/load_ecr"
+                                ajax="api/load_ecr?status=QA"
                                 :options="{
                                     serverSide: true, //Serverside true will load the network
                                     columnDefs:[
@@ -103,7 +103,7 @@
                     </div>
 
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Customer Name:</span>
+                        <span class="input-group-text" id="addon-wrapping">Ecr Ctrl No:</span>
                         <input v-model="frmEcr.ecrNo" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
                     <div class="col-sm-6">
@@ -529,6 +529,7 @@
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
     import useForm from '../../js/composables/utils/useForm.js'
+    import useSettings from '../composables/settings.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore);
@@ -545,13 +546,16 @@
         frmEcrPmiApproverRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
-        getDropdownMasterByOpt,
-        getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrById,
         addEcrReasonRows,
         removeEcrReasonRows,
     } = useEcr();
+    const {
+        getRapidxUserByIdOpt,
+        getDropdownMasterByOpt,
+        onUserChange,
+    } = useSettings();
     // const item = ref();
     //ref state
     const modalSaveEcr = ref(null);
@@ -583,7 +587,7 @@
                 }
             }
         } ,
-        {   data: 'status'} ,
+        {   data: 'get_status'} ,
         {   data: 'ecr_no'} ,
         {   data: 'category'} ,
         {   data: 'internal_external'} ,
@@ -699,9 +703,9 @@
         modal.SaveEcr.show();
         await getRapidxUserByIdOpt(otherDispoRequestedByParams);
     }
-    const onUserChange = async (selectedParams)=>{
-        await getRapidxUserByIdOpt(selectedParams);
-    }
+    // const onUserChange = async (selectedParams)=>{
+    //     await getRapidxUserByIdOpt(selectedParams);
+    // }
     const ecrReqDecisionChange = async (selectedParams,varParams)=>{
         console.log('ecrReqDecisionChange',selectedParams);
         console.log(varParams);
@@ -716,7 +720,6 @@
         //Do not name the Modal it is same new Modal js clas
         modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
-        modal.EcrRequirements.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
@@ -815,7 +818,8 @@
         }
         //TODO: Save Successfully
         axiosSaveData(formData,'api/save_ecr', (response) =>{
-            // tblEdocs.value.dt.draw();
+            tblEcr.value.dt.draw();
+            modal.SaveEcr.modal();
             console.log(response);
         });
     }

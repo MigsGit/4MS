@@ -24,29 +24,61 @@ class EcrController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-
     public function loadEcr(Request $request){
         // return 'true' ;
-        $data = [];
-        $relations = [];
-        $conditions = [];
-
-        $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
-        return DataTables($ecr)
-        ->addColumn('get_actions',function ($row){
-            $result = '';
-            $result .= '<center>';
-            $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
-            $result .= '</center>';
-            return $result;
-            return $result;
-        })
-        ->rawColumns(['get_actions'])
-        ->make(true);
         try {
-            return response()->json(['is_success' => 'true']);
+            $status = $request->status ?? "";
+            $data = [];
+            $relations = [];
+            $conditions = [
+                'status' => $status
+            ];
+            $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+            return DataTables($ecr)
+            ->addColumn('get_actions',function ($row){
+                $result = '';
+                $result .= '<center>';
+                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= '</center>';
+                return $result;
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+
+                switch ($row->status) {
+                    case 'IA':
+                        $status = 'Internal Approval';
+                        break;
+                    case 'QA':
+                        $status = 'QA Approval';
+                        break;
+                    default:
+                        $status = '';
+                        break;
+                }
+                switch ($row->approval_status) {
+                    case 'OTRB':
+                        $approvalStatus = 'Requested by:';
+                        break;
+                    case 'OTTE':
+                        $approvalStatus = 'Requested by:';
+                        break;
+                    default:
+                        $approvalStatus = '';
+                        break;
+                }
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$status.' </span>';
+                $result .= '<span class="badge rounded-pill bg-danger"> '.$approvalStatus.' </span>';
+                $result .= '</center>';
+                return $result;
+                return $result;
+            })
+            ->rawColumns(['get_actions','get_status'])
+            ->make(true);
         } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+            throw $e;
         }
     }
     public function loadEcrByStatus(Request $request){
@@ -194,8 +226,7 @@ class EcrController extends Controller
         try {
             //TODO: EDIT ecr_no, DELETE, Auto Increment Ctrl Number, InsertById, N/A in Dropdown
             DB::beginTransaction();
-            // return;
-            $ecr_id = 2;
+            $ecr_id = 1;
             $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request,$ecr_id){
                 return [
                     'ecrs_id' =>  $ecr_id,
@@ -209,38 +240,41 @@ class EcrController extends Controller
                $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
             }
 
-            $ctr = 0; //assigned counter
             //Requested by, Engg, Heads, QA Approval
-            $ecr_approval_types = [
+            $ecrApprovalTypes = [
                 'OTRB' => $request->requested_by,
                 'OTTE' => $request->technical_evaluation,
                 'OTRVB' => $request->reviewed_by,
                 'QA' => [$request->qad_checked_by,$request->qad_approved_by_internal,$request->qad_approved_by_external],
             ];
-            $ecrApprovalRequest = collect($ecr_approval_types)->flatMap(function ($users,$type) use ($request,&$ctr,$ecr_id){
-                    return collect($users)->map(function ($userId) use ($request,$type,&$ctr,$ecr_id){
+            $ecrApprovalRequestCtr = 0; //assigned counter
+            $ecrApprovalRequest = collect($ecrApprovalTypes)->flatMap(function ($users,$type) use ($request,&$ecrApprovalRequestCtr,$ecr_id){
+                    return collect($users)->map(function ($userId) use ($request,$type,&$ecrApprovalRequestCtr,$ecr_id){
                         return [
                             'ecrs_id' =>  $ecr_id,
                             'rapidx_user_id' => $userId,
                             'type' => $type,
-                            'counter' => $ctr,
+                            'counter' => $ecrApprovalRequestCtr++,
                             'remarks' => $request->remarks,
                             'created_at' => now(),
                         ];
                     });
 
             })->toArray();
+            // EcrApproval::where('ecrs_id', $ecr_id)->delete();
             EcrApproval::insert($ecrApprovalRequest);
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
             //PMI Approvers
             $types = [
                 'PB' => $request->prepared_by,
                 'CB' => $request->checked_by,
                 'AB' => $request->approved_by,
             ];
-
-            $pmiApprovalRequest = collect($types)->flatMap(function ($users,$type) use ($request,&$ctr,$ecr_id){
+            $pmiApprovalRequestCtr = 0;
+            $pmiApprovalRequest = collect($types)->flatMap(function ($users,$type) use ($request,&$pmiApprovalRequestCtr,$ecr_id){
                 //return array users id as array value
-                return collect($users)->map(function ($userId) use ($type, $request,&$ctr,$ecr_id) {
+                return collect($users)->map(function ($userId) use ($type, $request,&$pmiApprovalRequestCtr,$ecr_id) {
                     // $type as a array name
                     //return array users id, defined type by use keyword,
                     return [
@@ -248,15 +282,14 @@ class EcrController extends Controller
                          // 'ecrs_id' =>  $ecr_id,
                         'rapidx_user_id' => $userId,
                         'type' => $type,
-                        'counter' => $ctr++,
+                        'counter' => $pmiApprovalRequestCtr++,
                         'remarks' => $request->remarks,
                         'created_at' => now(),
                     ];
                 });
             })->toArray();
-
             PmiApproval::insert($pmiApprovalRequest);
-            DB::commit();
+            // DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
