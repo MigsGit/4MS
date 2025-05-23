@@ -17,7 +17,7 @@ class CreateEcrApprovalsTable extends Migration
             $table->id();
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
             //manually inject relationship in MYSQL relation view
-            $table->unsignedBigInteger('rapidx_user_id')->unique()->comment('Rapidx User Id');
+            $table->unsignedBigInteger('rapidx_user_id')->comment('Rapidx User Id');
             //MYSQL restrict this function if different database
             // $table->foreignId('rapidx_users_id')->references('id')->on('rapidx.users')->comment ='Rapidx User Id';
             $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');

@@ -114,7 +114,10 @@ export default function useEcr(){
         frmEcrReasonRows.value.splice(index,1);
     }
     const getDropdownMasterByOpt = async (params) => {
-        await axiosFetchData(params, `api/get_dropdown_master_by_opt`, (response) => { //url
+        let apiParams = {
+            tblReference : params.tblReference
+        }
+        await axiosFetchData(apiParams, `api/get_dropdown_master_by_opt`, (response) => { //url
             let data = response.data;
             let dropdownMasterByOpt = data.dropdownMasterByOpt;
              /*
@@ -139,8 +142,9 @@ export default function useEcr(){
         });
     }
     const getRapidxUserByIdOpt = async (params) => {
+        let apiParams = {}
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
-        await axiosFetchData(params, `api/get_rapidx_user_by_id_opt`, (response) => { //url
+        await axiosFetchData(apiParams, `api/get_rapidx_user_by_id_opt`, (response) => { //url
             let data = response.data;
 
             let rapidxUserById = data.rapidxUserById;

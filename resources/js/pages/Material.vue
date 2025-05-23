@@ -211,17 +211,21 @@
                                                     </tr>
                                                 </thead>
                                                 <!-- @change="onUserChange(qadApprovedByInternalParams)" -->
+                                                <!-- @change="onUserChange(prCheckedByParams)" -->
+                                                  <!-- @change="onUserChange(prApprovedByParams)" -->
+
                                                 <tbody>
                                                     <tr >
                                                         <td>
                                                             Purchasing
                                                         </td>
                                                         <td>
+
                                                             <Multiselect
-                                                                v-model="frmMaterial.prCheckedBy"
+                                                                v-model="frmMaterial.prPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.prPreparedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -229,7 +233,7 @@
                                                                 v-model="frmMaterial.prCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.prCheckedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -237,7 +241,7 @@
                                                                 v-model="frmMaterial.prApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.prApprovedBy"
                                                             />
                                                         </td>
                                                     </tr>
@@ -247,10 +251,10 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
-                                                                v-model="frmMaterial.ppcCheckedBy"
+                                                                v-model="frmMaterial.ppcPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.ppcPreparedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -258,7 +262,7 @@
                                                                 v-model="frmMaterial.ppcCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.ppcCheckedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -266,7 +270,7 @@
                                                                 v-model="frmMaterial.ppcApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.ppcApprovedBy"
                                                             />
                                                         </td>
                                                     </tr>
@@ -462,6 +466,7 @@
     import useForm from '../../js/composables/utils/useForm.js'
     import useEcr from '../../js/composables/ecr.js';
     import useMaterial from '../../js/composables/material.js';
+    import useSettings from '../composables/settings.js';
     import useMan from '../../js/composables/man.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
@@ -476,12 +481,12 @@
         descriptionOfChangeParams,
         reasonOfChangeParams,
         typeOfPartParams,
-        getDropdownMasterByOpt,
-        getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrDetailsId,
         saveEcrDetails,
     } = useEcr();
+     // getDropdownMasterByOpt,
+     // getRapidxUserByIdOpt,
 
     const {
         materialVar,
@@ -494,7 +499,13 @@
 
     const {
         axiosSaveData
-    } = useForm(); // Call the useFetch function
+    } = useForm();
+
+    const {
+        getRapidxUserByIdOpt,
+        getDropdownMasterByOpt,
+        onUserChange,
+    } = useSettings();
 
 
     const modalSaveEcrDetail = ref(null);
@@ -514,6 +525,37 @@
         formModel: toRef(frmMaterial.value,'materialColor'),
         selectedVal: '',
     };
+    const prPreparedByParams = {
+        globalVar: materialVar.prPreparedBy,
+        formModel: toRef(frmMaterial.value,'prPreparedBy'),
+        selectedVal: '',
+    };
+    const prCheckedByParams = {
+        globalVar: materialVar.prCheckedBy,
+        formModel: toRef(frmMaterial.value,'prCheckedBy'),
+        selectedVal: '',
+    };
+    const prApprovedByParams = {
+        globalVar: materialVar.prApprovedBy,
+        formModel: toRef(frmMaterial.value,'prApprovedBy'),
+        selectedVal: '',
+    };
+    const ppcPreparedByParams = {
+        globalVar: materialVar.ppcPreparedBy,
+        formModel: toRef(frmMaterial.value,'ppcPreparedBy'),
+        selectedVal: '',
+    };
+    const ppcCheckedByParams = {
+        globalVar: materialVar.ppcCheckedBy,
+        formModel: toRef(frmMaterial.value,'ppcCheckedBy'),
+        selectedVal: '',
+    };
+    const ppcApprovedByParams = {
+        globalVar: materialVar.ppcApprovedBy,
+        formModel: toRef(frmMaterial.value,'ppcApprovedBy'),
+        selectedVal: '',
+    };
+
 
     //Columns
     const columns = [
@@ -528,6 +570,12 @@
                         frmMaterial.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
                         getMaterialEcrById(ecrId);
+                        getRapidxUserByIdOpt(prPreparedByParams);
+                        getRapidxUserByIdOpt(prCheckedByParams);
+                        getRapidxUserByIdOpt(prApprovedByParams);
+                        getRapidxUserByIdOpt(ppcPreparedByParams);
+                        getRapidxUserByIdOpt(ppcCheckedByParams);
+                        getRapidxUserByIdOpt(ppcApprovedByParams);
                         modal.SaveMaterial.show();
                     });
                 }
@@ -578,6 +626,7 @@
         await getDropdownMasterByOpt(typeOfPartParams);
         await getDropdownMasterByOpt(materialSupplierParams);
         await getDropdownMasterByOpt(materialColorParams);
+
     })
 
     //Functions
@@ -621,11 +670,19 @@
             ["rohs", frmMaterial.value.rohs],
             ["material_sample", frmMaterial.value.materialSample],
             ["coc", frmMaterial.value.coc],
+            //  , frmMaterial.value.materialSupplier],
+            //  , frmMaterial.value.materialColor],
+            ["prPreparedBy", frmMaterial.value.prPreparedBy],
+            ["prCheckedBy", frmMaterial.value.prCheckedBy],
+            ["prApprovedBy", frmMaterial.value.prApprovedBy],
+            ["ppcPreparedBy", frmMaterial.value.ppcPreparedBy],
+            ["ppcCheckedBy", frmMaterial.value.ppcCheckedBy],
+            ["ppcApprovedBy", frmMaterial.value.ppcApprovedBy],
+
         ].forEach(([key, value]) =>
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_material', (response) =>{
-            console.log(response);
             modal.SaveMaterial.hide();
             tblEcrByCategoryStatus.value.dt.draw();
         });

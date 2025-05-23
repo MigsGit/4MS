@@ -20,7 +20,7 @@ class MaterialController extends Controller
     public function saveMaterial(Request $request,MaterialRequest  $materialRequest){
         date_default_timezone_set('Asia/Manila');
         try {
-
+            return $materialRequest->all();
             $materialRequest = $materialRequest->validated();
 
             if ( isset($request->material_id)){
@@ -32,6 +32,12 @@ class MaterialController extends Controller
                 $materialRequest['created_at'] = now();
                 $this->resourceInterface->create(Material::class,$materialRequest);
             }
+            $request->ppcApprovedBy;
+            $request->ppcCheckedBy;
+            $request->ppcPreparedBy;
+            $request->prApprovedBy;
+            $request->prCheckedBy;
+            $request->prPreparedBy;
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;
