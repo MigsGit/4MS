@@ -21,7 +21,7 @@ class CreateEcrApprovalsTable extends Migration
             //MYSQL restrict this function if different database
             // $table->foreignId('rapidx_users_id')->references('id')->on('rapidx.users')->comment ='Rapidx User Id';
             $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
-            $table->string('type')->default('RB');
+            $table->string('approval_status')->default('RB');
             $table->bigInteger('counter');
             $table->longText('remarks')->nullable();
             $table->timestamps();

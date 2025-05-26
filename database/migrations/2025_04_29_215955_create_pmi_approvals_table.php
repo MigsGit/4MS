@@ -19,7 +19,7 @@ class CreatePmiApprovalsTable extends Migration
             //manually inject relationship in MYSQL relation view
             $table->unsignedBigInteger('rapidx_user_id')->unique()->comment('Rapidx User Id');
             $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
-            $table->string('type')->default('RB');
+            $table->string('approval_status')->default('RB');
             $table->bigInteger('counter');
             $table->longText('remarks')->nullable();
             $table->timestamps();

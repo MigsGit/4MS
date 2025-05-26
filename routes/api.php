@@ -40,6 +40,7 @@ Route::controller(SettingsController::class)->group(function () {
 Route::controller(EcrController::class)->group(function () {
     Route::post('save_ecr', 'saveEcr')->name('save_ecr');
     Route::post('save_ecr_details', 'saveEcrDetails')->name('save_ecr_details');
+    Route::post('save_ecr_approval', 'saveEcrApproval')->name('save_ecr_approval');
     Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
     Route::get('load_ecr', 'loadEcr')->name('load_ecr');
     Route::get('load_ecr_by_status', 'loadEcrByStatus')->name('load_ecr_by_status');

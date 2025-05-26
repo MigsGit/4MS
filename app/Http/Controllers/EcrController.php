@@ -66,7 +66,7 @@ class EcrController extends Controller
                         $approvalStatus = 'Requested by:';
                         break;
                     case 'OTTE':
-                        $approvalStatus = 'Requested by:';
+                        $approvalStatus = 'Technical Engg:';
                         break;
                     default:
                         $approvalStatus = '';
@@ -103,8 +103,8 @@ class EcrController extends Controller
             return DataTables($ecr)
             /*
             get_count
-get_approver_name
-get_status
+            get_approver_name
+            get_status
             */
             ->addColumn('get_count',function ($row) use(&$ctr){
                 $ctr++;
@@ -247,7 +247,7 @@ get_status
                     $isValid = "is-invalid";
                     $emptySelected = "selected";
                 }else{
-                    $isValid = "is-valid";
+                    $isValid = "";
                     $emptySelected = "";
                 }
                 $result = '';
@@ -315,12 +315,12 @@ get_status
                 'QA' => [$request->qad_checked_by,$request->qad_approved_by_internal,$request->qad_approved_by_external],
             ];
             $ecrApprovalRequestCtr = 0; //assigned counter
-            $ecrApprovalRequest = collect($ecrApprovalTypes)->flatMap(function ($users,$type) use ($request,&$ecrApprovalRequestCtr,$ecr_id){
-                    return collect($users)->map(function ($userId) use ($request,$type,&$ecrApprovalRequestCtr,$ecr_id){
+            $ecrApprovalRequest = collect($ecrApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$ecrApprovalRequestCtr,$ecr_id){
+                    return collect($users)->map(function ($userId) use ($request,$approval_status,&$ecrApprovalRequestCtr,$ecr_id){
                         return [
                             'ecrs_id' =>  $ecr_id,
                             'rapidx_user_id' => $userId,
-                            'type' => $type,
+                            'approval_status' => $approval_status,
                             'counter' => $ecrApprovalRequestCtr++,
                             'remarks' => $request->remarks,
                             'created_at' => now(),
@@ -333,22 +333,22 @@ get_status
             DB::commit();
             return response()->json(['is_success' => 'true']);
             //PMI Approvers
-            $types = [
+            $approval_statuss = [
                 'PB' => $request->prepared_by,
                 'CB' => $request->checked_by,
                 'AB' => $request->approved_by,
             ];
             $pmiApprovalRequestCtr = 0;
-            $pmiApprovalRequest = collect($types)->flatMap(function ($users,$type) use ($request,&$pmiApprovalRequestCtr,$ecr_id){
+            $pmiApprovalRequest = collect($approval_statuss)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$ecr_id){
                 //return array users id as array value
-                return collect($users)->map(function ($userId) use ($type, $request,&$pmiApprovalRequestCtr,$ecr_id) {
-                    // $type as a array name
+                return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$ecr_id) {
+                    // $approval_status as a array name
                     //return array users id, defined type by use keyword,
                     return [
                         'ecrs_id' => $ecr_id,
                          // 'ecrs_id' =>  $ecr_id,
                         'rapidx_user_id' => $userId,
-                        'type' => $type,
+                        'approval_status' => $approval_status,
                         'counter' => $pmiApprovalRequestCtr++,
                         'remarks' => $request->remarks,
                         'created_at' => now(),
@@ -363,6 +363,36 @@ get_status
             throw $e;
         }
     }
+    public function saveEcrApproval(Request $request){
+        date_default_timezone_set('Asia/Manila');
+        try {
+            $ecrEcrApprovalValidated = [
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ];
+            $EcrApprovalConditions = [
+                'ecrs_id' => $request->ecrs_id,
+                'approval_status' => $request->approval_status,
+                'rapidx_user_id' => $request->rapidx_user_id,
+            ];
+            $EcrConditions = [
+                'id' => $request->ecrs_id,
+            ];
+            $ecrEcrApprovalValidated = [
+                'approval_status' => $request->approval_status,
+            ];
+            // $this->resourceInterface->updateConditions(EcrApproval::class,$EcrApprovalConditions,$ecrEcrApprovalValidated);
+
+            return $ecrApproval = EcrApproval::where('status','PEN')
+            ->get(['status','id']);
+
+            // $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrEcrApprovalValidated);
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
     public function getEcrById(Request $request){
         try {
             // return 'true' ;
@@ -371,14 +401,15 @@ get_status
                 'ecr_details',
                 'ecr_approvals',
                 'pmi_approvals',
+
             ];
             $conditions = [
                 'id' => $request->ecr_id
             ];
 
             $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
-            $ecrApprovalCollection = collect($ecr[0]->ecr_approvals)->groupBy('type')->toArray();
-            $pmiApprovalCollection = collect($ecr[0]->pmi_approvals)->groupBy('type')->toArray();
+            $ecrApprovalCollection = collect($ecr[0]->ecr_approvals)->groupBy('approval_status')->toArray();
+            $pmiApprovalCollection = collect($ecr[0]->pmi_approvals)->groupBy('approval_status')->toArray();
             return response()->json(['is_success' => 'true', 'ecr' => $ecr[0] ,
                 'ecrApprovalCollection' => $ecrApprovalCollection,
                 'pmiApprovalCollection'=>$pmiApprovalCollection

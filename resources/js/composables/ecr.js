@@ -33,8 +33,9 @@ export default function useEcr(){
     });
     //Ref State
     const frmEcr = ref({
-        ecrId: '',
+        ecrsId: '',
         ecrNo: '',
+        approvalStatus: '',
         category: '',
         customerName: '',
         partName: '',
@@ -45,6 +46,7 @@ export default function useEcr(){
         deviceName: '',
         customerEcNo: '',
         dateOfRequest: '',
+        approvalRemarks: '',
     });
     const frmEcrDetails = ref({
         ecrDetailsId: '',
@@ -170,8 +172,9 @@ export default function useEcr(){
             let data = response.data;
             let ecr = data.ecr;
 
-            frmEcr.value.ecrId =ecr.ecrs_id;
-            frmEcr.value.ecrNo =ecr.ecr_no;;
+            frmEcr.value.ecrsId = ecr.id;
+            console.log(ecr);
+            frmEcr.value.ecrNo = ecr.ecr_no;;
             frmEcr.value.category = ecr.category;
             frmEcr.value.customerName = ecr.customer_name;
             frmEcr.value.partNumber = ecr.part_no;
@@ -182,7 +185,7 @@ export default function useEcr(){
             frmEcr.value.deviceName = ecr.device_name;
             frmEcr.value.customerEcNo = ecr.customer_ec_no;
             frmEcr.value.dateOfRequest = ecr.date_of_request;
-
+            frmEcr.value.approvalStatus = ecr.approval_status;
             //Multiselect
             frmEcrReasonRows.value = [];
             frmEcrOtherDispoRows.value = [];

@@ -19,7 +19,7 @@ class CreateMaterialApprovalsTable extends Migration
             //manually inject relationship in MYSQL relation view
             $table->unsignedBigInteger('rapidx_user_id')->comment('Rapidx User Id');
             $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
-            $table->string('type');
+            $table->string('approval_status');
             $table->bigInteger('counter');
             $table->longText('remarks')->nullable();
             $table->timestamps();

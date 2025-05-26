@@ -99,7 +99,7 @@
         <template #body>
                 <div class="row">
                     <div class="input flex-nowrap mb-2 input-group-sm">
-                            <input  v-model="frmEcr.ecrId" type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
+                        <input  v-model="frmEcr.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
 
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -428,10 +428,10 @@
             <template #footer>
                 <button v-show="isSelectReadonly === false" type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                 <button v-show="isSelectReadonly === false" type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
-                <button @click="btnEcrApproval" v-show="isSelectReadonly === true" type="button" ref= "btnEcrDisapproved" class="btn btn-danger btn-sm">
+                <button @click="btnEcrApproval('DIS')" v-show="isSelectReadonly === true" type="button" ref= "btnEcrDisapproved" class="btn btn-danger btn-sm">
                     <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
                 </button>
-                <button @click="btnEcrApproval" v-show="isSelectReadonly === true" type="button" ref= "btnEcrApproved" class="btn btn-success btn-sm">
+                <button @click="btnEcrApproval('APP')" v-show="isSelectReadonly === true" type="button" ref= "btnEcrApproved" class="btn btn-success btn-sm">
                     <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-up" />&nbsp;Approved
                 </button>
             </template>
@@ -453,7 +453,7 @@
                                     <DataTable
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
-                                        ref="tblEcrMatRequirements"
+                                        ref="tblEcrManRequirements"
                                         :columns="tblEcrManRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=1"
                                         :options="{
@@ -499,7 +499,7 @@
                                         class="table mt-2"
                                         ref="tblEcrMatRequirements"
 
-                                        :columns="tblEcrMatRequirementsColumns"
+                                        :columns="tblEcrManRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=2"
                                         :options="{
                                             paging:false,
@@ -539,9 +539,8 @@
                                     <DataTable
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
-                                        ref="tblEcrMatRequirements"
-
-                                        :columns="tblEcrMatRequirementsColumns"
+                                        ref="tblEcrMachineRequirements"
+                                        :columns="tblEcrManRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=3"
                                         :options="{
                                             paging:false,
@@ -572,7 +571,22 @@
             <!-- <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button> -->
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Approval" ref="modalEcrApproval">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" title="ECR Approval" ref="modalEcrApproval" @add-event="frmSaveEcrApproval()">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <textarea v-model="frmEcr.approvalRemarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
+        </template>
     </ModalComponent>
 
 </template>
@@ -614,14 +628,18 @@
     //ref state
     const modalSaveEcr = ref(null);
     const modalTitle = ref(null);
-    const isSelectReadonly = ref(null);
-    const btnEcrApproved = ref(null);
-    const btnEcrDisapproved = ref(null);
     const modalEcrRequirements = ref(null);
+    const modalEcrApproval = ref(null);
+    const isSelectReadonly = ref(null);
     const tblEcr = ref(null);
     const tblEcrManRequirements = ref(null);
     const tblEcrMatRequirements = ref(null);
     const tblEcrApproverSummary = ref(null);
+    const btnEcrApproved = ref(null);
+    const btnEcrDisapproved = ref(null);
+    const isApproved = ref(null);
+
+    //Table Column
     const tblEcrColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -631,7 +649,7 @@
                 let btnViewEcrId = cell.querySelector('#btnViewEcrId');
 
                 btnGetEcrId.addEventListener('click',function(){
-                    let ecrId = this.getAttribute('ecr-id');
+                    let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "Edit";
                     isSelectReadonly.value = false;
                     //:disabled
@@ -644,11 +662,11 @@
                     getRapidxUserByIdOpt(pmiApproverPreparedByParams);
                     getRapidxUserByIdOpt(pmiApproverCheckedByParams);
                     getRapidxUserByIdOpt(pmiApproverApprovedByParams);
-                    getEcrById(ecrId);
-                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrId).draw()
+                    getEcrById(ecrsId);
+                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrsId).draw()
                 });
                 btnViewEcrId.addEventListener('click',function(){
-                    let ecrId = this.getAttribute('ecr-id');
+                    let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "View";
                     isSelectReadonly.value = true;
                     getRapidxUserByIdOpt(otherDispoRequestedByParams);
@@ -660,8 +678,8 @@
                     getRapidxUserByIdOpt(pmiApproverPreparedByParams);
                     getRapidxUserByIdOpt(pmiApproverCheckedByParams);
                     getRapidxUserByIdOpt(pmiApproverApprovedByParams);
-                    getEcrById(ecrId);
-                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrId).draw()
+                    getEcrById(ecrsId);
+                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw()
                 });
             }
         } ,
@@ -704,32 +722,32 @@
             }
         }
     ];
-    const tblEcrMatRequirementsColumns = [
-        {   data: 'requirement'} ,
-        {   data: 'details'} ,
-        {   data: 'evidence'} ,
-        {   data: 'get_actions',
-            createdCell(cell){
-                let btnChangeEcrReqDecision = cell.querySelector('#btnChangeEcrReqDecision');
-                if(btnChangeEcrReqDecision != null){
-                    btnChangeEcrReqDecision.addEventListener('change',function(){
-                        let ecrReqId = this.getAttribute('ecr-requirements-id');
-                        let ecrReqValue = this.value;
-                        let classificationRequirementId = this.getAttribute('classification-requirement-id');
-                        let selectedParams = {
-                            ecr_req_id : ecrReqId,
-                            ecr_req_value : ecrReqValue,
-                            classification_requirement_id : classificationRequirementId,
-                        }
-                        let varParams = {
-                            btnChangeEcrReqDecisionClas: this.classList,
-                        }
-                        ecrReqDecisionChange(selectedParams,varParams);
-                    });
-                }
-            }
-        }
-    ];
+    // const tblEcrMatRequirementsColumns = [
+    //     {   data: 'requirement'} ,
+    //     {   data: 'details'} ,
+    //     {   data: 'evidence'} ,
+    //     {   data: 'get_actions',
+    //         createdCell(cell){
+    //             let btnChangeEcrReqDecision = cell.querySelector('#btnChangeEcrReqDecision');
+    //             if(btnChangeEcrReqDecision != null){
+    //                 btnChangeEcrReqDecision.addEventListener('change',function(){
+    //                     let ecrReqId = this.getAttribute('ecr-requirements-id');
+    //                     let ecrReqValue = this.value;
+    //                     let classificationRequirementId = this.getAttribute('classification-requirement-id');
+    //                     let selectedParams = {
+    //                         ecr_req_id : ecrReqId,
+    //                         ecr_req_value : ecrReqValue,
+    //                         classification_requirement_id : classificationRequirementId,
+    //                     }
+    //                     let varParams = {
+    //                         btnChangeEcrReqDecisionClas: this.classList,
+    //                     }
+    //                     ecrReqDecisionChange(selectedParams,varParams);
+    //                 });
+    //             }
+    //         }
+    //     }
+    // ];
     const tblEcrApproverSummaryColumns = [
         {   data: 'get_count'} ,
         {   data: 'get_approver_name'} ,
@@ -804,6 +822,7 @@
         //Do not name the Modal it is same new Modal js clas
         modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
@@ -838,6 +857,32 @@
     }
     const btnRemoveEcrPmiApproverRows = async (index) => {
         frmEcrPmiApproverRows.value.splice(index,1);
+    }
+    const btnEcrApproval = async (isEcrApproved) => {
+        modal.EcrApproval.show();
+        isApproved.value = isEcrApproved;
+        alert(isApproved.value)
+    }
+    const frmSaveEcrApproval = async () => {
+        let formData = new FormData();
+        console.log(frmEcr.ecrsId);
+
+        //Append form data
+        [
+            ["ecrs_id", frmEcr.value.ecrsId],
+            ["status", isApproved.value],
+            ["approval_status", frmEcr.value.approvalStatus],
+            ["rapidx_user_id", 149],
+            ["remarks", frmEcr.value.approvalRemarks],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_ecr_approval', (response) =>{
+            // tblEcr.value.dt.draw();
+            // modal.SaveEcr.modal();
+
+            console.log(response);
+        });
     }
     const frmSaveEcr = async () => {
         let formData = new FormData();
@@ -908,6 +953,7 @@
             console.log(response);
         });
     }
+
 </script>
 
 
