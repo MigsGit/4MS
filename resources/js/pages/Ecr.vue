@@ -95,7 +95,7 @@
             </div>
         </div>
     </div>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR" @add-event="frmSaveEcr()" ref="modalSaveEcr">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" :title="modalTitle+' '+'ECR'" @add-event="frmSaveEcr()" ref="modalSaveEcr">
         <template #body>
                 <div class="row">
                     <div class="input flex-nowrap mb-2 input-group-sm">
@@ -162,16 +162,17 @@
                         </div>
                     </div>
                 </div>
-                <EcrChangeComponent  @remove-ecr-reason-rows-event="removeEcrReasonRows(index)" @add-ecr-reason-rows-event="addEcrReasonRows()":frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+                <EcrChangeComponent :isSelectReadonly="isSelectReadonly" @remove-ecr-reason-rows-event="removeEcrReasonRows(index)" @add-ecr-reason-rows-event="addEcrReasonRows()":frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
                 </EcrChangeComponent>
                 <!-- Others Disposition -->
-                <div class="card mb-2">
+
+                <div v-show="isSelectReadonly === false" class="card mb-2">
                         <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="true" aria-controls="collapse3">
-                                Others Disposition
+                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
+                                Others Disposition {{ isSelectReadonly }}
                             </button>
                         </h5>
-                    <div id="collapse3" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
@@ -182,7 +183,7 @@
                                         <thead>
                                             <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col" style="width: 30%;">Requested Bysss</th>
+                                            <th scope="col" style="width: 30%;">Requested By</th>
                                             <th scope="col" style="width: 30%;">Technical Evaluation / Engineering</th>
                                             <th scope="col" style="width: 30%;">Reviewed By / Section Heads</th>
                                             <th scope="col">Action</th>
@@ -200,8 +201,9 @@
                                                         :searchable="true"
                                                         :options="ecrVar.requestedBy"
                                                         @change="onUserChange(otherDispoTechnicalEvaluationParams)"
-
+                                                        :disabled="isSelectReadonly"
                                                     />
+                                                    {{frmEcrOtherDispoRows.remarks}}
                                                 </td>
                                                 <td>
                                                     <Multiselect
@@ -210,6 +212,7 @@
                                                         :searchable="true"
                                                         :options="ecrVar.technicalEvaluation"
                                                         @change="onUserChange(otherDispoReviewedByParams)"
+                                                        :disabled="isSelectReadonly"
                                                     />
                                                 </td>
                                                 <td>
@@ -219,7 +222,7 @@
                                                         :searchable="true"
                                                         :options="ecrVar.reviewedBy"
                                                         @change="onUserChange(qadCheckedByParams)"
-
+                                                        :disabled="isSelectReadonly"
                                                     />
 
                                                 </td>
@@ -237,13 +240,13 @@
                     </div>
                 </div>
                  <!-- QA Dispositions -->
-                 <div class="card mb-2 h-100">
+                 <div class="card mb-2 h-100" v-show="isSelectReadonly === false">
                         <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
+                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="true" aria-controls="collapse3">
                                 QA Dispositions
                             </button>
                         </h5>
-                    <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapse3" class="collapse" data-bs-parent="#accordionMain">
                         <div class="card-body shadow">
                             <div class="row">
                                 <!-- style="height: 200px;-->
@@ -272,6 +275,7 @@
                                                         :searchable="true"
                                                         :options="ecrVar.optQadCheckedBy"
                                                         @change="onUserChange(qadApprovedByInternalParams)"
+                                                        :disabled="isSelectReadonly"
                                                         />
                                                     </td>
                                                 <td>
@@ -281,6 +285,7 @@
                                                         :searchable="true"
                                                         :options="ecrVar.optQadApprovedByInternal"
                                                         @change="onUserChange(qadApprovedByExternalParams)"
+                                                        :disabled="isSelectReadonly"
                                                         />
                                                     </td>
                                                 <td>
@@ -290,6 +295,7 @@
                                                         :searchable="true"
                                                         :options="ecrVar.optQadApprovedByExternal"
                                                         @change="onUserChange(pmiApproverPreparedByParams)"
+                                                        :disabled="isSelectReadonly"
                                                     />
                                                 </td>
                                             </tr>
@@ -306,7 +312,7 @@
                     </div>
                 </div>
                 <!-- PMI Approvers -->
-                <div class="card mb-2">
+                <div class="card mb-2" v-show="isSelectReadonly === false">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="true" aria-controls="collapse4">
                                 PMI Approvers
@@ -342,6 +348,8 @@
                                                         :searchable="true"
                                                         :options="ecrVar.preparedBy"
                                                         @change="onUserChange(pmiApproverCheckedByParams)"
+                                                        :disabled="isSelectReadonly"
+
 
                                                     />
 
@@ -353,6 +361,7 @@
                                                         :searchable="true"
                                                         :options="ecrVar.checkedBy"
                                                         @change="onUserChange(pmiApproverApprovedByParams)"
+                                                        :disabled="isSelectReadonly"
                                                     />
                                                 </td>
                                                 <td>
@@ -376,17 +385,59 @@
                         </div>
                     </div>
                 </div>
+                <!-- Approver Summary -->
+                <div class="row mt-3" v-show="isSelectReadonly === true">
+                    <div class="card mb-2">
+                            <h5 class="mb-0">
+                                <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseApprovalSummary" aria-expanded="true" aria-controls="collapseApprovalSummary">
+                                    ECR Approver Summary
+                                </button>
+                            </h5>
+                        <div id="collapseApprovalSummary" class="collapse show" data-bs-parent="#accordionMain">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-12 overflow-auto" style="height: 300px;">
+                                        <DataTable
+                                            width="100%" cellspacing="0"
+                                            class="table mt-2"
+                                            ref="tblEcrApproverSummary"
+                                            :columns="tblEcrApproverSummaryColumns"
+                                            ajax="api/load_ecr_approval_summary?ecrs_id="
+                                            :options="{
+                                                paging:false,
+                                                serverSide: true, //Serverside true will load the network
+                                                ordering: false,
+                                            }"
+                                        >
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Approver Name</th>
+                                                    <th>Remarks</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                        </DataTable>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </template>
             <template #footer>
-                <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
+                <button v-show="isSelectReadonly === false" type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <button v-show="isSelectReadonly === false" type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
+                <button @click="btnEcrApproval" v-show="isSelectReadonly === true" type="button" ref= "btnEcrDisapproved" class="btn btn-danger btn-sm">
+                    <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
+                </button>
+                <button @click="btnEcrApproval" v-show="isSelectReadonly === true" type="button" ref= "btnEcrApproved" class="btn btn-success btn-sm">
+                    <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-up" />&nbsp;Approved
+                </button>
             </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
-            <div class="row">
-
-            </div>
             <div class="row mt-3">
                 <!-- Man -->
                 <div class="card mb-2">
@@ -521,6 +572,9 @@
             <!-- <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button> -->
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Approval" ref="modalEcrApproval">
+    </ModalComponent>
+
 </template>
 
 <script setup>
@@ -559,32 +613,56 @@
     // const item = ref();
     //ref state
     const modalSaveEcr = ref(null);
+    const modalTitle = ref(null);
+    const isSelectReadonly = ref(null);
+    const btnEcrApproved = ref(null);
+    const btnEcrDisapproved = ref(null);
     const modalEcrRequirements = ref(null);
     const tblEcr = ref(null);
     const tblEcrManRequirements = ref(null);
     const tblEcrMatRequirements = ref(null);
+    const tblEcrApproverSummary = ref(null);
     const tblEcrColumns = [
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
-                if(btnGetEcrId != null){
-                    btnGetEcrId.addEventListener('click',function(){
-                        let ecrId = this.getAttribute('ecr-id');
-                        getRapidxUserByIdOpt(otherDispoRequestedByParams);
-                        getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
-                        getRapidxUserByIdOpt(otherDispoReviewedByParams);
-                        getRapidxUserByIdOpt(qadCheckedByParams);
-                        getRapidxUserByIdOpt(qadApprovedByInternalParams);
-                        getRapidxUserByIdOpt(qadApprovedByExternalParams);
-                        getRapidxUserByIdOpt(pmiApproverPreparedByParams);
-                        getRapidxUserByIdOpt(pmiApproverCheckedByParams);
-                        getRapidxUserByIdOpt(pmiApproverApprovedByParams);
-                        getEcrById(ecrId);
+                let btnViewEcrId = cell.querySelector('#btnViewEcrId');
 
-                    });
-                }
+                btnGetEcrId.addEventListener('click',function(){
+                    let ecrId = this.getAttribute('ecr-id');
+                    modalTitle.value = "Edit";
+                    isSelectReadonly.value = false;
+                    //:disabled
+                    getRapidxUserByIdOpt(otherDispoRequestedByParams);
+                    getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+                    getRapidxUserByIdOpt(otherDispoReviewedByParams);
+                    getRapidxUserByIdOpt(qadCheckedByParams);
+                    getRapidxUserByIdOpt(qadApprovedByInternalParams);
+                    getRapidxUserByIdOpt(qadApprovedByExternalParams);
+                    getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+                    getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+                    getRapidxUserByIdOpt(pmiApproverApprovedByParams);
+                    getEcrById(ecrId);
+                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrId).draw()
+                });
+                btnViewEcrId.addEventListener('click',function(){
+                    let ecrId = this.getAttribute('ecr-id');
+                    modalTitle.value = "View";
+                    isSelectReadonly.value = true;
+                    getRapidxUserByIdOpt(otherDispoRequestedByParams);
+                    getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+                    getRapidxUserByIdOpt(otherDispoReviewedByParams);
+                    getRapidxUserByIdOpt(qadCheckedByParams);
+                    getRapidxUserByIdOpt(qadApprovedByInternalParams);
+                    getRapidxUserByIdOpt(qadApprovedByExternalParams);
+                    getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+                    getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+                    getRapidxUserByIdOpt(pmiApproverApprovedByParams);
+                    getEcrById(ecrId);
+                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrId).draw()
+                });
             }
         } ,
         {   data: 'get_status'} ,
@@ -651,6 +729,12 @@
                 }
             }
         }
+    ];
+    const tblEcrApproverSummaryColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
     ];
 
     //constant object params
@@ -732,6 +816,7 @@
         // await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
         // await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
+        $('#collapse1').addClass('show');
     })
     //Functions
     const btnAddEcrOtherDispoRows = async () => {

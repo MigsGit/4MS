@@ -29,7 +29,9 @@ class EcrController extends Controller
         try {
             $status = $request->status ?? "";
             $data = [];
-            $relations = [];
+            $relations = [
+                'ecr_approval.rapidx_user'
+            ];
             $conditions = [
                 'status' => $status
             ];
@@ -39,12 +41,15 @@ class EcrController extends Controller
                 $result = '';
                 $result .= '<center>';
                 $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
-                $result .= '</center>';
+                $result .= '<br>';
+                $result .= '<br>';
+                $result .= "<button class='btn btn-outline-primary btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEcrId'> <i class='fa-solid fa-eye'></i></button>";
+                $result .= '</br>';
                 return $result;
                 return $result;
             })
             ->addColumn('get_status',function ($row){
-
+                $currentApprover = $row->ecr_approval['rapidx_user']['name'] ?? '';
                 switch ($row->status) {
                     case 'IA':
                         $status = 'Internal Approval';
@@ -70,12 +75,74 @@ class EcrController extends Controller
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="badge rounded-pill bg-primary"> '.$status.' </span>';
-                $result .= '<span class="badge rounded-pill bg-danger"> '.$approvalStatus.' </span>';
-                $result .= '</center>';
+                $result .= '<br>';
+                $result .= '<span class="badge rounded-pill bg-danger"> '.$approvalStatus.' '.$currentApprover.' </span>';
+                $result .= '</br>';
                 return $result;
                 return $result;
             })
             ->rawColumns(['get_actions','get_status'])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function loadEcrApprovalSummary(Request $request){
+        try {
+            $ecrsId = $request->ecrsId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                // 'ecrs_id' => $ecrsId
+                'ecrs_id' => $ecrsId
+            ];
+            $ecr = $this->resourceInterface->readWithRelationsConditionsActive(EcrApproval::class,$data,$relations,$conditions);
+            $ctr = 0;
+            return DataTables($ecr)
+            /*
+            get_count
+get_approver_name
+get_status
+            */
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
+                    case 'PEN':
+                        $status = 'PENDING';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        break;
+                    default:
+                        $status = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name'])
             ->make(true);
         } catch (Exception $e) {
             throw $e;
@@ -236,10 +303,10 @@ class EcrController extends Controller
                 ];
             });
 
+            EcrDetail::where('ecrs_id', $ecr_id)->delete();
             foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
                $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
             }
-
             //Requested by, Engg, Heads, QA Approval
             $ecrApprovalTypes = [
                 'OTRB' => $request->requested_by,
@@ -261,7 +328,7 @@ class EcrController extends Controller
                     });
 
             })->toArray();
-            // EcrApproval::where('ecrs_id', $ecr_id)->delete();
+            EcrApproval::where('ecrs_id', $ecr_id)->delete();
             EcrApproval::insert($ecrApprovalRequest);
             DB::commit();
             return response()->json(['is_success' => 'true']);

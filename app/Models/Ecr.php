@@ -22,8 +22,13 @@ class Ecr extends Model
     {
         return $this->hasMany(EcrApproval::class, 'ecrs_id', 'id');
     }
+    public function ecr_approval()
+    {
+        return $this->hasOne(EcrApproval::class, 'ecrs_id', 'id');
+    }
     public function pmi_approvals()
     {
         return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id');
     }
+
 }

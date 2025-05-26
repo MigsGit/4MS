@@ -414,7 +414,7 @@
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
         <template #body>
              <!-- Description of Change / Reason for Change -->
-             <EcrChangeComponent :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+             <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
             <div class="row">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -510,6 +510,7 @@
 
     const modalSaveEcrDetail = ref(null);
     const modalSaveMaterial = ref(null);
+    const isSelectReadonly  = ref(null);
     const tblEcrByCategoryStatus = ref(null);
 
     //Params
