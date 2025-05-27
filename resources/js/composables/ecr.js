@@ -194,60 +194,69 @@ export default function useEcr(){
             let ecrApprovalCollection = data.ecrApprovalCollection;
             let pmiApprovalCollection = data.pmiApprovalCollection;
             let ecrDetails = ecr.ecr_details;
-            //Reasons
-            if (ecrDetails.length != 0){
-                ecrDetails.forEach((ecrDetailsEl,index) =>{
-                    frmEcrReasonRows.value.push({
-                        descriptionOfChange : ecrDetailsEl.description_of_change,
-                        reasonOfChange : ecrDetailsEl.reason_of_change
-                    });
-                })
-            }
-            //ECR Approval
-            if (ecrApprovalCollection.length != 0){
-                let requestedBy = ecrApprovalCollection.OTRB;
-                let technicalEvaluation = ecrApprovalCollection.OTTE;
-                let reviewedBy = ecrApprovalCollection.OTRVB;
-                let qaCheckedBy = ecrApprovalCollection.QA;
-                // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
-                 // Exclude 'QA' from keys
-                const ecrApprovalCollectionFiltered = Object.keys(ecrApprovalCollection).filter(key => key !== 'QA');
-                const maxKey = ecrApprovalCollectionFiltered.reduce((a, b) =>
-                    ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
-                );
-                ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
-                    frmEcrOtherDispoRows.value.push({
-                        requestedBy: requestedBy[index] === undefined ? 0: requestedBy[index].rapidx_user_id ,
-                        reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
-                        technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
-                    });
-                });
-                //QA Approval
-                if (qaCheckedBy.length != 0){
-                    frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
-                    frmEcrQadRows.value.qadApprovedByInternal = qaCheckedBy[1].rapidx_user_id === undefined ? 0: qaCheckedBy[1].rapidx_user_id; //nmodify
-                    frmEcrQadRows.value.qadApprovedByExternal = qaCheckedBy[2].rapidx_user_id === undefined ? 0: qaCheckedBy[2].rapidx_user_id; //nmodify
+            setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
+                //Reasons
+                if (ecrDetails.length != 0){
+                    ecrDetails.forEach((ecrDetailsEl,index) =>{
+                        frmEcrReasonRows.value.push({
+                            descriptionOfChange : ecrDetailsEl.description_of_change,
+                            reasonOfChange : ecrDetailsEl.reason_of_change
+                        });
+                    })
                 }
+            }, 100);
+            setTimeout(() => { //Cannot display data immediately, need to wait for the DOM to be updated
+                //ECR Approval
+                if (ecrApprovalCollection.length != 0){
+                    let requestedBy = ecrApprovalCollection.OTRB;
+                    let technicalEvaluation = ecrApprovalCollection.OTTE;
+                    let reviewedBy = ecrApprovalCollection.OTRVB;
+                    let qaCheckedBy = ecrApprovalCollection.QACB;
+                    let qaInternal = ecrApprovalCollection.QAIN;
+                    let qaExternal = ecrApprovalCollection.QAEX;
 
-            }
-            //PMI Approval
-            if (pmiApprovalCollection.length != 0){
-                let preparedBy = pmiApprovalCollection.PB;
-                let checkedBy = pmiApprovalCollection.CB                ;
-                let approvedBy = pmiApprovalCollection.AB                ;
-                // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
-                const maxKey = Object.keys(pmiApprovalCollection).reduce((a, b) =>
-                    pmiApprovalCollection[a].length > pmiApprovalCollection[b].length ? a : b
-                );
-
-                pmiApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
-                    frmEcrPmiApproverRows.value.push({
-                        preparedBy: preparedBy[index] === undefined ? 0: preparedBy[index].rapidx_user_id ,
-                        checkedBy: checkedBy[index] === undefined ? 0: checkedBy[index].rapidx_user_id ,
-                        approvedBy:approvedBy[index] === undefined ? 0: approvedBy[index].rapidx_user_id,
+                    // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
+                    // Exclude 'QA' from keys
+                    const ecrApprovalCollectionFiltered = Object.keys(ecrApprovalCollection).filter(key => key !== 'QA');
+                    const maxKey = ecrApprovalCollectionFiltered.reduce((a, b) =>
+                        ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
+                    );
+                    ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
+                        frmEcrOtherDispoRows.value.push({
+                            requestedBy: requestedBy[index] === undefined ? 0: requestedBy[index].rapidx_user_id ,
+                            reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
+                            technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
+                        });
                     });
-                });
-            }
+                    //QA Approval
+                    if (qaCheckedBy.length != 0){
+                        frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id ?? 0; //nmodify
+                        // frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
+                        frmEcrQadRows.value.qadApprovedByInternal = qaInternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
+                        frmEcrQadRows.value.qadApprovedByExternal = qaExternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
+                    }
+
+                }
+                //PMI Approval
+                if (pmiApprovalCollection.length != 0){
+                    let preparedBy = pmiApprovalCollection.PB;
+                    let checkedBy = pmiApprovalCollection.CB                ;
+                    let approvedBy = pmiApprovalCollection.AB                ;
+                    // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
+                    const maxKey = Object.keys(pmiApprovalCollection).reduce((a, b) =>
+                        pmiApprovalCollection[a].length > pmiApprovalCollection[b].length ? a : b
+                    );
+
+                    pmiApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
+                            frmEcrPmiApproverRows.value.push({
+                                preparedBy: preparedBy[index] === undefined ? 0: preparedBy[index].rapidx_user_id ,
+                                checkedBy: checkedBy[index] === undefined ? 0: checkedBy[index].rapidx_user_id ,
+                                approvedBy:approvedBy[index] === undefined ? 0: approvedBy[index].rapidx_user_id,
+                            });
+
+                    });
+                }
+            }, 1000);
             modal.SaveEcr.show();
         });
     }
