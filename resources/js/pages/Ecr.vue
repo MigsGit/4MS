@@ -861,27 +861,21 @@
     const btnEcrApproval = async (isEcrApproved) => {
         modal.EcrApproval.show();
         isApproved.value = isEcrApproved;
-        alert(isApproved.value)
     }
     const frmSaveEcrApproval = async () => {
         let formData = new FormData();
-        console.log(frmEcr.ecrsId);
-
         //Append form data
         [
             ["ecrs_id", frmEcr.value.ecrsId],
             ["status", isApproved.value],
-            ["approval_status", frmEcr.value.approvalStatus],
-            ["rapidx_user_id", 149],
             ["remarks", frmEcr.value.approvalRemarks],
         ].forEach(([key, value]) =>
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_ecr_approval', (response) =>{
-            // tblEcr.value.dt.draw();
-            // modal.SaveEcr.modal();
-
-            console.log(response);
+            tblEcrApproverSummary.value.dt.draw();
+            modal.EcrApproval.hide();
+            modal.SaveEcr.hide();
         });
     }
     const frmSaveEcr = async () => {
