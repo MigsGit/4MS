@@ -340,15 +340,6 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function index(Request $request){
-        return 'true' ;
-        date_default_timezone_set('Asia/Manila');
-        try {
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
     public function saveEcrApproval(Request $request){
         try {
             date_default_timezone_set('Asia/Manila');

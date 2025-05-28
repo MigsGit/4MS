@@ -178,7 +178,7 @@
                                 <div class="col-12">
                                     <button @click="btnAddEcrOtherDispoRows()" test="dasd" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Validator</button>
                                 </div>
-                                <div class="col-12 overflow-auto" style="height: 300px;">
+                                <div class="col-12">
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
@@ -253,7 +253,7 @@
                                 <div class="col-12">
                                     <span class="input-group-text" id="addon-wrapping">Agreed By: </span>
                                 </div>
-                                <div class="col-12 overflow-auto" style="height: 300px;">
+                                <div class="col-12">
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
@@ -324,7 +324,7 @@
                                 <div class="col-12">
                                     <button @click="btnAddEcrPmiApproverRows"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI Approvers</button>
                                 </div>
-                                <div class="col-12 overflow-auto" style="height: 300px;">
+                                <div class="col-12">
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
@@ -396,7 +396,7 @@
                         <div id="collapseApprovalSummary" class="collapse show" data-bs-parent="#accordionMain">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-12 overflow-auto" style="height: 300px;">
+                                    <div class="col-12">
                                         <DataTable
                                             width="100%" cellspacing="0"
                                             class="table mt-2"
@@ -449,7 +449,7 @@
                     <div id="collapseMan" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-12 overflow-auto" style="height: 300px;">
+                                <div class="col-12">
                                     <DataTable
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
@@ -493,7 +493,7 @@
                     <div id="collapMat" class="collapse" data-bs-parent="#accordionMain">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-12 overflow-auto" style="height: 300px;">
+                                <div class="col-12">
                                     <DataTable
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
@@ -535,7 +535,7 @@
                     <div id="collapseMac" class="collapse" data-bs-parent="#accordionMain">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-12 overflow-auto" style="height: 300px;">
+                                <div class="col-12">
                                     <DataTable
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
@@ -614,6 +614,7 @@
         frmEcrPmiApproverRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
+        resetArrEcrRows,
         axiosFetchData,
         getEcrById,
         addEcrReasonRows,
@@ -634,6 +635,7 @@
     const tblEcr = ref(null);
     const tblEcrManRequirements = ref(null);
     const tblEcrMatRequirements = ref(null);
+    const tblEcrMachineRequirements = ref(null);
     const tblEcrApproverSummary = ref(null);
     const btnEcrApproved = ref(null);
     const btnEcrDisapproved = ref(null);
@@ -722,32 +724,7 @@
             }
         }
     ];
-    // const tblEcrMatRequirementsColumns = [
-    //     {   data: 'requirement'} ,
-    //     {   data: 'details'} ,
-    //     {   data: 'evidence'} ,
-    //     {   data: 'get_actions',
-    //         createdCell(cell){
-    //             let btnChangeEcrReqDecision = cell.querySelector('#btnChangeEcrReqDecision');
-    //             if(btnChangeEcrReqDecision != null){
-    //                 btnChangeEcrReqDecision.addEventListener('change',function(){
-    //                     let ecrReqId = this.getAttribute('ecr-requirements-id');
-    //                     let ecrReqValue = this.value;
-    //                     let classificationRequirementId = this.getAttribute('classification-requirement-id');
-    //                     let selectedParams = {
-    //                         ecr_req_id : ecrReqId,
-    //                         ecr_req_value : ecrReqValue,
-    //                         classification_requirement_id : classificationRequirementId,
-    //                     }
-    //                     let varParams = {
-    //                         btnChangeEcrReqDecisionClas: this.classList,
-    //                     }
-    //                     ecrReqDecisionChange(selectedParams,varParams);
-    //                 });
-    //             }
-    //         }
-    //     }
-    // ];
+
     const tblEcrApproverSummaryColumns = [
         {   data: 'get_count'} ,
         {   data: 'get_approver_name'} ,
@@ -803,7 +780,9 @@
     };
     const btnEcr = async () => {
         modal.SaveEcr.show();
+        isSelectReadonly.value = false;
         await getRapidxUserByIdOpt(otherDispoRequestedByParams);
+
     }
     // const onUserChange = async (selectedParams)=>{
     //     await getRapidxUserByIdOpt(selectedParams);
@@ -814,7 +793,9 @@
 
         axiosFetchData(selectedParams,'api/ecr_req_decision_change',function(response){
             varParams.btnChangeEcrReqDecisionClas.remove("is-invalid");
-            varParams.btnChangeEcrReqDecisionClas.add("is-valid");
+            tblEcrManRequirements.value.dt.draw();
+            tblEcrMatRequirements.value.dt.draw();
+            tblEcrMachineRequirements.value.dt.draw();
         });
     }
     onMounted( async ()=>{
@@ -825,6 +806,7 @@
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
+        modal.EcrRequirements.show();
         // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
         // await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
         // await getRapidxUserByIdOpt(otherDispoReviewedByParams);

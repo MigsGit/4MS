@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Man;
+use App\Models\ManChecklist;
 use Illuminate\Http\Request;
 use App\Http\Requests\ManRequest;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
+use App\Models\DropdownMasterDetail;
 use App\Interfaces\ResourceInterface;
 
 class ManController extends Controller
@@ -128,6 +130,56 @@ class ManController extends Controller
 
         }
     }
+    public function loadManChecklist(Request $request){
+        try {
+            $data = [];
+            $relations = [];
+            $conditions = [
+                'dropdown_masters_id' => $request->dropdown_masters_id
+            ];
+            $man_checklist_data = [];
+            $man_checklist_relations = [];
+            $man_checklist_conditions = [
+                'man_id' => 1,
+            ];
+
+            $dropdownMasterDetail = $this->resourceInterface->readCustomEloquent(DropdownMasterDetail::class,$data,$relations,$conditions);
+            $dropdownMasterDetail->orderBy('dropdown_masters_details');
+            // return $classificationRequirement; dropdown_masters_details
+            $manChecklist = $this->resourceInterface->readWithRelationsConditionsActive(ManChecklist::class,$man_checklist_data,$man_checklist_relations,$man_checklist_conditions);
+            return DataTables($dropdownMasterDetail)
+            ->addColumn('get_actions',function ($row) use($manChecklist) {
+                // return 'true';
+                $manChecklistCollection = collect($manChecklist);
+                $manChecklistMatch = $manChecklistCollection->firstWhere('dropdown_master_details_id', $row->id);
+                $manChecklistId = $manChecklistMatch['id'] ?? '';
+                $cSelected = $manChecklistMatch['decision'] === 'C' ? 'selected' : '';
+                $xSelected = $manChecklistMatch['decision'] === 'X' ? 'selected' : '';
+                if($manChecklistId === ''){
+                    $isValid = "is-invalid";
+                    $emptySelected = "selected";
+                }else{
+                    $isValid = "";
+                    $emptySelected = "";
+                }
+                $result = '';
+                $result .= '<center>';
+                $result .= "<select id='btnChangeManChecklistDecision' class='form-select btn-change-ecr-req-decision ".$isValid."' ref=btnChangeManChecklistDecision man-checklists-id ='".$manChecklistId."' dropdown-master-details-id='".$row->id."'>";
+                $result .=  "<option value='' ".$emptySelected." disabled> --Select-- </option>";
+                $result .=  "<option value='C' ".$cSelected."> √ </option>";
+                $result .=  "<option value='X' ".$xSelected."> X </option>";
+                $result .=  "</select>";
+                $result .= '</center>';
+                return $result;
+            })
+            ->rawColumns([
+                'get_actions',
+            ])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function getManById(Request $request){
         try {
             $data = [];
@@ -139,6 +191,34 @@ class ManController extends Controller
             $man = $this->resourceInterface->readWithRelationsConditionsActive(Man::class,$data,$relations,$conditions);
             return response()->json(['is_success' => 'true','man'=>$man[0]]);
         } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function manChecklistDecisionChange(Request $request){
+        try {
+            if( isset($request->manChecklistsId) ){ //edit
+                // return 'edit';
+                $conditions = [
+                    'id' => $request->manChecklistsId
+                ];
+                $data = [
+                    // 'dropdown_master_details_id' => $request->dropdownMasterDetailsId,
+                    'decision' => $request->manChecklistValue,
+                ];
+
+                $this->resourceInterface->updateConditions(ManChecklist::class,$conditions,$data);
+            }else{ //add
+                $data = [
+                    'dropdown_master_details_id' => $request->dropdownMasterDetailsId,
+                    'decision' => $request->manChecklistValue,
+                    'man_id' => 1, //TODO: Get Man Id from Params
+                ];
+                $this->resourceInterface->create(ManChecklist::class,$data);
+            }
+
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+
             throw $e;
         }
     }

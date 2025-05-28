@@ -230,10 +230,10 @@ export default function useEcr(){
                     });
                     //QA Approval
                     if (qaCheckedBy.length != 0){
-                        frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id ?? 0; //nmodify
-                        // frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
-                        frmEcrQadRows.value.qadApprovedByInternal = qaInternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
-                        frmEcrQadRows.value.qadApprovedByExternal = qaExternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id; //nmodify
+                        frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id ?? 0;
+                        // frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id;
+                        frmEcrQadRows.value.qadApprovedByInternal = qaInternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id;
+                        frmEcrQadRows.value.qadApprovedByExternal = qaExternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id;
                     }
 
                 }
@@ -258,6 +258,17 @@ export default function useEcr(){
                 }
             }, 1000);
             modal.SaveEcr.show();
+        });
+    }
+    const resetArrEcrRows = async () => {
+        frmEcrQadRows.value.qadCheckedBy =  '';
+        frmEcrQadRows.value.qadApprovedByInternal = '';
+        frmEcrQadRows.value.qadApprovedByExternal = '';
+        frmEcrPmiApproverRows.value = [];
+        frmEcrPmiApproverRows.value.push({
+            preparedBy: '' ,
+            checkedBy: '' ,
+            approvedBy: '' ,
         });
     }
     const getEcrDetailsId = async (ecrDetailsId) =>
@@ -311,6 +322,7 @@ export default function useEcr(){
         reasonOfChangeParams,
         typeOfPartParams,
         tblEcrDetails,
+        resetArrEcrRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,

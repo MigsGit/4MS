@@ -35,9 +35,9 @@
                     >
                         <thead>
                             <tr>
-                                <th>Action</th>
-                                <th>Status</th>
-                                <th>Name</th>
+                                <th style="width:10%">Action</th>
+                                <th style="width:10%">Status</th>
+                                <th>Dropdown Details</th>
                                 <th>Remarks</th>
                             </tr>
                         </thead>

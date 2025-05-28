@@ -32,8 +32,9 @@ class SettingsController extends Controller
                 // return $btn = '<button data-id = "'.$row->id.'" id="editResProcedure" type="button" class="btn btn-info btn-sm" title="Edit"></i>Edit</button>';
             })
             ->addColumn('get_status',function($row){
-                return $result = "Active";
-                // return $btn = '<button data-id = "'.$row->id.'" id="editResProcedure" type="button" class="btn btn-info btn-sm" title="Edit"></i>Edit</button>';
+                $result = '';
+                $result .= '<span class="badge rounded-pill bg-primary"> Active </span>';
+                return $result;
             })
             ->rawColumns(['get_action','get_status'])
             ->make(true);
@@ -60,13 +61,17 @@ class SettingsController extends Controller
                 'dropdown_masters_id' => $request->dropDownMastersId ?? ""
             ];
 
-            $dropdownMaster =  $this->resourceInterface->readWithRelationsConditions(DropdownMasterDetail::class,[],[],$conditions);
+            $dropdownMaster =  $this->resourceInterface->readCustomEloquent(DropdownMasterDetail::class,[],[],$conditions);
+
+            $dropdownMaster->orderBy('dropdown_masters_details');
             return DataTables::of($dropdownMaster)
             ->addColumn('get_action',function($row){
                 return $btn = '<button dropdown-master-details-id = "'.$row->id.'"  class="btn btn-outline-info btn-sm" data-toggle="modal" id="btnDropdownMasterDetails" type="button" title="Edit"><i class="fas fa-edit"></i></button>';
             })
             ->addColumn('get_status',function($row){
-                return $result = "Active";
+                $result = '';
+                $result .= '<span class="badge rounded-pill bg-success"> Active </span>';
+                return $result;
             })
             ->rawColumns(['get_action','get_status'])
             ->make(true);

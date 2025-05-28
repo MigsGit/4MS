@@ -297,6 +297,90 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Checklist" ref="modalManChecklist">
+        <template #body>
+            <div class="row mt-3">
+                <!-- Man -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMan" aria-expanded="true" aria-controls="collapseMan">
+                                Man
+                            </button>
+                        </h5>
+                    <div id="collapseMan" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblManChecklist"
+                                        :columns="tblManChecklistColumns"
+                                        ajax="api/load_man_checklist?dropdown_masters_id=7"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {
+                                                    orderable:false,target:[0,1],
+                                                }
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th style="width:80%">Requirement</th>
+                                                <th style="width:20%">Action</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Material -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMat" aria-expanded="true" aria-controls="collapseMat">
+                                Material
+                            </button>
+                        </h5>
+                    <div id="collapseMat" class="collapse" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblManChecklist"
+                                        :columns="tblManChecklistColumns"
+                                        ajax="api/load_man_checklist?dropdown_masters_id=8"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering:false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th style="width:80%">Requirement</th>
+                                                <th style="width:20%">Action</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <!-- <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button> -->
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -334,11 +418,13 @@
 
     //ref state
     const tblEcrByStatus = ref(null);
+    const tblManChecklist = ref(null);
     const isSelectReadonly  = ref(null);
     const tblManDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
     const modalSaveManDetails = ref(null);
+    const modalManChecklist = ref(null);
 
     const columns = [
         {   data: 'get_actions',
@@ -421,6 +507,28 @@
         {   data: 'lqc_result'} ,
         {   data: 'process_change_factor'} ,
     ];
+    const tblManChecklistColumns = [
+        {   data: 'dropdown_masters_details'} ,
+        {   data: 'get_actions',
+            createdCell(cell){
+                let btnChangeManChecklistDecision = cell.querySelector('#btnChangeManChecklistDecision');
+                if(btnChangeManChecklistDecision != null){
+                    btnChangeManChecklistDecision.addEventListener('change',function(){
+                        let manChecklistsId = this.getAttribute('man-checklists-id');
+                        let manChecklistValue = this.value;
+                        let dropdownMasterDetailsId = this.getAttribute('dropdown-master-details-id');
+                        let params = {
+                            manChecklistsId : manChecklistsId,
+                            manChecklistValue : manChecklistValue,
+                            dropdownMasterDetailsId : dropdownMasterDetailsId,
+                            btnChangeManChecklistDecisionClass: this.classList,
+                        }
+                        changeManChecklistDecision(params);
+                    });
+                }
+            }
+        }
+    ];
 
     const qcInspectorOperatorParams = {
         globalVar: manVar.optUserMaster,
@@ -442,7 +550,8 @@
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveManDetails = new Modal(modalSaveManDetails.value.modalRef,{ keyboard: false });
-        // modal.SaveManDetails.show();
+        modal.ManChecklist = new Modal(modalManChecklist.value.modalRef,{ keyboard: false });
+        modal.ManChecklist.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -479,6 +588,19 @@
             frmMan.value.processChangeFactor = man.process_change_factor;
 
 
+        });
+    }
+    const changeManChecklistDecision = async (params)=>{
+        let apiParams = {
+            manChecklistsId : params.manChecklistsId,
+            manChecklistValue : params.manChecklistValue,
+            dropdownMasterDetailsId : params.dropdownMasterDetailsId,
+        }
+        console.log(apiParams);
+
+        axiosFetchData(apiParams,'api/man_checklist_decision_change',function(response){
+            params.btnChangeManChecklistDecisionClass.remove("is-invalid");
+            tblManChecklist.value.dt.draw();
         });
     }
     //saveEcrDetails
