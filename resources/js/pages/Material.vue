@@ -44,7 +44,6 @@
             </div>
         </div>
     </div>
-    <!-- saveMaterial() -->
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Material" @add-event="" ref="modalSaveMaterial">
         <template #body>
             <div class="row">
