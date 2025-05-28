@@ -50,18 +50,18 @@
                 <div class="card">
                     <div class="card-body overflow-auto">
                         <DataTable
-                        width="100%" cellspacing="0"
-                        class="table  table-responsive mt-2"
-                        ref="tblEcrDetails"
-                        :columns="tblEcrDetailColumns"
-                        ajax="api/load_ecr_details_by_ecr_id?ecr_id=4"
-                        :options="{
-                            serverSide: true, //Serverside true will load the network loadEcrDetailsByEcrId
-                            columnDefs:[
-                                // {orderable:false,target:[0]}
-                            ]
-                        }"
-                    >
+                            width="100%" cellspacing="0"
+                            class="table  table-responsive mt-2"
+                            ref="tblEcrDetails"
+                            :columns="tblEcrDetailColumns"
+                            ajax="api/load_ecr_details_by_ecr_id?ecr_id=4"
+                            :options="{
+                                serverSide: true, //Serverside true will load the network loadEcrDetailsByEcrId
+                                columnDefs:[
+                                    {orderable:false,target:[0]}
+                                ]
+                            }"
+                        >
                         <thead>
                             <tr>
                                 <th>Action</th>
@@ -74,7 +74,7 @@
                                 <th> Remarks</th>
                             </tr>
                         </thead>
-                    </DataTable>
+                        </DataTable>
                     </div>
                 </div>
             </div>
