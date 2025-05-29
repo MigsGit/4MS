@@ -27,6 +27,7 @@ use App\Http\Controllers\SettingsController;
 
 Route::controller(CommonController::class)->group(function () {
     Route::get('get_rapidx_user_by_id_opt', 'getRapidxUserByIdOpt')->name('get_rapidx_user_by_id_opt');
+    Route::get('get_current_approver_session', 'getCurrentApproverSession')->name('get_current_approver_session');
 });
 Route::controller(SettingsController::class)->group(function () {
     Route::get('get_user_master', 'getUserMaster')->name('get_user_master');

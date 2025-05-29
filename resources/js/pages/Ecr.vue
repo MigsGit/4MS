@@ -23,7 +23,7 @@
                             class="table mt-2"
                             ref="tblEcr"
                             :columns="tblEcrColumns"
-                            ajax="api/load_ecr?status=IA"
+                            ajax="api/load_ecr?status=IA,DIS"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -61,7 +61,7 @@
                             <DataTable
                                 width="100%" cellspacing="0"
                                 class="table mt-2"
-                                ref="tblEcr"
+                                ref="tblEcrQa"
                                 :columns="tblEcrColumns"
                                 ajax="api/load_ecr?status=QA"
                                 :options="{
@@ -165,11 +165,10 @@
                 <EcrChangeComponent :isSelectReadonly="isSelectReadonly" @remove-ecr-reason-rows-event="removeEcrReasonRows(index)" @add-ecr-reason-rows-event="addEcrReasonRows()":frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
                 </EcrChangeComponent>
                 <!-- Others Disposition -->
-
                 <div v-show="isSelectReadonly === false" class="card mb-2">
                         <h5 class="mb-0">
                             <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
-                                Others Disposition {{ isSelectReadonly }}
+                                Others Disposition
                             </button>
                         </h5>
                     <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
@@ -428,13 +427,15 @@
             <template #footer>
                 <button v-show="isSelectReadonly === false" type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                 <button v-show="isSelectReadonly === false" type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
-                <button @click="btnEcrApproval('DIS')" v-show="isSelectReadonly === true" type="button" ref= "btnEcrDisapproved" class="btn btn-danger btn-sm">
+                <button @click="btnEcrApproval('DIS')" v-show="isSelectReadonly === true && commonVar.isSessionApprover === true" type="button" ref= "btnEcrDisapproved" class="btn btn-danger btn-sm">
                     <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
                 </button>
-                <button @click="btnEcrApproval('APP')" v-show="isSelectReadonly === true" type="button" ref= "btnEcrApproved" class="btn btn-success btn-sm">
+                <button @click="btnEcrApproval('APP')" v-show="isSelectReadonly === true && commonVar.isSessionApprover === true" type="button" ref= "btnEcrApproved" class="btn btn-success btn-sm">
                     <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-up" />&nbsp;Approved
                 </button>
             </template>
+            <!--  && commonVar.isSessionApprover === true
+ && commonVar.isSessionApprover === true -->
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
@@ -595,6 +596,7 @@
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
+    import useCommon from '../../js/composables/common.js';
     import useEcr from '../../js/composables/ecr.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import useSettings from '../composables/settings.js';
@@ -625,6 +627,15 @@
         getDropdownMasterByOpt,
         onUserChange,
     } = useSettings();
+    const {
+        commonVar,
+        getCurrentApprover,
+        getSession,
+    } = useCommon();
+    console.log(useCommon());
+    
+    
+
     // const item = ref();
     //ref state
     const modalSaveEcr = ref(null);
@@ -633,6 +644,7 @@
     const modalEcrApproval = ref(null);
     const isSelectReadonly = ref(null);
     const tblEcr = ref(null);
+    const tblEcrQa = ref(null);
     const tblEcrManRequirements = ref(null);
     const tblEcrMatRequirements = ref(null);
     const tblEcrMachineRequirements = ref(null);
@@ -654,6 +666,9 @@
                     let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "Edit";
                     isSelectReadonly.value = false;
+                    let approverParams = {
+                        ecrsId : ecrsId
+                    }
                     //:disabled
                     getRapidxUserByIdOpt(otherDispoRequestedByParams);
                     getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
@@ -665,6 +680,7 @@
                     getRapidxUserByIdOpt(pmiApproverCheckedByParams);
                     getRapidxUserByIdOpt(pmiApproverApprovedByParams);
                     getEcrById(ecrsId);
+                    getCurrentApprover(approverParams);
                     tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrsId).draw()
                 });
                 btnViewEcrId.addEventListener('click',function(){
@@ -724,7 +740,6 @@
             }
         }
     ];
-
     const tblEcrApproverSummaryColumns = [
         {   data: 'get_count'} ,
         {   data: 'get_approver_name'} ,
@@ -778,6 +793,31 @@
         formModel: toRef(frmEcrPmiApproverRows.value[0],'approvedBy'),
         selectedVal: '',
     };
+
+    onMounted( async ()=>{
+        //ModalRef inside the ModalComponent.vue
+        //Do not name the Modal it is same new Modal js clas
+        modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
+        modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
+        const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
+        $('#collapse1').addClass('show');
+        getSession();
+        // modal.EcrRequirements.show();
+        // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
+        // await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+        // await getRapidxUserByIdOpt(otherDispoReviewedByParams);
+        // await getRapidxUserByIdOpt(qadCheckedByParams);
+        // await getRapidxUserByIdOpt(qadApprovedByInternalParams);
+        // await getRapidxUserByIdOpt(qadApprovedByExternalParams);
+        // await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+        // await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+        // await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
+        
+    })
+
     const btnEcr = async () => {
         modal.SaveEcr.show();
         isSelectReadonly.value = false;
@@ -798,27 +838,7 @@
             tblEcrMachineRequirements.value.dt.draw();
         });
     }
-    onMounted( async ()=>{
-        //ModalRef inside the ModalComponent.vue
-        //Do not name the Modal it is same new Modal js clas
-        modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
-        modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
-        modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
-        await getDropdownMasterByOpt(descriptionOfChangeParams);
-        await getDropdownMasterByOpt(reasonOfChangeParams);
-        modal.EcrRequirements.show();
-        // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
-        // await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
-        // await getRapidxUserByIdOpt(otherDispoReviewedByParams);
-        // await getRapidxUserByIdOpt(qadCheckedByParams);
-        // await getRapidxUserByIdOpt(qadApprovedByInternalParams);
-        // await getRapidxUserByIdOpt(qadApprovedByExternalParams);
-        // await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
-        // await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
-        // await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
-        const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
-        $('#collapse1').addClass('show');
-    })
+   
     //Functions
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({
@@ -864,11 +884,12 @@
         let formData = new FormData();
         //Append form data
         [
+            ["ecrs_id", frmEcr.value.ecrsId],
             ["ecr_no", frmEcr.value.ecrNo],
             ["category", frmEcr.value.category],
             ["customer_name", frmEcr.value.customerName],
             ["part_name", frmEcr.value.partName],
-            ["productLine", frmEcr.value.productLine],
+            ["product_line", frmEcr.value.productLine],
             ["section", frmEcr.value.section],
             ["internal_external", frmEcr.value.internalExternal],
             ["part_no", frmEcr.value.partNumber],
@@ -924,9 +945,9 @@
         }
         //TODO: Save Successfully
         axiosSaveData(formData,'api/save_ecr', (response) =>{
-            tblEcr.value.dt.draw();
-            modal.SaveEcr.modal();
-            console.log(response);
+            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
+            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
+            modal.SaveEcr.hide();
         });
     }
 

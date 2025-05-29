@@ -113,13 +113,10 @@ class ResourceService implements ResourceInterface
         date_default_timezone_set('Asia/Manila');
         DB::beginTransaction();
         try {
-            // return 'edit';
             $query = $model::query();
             if($conditions != null){
                 foreach ($conditions as $key => $value) {
                     $query->where($key, $value);
-                    // $query->where('column1'=>'1');
-                    // $query->where('column2'=>'2');
                 }
             }
             $query->update($data);

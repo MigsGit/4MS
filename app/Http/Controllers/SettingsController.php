@@ -21,7 +21,6 @@ class SettingsController extends Controller
     }
 
     public function getUserMaster(Request $request){
-        // return 'true' ;
         try {
             $user = User::whereNull('deleted_at')->get();
 

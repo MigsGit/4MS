@@ -6,6 +6,7 @@ use Mail;
 use Helpers;
 use App\Models\RapidxUser;
 use App\Models\UserAccess;
+use App\Models\EcrApproval;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
@@ -20,16 +21,14 @@ class CommonController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
+
     public function getRapidxUserByIdOpt(Request $request){
         try {
-            // return $rapidx_user_by_id = RapidxUser::where('id',625)->get(); //relationship to systemone by emp_no
-            $rapidxUserById = RapidxUser::where('department_id',22)->get(); //22 QAD
+            // $rapidxUserById = RapidxUser::where('department_id',22)->where('logdel',0)->get(); //22 QAD
             $data = [];
-
             $relations = [];
-
             $conditions = [
-                'department_id' => 22,
+                'department_id' => 1,
                 'user_stat' => 1,
             ];
             // $query->where('deleted_at',NULL);
@@ -42,6 +41,29 @@ class CommonController extends Controller
             return response()->json(['is_success' => 'true','rapidxUserById'=>$rapidxUserById]);
         } catch (Exception $e) {
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
+    public function getCurrentApproverSession(Request $request){
+        try {
+            $conditions = [
+                'ecrs_id' => $request->ecrsId,
+                'status' => 'PEN',
+            ];
+            $data = [
+                'rapidx_user_id'
+            ];
+            $relations = [
+                
+            ];
+            $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(EcrApproval::class,$data,$relations,$conditions);
+            $ecrApproval =  $ecrApprovalQuery->get();
+            $isSessionApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
+        
+
+            $ecrApproval[0]->rapidx_user_id;
+            return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover]);
+        } catch (Exception $e) {
+            throw $e;
         }
     }
     public function check_access(Request $request){
@@ -86,7 +108,6 @@ class CommonController extends Controller
 
         }
     }
-
     public function send_mail($mail_filename, $data, $request, $admin_email, $user_email, $subject){
         Mail::send("mail.{$mail_filename}", $data, function($message) use ($request, $admin_email, $user_email, $subject){
             $message->to($admin_email);

@@ -31,7 +31,7 @@ class EcrRequest extends FormRequest
             'part_no'=> 'required',
             'part_name'=> 'required',
             'device_name'=> 'required',
-            'productLine'=> 'required',
+            'product_line'=> 'required',
             'section'=> 'required',
             'customer_ec_no'=> 'required',
             'date_of_request'=> 'required',

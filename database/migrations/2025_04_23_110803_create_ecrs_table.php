@@ -16,7 +16,7 @@ class CreateEcrsTable extends Migration
         Schema::create('ecrs', function (Blueprint $table) {
             $table->id();
             $table->string('ecr_no');
-            $table->string('status')->default('FA')->comment('FA - For Approval | DO- Done');
+            $table->string('status')->default('IA')->comment('IA - Internal Approval | QA Approval | DO- Done');
             $table->string('approval_status')->default('RB');
             $table->string('category');
             $table->string('internal_external');
@@ -28,6 +28,8 @@ class CreateEcrsTable extends Migration
             $table->string('section'); //dropdown or session
             $table->string('customer_ec_no');
             $table->date('date_of_request');
+            $table->unsignedBigInteger('created_by')->unique()->comment('Rapidx User Id');
+            $table->unsignedBigInteger('updated_by')->unique()->comment('Rapidx User Id');
             $table->timestamps();
             $table->softDeletes();
         });

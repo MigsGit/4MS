@@ -27,14 +27,15 @@ class EcrController extends Controller
     public function loadEcr(Request $request){
         // return 'true' ;
         try {
-            $status = $request->status ?? "";
+            $status = explode(',',$request->status) ?? "";
+            // $status = $request->status ?? "";
             $data = [];
             $relations = [
                 'ecr_approval.rapidx_user'
             ];
             $conditions = [];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-            $ecr->whereIn('status',[$request->status,'DIS'])->get();
+            $ecr->whereIn('status',$status)->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
                 $result = '';
@@ -270,17 +271,32 @@ class EcrController extends Controller
         try {
             //TODO: EDIT ecr_no, DELETE, Auto Increment Ctrl Number, InsertById, N/A in Dropdown
             DB::beginTransaction();
-            $ecr_id = 1;
-            $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request,$ecr_id){
+            $ecrsId = $request->ecrs_id;
+            $ecrRequest = $ecrRequest->validated();
+            $ecrConditions = [
+                'id' => $ecrsId
+            ];
+            if( isset($ecrsId) ){
+                $ecrRequest['status'] = 'IA';
+                // return $ecrRequest;
+                $this->resourceInterface->updateConditions(Ecr::class,$ecrConditions,$ecrRequest);
+                $currenErcId = $ecrsId;
+            }else{
+                $ecrRequest['created_at'] = now();
+                $ecr =  $this->resourceInterface->create(Ecr::class,$ecrRequest);
+                $currenErcId = $ecr['data_id'];
+            }
+            $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request,$currenErcId){
                 return [
-                    'ecrs_id' =>  $ecr_id,
+                    'ecrs_id' =>  $currenErcId,
                     'description_of_change' => $description_of_change,
                     'reason_of_change' => $request->reason_of_change[$index],
                     'created_at' => now(),
                 ];
             });
-
-            EcrDetail::where('ecrs_id', $ecr_id)->delete();
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+            EcrDetail::where('ecrs_id', $currenErcId)->delete();
             foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
                $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
             }
@@ -289,13 +305,15 @@ class EcrController extends Controller
                 'OTRB' => $request->requested_by,
                 'OTTE' => $request->technical_evaluation,
                 'OTRVB' => $request->reviewed_by,
-                'QA' => [$request->qad_checked_by,$request->qad_approved_by_internal,$request->qad_approved_by_external],
+                'QACB' => $request->qad_checked_by,
+                'QAIN' => $request->qad_approved_by_internal,
+                'QAEX' => $request->qad_approved_by_external,
             ];
             $ecrApprovalRequestCtr = 0; //assigned counter
-            $ecrApprovalRequest = collect($ecrApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$ecrApprovalRequestCtr,$ecr_id){
-                    return collect($users)->map(function ($userId) use ($request,$approval_status,&$ecrApprovalRequestCtr,$ecr_id){
+            $ecrApprovalRequest = collect($ecrApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$ecrApprovalRequestCtr,$currenErcId){
+                    return collect($users)->map(function ($userId) use ($request,$approval_status,&$ecrApprovalRequestCtr,$currenErcId){
                         return [
-                            'ecrs_id' =>  $ecr_id,
+                            'ecrs_id' =>  $currenErcId,
                             'rapidx_user_id' => $userId,
                             'approval_status' => $approval_status,
                             'counter' => $ecrApprovalRequestCtr++,
@@ -305,10 +323,9 @@ class EcrController extends Controller
                     });
 
             })->toArray();
-            EcrApproval::where('ecrs_id', $ecr_id)->delete();
+            EcrApproval::where('ecrs_id', $currenErcId)->delete();
             EcrApproval::insert($ecrApprovalRequest);
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
+           
             //PMI Approvers
             $approval_statuss = [
                 'PB' => $request->prepared_by,
@@ -316,14 +333,13 @@ class EcrController extends Controller
                 'AB' => $request->approved_by,
             ];
             $pmiApprovalRequestCtr = 0;
-            $pmiApprovalRequest = collect($approval_statuss)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$ecr_id){
+            $pmiApprovalRequest = collect($approval_statuss)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                 //return array users id as array value
-                return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$ecr_id) {
+                return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
                     // $approval_status as a array name
                     //return array users id, defined type by use keyword,
                     return [
-                        'ecrs_id' => $ecr_id,
-                         // 'ecrs_id' =>  $ecr_id,
+                        'ecrs_id' => $currenErcId,
                         'rapidx_user_id' => $userId,
                         'approval_status' => $approval_status,
                         'counter' => $pmiApprovalRequestCtr++,
@@ -332,8 +348,9 @@ class EcrController extends Controller
                     ];
                 });
             })->toArray();
+            PmiApproval::where('ecrs_id', $currenErcId)->delete();
             PmiApproval::insert($pmiApprovalRequest);
-            // DB::commit();
+            DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
