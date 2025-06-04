@@ -361,7 +361,6 @@ class EcrController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
-
             //Get Current Status
             $ecrApproval = Ecr::where('id',$request->ecrs_id)->get(['approval_status']);
             //Update the ECR Approval Status
@@ -372,8 +371,9 @@ class EcrController extends Controller
             $ecrApprovalConditions = [
                 'ecrs_id' => $request->ecrs_id,
                 'approval_status' => $ecrApproval[0]->approval_status,
-                'rapidx_user_id' => 149, //Double check the rapidx user id to update status
+                'rapidx_user_id' => session('rapidx_user_id'), //Double check the rapidx user id to update status
             ];
+            return $ecrApprovalConditions;
             $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
 
             //Get the ECR Approval Status & Id, Update the Approval Status as Pending
@@ -404,7 +404,7 @@ class EcrController extends Controller
             if($request->status === "DIS"){
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
             }
-            DB::commit();
+            // DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

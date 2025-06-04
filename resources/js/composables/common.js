@@ -11,23 +11,23 @@ export default function useCommon(){
         let apiParams = {
             ecrsId : params.ecrsId
         }
-        axiosFetchData(apiParams,'get_current_approver_session',function(response){
+        axiosFetchData(apiParams,'api/get_current_approver_session',function(response){
             let data = response.data;
             commonVar.value.isSessionApprover = data.isSessionApprover;
         });
     }
     const getSession = async () => {
         let apiParams = {}
-        axiosFetchData(apiParams,'check_user',function(response){
+        axiosFetchData(apiParams,'api/check_user',function(response){
             return response;
             // console.log(response);
         });
     }
-   
+
     return {
         commonVar,
         getCurrentApprover,
         getSession,
     }
-       
+
 }

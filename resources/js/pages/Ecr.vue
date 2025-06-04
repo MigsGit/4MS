@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-4">ENGINEERING CHANGE REQUEST</h4>
+        <h4 class="mt-4">ENGINEERING CHANGE REQUESTssss</h4>
         <div class="card mt-5"  style="width: 100%;">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
@@ -434,8 +434,6 @@
                     <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-up" />&nbsp;Approved
                 </button>
             </template>
-            <!--  && commonVar.isSessionApprover === true
- && commonVar.isSessionApprover === true -->
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
@@ -632,9 +630,6 @@
         getCurrentApprover,
         getSession,
     } = useCommon();
-    console.log(useCommon());
-    
-    
 
     // const item = ref();
     //ref state
@@ -666,9 +661,7 @@
                     let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "Edit";
                     isSelectReadonly.value = false;
-                    let approverParams = {
-                        ecrsId : ecrsId
-                    }
+
                     //:disabled
                     getRapidxUserByIdOpt(otherDispoRequestedByParams);
                     getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
@@ -680,7 +673,6 @@
                     getRapidxUserByIdOpt(pmiApproverCheckedByParams);
                     getRapidxUserByIdOpt(pmiApproverApprovedByParams);
                     getEcrById(ecrsId);
-                    getCurrentApprover(approverParams);
                     tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrsId).draw()
                 });
                 btnViewEcrId.addEventListener('click',function(){
@@ -697,6 +689,10 @@
                     getRapidxUserByIdOpt(pmiApproverCheckedByParams);
                     getRapidxUserByIdOpt(pmiApproverApprovedByParams);
                     getEcrById(ecrsId);
+                    let approverParams = {
+                        ecrsId : ecrsId
+                    }
+                    getCurrentApprover(approverParams);
                     tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw()
                 });
             }
@@ -815,7 +811,7 @@
         // await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
         // await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
         // await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
-        
+
     })
 
     const btnEcr = async () => {
@@ -838,7 +834,7 @@
             tblEcrMachineRequirements.value.dt.draw();
         });
     }
-   
+
     //Functions
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({

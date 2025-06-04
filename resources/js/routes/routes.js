@@ -10,7 +10,6 @@ import Environment from '../../js/pages/Environment.vue'
 import UserMaster from '../../js/pages/UserMaster.vue'
 import DropdownMaster from '../../js/pages/DropdownMaster.vue'
 
-console.log('routes');
 export default [
     {
         path: '/4M',
