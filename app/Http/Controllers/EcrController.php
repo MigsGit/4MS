@@ -28,14 +28,17 @@ class EcrController extends Controller
         // return 'true' ;
         try {
             $status = explode(',',$request->status) ?? "";
-            // $status = $request->status ?? "";
             $data = [];
             $relations = [
-                'ecr_approval.rapidx_user'
+                'ecr_approval_pending'
             ];
             $conditions = [];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-            $ecr->whereIn('status',$status)->get();
+            $ecr->whereIn('status',$status)
+            // ->whereHas('ecr_approval',function($query) use ($request){
+            //     $query->where('status','PEN');
+            // })
+            ->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
                 $result = '';
@@ -48,7 +51,7 @@ class EcrController extends Controller
                 return $result;
             })
             ->addColumn('get_status',function ($row){
-                $currentApprover = $row->ecr_approval['rapidx_user']['name'] ?? '';
+                $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
                 $getStatus = $this->getStatus($row->status);
                 $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
                 $result = '';
@@ -325,7 +328,7 @@ class EcrController extends Controller
             })->toArray();
             EcrApproval::where('ecrs_id', $currenErcId)->delete();
             EcrApproval::insert($ecrApprovalRequest);
-           
+
             //PMI Approvers
             $approval_statuss = [
                 'PB' => $request->prepared_by,
@@ -373,7 +376,6 @@ class EcrController extends Controller
                 'approval_status' => $ecrApproval[0]->approval_status,
                 'rapidx_user_id' => session('rapidx_user_id'), //Double check the rapidx user id to update status
             ];
-            return $ecrApprovalConditions;
             $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
 
             //Get the ECR Approval Status & Id, Update the Approval Status as Pending
@@ -404,7 +406,7 @@ class EcrController extends Controller
             if($request->status === "DIS"){
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
             }
-            // DB::commit();
+            DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

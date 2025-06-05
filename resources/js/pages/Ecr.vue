@@ -872,6 +872,8 @@
         );
         axiosSaveData(formData,'api/save_ecr_approval', (response) =>{
             tblEcrApproverSummary.value.dt.draw();
+            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
+            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
             modal.EcrApproval.hide();
             modal.SaveEcr.hide();
         });
@@ -942,7 +944,7 @@
         //TODO: Save Successfully
         axiosSaveData(formData,'api/save_ecr', (response) =>{
             tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
-            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
+            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
             modal.SaveEcr.hide();
         });
     }

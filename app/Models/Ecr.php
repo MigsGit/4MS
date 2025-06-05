@@ -26,6 +26,10 @@ class Ecr extends Model
     {
         return $this->hasOne(EcrApproval::class, 'ecrs_id', 'id');
     }
+    public function ecr_approval_pending()
+    {
+        return $this->hasOne(EcrApproval::class, 'ecrs_id', 'id')->where('status','PEN');
+    }
     public function pmi_approvals()
     {
         return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id');
