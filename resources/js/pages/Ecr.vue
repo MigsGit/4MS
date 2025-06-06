@@ -424,6 +424,13 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="modal-footer justify-content-end">
+                        <button @click="btnEcrRequirement(frmEcr.ecrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
+                            <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp;QA ECR Requirements
+                        </button>
+                    </div>
+                </div>
             </template>
             <template #footer>
                 <button v-show="isSelectReadonly === false" type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -434,6 +441,7 @@
                 <button @click="btnEcrApproval('APP')" v-show="isSelectReadonly === true && commonVar.isSessionApprover === true" type="button" ref= "btnEcrApproved" class="btn btn-success btn-sm">
                     <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-up" />&nbsp;Approved
                 </button>
+
             </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Requirements" ref="modalEcrRequirements">
@@ -585,7 +593,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
 
@@ -648,6 +656,7 @@
     const btnEcrApproved = ref(null);
     const btnEcrDisapproved = ref(null);
     const isApproved = ref(null);
+    const currentEcrsId = ref(null);
 
     //Table Column
     const tblEcrColumns = [
@@ -662,6 +671,7 @@
                     let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "Edit";
                     isSelectReadonly.value = false;
+                    currentEcrsId.value = ecrsId;
 
                     //:disabled
                     getRapidxUserByIdOpt(otherDispoRequestedByParams);
@@ -680,6 +690,7 @@
                     let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "View";
                     isSelectReadonly.value = true;
+                    currentEcrsId.value = ecrsId;
                     getRapidxUserByIdOpt(otherDispoRequestedByParams);
                     getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
                     getRapidxUserByIdOpt(otherDispoReviewedByParams);
@@ -723,15 +734,14 @@
                         let ecrReqId = this.getAttribute('ecr-requirements-id');
                         let ecrReqValue = this.value;
                         let classificationRequirementId = this.getAttribute('classification-requirement-id');
-                        let selectedParams = {
-                            ecr_req_id : ecrReqId,
-                            ecr_req_value : ecrReqValue,
-                            classification_requirement_id : classificationRequirementId,
+                        let ecrReqDecisionParams = {
+                            ecrReqId : ecrReqId,
+                            ecrReqValue : ecrReqValue,
+                            classificationRequirementId : classificationRequirementId,
+                            btnChangeEcrReqDecisionClass: this.classList,
                         }
-                        let varParams = {
-                            btnChangeEcrReqDecisionClas: this.classList,
-                        }
-                        ecrReqDecisionChange(selectedParams,varParams);
+
+                        ecrReqDecisionChange(ecrReqDecisionParams);
                     });
                 }
             }
@@ -803,7 +813,6 @@
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         $('#collapse1').addClass('show');
         getSession();
-        // modal.EcrRequirements.show();
         // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
         // await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
         // await getRapidxUserByIdOpt(otherDispoReviewedByParams);
@@ -825,15 +834,18 @@
     // const onUserChange = async (selectedParams)=>{
     //     await getRapidxUserByIdOpt(selectedParams);
     // }
-    const ecrReqDecisionChange = async (selectedParams,varParams)=>{
-        console.log('ecrReqDecisionChange',selectedParams);
-        console.log(varParams);
-
-        axiosFetchData(selectedParams,'api/ecr_req_decision_change',function(response){
-            varParams.btnChangeEcrReqDecisionClas.remove("is-invalid");
-            tblEcrManRequirements.value.dt.draw();
-            tblEcrMatRequirements.value.dt.draw();
-            tblEcrMachineRequirements.value.dt.draw();
+    const ecrReqDecisionChange = async (ecrReqDecisionParams)=>{
+        let apiParams = {
+            ecr_req_id : ecrReqDecisionParams.ecrReqId,
+            ecr_req_value : ecrReqDecisionParams.ecrReqValue,
+            classification_requirement_id : ecrReqDecisionParams.classificationRequirementId,
+            ecrsId : currentEcrsId.value,
+        }
+        axiosFetchData(apiParams,'api/ecr_req_decision_change',function(response){
+            ecrReqDecisionParams.btnChangeEcrReqDecisionClass.remove("is-invalid");
+            tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+currentEcrsId.value).draw();
+            tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+currentEcrsId.value).draw();
+            tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
         });
     }
 
@@ -861,6 +873,12 @@
     const btnEcrApproval = async (isEcrApproved) => {
         modal.EcrApproval.show();
         isApproved.value = isEcrApproved;
+    }
+    const btnEcrRequirement = async (ecrsId) => {
+        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
+        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+        modal.EcrRequirements.show();
     }
     const frmSaveEcrApproval = async () => {
         let formData = new FormData();

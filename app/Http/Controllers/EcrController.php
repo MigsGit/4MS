@@ -213,7 +213,6 @@ class EcrController extends Controller
     }
     public function loadEcrRequirements(Request $request){
         try {
-            //TODO: Get ECR Id When opening modal
             $data = [];
             $relations = [];
             $conditions = [
@@ -222,7 +221,7 @@ class EcrController extends Controller
             $ecr_req_data = [];
             $ecr_req_relations = [];
             $ecr_req_conditions = [
-                'ecrs_id' => 1,
+                'ecrs_id' => $request->ecrsId ?? "",
             ];
             $classificationRequirement = $this->resourceInterface->readWithRelationsConditionsActive(ClassificationRequirement::class,$data,$relations,$conditions);
             $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,$ecr_req_data,$ecr_req_relations,$ecr_req_conditions);
@@ -489,7 +488,6 @@ class EcrController extends Controller
     }
     public function ecrReqDecisionChange(Request $request){
         try {
-
             if( isset($request->ecr_req_id) ){ //edit
                 $conditions = [
                     'id' => $request->ecr_req_id
@@ -504,7 +502,7 @@ class EcrController extends Controller
                 $data = [
                     'classification_requirements_id' => $request->classification_requirement_id,
                     'decision' => $request->ecr_req_value,
-                    'ecrs_id' => 1, //TODO: Get ECR Id from Params
+                    'ecrs_id' => $request->ecrsId,
                 ];
                 $this->resourceInterface->create(EcrRequirement::class,$data);
             }
