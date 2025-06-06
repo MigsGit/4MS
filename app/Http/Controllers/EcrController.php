@@ -95,6 +95,15 @@ class EcrController extends Controller
                 $result .= '</br>';
                 return $result;
             })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].' </span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
             ->addColumn('get_status',function ($row){
                 switch ($row->status) {
 
@@ -123,7 +132,7 @@ class EcrController extends Controller
                 $result .= '</br>';
                 return $result;
             })
-            ->rawColumns(['get_count','get_status','get_approver_name'])
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
             ->make(true);
         } catch (Exception $e) {
             throw $e;
@@ -134,7 +143,7 @@ class EcrController extends Controller
         $data = [];
         $relations = [];
         $conditions = [
-            // 'status' => $request->status,
+            'status' => 'OK',
             'category' => $request->category
         ];
         $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
@@ -364,6 +373,11 @@ class EcrController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
+            //Get Current Ecr Approval is equal to Current Session
+            $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$request->ecrs_id)->where('status','PEN')->limit(1)->get(['rapidx_user_id']);
+            if($ecrApprovalCurrent[0]->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
             //Get Current Status
             $ecrApproval = Ecr::where('id',$request->ecrs_id)->get(['approval_status']);
             //Update the ECR Approval Status
@@ -378,7 +392,7 @@ class EcrController extends Controller
             ];
             $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
 
-            //Get the ECR Approval Status & Id, Update the Approval Status as Pending
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
             $ecrApproval = EcrApproval::where('ecrs_id',$request->ecrs_id)->where('status','-')->limit(1)->get(['id','approval_status']);
             if ( count($ecrApproval) != 0){
                 $ecrApprovalValidated = [
@@ -395,15 +409,31 @@ class EcrController extends Controller
                 $ecrValidated = [
                     'approval_status' => $ecrApproval[0]->approval_status,
                 ];
+                //Change QA Status
+                if (str_contains($ecrApproval[0]->approval_status, 'QA')) {
+                    $ecrValidated = [
+                        'approval_status' => $ecrApproval[0]->approval_status,
+                        'status' => 'QA',
+                    ];
+                }
+                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+            }else{
+                $EcrConditions = [
+                    'id' => $request->ecrs_id,
+                ];
+                $ecrValidated = [
+                    'status' => 'OK', //APPROVED ECR / ALL APPROVERS APPROVED
+                ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
             }
-            $EcrConditions = [
-                'id' => $request->ecrs_id,
-            ];
-            $ecrValidated = [
-                'status' => 'DIS', //DISAPPROVED
-            ];
+            //DISAPPROVED ECR
             if($request->status === "DIS"){
+                $EcrConditions = [
+                    'id' => $request->ecrs_id,
+                ];
+                $ecrValidated = [
+                    'status' => 'DIS',
+                ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
             }
             DB::commit();
@@ -537,8 +567,17 @@ class EcrController extends Controller
                 case 'OTTE':
                     $approvalStatus = 'Technical Engg:';
                     break;
+                case 'OTRVB':
+                    $approvalStatus = 'Reviewed By:';
+                    break;
+                case 'QACB':
+                    $approvalStatus = 'QA Engineer';
+                    break;
+                case 'QAIN':
+                    $approvalStatus = 'QA Manager';
+                    break;
                 case 'QAEX':
-                    $approvalStatus = 'QA External';
+                    $approvalStatus = 'QMD External';
                     break;
                 default:
                     $approvalStatus = '';

@@ -58,7 +58,6 @@ class ManController extends Controller
                 'rapidx_user_lqc_supervisor',
             ];
             $conditions = [
-                // 'ecrs_id' => $request->ecr_id
             ];
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(Man::class,$data,$relations,$conditions);
             return DataTables($ecrDetail)

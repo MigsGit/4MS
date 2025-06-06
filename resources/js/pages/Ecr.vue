@@ -412,6 +412,7 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Approver Name</th>
+                                                    <th>Role</th>
                                                     <th>Remarks</th>
                                                     <th>Status</th>
                                                 </tr>
@@ -739,6 +740,7 @@
     const tblEcrApproverSummaryColumns = [
         {   data: 'get_count'} ,
         {   data: 'get_approver_name'} ,
+        {   data: 'get_role'} ,
         {   data: 'remarks'},
         {   data: 'get_status'} ,
     ];
