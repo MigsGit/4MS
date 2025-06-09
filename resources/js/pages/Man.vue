@@ -94,7 +94,50 @@
                         :columns="tblManColumns"
                         ajax="api/load_man_by_ecr_id"
                         :options="{
-                            serverSide: true, //Serverside true will load the network
+                            serverSide: true, //Serverside true will load the network  //ecrsId
+                            columnDefs:[
+                                // {orderable:false,target:[0]}
+                            ]
+                        }"
+                    >
+                        <thead>
+                            <tr>
+                                <th> Action </th>
+                               <th> First Assign </th>
+                               <th> Long Interval </th>
+                               <th> Change </th>
+                               <th> Process Name </th>
+                               <th> Working Time </th>
+                               <th> Qc Inspector /Operator </th>
+                               <th> Trainer </th>
+                               <th> Trainer SampleSize </th>
+                               <th> Trainer Result </th>
+                               <th> Lqc Supervisor </th>
+                               <th> Lqc SampleSize </th>
+                               <th> Lqc Result </th>
+                               <th> Process Change Factor </th>
+                            </tr>
+                        </thead>
+                    </DataTable>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="card">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <button @click="addManDetails()" test="dasd" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
+                        </div>
+                    </div>
+                    <div class="card-body overflow-auto">
+                        <DataTable
+                        width="100%" cellspacing="0"
+                        class="table mt-2"
+                        ref="tblManDetails"
+                        :columns="tblManColumns"
+                        ajax="api/load_man_by_ecr_id"
+                        :options="{
+                            serverSide: true, //Serverside true will load the network  //ecrsId
                             columnDefs:[
                                 // {orderable:false,target:[0]}
                             ]
@@ -174,7 +217,7 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Details" @add-event="saveManDetails" ref="modalSaveManDetails">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Details" @add-event="saveManDetails()" ref="modalSaveManDetails">
         <template #body>
             <div class="row">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -353,7 +396,7 @@
                                     <DataTable
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
-                                        ref="tblManChecklist"
+                                        ref="tblMatChecklist"
                                         :columns="tblManChecklistColumns"
                                         ajax="api/load_man_checklist?dropdown_masters_id=8"
                                         :options="{
@@ -409,6 +452,7 @@
         getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrDetailsId,
+        saveEcrDetails,
     } = useEcr();
 
     const {
@@ -419,12 +463,14 @@
     //ref state
     const tblEcrByStatus = ref(null);
     const tblManChecklist = ref(null);
+    const tblMatChecklist = ref(null);
     const isSelectReadonly  = ref(null);
     const tblManDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
     const modalSaveManDetails = ref(null);
     const modalManChecklist = ref(null);
+    const currentManDetailsId = ref(null);
 
     const columns = [
         {   data: 'get_actions',
@@ -437,6 +483,7 @@
                         let ecrId = this.getAttribute('ecr-id');
                         frmMan.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
+                        tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrId).draw()
                         modal.SaveMan.show();
                     });
                 }
@@ -489,6 +536,17 @@
                         let manDetailsId = this.getAttribute('man-details-id');
                         getManById(manDetailsId);
                         modal.SaveManDetails.show();
+                    });
+                }
+                let btnManChecklistId = cell.querySelector('#btnManChecklistId');
+                if(btnManChecklistId != null){
+                    btnManChecklistId.addEventListener('click',function(){
+                        let manDetailsId = this.getAttribute('man-details-id');
+                        currentManDetailsId.value = manDetailsId;
+
+                        tblManChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=7 && manDetailsId="+manDetailsId).draw();
+                        tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=8 && manDetailsId="+manDetailsId).draw();
+                        modal.ManChecklist.show();
                     });
                 }
             }
@@ -551,7 +609,7 @@
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveManDetails = new Modal(modalSaveManDetails.value.modalRef,{ keyboard: false });
         modal.ManChecklist = new Modal(modalManChecklist.value.modalRef,{ keyboard: false });
-        modal.ManChecklist.show();
+        // modal.ManChecklist.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -595,39 +653,14 @@
             manChecklistsId : params.manChecklistsId,
             manChecklistValue : params.manChecklistValue,
             dropdownMasterDetailsId : params.dropdownMasterDetailsId,
+            manDetailsId : currentManDetailsId.value,
         }
         console.log(apiParams);
 
         axiosFetchData(apiParams,'api/man_checklist_decision_change',function(response){
             params.btnChangeManChecklistDecisionClass.remove("is-invalid");
-            tblManChecklist.value.dt.draw();
-        });
-    }
-    //saveEcrDetails
-    const saveManDetails = async () => {
-        let formData = new FormData();
-        //Append form data
-        [
-            ["ecrs_id", frmMan.value.ecrsId],
-            ["man_id", frmMan.value.manId],
-            ["first_assign", frmMan.value.firstAssign],
-            ["long_interval", frmMan.value.longInterval],
-            ["change", frmMan.value.change],
-            ["process_name", frmMan.value.processName],
-            ["working_time", frmMan.value.workingTime],
-            ["trainer", frmMan.value.trainer],
-            ["qc_inspector_operator", frmMan.value.qcInspectorOperator],
-            ["trainer_sample_size", frmMan.value.trainerSampleSize],
-            ["trainer_result", frmMan.value.trainerResult],
-            ["lqc_supervisor", frmMan.value.lqcSupervisor],
-            ["lqc_sample_size", frmMan.value.lqcSampleSize],
-            ["lqc_result", frmMan.value.lqcResult],
-            ["process_change_factor", frmMan.value.processChangeFactor],
-        ].forEach(([key, value]) =>
-            formData.append(key, value)
-        );
-        axiosSaveData(formData,'api/save_man', (response) =>{
-            console.log(response);
+            tblManChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=7 && manDetailsId="+currentManDetailsId.value).draw();
+            tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=8 && manDetailsId="+currentManDetailsId.value).draw();
         });
     }
 </script>

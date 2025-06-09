@@ -58,7 +58,7 @@
                             class="table  table-responsive mt-2"
                             ref="tblEcrDetails"
                             :columns="tblEcrDetailColumns"
-                            ajax="api/load_ecr_details_by_ecr_id?ecr_id=4"
+                            ajax="api/load_ecr_details_by_ecr_id"
                             :options="{
                                 serverSide: true, //Serverside true will load the network loadEcrDetailsByEcrId
                                 columnDefs:[
@@ -88,6 +88,63 @@
             <button @click="saveMaterial()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
+        <template #body>
+             <!-- Description of Change / Reason for Change -->
+             <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+            </EcrChangeComponent>
+            <div class="row">
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                    <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
+                    <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
+                        <Multiselect
+                            v-model="frmEcrDetails.typeOfPart"
+                            :options="ecrVar.optTypeOfPart"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
+                        <input v-model="frmEcrDetails.changeImpDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Docs To Be Submitted</span>
+                        <input v-model="frmEcrDetails.docToBeSub" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                 </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Docs Submission Date:</span>
+                        <input v-model="frmEcrDetails.docSubDate"  type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <input v-model="frmEcrDetails.remarks"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Customer Approval</span>
+                        <Multiselect
+                            v-model="frmEcrDetails.customerApproval"
+                            :options="commonVar.optConditions"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -97,6 +154,7 @@
     import useEcr from '../../js/composables/ecr.js';
     import useMan from '../../js/composables/man.js';
     import useForm from '../../js/composables/utils/useForm.js'
+    import useCommon from '../../js/composables/common.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore);
@@ -113,8 +171,16 @@
         getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrDetailsId,
+        saveEcrDetails,
     } = useEcr();
+    const {
+        commonVar,
+        getCurrentApprover,
+        getSession,
+    } = useCommon();
     const modalSaveEnvironment = ref(null);
+    const modalSaveEcrDetail = ref(null);
+    const isSelectReadonly = ref(null);
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -147,9 +213,9 @@
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrId = this.getAttribute('ecr-id');
-                        frmMan.value.ecrsId = ecrId;
+                        // frmEnviroment.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
-                        modal.SaveMan.show();
+                        modal.SaveEnvironment.show();
                     });
                 }
             }
@@ -169,6 +235,8 @@
     ];
     onMounted( async ()=>{
         modal.SaveEnvironment = new Modal(modalSaveEnvironment.value.modalRef,{ keyboard: false });
+        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        await getDropdownMasterByOpt(typeOfPartParams);
         // modal.SaveEnvironment.show();
     })
 </script>

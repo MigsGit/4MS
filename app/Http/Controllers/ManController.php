@@ -58,13 +58,15 @@ class ManController extends Controller
                 'rapidx_user_lqc_supervisor',
             ];
             $conditions = [
+                'ecrs_id' => $request->ecrsId ?? ''
             ];
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(Man::class,$data,$relations,$conditions);
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
                 $result = '';
-                $result .= '<center>';
                 $result .= "<button class='btn btn-outline-info btn-sm mr-1' man-details-id='".$row->id."' id='btnManDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= '</br> </br>';
+                $result .= "<button class='btn btn-outline-success btn-sm mr-1' man-details-id='".$row->id."' id='btnManChecklistId'> <i class='fa-solid fa-check'></i></button>";
                 $result .= '</center>';
                 return $result;
             })
@@ -139,7 +141,7 @@ class ManController extends Controller
             $man_checklist_data = [];
             $man_checklist_relations = [];
             $man_checklist_conditions = [
-                'man_id' => 1,
+                'man_id' => $request->manDetailsId,
             ];
 
             $dropdownMasterDetail = $this->resourceInterface->readCustomEloquent(DropdownMasterDetail::class,$data,$relations,$conditions);
@@ -210,7 +212,7 @@ class ManController extends Controller
                 $data = [
                     'dropdown_master_details_id' => $request->dropdownMasterDetailsId,
                     'decision' => $request->manChecklistValue,
-                    'man_id' => 1, //TODO: Get Man Id from Params
+                    'man_id' => $request->manDetailsId,
                 ];
                 $this->resourceInterface->create(ManChecklist::class,$data);
             }

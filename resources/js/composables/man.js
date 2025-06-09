@@ -43,6 +43,12 @@ export default function useMan(){
             {"value":"N/A","label":"N/A"},
             {"value":"C","label":"√"},
             {"value":"X","label":"X"},
+        ],
+        optConditions : [
+            {"value":"","label":"-Select an option-"},
+            {"value":"N/A","label":"N/A"},
+            {"value":"R","label":"REQUIRED"},
+            {"value":"NR","label":"NOT REQUIRED"},
         ]
     })
 
