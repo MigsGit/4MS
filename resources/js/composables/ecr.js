@@ -278,12 +278,11 @@ export default function useEcr(){
         }
         axiosFetchData(params,'api/get_ecr_details_id',function(response){
             let ecrDetails = response.data.ecrDetail;
-            console.log('ecrDetailsId',ecrDetailsId);
-
             frmEcrDetails.value.ecrDetailsId = ecrDetailsId;
             frmEcrDetails.value.changeImpDate =ecrDetails.change_imp_date
             frmEcrDetails.value.docSubDate =ecrDetails.doc_sub_date
             frmEcrDetails.value.docToBeSub =ecrDetails.doc_to_be_sub
+            frmEcrDetails.value.customerApproval = ecrDetails.customer_approval
             frmEcrDetails.value.remarks =ecrDetails.remarks
             frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
             frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
@@ -300,6 +299,7 @@ export default function useEcr(){
             ["type_of_part", frmEcrDetails.value.typeOfPart],
             ["doc_sub_date", frmEcrDetails.value.docSubDate],
             ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
+            ["customer_approval", frmEcrDetails.value.customerApproval],
             ["remarks", frmEcrDetails.value.remarks],
         ].forEach(([key, value]) =>
             formData.append(key, value)

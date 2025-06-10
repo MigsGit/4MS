@@ -200,11 +200,33 @@ class EcrController extends Controller
                 $result .= $row->dropdown_master_detail_type_of_part->dropdown_masters_details ?? '';
                 return $result;
             })
+            ->addColumn('get_customer_approval',function ($row){
+                $result = '';
+                $result .= $row->customer_approval;
+                $result = '';
+                switch ($row->customer_approval) {
+                    case 'R':
+                        $bgColor = 'bg-success text-white';
+                        $customerApproval = 'REQUIRED';
+                        break;
+                    case 'NR':
+                        $bgColor = 'bg-warning text-white';
+                        $customerApproval = 'NOT REQUIRED';
+                        break;
+                    default:
+                        $bgColor = 'bg-secondary text-white';
+                        $customerApproval = 'N/A';
+                        break;
+                }
+                $result .='<span class="badge '.$bgColor.'"> '.$customerApproval.' </span>';
+                return $result;
+            })
             ->rawColumns([
                 'get_actions',
                 'reason_of_change',
                 'description_of_change',
                 'type_of_part',
+                'get_customer_approval',
             ])
             ->make(true);
         } catch (Exception $e) {
@@ -517,10 +539,12 @@ class EcrController extends Controller
        date_default_timezone_set('Asia/Manila');
        try {
             $ecrDetailRequestValidated = $ecrDetailRequest->validated();
+            $ecrDetailRequestValidated['customer_approval'] = $request->customer_approval ?? NULL;
             $ecrDetailRequestValidated['remarks'] = $request->remarks;
             $conditions = [
                 'id' => $request->ecr_details_id
             ];
+            // return $ecrDetailRequestValidated;
             $this->resourceInterface->updateConditions(EcrDetail::class,$conditions,$ecrDetailRequestValidated);
             return response()->json(['is_success' => 'true']);
        } catch (Exception $e) {

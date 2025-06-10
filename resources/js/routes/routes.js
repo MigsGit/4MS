@@ -18,6 +18,10 @@ function checkIfSessionExist(to, from, next) {
         if(response.data === 1){
             next();
         }else{
+            // next({
+            //     path: '/RapidX/',
+            //     replace: true
+            // });
             return window.location.href = '/RapidX';
         }
     });
@@ -42,6 +46,7 @@ export default [
             {
                 path: 'ecr',
                 name: 'Ecr',
+                beforeEnter: checkIfSessionExist,
                 component: Ecr,
             },
             {

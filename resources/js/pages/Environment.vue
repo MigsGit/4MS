@@ -73,8 +73,9 @@
                                 <th> Reason Of Change</th>
                                 <th> Type Of Part</th>
                                 <th> Change Imp Date</th>
-                                <th> Doc Sub Date</th>
-                                <th> Doc To Be Sub</th>
+                                <th> Docs Sub Date</th>
+                                <th> Docs To Be Sub</th>
+                                <th> Customer Approval</th>
                                 <th> Remarks</th>
                             </tr>
                         </thead>
@@ -202,6 +203,7 @@
         {   data: 'change_imp_date'} ,
         {   data: 'doc_sub_date'} ,
         {   data: 'doc_to_be_sub'} ,
+        {   data: 'get_customer_approval'} ,
         {   data: 'remarks'} ,
     ];
     const tblEcrByStatusColumns = [
@@ -236,6 +238,8 @@
     onMounted( async ()=>{
         modal.SaveEnvironment = new Modal(modalSaveEnvironment.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         // modal.SaveEnvironment.show();
     })

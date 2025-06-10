@@ -42,8 +42,7 @@ const useAuth = useAuthStore();
             </div>
         </div>
         <div class="sb-sidenav-footer">
-            <div class="small">Logged in as:</div>
-
+            <div class="small">Logged in as: </div>
         </div>
     </nav>
 </template>
