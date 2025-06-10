@@ -7,6 +7,8 @@ use Helpers;
 use App\Models\RapidxUser;
 use App\Models\UserAccess;
 use App\Models\EcrApproval;
+use App\Models\Environment;
+use App\Models\PmiApproval;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
@@ -58,11 +60,190 @@ class CommonController extends Controller
             $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(EcrApproval::class,$data,$relations,$conditions);
             $ecrApproval =  $ecrApprovalQuery->get();
             $isSessionApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
-
-
             $ecrApproval[0]->rapidx_user_id;
             return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover]);
         } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getCurrentPmiInternalApprover(Request $request){
+        try {
+            $conditions = [
+                'ecrs_id' => $request->ecrsId, //TODO: Ecr Id
+                'status' => 'PEN',
+            ];
+            $data = [
+                'rapidx_user_id'
+            ];
+            $relations = [
+
+            ];
+            $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(PmiApproval::class,$data,$relations,$conditions);
+            $ecrApproval =  $ecrApprovalQuery->get();
+            $isSessionPmiInternalApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
+            return response()->json(['isSuccess' => 'true','isSessionPmiInternalApprover'=>$isSessionPmiInternalApprover]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function loadPmiInternalApprovalSummary(Request $request){
+        try {
+            $ecrsId = $request->ecrsId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                // 'ecrs_id' => $ecrsId
+                'ecrs_id' => 6
+            ];
+            $pmiApproval = $this->resourceInterface->readCustomEloquent(PmiApproval::class,$data,$relations,$conditions);
+            $pmiApproval = $pmiApproval->orderBy('counter','asc')->get();
+            return DataTables($pmiApproval)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
+
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
+            ->make(true);
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getApprovalStatus($approval_status){
+        try {
+             switch ($approval_status) {
+                 case 'PB':
+                     $approvalStatus = 'Prepared by:';
+                     break;
+                 case 'CB':
+                     $approvalStatus = 'Checked by:';
+                     break;
+                 case 'AB':
+                     $approvalStatus = 'Approved by:';
+                     break;
+                 default:
+                     $approvalStatus = '---';
+                     break;
+             }
+             return [
+                 'approvalStatus' => $approvalStatus,
+             ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function savePmiInternalApproval(Request $request){
+
+        date_default_timezone_set('Asia/Manila');
+        DB::beginTransaction();
+        try {
+            //Get Current Ecr Approval is equal to Current Session
+            $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$request->ecrsId)->where('status','PEN')->limit(1)->get(['rapidx_user_id']);
+            if($pmiInternalApprovalCurrent[0]->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+            //Get Current Status
+            $pmiInternalApproval = Environment::where('ecrs_id',$request->ecrsId)->limit(1)->get(['approval_status']);
+            //Update the ECR Approval Status
+            $pmiInternalApprovalValidated = [
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ];
+            $pmiInternalApprovalConditions = [
+                'ecrs_id' => $request->ecrsId,
+                'approval_status' => $pmiInternalApproval[0]->approval_status,
+                'rapidx_user_id' => session('rapidx_user_id'), //Double check the rapidx user id to update status
+            ];
+            $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+            $pmiInternalApproval = PmiApproval::where('ecrs_id',$request->ecrsId)->where('status','-')->limit(1)->get(['id','approval_status']);
+            if ( count($pmiInternalApproval) != 0){
+                $pmiInternalApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $pmiInternalApprovalConditions = [
+                    'id' => $pmiInternalApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
+                //Update the ECR Approval Status
+                $enviromentConditions = [
+                    'id' => $request->ecrsId,
+                ];
+                $enviromentValidated = [
+                    'approval_status' => $pmiInternalApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions(Environment::class,$enviromentConditions,$enviromentValidated);
+            }else{
+                $enviromentConditions = [
+                    'id' => $request->ecrsId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'ENVOK', //APPROVED ENVIRONMENT / ALL APPROVERS APPROVED
+                ];
+                $this->resourceInterface->updateConditions(Environment::class,$enviromentConditions,$enviromentValidated);
+            }
+             //DISAPPROVED ECR
+             if($request->status === "DIS"){
+                $enviromentConditions = [
+                    'id' => $request->ecrsId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'DIS',
+                ];
+                $this->resourceInterface->updateConditions(Environment::class,$enviromentConditions,$enviromentValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
             throw $e;
         }
     }

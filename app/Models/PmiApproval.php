@@ -7,5 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PmiApproval extends Model
 {
-    use HasFactory;
+    public function rapidx_user()
+    {
+        return $this->hasOne(RapidxUser::class, 'id', 'rapidx_user_id');
+    }
 }

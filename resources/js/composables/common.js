@@ -5,6 +5,7 @@ export default function useCommon(){
     const { axiosFetchData } = useFetch(); // Call  the useFetch function
     const commonVar = ref({
         isSessionApprover : false,
+        isSessionPmiInternalApprover : false,
         optUserMaster:[],
         optYesNo : [
             {"value":"","label":"-Select an option-"},
@@ -47,18 +48,20 @@ export default function useCommon(){
             commonVar.value.isSessionApprover = data.isSessionApprover;
         });
     }
-    const getSession = async () => {
-        let apiParams = {}
-        axiosFetchData(apiParams,'api/check_user',function(response){
-            return response;
-            // console.log(response);
+    const getCurrentPmiInternalApprover = async (params) => {
+        let apiParams = {
+            ecrsId : params.ecrsId
+        }
+        axiosFetchData(apiParams,'api/get_current_pmi_internal_approver',function(response){
+            let data = response.data;
+            commonVar.value.isSessionPmiInternalApprover = data.isSessionPmiInternalApprover;
         });
     }
 
     return {
         commonVar,
         getCurrentApprover,
-        getSession,
+        getCurrentPmiInternalApprover,
     }
 
 }

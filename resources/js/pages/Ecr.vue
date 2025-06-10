@@ -637,7 +637,7 @@
     const {
         commonVar,
         getCurrentApprover,
-        getSession,
+        getCurrentPmiInternalApprover,
     } = useCommon();
 
     // const item = ref();

@@ -48,9 +48,12 @@ Route::middleware('auth')->group(function(){
         Route::get('load_ecr_approval_summary', 'loadEcrApprovalSummary')->name('load_ecr_approval_summary');
     });
 
-    Route::controller(CommonController::class)->group(function () {
+    Route::controller(CommonController::class)->group(function (): void {
+        Route::post('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::get('get_rapidx_user_by_id_opt', 'getRapidxUserByIdOpt')->name('get_rapidx_user_by_id_opt');
         Route::get('get_current_approver_session', 'getCurrentApproverSession')->name('get_current_approver_session');
+        Route::get('get_current_pmi_internal_approver', 'getCurrentPmiInternalApprover')->name('get_current_pmi_internal_approver');
+        Route::get('load_pmi_internal_approval_summary', 'loadPmiInternalApprovalSummary')->name('load_pmi_internal_approval_summary');
     });
 
     Route::controller(SettingsController::class)->group(function () {

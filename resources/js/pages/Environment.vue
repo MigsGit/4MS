@@ -83,10 +83,59 @@
                     </div>
                 </div>
             </div>
+            <!-- Pmi Internal Approver -->
+            <!-- <PmiInternalApprover :tblEcrPmiInternalApproverSummary="tblEcrPmiInternalApproverSummary" :tblEcrPmiInternalApproverSummaryColumns = tblEcrPmiInternalApproverSummaryColumns>
+            </PmiInternalApprover> -->
+            <!-- <div class="row mt-3" v-show="isSelectReadonly === true"> -->
+            <div class="row mt-3">
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
+                                ECR Approver Summary
+                            </button>
+                        </h5>
+                    <div id="collapsePmiInternalApprovalSummary" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblPmiInternalApproverSummary"
+                                        :columns="tblPmiInternalApproverSummaryColumns"
+                                        ajax="api/load_pmi_internal_approval_summary"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering: false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Role</th>
+                                                <th>Approver Name</th>
+                                                <th>Remarks</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </template>
         <template #footer>
-            <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click="saveMaterial()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+            <button @click="btnPmiInternalApproval('DIS')" v-show="isSelectReadonly === true && commonVar.isSessionPmiInternalApprover === true" type="button" ref= "btnPmiInternalDisapproved" class="btn btn-danger btn-sm">
+                <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
+            </button>
+            <button @click="btnPmiInternalApproval('APP')" v-show="isSelectReadonly === true && commonVar.isSessionPmiInternalApprover === true" type="button" ref= "btnPmiInternalApproved" class="btn btn-success btn-sm">
+                <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-up" />&nbsp;Approved
+            </button>
+            <!-- <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button @click="saveMaterial()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button> -->
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -146,19 +195,38 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" title="ECR Approval" ref="modalPmiInternalApproval" @add-event="frmSavePmiInternalApproval()">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <textarea v-model="approvalRemarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
+    import PmiInternalApprover from '../components/PmiInternalApprover.vue';
     import useEcr from '../../js/composables/ecr.js';
-    import useMan from '../../js/composables/man.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import useCommon from '../../js/composables/common.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore);
+
+    const { axiosSaveData } = useForm(); // Call the useFetch function
     const {
         modal,
         ecrVar,
@@ -177,11 +245,28 @@
     const {
         commonVar,
         getCurrentApprover,
-        getSession,
+        getCurrentPmiInternalApprover,
     } = useCommon();
+    // console.log(commonVar.isSessionPmiInternalApprover);
+
     const modalSaveEnvironment = ref(null);
     const modalSaveEcrDetail = ref(null);
-    const isSelectReadonly = ref(null);
+    const isSelectReadonly = ref(true);
+
+    const modalPmiInternalApproval = ref(null);
+    const tblPmiInternalApproverSummary = ref(null);
+    const approvalRemarks = ref(null);
+    const selectedEcrsId = ref(null);
+
+    const isPmiInternalApproved = ref(null);
+
+    const tblPmiInternalApproverSummaryColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
+    ];
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -214,9 +299,13 @@
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
-                        let ecrId = this.getAttribute('ecr-id');
-                        // frmEnviroment.value.ecrsId = ecrId;
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
+                        let ecrsId = this.getAttribute('ecr-id');
+                        selectedEcrsId.value = ecrsId;
+                        let approverParams = {
+                            ecrsId : ecrsId
+                        }
+                        getCurrentPmiInternalApprover(approverParams);
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw()
                         modal.SaveEnvironment.show();
                     });
                 }
@@ -238,11 +327,32 @@
     onMounted( async ()=>{
         modal.SaveEnvironment = new Modal(modalSaveEnvironment.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modal.PmiInternalApproval = new Modal(modalPmiInternalApproval.value.modalRef,{ keyboard: false });
+
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
-        // modal.SaveEnvironment.show();
     })
+    const btnPmiInternalApproval = async (isEcrApproved) => {
+        modal.PmiInternalApproval.show();
+        isPmiInternalApproved.value = isEcrApproved;
+    }
+    const frmSavePmiInternalApproval = async () => {
+        let formData = new FormData();
+        //Append form data
+        [
+            ["ecrsId", selectedEcrsId.value],
+            ["status", isPmiInternalApproved.value],
+            ["remarks", approvalRemarks.value],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_pmi_internal_approval', (response) =>{
+            tblPmiInternalApproverSummary.value.dt.draw();
+            modal.PmiInternalApproval.hide();
+            modal.SaveEnvironment.hide();
+        });
+    }
 </script>
 
 
