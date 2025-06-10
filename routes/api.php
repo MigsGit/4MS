@@ -22,18 +22,10 @@ use App\Http\Controllers\SettingsController;
 */
 
 Route::get('check_session', function (Request $request) {
+    // return session('rapidx_name');
     session_start();
     if($_SESSION){
-        session([
-            'rapidx_user_id' => $_SESSION["rapidx_user_id"],
-            'rapidx_name' => $_SESSION["rapidx_name"],
-            'rapidx_username' => $_SESSION["rapidx_username"],
-            'rapidx_user_level_id' => $_SESSION["rapidx_user_level_id"],
-            'rapidx_email' => $_SESSION["rapidx_email"],
-            'rapidx_department_id' => $_SESSION["rapidx_department_id"],
-            'rapidx_employee_number' => $_SESSION["rapidx_employee_number"],
-        ]);
-        return session()->all();
+        return true;
     }else{
         return false;
     }

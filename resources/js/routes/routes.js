@@ -9,11 +9,24 @@ import Method from '../../js/pages/Method.vue'
 import Environment from '../../js/pages/Environment.vue'
 import UserMaster from '../../js/pages/UserMaster.vue'
 import DropdownMaster from '../../js/pages/DropdownMaster.vue'
+import useFetch from '../../js/composables/utils/useFetch';
+const { axiosFetchData } = useFetch(); // Call  the useFetch function
 
+function checkIfSessionExist(to, from, next) {
+    let apiParams;
+    axiosFetchData(apiParams,'api/check_session',function(response){
+        if(response.data === 1){
+            next();
+        }else{
+            return window.location.href = '/RapidX';
+        }
+    });
+}
 export default [
     {
         path: '/4M',
         component: '4M',
+        beforeEnter: checkIfSessionExist,
         components: {
             default: IndexComponent,
             dashboard: Dashboard,
@@ -22,7 +35,9 @@ export default [
             {
                 path: 'dashboard',
                 name: 'dashboard',
+                beforeEnter: checkIfSessionExist,
                 component: Dashboard,
+
             },
             {
                 path: 'ecr',
