@@ -27,6 +27,7 @@
                                         <tr>
                                             <th>Action</th>
                                             <th>Status</th>
+                                            <th>Attachment</th>
                                             <th>ECR Ctrl No.</th>
                                             <th>Category</th>
                                             <th>Internal or External</th>
@@ -335,6 +336,20 @@
                         modal.UploadEnvironmentRef.show();
                     });
                 }
+            }
+        } ,
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewEnvironmentRef = cell.querySelector('#btnViewEnvironmentRef');
+                if(btnViewEnvironmentRef != null){
+                    btnViewEnvironmentRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        window.open(`api/view_environment_ref?ecrsId=${ecrsId}`, '_blank');
+                    });
+                }
+
             }
         } ,
         {   data: 'status'} ,

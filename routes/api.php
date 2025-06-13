@@ -80,7 +80,7 @@ Route::middleware('auth')->group(function(){
     });
 
     Route::controller(EnvironmentController::class)->group(function () {
-        // upload_environment_ref
         Route::post('upload_environment_ref', 'uploadEnvironmentRef')->name('upload_environment_ref');
+        Route::get('/view_environment_ref', 'viewEnvironmentRef')->name('view_environment_ref');
     });
 });

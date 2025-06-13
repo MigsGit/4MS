@@ -23,7 +23,7 @@ class EnvironmentController extends Controller
         DB::beginTransaction();
         try {
             if($environmentRequest->hasfile('environment_ref') ){
-                $arrUploadFile = $this->commonInterface->uploadFile($environmentRequest->environment_ref,$environmentRequest->ecrs_id,'environment');
+                $arrUploadFile = $this->commonInterface->uploadFile($environmentRequest->environment_ref,$environmentRequest->ecrsId,'environment');
                 $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
                 $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
 
@@ -38,6 +38,14 @@ class EnvironmentController extends Controller
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
+            throw $e;
+        }
+    }
+    public function viewEnvironmentRef(Request $request){
+        try {
+            $pdfPath = storage_path('app/public/environment/6'.'/'.'0_official_sar_user_manual.pdf');
+            $this->commonInterface->viewPdfFile($pdfPath);
+        } catch (Exception $e) {
             throw $e;
         }
     }

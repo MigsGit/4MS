@@ -150,8 +150,9 @@ class EcrController extends Controller
         return DataTables($ecr)
         ->addColumn('get_actions',function ($row) use ($request){
             $result = '';
+            $result .= '<center>';
             $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
-            if($request->category){
+            if($request->category === 'Environment'){
                 $result .= '</br>';
                 $result .= '</br>';
                 $result .= "<button class='btn btn-outline-danger btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnDownloadEnvironmentRef'> <i class='fa-solid fa-upload'></i></button>";
@@ -160,7 +161,21 @@ class EcrController extends Controller
             return $result;
             return $result;
         })
-        ->rawColumns(['get_actions'])
+        ->addColumn('get_attachment',function ($row) use ($request){
+            $result = '';
+            $result .= '<center>';
+            if($request->category  === 'Environment'){
+                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'> View Attachment</a>";
+                // $result .= "<a class='link-danger' ecr-id='".$row->id."' id='btnViewEnvironmentRef'> View Attachment</a>";
+            }
+            $result .= '</center>';
+            return $result;
+            return $result;
+        })
+        ->rawColumns([
+            'get_actions',
+            'get_attachment',
+        ])
         ->make(true);
         try {
             return response()->json(['is_success' => 'true']);
