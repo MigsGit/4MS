@@ -9,7 +9,6 @@ use App\Http\Controllers\EdocsController;
 use App\Http\Controllers\CommonController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\EnvironmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,10 +76,5 @@ Route::middleware('auth')->group(function(){
     Route::controller(MaterialController::class)->group(function () {
         Route::post('save_material', 'saveMaterial')->name('save_material');
         Route::get('get_material_ecr_by_id', 'getMaterialEcrById')->name('get_material_ecr_by_id');
-    });
-
-    Route::controller(EnvironmentController::class)->group(function () {
-        // upload_environment_ref
-        Route::post('upload_environment_ref', 'uploadEnvironmentRef')->name('upload_environment_ref');
     });
 });

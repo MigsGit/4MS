@@ -212,21 +212,6 @@
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Environment Reference" ref="modalUploadEnvironmentRef" @add-event="frmUploadEnvironmentRef()">
-        <template #body>
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <input @change="changeEnvironmentRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                    </div>
-                </div>
-            </div>
-        </template>
-        <template #footer>
-            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
-        </template>
-    </ModalComponent>
 </template>
 
 <script setup>
@@ -264,20 +249,17 @@
     } = useCommon();
     // console.log(commonVar.isSessionPmiInternalApprover);
 
-    // const frmEnvironment = ref({
-    //     environmentRef: null,
-    // });
     const modalSaveEnvironment = ref(null);
     const modalSaveEcrDetail = ref(null);
     const isSelectReadonly = ref(true);
-    const environmentRef = ref(null);
-    const modalUploadEnvironmentRef = ref(null);
 
     const modalPmiInternalApproval = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
     const approvalRemarks = ref(null);
     const selectedEcrsId = ref(null);
+
     const isPmiInternalApproved = ref(null);
+
     const tblPmiInternalApproverSummaryColumns = [
         {   data: 'get_count'} ,
         {   data: 'get_role'} ,
@@ -315,7 +297,6 @@
             searchable: false,
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
-                let btnDownloadEnvironmentRef = cell.querySelector('#btnDownloadEnvironmentRef');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecr-id');
@@ -326,13 +307,6 @@
                         getCurrentPmiInternalApprover(approverParams);
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw()
                         modal.SaveEnvironment.show();
-                    });
-                }
-                if(btnDownloadEnvironmentRef != null){
-                    btnDownloadEnvironmentRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
-                        selectedEcrsId.value = ecrsId;
-                        modal.UploadEnvironmentRef.show();
                     });
                 }
             }
@@ -354,7 +328,6 @@
         modal.SaveEnvironment = new Modal(modalSaveEnvironment.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.PmiInternalApproval = new Modal(modalPmiInternalApproval.value.modalRef,{ keyboard: false });
-        modal.UploadEnvironmentRef = new Modal(modalUploadEnvironmentRef.value.modalRef,{ keyboard: false });
 
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
@@ -378,20 +351,6 @@
             tblPmiInternalApproverSummary.value.dt.draw();
             modal.PmiInternalApproval.hide();
             modal.SaveEnvironment.hide();
-        });
-    }
-    const changeEnvironmentRef = async (event)  => {
-        environmentRef.value =  Array.from(event.target.files);
-    }
-    const frmUploadEnvironmentRef = async () => {
-        let formData = new FormData();
-        environmentRef.value.forEach((file, index) => {
-            formData.append('environment_ref[]', file);
-        });
-        formData.append("ecrsId", selectedEcrsId.value);
-
-        axiosSaveData(formData,'api/upload_environment_ref',(response) =>{
-            console.log(response);
         });
     }
 </script>
