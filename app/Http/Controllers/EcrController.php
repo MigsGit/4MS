@@ -148,10 +148,14 @@ class EcrController extends Controller
         ];
         $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
         return DataTables($ecr)
-        ->addColumn('get_actions',function ($row){
+        ->addColumn('get_actions',function ($row) use ($request){
             $result = '';
-            $result .= '<center>';
             $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+            if($request->category){
+                $result .= '</br>';
+                $result .= '</br>';
+                $result .= "<button class='btn btn-outline-danger btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnDownloadEnvironmentRef'> <i class='fa-solid fa-upload'></i></button>";
+            }
             $result .= '</center>';
             return $result;
             return $result;

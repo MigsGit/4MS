@@ -1,20 +1,12 @@
 <?php
-
-namespace App\Jobs;
+namespace App\Services;
 
 use App\Interfaces\FileInterface;
+use Illuminate\Support\Facades\Storage;
 
 
-
-class FileJob implements FileInterface
+class FileService implements FileInterface
 {
-
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
-
     public function slug($string, $slug, $extra)
 	{
 		return strtolower(trim(preg_replace('~[^0-9a-z' . preg_quote($extra, '~') . ']+~i', $slug, $this->Unaccent($string)), $slug));
