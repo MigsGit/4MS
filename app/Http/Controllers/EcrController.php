@@ -139,9 +139,11 @@ class EcrController extends Controller
         }
     }
     public function loadEcrByStatus(Request $request){
-        // return 'true' ;
         $data = [];
-        $relations = [];
+        $relations = [
+            'pmi_approvals_pending.rapidx_user',
+            'environment',
+        ];
         $conditions = [
             'status' => 'OK',
             'category' => $request->category
@@ -161,12 +163,49 @@ class EcrController extends Controller
             return $result;
             return $result;
         })
+        ->addColumn('get_status',function ($row) use($request){
+            $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
+            switch ($request->category) {
+                case 'Man':
+                    $currentModel = Man::class;
+                    $approvalStatus = $row->man[0]->approval_status;
+                    break;
+                case 'Material':
+                    $currentModel = Material::class;
+                    $approvalStatus = $row->material[0]->approval_status;
+
+                    break;
+                case 'Machine':
+                    $currentModel = Machine::class;
+                    $approvalStatus = $row->machine[0]->approval_status;
+                    break;
+                case 'Method':
+                    $currentModel = Method::class;
+                    $approvalStatus = $row->method[0]->approval_status;
+                    break;
+                case 'Environment':
+                    $currentModel = Environment::class;
+                    $approvalStatus = $row->environment[0]->approval_status;
+                    break;
+                default:
+                    $approvalStatus = '';
+                    return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
+                    break;
+            }
+            $getApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
+            $result = '';
+            $result .= '<center>';
+            // $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
+            $result .= '<br>';
+            $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+            $result .= '</br>';
+            return $result;
+        })
         ->addColumn('get_attachment',function ($row) use ($request){
             $result = '';
             $result .= '<center>';
             if($request->category  === 'Environment'){
                 $result .= "<a class='btn btn-outline-danger btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'> View Attachment</a>";
-                // $result .= "<a class='link-danger' ecr-id='".$row->id."' id='btnViewEnvironmentRef'> View Attachment</a>";
             }
             $result .= '</center>';
             return $result;
@@ -174,6 +213,7 @@ class EcrController extends Controller
         })
         ->rawColumns([
             'get_actions',
+            'get_status',
             'get_attachment',
         ])
         ->make(true);
@@ -619,6 +659,29 @@ class EcrController extends Controller
                     break;
                 case 'QAEX':
                     $approvalStatus = 'QMD External';
+                    break;
+                default:
+                    $approvalStatus = '';
+                    break;
+            }
+            return [
+                'approvalStatus' => $approvalStatus,
+            ];
+       } catch (Exception $e) {
+           throw $e;
+       }
+   }
+   public function getPmiApprovalStatus($approval_status){
+       try {
+            switch ($approval_status) {
+                case 'PB':
+                    $approvalStatus = 'Prepared by:';
+                    break;
+                case 'CB':
+                    $approvalStatus = 'Checked by:';
+                    break;
+                case 'AP':
+                    $approvalStatus = 'Approved by:';
                     break;
                 default:
                     $approvalStatus = '';

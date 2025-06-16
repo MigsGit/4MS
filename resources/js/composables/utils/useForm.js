@@ -31,7 +31,16 @@ export default function useForm ()
                 });
             }
         } catch (error) {
-            throw error; // Ensure errors are propagated
+            let errorMsg = error.response.data.msg;
+            Swal.fire({
+                title: "Error!",
+                text: errorMsg,
+                icon: "error",
+                timer: 2000,
+                showConfirmButton: false
+            });
+            console.log('error',error.response.data);
+            // throw error; // Ensure errors are propagated
         } finally {
             isModalLoadingComponent.value = false;
         }

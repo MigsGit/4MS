@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Mail;
 use Helpers;
+use App\Models\Ecr;
+use App\Models\Man;
+use App\Models\Material;
 use App\Models\RapidxUser;
 use App\Models\UserAccess;
 use App\Models\EcrApproval;
@@ -185,26 +188,59 @@ class CommonController extends Controller
         date_default_timezone_set('Asia/Manila');
         DB::beginTransaction();
         try {
+            $ecrsId = $request->ecrsId;
             //Get Current Ecr Approval is equal to Current Session
-            $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$request->ecrsId)->where('status','PEN')->limit(1)->get(['rapidx_user_id']);
+            $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)->where('status','PEN')->limit(1)->get(['rapidx_user_id']);
             if($pmiInternalApprovalCurrent[0]->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
+            //Get the ECR Category
+            $isCategory = Ecr::where('id',$ecrsId)
+            ->whereNull('deleted_at')
+            ->limit(1)
+            ->get(['category']);
+            $isCategory = $isCategory[0]->category;
+            switch ($isCategory) {
+                case 'Man':
+                    $currentModel = Man::class;
+                    break;
+                case 'Material':
+                    $currentModel = Material::class;
+                    break;
+                case 'Machine':
+                    $currentModel = Machine::class;
+                    break;
+                case 'Method':
+                    $currentModel = Method::class;
+                    break;
+                case 'Environment':
+                    $currentModel = Environment::class;
+                    $isEnvironmentRefFileExist = Environment::where('ecrs_id',$ecrsId)
+                    ->whereNotNull('original_filename')
+                    ->count();
+                    if ( $isEnvironmentRefFileExist === 0){
+                        return response()->json(['isSuccess' => 'false','msg' => 'Please upload Environment Reference File !'],500);
+                    }
+                    break;
+                default:
+                    return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
+                    break;
+            }
             //Get Current Status
-            $pmiInternalApproval = Environment::where('ecrs_id',$request->ecrsId)->limit(1)->get(['approval_status']);
+            $pmiInternalApproval = $currentModel::where('ecrs_id',$ecrsId)->limit(1)->get(['approval_status']);
             //Update the ECR Approval Status
             $pmiInternalApprovalValidated = [
                 'status' => $request->status,
                 'remarks' => $request->remarks,
             ];
             $pmiInternalApprovalConditions = [
-                'ecrs_id' => $request->ecrsId,
+                'ecrs_id' => $ecrsId,
                 'approval_status' => $pmiInternalApproval[0]->approval_status,
                 'rapidx_user_id' => session('rapidx_user_id'), //Double check the rapidx user id to update status
             ];
             $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-            $pmiInternalApproval = PmiApproval::where('ecrs_id',$request->ecrsId)->where('status','-')->limit(1)->get(['id','approval_status']);
+            $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)->where('status','-')->limit(1)->get(['id','approval_status']);
             if ( count($pmiInternalApproval) != 0){
                 $pmiInternalApprovalValidated = [
                     'status' => 'PEN',
@@ -215,30 +251,30 @@ class CommonController extends Controller
                 $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
                 //Update the ECR Approval Status
                 $enviromentConditions = [
-                    'id' => $request->ecrsId,
+                    'id' => $ecrsId,
                 ];
                 $enviromentValidated = [
                     'approval_status' => $pmiInternalApproval[0]->approval_status,
                 ];
-                $this->resourceInterface->updateConditions(Environment::class,$enviromentConditions,$enviromentValidated);
+                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }else{
                 $enviromentConditions = [
-                    'id' => $request->ecrsId,
+                    'id' => $ecrsId,
                 ];
                 $enviromentValidated = [
-                    'status' => 'ENVOK', //APPROVED ENVIRONMENT / ALL APPROVERS APPROVED
+                    'status' => 'OK',
                 ];
-                $this->resourceInterface->updateConditions(Environment::class,$enviromentConditions,$enviromentValidated);
+                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }
              //DISAPPROVED ECR
              if($request->status === "DIS"){
                 $enviromentConditions = [
-                    'id' => $request->ecrsId,
+                    'id' => $ecrsId,
                 ];
                 $enviromentValidated = [
                     'status' => 'DIS',
                 ];
-                $this->resourceInterface->updateConditions(Environment::class,$enviromentConditions,$enviromentValidated);
+                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }
             DB::commit();
             return response()->json(['is_success' => 'true']);
