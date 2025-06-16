@@ -43,10 +43,48 @@ class EnvironmentController extends Controller
     }
     public function viewEnvironmentRef(Request $request){
         try {
-            $pdfPath = storage_path('app/public/environment/6'.'/'.'0_official_sar_user_manual.pdf');
-            $this->commonInterface->viewPdfFile($pdfPath);
+            $ecrsId = decrypt($request->ecrsId);
+            $conditions = [
+                'ecrs_id' => $ecrsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Environment::class,[],[],$conditions);
+            $environmentRefByEcrsId = $data
+            ->get([
+                'filtered_document_name',
+                'file_path',
+            ]);
+            if(count($environmentRefByEcrsId) != 0){
+                $arrFilteredDocumentName = explode(' | ' ,$environmentRefByEcrsId[0]->filtered_document_name);
+                $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                $filePathWithEcrsId = $environmentRefByEcrsId[0]->file_path."/".$ecrsId."/".$selectedFilteredDocumentName;
+                $pdfPath = storage_path("app/public/".$filePathWithEcrsId."");
+                $this->commonInterface->viewPdfFile($pdfPath);
+            }
         } catch (Exception $e) {
             throw $e;
         }
     }
+    public function getEnvironmentRefByEcrsId(Request $request){
+        try {
+            $ecrsId = $request->ecrsId;
+            $conditions = [
+                'ecrs_id' => $ecrsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Environment::class,[],[],$conditions);
+            $environmentRefByEcrsId = $data
+            ->get([
+                'id',
+                'ecrs_id',
+                'original_filename',
+            ]);
+            return response()->json([
+                'isSuccess' => 'true',
+                'originalFilename'=> explode(' | ',$environmentRefByEcrsId[0]->original_filename),
+                'ecrsId'=> encrypt($environmentRefByEcrsId[0]->ecrs_id),
+            ]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
 }

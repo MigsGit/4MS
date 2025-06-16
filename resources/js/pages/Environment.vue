@@ -228,6 +228,35 @@
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Environment Reference" ref="modalViewEnvironmentRef">
+        <template #body>
+            <div class="row mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                First
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilename, index) in arrOriginalFilenames" :key="arrOriginalFilename.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="" class="link-primary" ref="aViewEnvironmentRef" @click="btnLinkViewEnvironmentRef(selectedEcrsIdEncrypted,index)" environment-id ="" view-environment-file-index="">
+                                    {{ arrOriginalFilename }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -273,6 +302,10 @@
     const isSelectReadonly = ref(true);
     const environmentRef = ref(null);
     const modalUploadEnvironmentRef = ref(null);
+    const modalViewEnvironmentRef = ref(null);
+    const aViewEnvironmentRef = ref(null);
+    const selectedEcrsIdEncrypted = ref(null);
+    const arrOriginalFilenames = ref([]);
 
     const modalPmiInternalApproval = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
@@ -338,6 +371,7 @@
                 }
             }
         } ,
+        {   data: 'status'} ,
         {   data: 'get_attachment',
             orderable: false,
             searchable: false,
@@ -346,13 +380,12 @@
                 if(btnViewEnvironmentRef != null){
                     btnViewEnvironmentRef.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecr-id');
-                        window.open(`api/view_environment_ref?ecrsId=${ecrsId}`, '_blank');
+                        getEnvironmentRefByEcrsId(ecrsId);
                     });
                 }
 
             }
         } ,
-        {   data: 'status'} ,
         {   data: 'ecr_no'} ,
         {   data: 'category'} ,
         {   data: 'internal_external'} ,
@@ -370,7 +403,7 @@
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.PmiInternalApproval = new Modal(modalPmiInternalApproval.value.modalRef,{ keyboard: false });
         modal.UploadEnvironmentRef = new Modal(modalUploadEnvironmentRef.value.modalRef,{ keyboard: false });
-
+        modal.ViewEnvironmentRef = new Modal(modalViewEnvironmentRef.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -407,6 +440,25 @@
 
         axiosSaveData(formData,'api/upload_environment_ref',(response) =>{
             console.log(response);
+        });
+    }
+    const btnLinkViewEnvironmentRef = async (selectedEcrsIdEncrypted,index) => {
+        // alert('aViewEnvironmentRef');
+        window.open(`api/view_environment_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
+    }
+    const getEnvironmentRefByEcrsId = async (ecrsId) => {
+        let apiParams = {
+            ecrsId : ecrsId
+        }
+        axiosFetchData(apiParams,'api/get_environment_ref_by_ecrs_id',function(response){
+            let data = response.data;
+            let ecrsId = data.ecrsId;
+            let originalFilename = data.originalFilename;
+            arrOriginalFilenames.value = originalFilename;
+            selectedEcrsIdEncrypted.value = ecrsId;
+            console.log(arrOriginalFilenames);
+
+            modal.ViewEnvironmentRef.show();
         });
     }
 </script>

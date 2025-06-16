@@ -81,6 +81,8 @@ Route::middleware('auth')->group(function(){
 
     Route::controller(EnvironmentController::class)->group(function () {
         Route::post('upload_environment_ref', 'uploadEnvironmentRef')->name('upload_environment_ref');
+        
+        Route::get('get_environment_ref_by_ecrs_id', 'getEnvironmentRefByEcrsId')->name('get_environment_ref_by_ecrs_id');
         Route::get('/view_environment_ref', 'viewEnvironmentRef')->name('view_environment_ref');
     });
 });
