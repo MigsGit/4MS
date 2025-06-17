@@ -15,7 +15,7 @@
                                     class="table mt-2"
                                     ref="tblEcrByStatus"
                                     :columns="tblEcrByStatusColumns"
-                                    ajax="api/load_ecr_by_status?category=Environment"
+                                    ajax="api/load_ecr_environment_by_status?category=Environment"
                                     :options="{
                                         serverSide: true, //Serverside true will load the network
                                         columnDefs:[
@@ -349,6 +349,7 @@
             searchable: false,
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
+                let btnViewEcrById = cell.querySelector('#btnViewEcrById');
                 let btnDownloadEnvironmentRef = cell.querySelector('#btnDownloadEnvironmentRef');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
@@ -359,6 +360,20 @@
                         }
                         getCurrentPmiInternalApprover(approverParams);
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw()
+                        tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
+                        modal.SaveEnvironment.show();
+                    });
+                }
+                if(btnViewEcrById != null){
+                    btnViewEcrById.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        selectedEcrsId.value = ecrsId;
+                        let approverParams = {
+                            ecrsId : ecrsId
+                        }
+                        getCurrentPmiInternalApprover(approverParams);
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw()
+                        tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         modal.SaveEnvironment.show();
                     });
                 }
@@ -412,35 +427,8 @@
         modal.PmiInternalApproval.show();
         isPmiInternalApproved.value = isEcrApproved;
     }
-    const frmSavePmiInternalApproval = async () => {
-        let formData = new FormData();
-        //Append form data
-        [
-            ["ecrsId", selectedEcrsId.value],
-            ["status", isPmiInternalApproved.value],
-            ["remarks", approvalRemarks.value],
-        ].forEach(([key, value]) =>
-            formData.append(key, value)
-        );
-        axiosSaveData(formData,'api/save_pmi_internal_approval', (response) =>{
-            tblPmiInternalApproverSummary.value.dt.draw();
-            modal.PmiInternalApproval.hide();
-            modal.SaveEnvironment.hide();
-        });
-    }
     const changeEnvironmentRef = async (event)  => {
         environmentRef.value =  Array.from(event.target.files);
-    }
-    const frmUploadEnvironmentRef = async () => {
-        let formData = new FormData();
-        environmentRef.value.forEach((file, index) => {
-            formData.append('environment_ref[]', file);
-        });
-        formData.append("ecrsId", selectedEcrsId.value);
-
-        axiosSaveData(formData,'api/upload_environment_ref',(response) =>{
-            console.log(response);
-        });
     }
     const btnLinkViewEnvironmentRef = async (selectedEcrsIdEncrypted,index) => {
         // alert('aViewEnvironmentRef');
@@ -461,6 +449,34 @@
             modal.ViewEnvironmentRef.show();
         });
     }
+    const frmSavePmiInternalApproval = async () => {
+        let formData = new FormData();
+        //Append form data
+        [
+            ["ecrsId", selectedEcrsId.value],
+            ["status", isPmiInternalApproved.value],
+            ["remarks", approvalRemarks.value],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_pmi_internal_approval', (response) =>{
+            tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecr_id="+selectedEcrsId.value).draw()
+            modal.PmiInternalApproval.hide();
+            modal.SaveEnvironment.hide();
+        });
+    }
+    const frmUploadEnvironmentRef = async () => {
+        let formData = new FormData();
+        environmentRef.value.forEach((file, index) => {
+            formData.append('environment_ref[]', file);
+        });
+        formData.append("ecrsId", selectedEcrsId.value);
+
+        axiosSaveData(formData,'api/upload_environment_ref',(response) =>{
+            console.log(response);
+        });
+    }
+
 </script>
 
 

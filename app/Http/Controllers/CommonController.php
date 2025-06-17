@@ -97,8 +97,7 @@ class CommonController extends Controller
                 'rapidx_user'
             ];
             $conditions = [
-                // 'ecrs_id' => $ecrsId
-                'ecrs_id' => 6
+                'ecrs_id' => $ecrsId
             ];
             $pmiApproval = $this->resourceInterface->readCustomEloquent(PmiApproval::class,$data,$relations,$conditions);
             $pmiApproval = $pmiApproval->orderBy('counter','asc')->get();
@@ -240,7 +239,7 @@ class CommonController extends Controller
             ];
             $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-            $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)->where('status','-')->limit(1)->get(['id','approval_status']);
+           $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)->where('status','-')->limit(1)->get(['id','approval_status']);
             if ( count($pmiInternalApproval) != 0){
                 $pmiInternalApprovalValidated = [
                     'status' => 'PEN',
@@ -251,15 +250,15 @@ class CommonController extends Controller
                 $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
                 //Update the ECR Approval Status
                 $enviromentConditions = [
-                    'id' => $ecrsId,
+                    'ecrs_id' => $ecrsId,
                 ];
                 $enviromentValidated = [
                     'approval_status' => $pmiInternalApproval[0]->approval_status,
                 ];
-                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
+                $this->resourceInterface->updateConditions(Environment::class,$enviromentConditions,$enviromentValidated);
             }else{
                 $enviromentConditions = [
-                    'id' => $ecrsId,
+                    'ecrs_id' => $ecrsId,
                 ];
                 $enviromentValidated = [
                     'status' => 'OK',
@@ -269,7 +268,7 @@ class CommonController extends Controller
              //DISAPPROVED ECR
              if($request->status === "DIS"){
                 $enviromentConditions = [
-                    'id' => $ecrsId,
+                    'ecrs_id' => $ecrsId,
                 ];
                 $enviromentValidated = [
                     'status' => 'DIS',

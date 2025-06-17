@@ -812,7 +812,6 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         $('#collapse1').addClass('show');
-        getSession();
         // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
         // await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
         // await getRapidxUserByIdOpt(otherDispoReviewedByParams);

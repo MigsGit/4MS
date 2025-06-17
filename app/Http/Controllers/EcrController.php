@@ -165,39 +165,11 @@ class EcrController extends Controller
         })
         ->addColumn('get_status',function ($row) use($request){
             $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
-            switch ($request->category) {
-                case 'Man':
-                    $currentModel = Man::class;
-                    $approvalStatus = $row->man[0]->approval_status;
-                    break;
-                case 'Material':
-                    $currentModel = Material::class;
-                    $approvalStatus = $row->material[0]->approval_status;
-
-                    break;
-                case 'Machine':
-                    $currentModel = Machine::class;
-                    $approvalStatus = $row->machine[0]->approval_status;
-                    break;
-                case 'Method':
-                    $currentModel = Method::class;
-                    $approvalStatus = $row->method[0]->approval_status;
-                    break;
-                case 'Environment':
-                    $currentModel = Environment::class;
-                    $approvalStatus = $row->environment[0]->approval_status;
-                    break;
-                default:
-                    $approvalStatus = '';
-                    return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
-                    break;
-            }
-            $getApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
             $result = '';
             $result .= '<center>';
             // $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
             $result .= '<br>';
-            $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+            $result .= '<span class="badge rounded-pill bg-danger"> '.$row->approval_status.' '.$currentApprover.' </span>';
             $result .= '</br>';
             return $result;
         })
