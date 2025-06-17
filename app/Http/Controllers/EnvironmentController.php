@@ -87,7 +87,6 @@ class EnvironmentController extends Controller
             throw $e;
         }
     }
-
     public function loadEcrEnvironmentByStatus(Request $request){
         $data = [];
         $relations = [
@@ -140,7 +139,7 @@ class EnvironmentController extends Controller
             $result = '';
             $result .= '<center>';
             if($request->category  === 'Environment'){
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'> View Attachment</a>";
+                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'><i class='fa-solid fa-file-pdf'></i></a>";
             }
             $result .= '</center>';
             return $result;

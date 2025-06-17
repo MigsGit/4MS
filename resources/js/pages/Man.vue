@@ -24,7 +24,9 @@
                         >
                             <thead>
                                 <tr>
-                                    <th>Action</th>
+                                    <th>
+                                        <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                    </th>
                                     <th>Status</th>
                                     <th>ECR Ctrl No.</th>
                                     <th>Category</th>
@@ -65,7 +67,9 @@
                     >
                         <thead>
                             <tr>
-                                <th>Action</th>
+                                <th>
+                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                </th>
                                 <th> Description Of Change</th>
                                 <th> Reason Of Change</th>
                                 <th> Type Of Part</th>
@@ -102,7 +106,9 @@
                     >
                         <thead>
                             <tr>
-                                <th> Action </th>
+                                <th>
+                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                </th>
                                <th> First Assign </th>
                                <th> Long Interval </th>
                                <th> Change </th>
@@ -126,16 +132,16 @@
                 <div class="card">
                     <div class="row mt-2">
                         <div class="col-12">
-                            <button @click="addManDetails()" test="dasd" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
+                            <button @click="addSpecialAcceptanceDetails()" test="dasd" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add SA Details</button>
                         </div>
                     </div>
                     <div class="card-body overflow-auto">
                         <DataTable
                         width="100%" cellspacing="0"
                         class="table mt-2"
-                        ref="tblManDetails"
-                        :columns="tblManColumns"
-                        ajax="api/load_man_by_ecr_id"
+                        ref="tblSpecialAcceptanceDetails"
+                        :columns="tblSpecialAcceptanceDetailsColumns"
+                        ajax="api/load_special_acceptance_details_by_ecr_id"
                         :options="{
                             serverSide: true, //Serverside true will load the network  //ecrsId
                             columnDefs:[
@@ -145,20 +151,18 @@
                     >
                         <thead>
                             <tr>
-                                <th> Action </th>
-                               <th> First Assign </th>
-                               <th> Long Interval </th>
-                               <th> Change </th>
-                               <th> Process Name </th>
-                               <th> Working Time </th>
-                               <th> Qc Inspector /Operator </th>
-                               <th> Trainer </th>
-                               <th> Trainer SampleSize </th>
-                               <th> Trainer Result </th>
-                               <th> Lqc Supervisor </th>
-                               <th> Lqc SampleSize </th>
-                               <th> Lqc Result </th>
-                               <th> Process Change Factor </th>
+                                <th>
+                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                </th>
+                               <th> Product Detail </th>
+                               <th> Lot Qty </th>
+                               <th> Samples </th>
+                               <th> Mod </th>
+                               <th> Mod Qty </th>
+                               <th> Judgement </th>
+                               <th> Inspection Date </th>
+                               <th> Inspector </th>
+                               <th> Remarks </th>
                             </tr>
                         </thead>
                     </DataTable>
@@ -373,7 +377,9 @@
                                         <thead>
                                             <tr>
                                                 <th style="width:80%">Requirement</th>
-                                                <th style="width:20%">Action</th>
+                                                <th style="width:20%">
+                                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                                </th>
                                             </tr>
                                         </thead>
                                     </DataTable>
@@ -408,7 +414,9 @@
                                         <thead>
                                             <tr>
                                                 <th style="width:80%">Requirement</th>
-                                                <th style="width:20%">Action</th>
+                                                <th style="width:20%">
+                                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                                </th>
                                             </tr>
                                         </thead>
                                     </DataTable>
@@ -472,6 +480,8 @@
     const modalManChecklist = ref(null);
     const currentManDetailsId = ref(null);
 
+    const tblSpecialAcceptanceDetails = ref(null);
+
     const columns = [
         {   data: 'get_actions',
             orderable: false,
@@ -484,6 +494,7 @@
                         frmMan.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
                         tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrId).draw()
+                        tblSpecialAcceptanceDetails.value.dt.ajax.url("api/load_special_acceptance_details_by_ecr_id?ecrsId="+ecrId).draw()
                         modal.SaveMan.show();
                     });
                 }
@@ -564,6 +575,31 @@
         {   data: 'lqc_sample_size'} ,
         {   data: 'lqc_result'} ,
         {   data: 'process_change_factor'} ,
+    ];
+    const tblSpecialAcceptanceDetailsColumns = [
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                // let btnManDetailsId = cell.querySelector('#btnManDetailsId');
+                // if(btnManDetailsId != null){
+                //     btnManDetailsId.addEventListener('click',function(){
+                //         let manDetailsId = this.getAttribute('man-details-id');
+                //         getManById(manDetailsId);
+                //         modal.SaveManDetails.show();
+                //     });
+                // }
+            }
+        } ,
+        {   data: 'product_detail'} ,
+        {   data: 'lot_qty'} ,
+        {   data: 'samples' } ,
+        {   data: 'mod' } ,
+        {   data: 'mod_qty' } ,
+        {   data: 'judgement' } ,
+        {   data: 'inspection_date' } ,
+        {   data: 'inspector_rapidx_user_id' } ,
+        {   data: 'remarks' } ,
     ];
     const tblManChecklistColumns = [
         {   data: 'dropdown_masters_details'} ,

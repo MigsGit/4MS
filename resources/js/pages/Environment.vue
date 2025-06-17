@@ -259,7 +259,7 @@
     </ModalComponent>
 </template>
 
-<script setup>
+<script setup> //TODO: PMI APPROVAL Move as PmiApprovalComponent
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';

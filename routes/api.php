@@ -55,6 +55,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_current_approver_session', 'getCurrentApproverSession')->name('get_current_approver_session');
         Route::get('get_current_pmi_internal_approver', 'getCurrentPmiInternalApprover')->name('get_current_pmi_internal_approver');
         Route::get('load_pmi_internal_approval_summary', 'loadPmiInternalApprovalSummary')->name('load_pmi_internal_approval_summary');
+        Route::get('load_special_acceptance_details_by_ecr_id', 'loadSpecialAcceptanceDetailsByEcrId')->name('load_special_acceptance_details_by_ecr_id');
     });
 
     Route::controller(SettingsController::class)->group(function () {

@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 
 use Mail;
 use Helpers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Ecr;
 use App\Models\Man;
 use App\Models\Material;
 use App\Models\RapidxUser;
-use App\Models\UserAccess;
 use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\PmiApproval;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\SpecialAcceptanceDetail;
 use App\Interfaces\CommonInterface;
 use App\Interfaces\ResourceInterface;
 
@@ -26,65 +26,27 @@ class CommonController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-
-    public function getRapidxUserByIdOpt(Request $request){
+    public function loadSpecialAcceptanceDetailsByEcrId(Request $request){
         try {
-            // $rapidxUserById = RapidxUser::where('department_id',22)->where('logdel',0)->get(); //22 QAD
+            $ecrsId = $request->ecrsId ?? "";
             $data = [];
             $relations = [];
             $conditions = [
-                'department_id' => 1,
-                'user_stat' => 1,
+                'ecrs_id' => $ecrsId
             ];
-            // $query->where('deleted_at',NULL);
-
-            $rapidxUserById = $this->resourceInterface->readWithRelationsConditions(RapidxUser::class,$data,$relations,$conditions);
-            $rapidxUserById = $rapidxUserById;
-            // $arr_merge_group = array_merge(...array_map(function($item) {
-            //     return (array) $item;
-            // }, $arr_group_by1));
-            return response()->json(['is_success' => 'true','rapidxUserById'=>$rapidxUserById]);
-        } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
-        }
-    }
-    public function getCurrentApproverSession(Request $request){
-        try {
-            $conditions = [
-                'ecrs_id' => $request->ecrsId,
-                'status' => 'PEN',
-            ];
-            $data = [
-                'rapidx_user_id'
-            ];
-            $relations = [
-
-            ];
-            $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(EcrApproval::class,$data,$relations,$conditions);
-            $ecrApproval =  $ecrApprovalQuery->get();
-            $isSessionApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
-            $ecrApproval[0]->rapidx_user_id;
-            return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover]);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function getCurrentPmiInternalApprover(Request $request){
-        try {
-            $conditions = [
-                'ecrs_id' => $request->ecrsId, //TODO: Ecr Id
-                'status' => 'PEN',
-            ];
-            $data = [
-                'rapidx_user_id'
-            ];
-            $relations = [
-
-            ];
-            $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(PmiApproval::class,$data,$relations,$conditions);
-            $ecrApproval =  $ecrApprovalQuery->get();
-            $isSessionPmiInternalApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
-            return response()->json(['isSuccess' => 'true','isSessionPmiInternalApprover'=>$isSessionPmiInternalApprover]);
+            $data = $this->resourceInterface->readCustomEloquent(SpecialAcceptanceDetail::class,$data,$relations,$conditions);
+            $specialAcceptanceDetail = $data->get();
+            return DataTables($specialAcceptanceDetail)
+            ->addColumn('get_actions',function ($row){
+                $result = '';
+                $result .= '<center>';
+                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' sa-details-id='".$row->id."' id='btnGetSaDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= '</center>';
+                return $result;
+            })
+            ->rawColumns(['get_actions'])
+            ->make(true);
+            return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;
         }
@@ -155,6 +117,68 @@ class CommonController extends Controller
             ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
             ->make(true);
             return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getRapidxUserByIdOpt(Request $request){
+        try {
+            // $rapidxUserById = RapidxUser::where('department_id',22)->where('logdel',0)->get(); //22 QAD
+            $data = [];
+            $relations = [];
+            $conditions = [
+                'department_id' => 1,
+                'user_stat' => 1,
+            ];
+            // $query->where('deleted_at',NULL);
+
+            $rapidxUserById = $this->resourceInterface->readWithRelationsConditions(RapidxUser::class,$data,$relations,$conditions);
+            $rapidxUserById = $rapidxUserById;
+            // $arr_merge_group = array_merge(...array_map(function($item) {
+            //     return (array) $item;
+            // }, $arr_group_by1));
+            return response()->json(['is_success' => 'true','rapidxUserById'=>$rapidxUserById]);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
+    public function getCurrentApproverSession(Request $request){
+        try {
+            $conditions = [
+                'ecrs_id' => $request->ecrsId,
+                'status' => 'PEN',
+            ];
+            $data = [
+                'rapidx_user_id'
+            ];
+            $relations = [
+
+            ];
+            $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(EcrApproval::class,$data,$relations,$conditions);
+            $ecrApproval =  $ecrApprovalQuery->get();
+            $isSessionApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
+            $ecrApproval[0]->rapidx_user_id;
+            return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getCurrentPmiInternalApprover(Request $request){
+        try {
+            $conditions = [
+                'ecrs_id' => $request->ecrsId, //TODO: Ecr Id
+                'status' => 'PEN',
+            ];
+            $data = [
+                'rapidx_user_id'
+            ];
+            $relations = [
+
+            ];
+            $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(PmiApproval::class,$data,$relations,$conditions);
+            $ecrApproval =  $ecrApprovalQuery->get();
+            $isSessionPmiInternalApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
+            return response()->json(['isSuccess' => 'true','isSessionPmiInternalApprover'=>$isSessionPmiInternalApprover]);
         } catch (Exception $e) {
             throw $e;
         }
