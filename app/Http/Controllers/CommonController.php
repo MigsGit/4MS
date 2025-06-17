@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Mail;
 use Helpers;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\Ecr;
 use App\Models\Man;
 use App\Models\Material;
@@ -13,9 +11,12 @@ use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\PmiApproval;
-use App\Models\SpecialAcceptanceDetail;
+use Illuminate\Http\Request;
+use App\Models\SpecialInspection;
+use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Interfaces\ResourceInterface;
+use App\Http\Requests\SpecialInspectionRequest;
 
 
 class CommonController extends Controller
@@ -26,25 +27,37 @@ class CommonController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-    public function loadSpecialAcceptanceDetailsByEcrId(Request $request){
+    public function loadSpecialInspectionByEcrId(Request $request){
         try {
             $ecrsId = $request->ecrsId ?? "";
             $data = [];
-            $relations = [];
+            $relations = [
+                'rapidx_user'
+            ];
             $conditions = [
                 'ecrs_id' => $ecrsId
             ];
-            $data = $this->resourceInterface->readCustomEloquent(SpecialAcceptanceDetail::class,$data,$relations,$conditions);
-            $specialAcceptanceDetail = $data->get();
-            return DataTables($specialAcceptanceDetail)
+            $data = $this->resourceInterface->readCustomEloquent(SpecialInspection::class,$data,$relations,$conditions);
+            $specialInspection = $data->get();
+            return DataTables($specialInspection)
             ->addColumn('get_actions',function ($row){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' sa-details-id='".$row->id."' id='btnGetSaDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= "<button class='btn btn-outline-info btn-sm mr-1' special-inspections-id='".$row->id."' id='btnGetSpecialInspectionId'> <i class='fa-solid fa-pen-to-square'></i></button>";
                 $result .= '</center>';
                 return $result;
             })
-            ->rawColumns(['get_actions'])
+            ->addColumn('get_inspector',function ($row){
+                $result = '';
+                $result .= '<center>';
+                $result .= $row->rapidx_user['name'] ?? "---";
+                $result .= '</center>';
+                return $result;
+            })
+            ->rawColumns([
+                'get_actions',
+                'get_inspector',
+            ])
             ->make(true);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
@@ -121,6 +134,7 @@ class CommonController extends Controller
             throw $e;
         }
     }
+
     public function getRapidxUserByIdOpt(Request $request){
         try {
             // $rapidxUserById = RapidxUser::where('department_id',22)->where('logdel',0)->get(); //22 QAD
@@ -202,6 +216,20 @@ class CommonController extends Controller
              return [
                  'approvalStatus' => $approvalStatus,
              ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getSpecialInspectionById(Request $request){
+        try {
+            $conditions = [
+                'id' => $request->specialInspectionsId,
+            ];
+            $data = [];
+            $relations = [];
+            $data = $this->resourceInterface->readCustomEloquent(SpecialInspection::class,$data,$relations,$conditions);
+            $specialInspection =  $data->get();
+            return response()->json(['isSuccess' => 'true','specialInspection'=>$specialInspection[0]]);
         } catch (Exception $e) {
             throw $e;
         }
@@ -298,6 +326,29 @@ class CommonController extends Controller
                     'status' => 'DIS',
                 ];
                 $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveSpecialInspection(SpecialInspectionRequest $specialInspectionRequest){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            if( isset($specialInspectionRequest->specialInspectionsId) ){ //Edit
+                $specialInspectionRequestValidated = $specialInspectionRequest->validated();
+                $conditions = [
+                    'id' => $specialInspectionRequest->specialInspectionsId
+                ];
+                $this->resourceInterface->updateConditions(SpecialInspection::class,$conditions,$specialInspectionRequestValidated);
+            }else{ //Add
+                $specialInspectionRequestValidated = $specialInspectionRequest->validated();
+                $specialInspectionRequestValidated['created_at'] = now();
+                $specialInspectionRequestValidated['created_by'] = session('rapidx_user_id');
+                $this->resourceInterface->create(SpecialInspection::class,$specialInspectionRequestValidated);
             }
             DB::commit();
             return response()->json(['is_success' => 'true']);

@@ -87,7 +87,7 @@
                 <div class="card">
                     <div class="row mt-2">
                         <div class="col-12">
-                            <button @click="addManDetails()" test="dasd" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
+                            <button @click="addManDetails()" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
                         </div>
                     </div>
                     <div class="card-body overflow-auto">
@@ -132,16 +132,16 @@
                 <div class="card">
                     <div class="row mt-2">
                         <div class="col-12">
-                            <button @click="addSpecialAcceptanceDetails()" test="dasd" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add SA Details</button>
+                            <button @click="btnAddSpecialInspection()" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add SA Details</button>
                         </div>
                     </div>
                     <div class="card-body overflow-auto">
                         <DataTable
                         width="100%" cellspacing="0"
                         class="table mt-2"
-                        ref="tblSpecialAcceptanceDetails"
-                        :columns="tblSpecialAcceptanceDetailsColumns"
-                        ajax="api/load_special_acceptance_details_by_ecr_id"
+                        ref="tblSpecialInspection"
+                        :columns="tblSpecialInspectionColumns"
+                        ajax="api/load_special_inspection_by_ecr_id"
                         :options="{
                             serverSide: true, //Serverside true will load the network  //ecrsId
                             columnDefs:[
@@ -432,6 +432,73 @@
             <!-- <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button> -->
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Special Inspection" @add-event="saveSpecialInspection()" ref="modalSaveSpecialInspection">
+        <template #body>
+            <div class="row">
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                    <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
+                    <input v-model="frmSpecialInspection.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                </div>
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                    <span class="input-group-text" id="addon-wrapping">Special Inspection Id:</span>
+                    <input  v-model="frmSpecialInspection.specialInspectionsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Product Detail:</span>
+                        <input v-model="frmSpecialInspection.productDetail" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Lot Qty:</span>
+                        <input v-model="frmSpecialInspection.lotQty" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Mod:</span>
+                        <input v-model="frmSpecialInspection.mod" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <textarea v-model="frmSpecialInspection.remarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </textarea>
+                    </div>
+                 </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Mod Qty:</span>
+                        <input v-model="frmSpecialInspection.modQty" type="int" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Judgement:</span>
+                        <Multiselect
+                            v-model="frmSpecialInspection.judgement"
+                            :options="commonVar.optJudgment"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Inspection Date:</span>
+                        <input v-model="frmSpecialInspection.inspectionDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Inspector:</span>
+                        <Multiselect
+                            v-model="frmSpecialInspection.inspector"
+                            :options="manVar.optUserMaster"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -443,8 +510,8 @@
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
+    import useCommon from '../../js/composables/common.js';
     DataTable.use(DataTablesCore)
-
     const { axiosSaveData } = useForm(); // Call the useFetch function
     //composables export function
     const {
@@ -467,6 +534,12 @@
         frmMan,
         manVar,
     } = useMan();
+    const {
+        commonVar,
+        getCurrentApprover,
+        getCurrentPmiInternalApprover,
+        frmSpecialInspection,
+    } = useCommon();
 
     //ref state
     const tblEcrByStatus = ref(null);
@@ -480,7 +553,9 @@
     const modalManChecklist = ref(null);
     const currentManDetailsId = ref(null);
 
-    const tblSpecialAcceptanceDetails = ref(null);
+    const tblSpecialInspection = ref(null);
+    const modalSaveSpecialInspection = ref(null);
+
 
     const columns = [
         {   data: 'get_actions',
@@ -492,9 +567,10 @@
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrId = this.getAttribute('ecr-id');
                         frmMan.value.ecrsId = ecrId;
+                        frmSpecialInspection.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
                         tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrId).draw()
-                        tblSpecialAcceptanceDetails.value.dt.ajax.url("api/load_special_acceptance_details_by_ecr_id?ecrsId="+ecrId).draw()
+                        tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrId).draw()
                         modal.SaveMan.show();
                     });
                 }
@@ -576,19 +652,19 @@
         {   data: 'lqc_result'} ,
         {   data: 'process_change_factor'} ,
     ];
-    const tblSpecialAcceptanceDetailsColumns = [
+    const tblSpecialInspectionColumns = [
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
             createdCell(cell){
-                // let btnManDetailsId = cell.querySelector('#btnManDetailsId');
-                // if(btnManDetailsId != null){
-                //     btnManDetailsId.addEventListener('click',function(){
-                //         let manDetailsId = this.getAttribute('man-details-id');
-                //         getManById(manDetailsId);
-                //         modal.SaveManDetails.show();
-                //     });
-                // }
+                let btnGetSpecialInspectionId = cell.querySelector('#btnGetSpecialInspectionId');
+                if(btnGetSpecialInspectionId != null){
+                    btnGetSpecialInspectionId.addEventListener('click',function(){
+                        let specialInspectionsId = this.getAttribute('special-inspections-id');
+                        getSpecialInspectionById(specialInspectionsId);
+                        modal.modalSaveSpecialInspection.show();
+                    });
+                }
             }
         } ,
         {   data: 'product_detail'} ,
@@ -598,7 +674,7 @@
         {   data: 'mod_qty' } ,
         {   data: 'judgement' } ,
         {   data: 'inspection_date' } ,
-        {   data: 'inspector_rapidx_user_id' } ,
+        {   data: 'get_inspector' } ,
         {   data: 'remarks' } ,
     ];
     const tblManChecklistColumns = [
@@ -623,7 +699,6 @@
             }
         }
     ];
-
     const qcInspectorOperatorParams = {
         globalVar: manVar.optUserMaster,
         formModel: toRef(frmMan.value,'qcInspectorOperator'),
@@ -645,27 +720,48 @@
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveManDetails = new Modal(modalSaveManDetails.value.modalRef,{ keyboard: false });
         modal.ManChecklist = new Modal(modalManChecklist.value.modalRef,{ keyboard: false });
-        // modal.ManChecklist.show();
+        modal.modalSaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(qcInspectorOperatorParams);
 
-
     })
 
     const addManDetails = async () => {
-            modal.SaveManDetails.show();
+        modal.SaveManDetails.show();
+    }
+    const btnAddSpecialInspection = async () => {
+        modal.modalSaveSpecialInspection.show();
+    }
+
+    const getSpecialInspectionById = async (specialInspectionsId) => {
+        let apiParams = {
+            specialInspectionsId : specialInspectionsId
+        }
+        axiosFetchData(apiParams,'api/get_special_inspection_by_id',function(response){
+            let data = response.data;
+            let specialInspection = response.data.specialInspection;
+            frmSpecialInspection.value.ecrsId = specialInspection.ecrs_id;
+            frmSpecialInspection.value.productDetail = specialInspection.product_detail;
+            frmSpecialInspection.value.lotQty = specialInspection.lot_qty;
+            frmSpecialInspection.value.samples = specialInspection.samples;
+            frmSpecialInspection.value.mod = specialInspection.mod;
+            frmSpecialInspection.value.modQty = specialInspection.mod_qty;
+            frmSpecialInspection.value.judgement = specialInspection.judgement;
+            frmSpecialInspection.value.inspectionDate = specialInspection.inspection_date;
+            frmSpecialInspection.value.inspector = specialInspection.inspector;
+            frmSpecialInspection.value.remarks = specialInspection.remarks;
+        });
     }
     const getManById = async (manId) =>
     {
-        let params = {
+        let apiParams = {
             manId : manId
         }
-        axiosFetchData(params,'api/get_man_by_id',function(response){
+        axiosFetchData(apiParams,'api/get_man_by_id',function(response){
             let data = response.data;
             let man = data.man;
-
             frmMan.value.manId = man.id;
             frmMan.value.firstAssign = man.first_assign;
             frmMan.value.longInterval = man.long_interval;
@@ -680,8 +776,6 @@
             frmMan.value.lqcSampleSize = man.lqc_sample_size;
             frmMan.value.lqcResult = man.lqc_result;
             frmMan.value.processChangeFactor = man.process_change_factor;
-
-
         });
     }
     const changeManChecklistDecision = async (params)=>{
@@ -699,6 +793,56 @@
             tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=8 && manDetailsId="+currentManDetailsId.value).draw();
         });
     }
+    const saveManDetails = async () => {
+        let formData = new FormData();
+        //Append form data
+        [
+            ["ecrs_id", frmMan.value.ecrsId],
+            ["first_assign", frmMan.value.firstAssign],
+            ["long_interval", frmMan.value.longInterval],
+            ["change", frmMan.value.change],
+            ["process_name", frmMan.value.processName],
+            ["working_time", frmMan.value.workingTime],
+            ["trainer", frmMan.value.trainer],
+            ["qc_inspector_operator", frmMan.value.qcInspectorOperator],
+            ["trainer_sample_size", frmMan.value.trainerSampleSize],
+            ["trainer_result", frmMan.value.trainerResult],
+            ["lqc_supervisor", frmMan.value.lqcSupervisor],
+            ["lqc_sample_size", frmMan.value.lqcSampleSize],
+            ["lqc_result", frmMan.value.lqcResult],
+            ["process_change_factor", frmMan.value.processChangeFactor],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_man', (response) =>{
+            modal.modalSaveSpecialInspection.show();
+            //load_man_by_ecr_id
+            tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw()
+        });
+    }
+    const saveSpecialInspection = async () => {
+        let formData = new FormData();
+         //Append form data
+         [
+            ["ecrs_id" , frmSpecialInspection.value.ecrsId],
+            ["product_detail" , frmSpecialInspection.value.productDetail],
+            ["lot_qty" , frmSpecialInspection.value.lotQty],
+            ["samples" , frmSpecialInspection.value.samples],
+            ["mod" , frmSpecialInspection.value.mod],
+            ["mod_qty" , frmSpecialInspection.value.modQty],
+            ["judgement" , frmSpecialInspection.value.judgement],
+            ["inspection_date" , frmSpecialInspection.value.inspectionDate],
+            ["inspector" , frmSpecialInspection.value.inspector],
+            ["remarks" , frmSpecialInspection.value.remarks],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_special_inspection', (response) =>{
+            tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+frmSpecialInspection.value.ecrsId).draw()
+            modal.modalSaveSpecialInspection.hide();
+        });
+    }
+
 </script>
 
 

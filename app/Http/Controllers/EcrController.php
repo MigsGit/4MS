@@ -358,8 +358,8 @@ class EcrController extends Controller
                     'created_at' => now(),
                 ];
             });
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
+            // DB::commit();
+            // return response()->json(['is_success' => 'true']);
             EcrDetail::where('ecrs_id', $currenErcId)->delete();
             foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
                $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);

@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function(){
         Route::post('save_ecr', 'saveEcr')->name('save_ecr');
         Route::post('save_ecr_details', 'saveEcrDetails')->name('save_ecr_details');
         Route::post('save_ecr_approval', 'saveEcrApproval')->name('save_ecr_approval');
+
         Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
         Route::get('load_ecr', 'loadEcr')->name('load_ecr');
         Route::get('load_ecr_by_status', 'loadEcrByStatus')->name('load_ecr_by_status');
@@ -51,20 +52,23 @@ Route::middleware('auth')->group(function(){
 
     Route::controller(CommonController::class)->group(function (): void {
         Route::post('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
+        Route::post('save_special_inspection', 'saveSpecialInspection')->name('save_special_inspection');
+
+        Route::get('get_special_inspection_by_id', 'getSpecialInspectionById')->name('get_special_inspection_by_id');
         Route::get('get_rapidx_user_by_id_opt', 'getRapidxUserByIdOpt')->name('get_rapidx_user_by_id_opt');
         Route::get('get_current_approver_session', 'getCurrentApproverSession')->name('get_current_approver_session');
         Route::get('get_current_pmi_internal_approver', 'getCurrentPmiInternalApprover')->name('get_current_pmi_internal_approver');
         Route::get('load_pmi_internal_approval_summary', 'loadPmiInternalApprovalSummary')->name('load_pmi_internal_approval_summary');
-        Route::get('load_special_acceptance_details_by_ecr_id', 'loadSpecialAcceptanceDetailsByEcrId')->name('load_special_acceptance_details_by_ecr_id');
+        Route::get('load_special_inspection_by_ecr_id', 'loadSpecialInspectionByEcrId')->name('load_special_inspection_by_ecr_id');
     });
 
     Route::controller(SettingsController::class)->group(function () {
+        Route::post('save_dropdown_master_details', 'saveDropdownMasterDetails')->name('save_dropdown_master_details');
+
         Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
         Route::get('load_dropdown_master_details', 'loadDropdownMasterDetails')->name('load_dropdown_master_details');
         Route::get('get_dropdown_master', 'getDropdownMaster')->name('get_dropdown_master');
         Route::get('get_dropdown_master_details_id', 'getDropdownMasterDetailsId')->name('get_dropdown_master_details_id');
-
-        Route::post('save_dropdown_master_details', 'saveDropdownMasterDetails')->name('save_dropdown_master_details');
     });
 
     Route::controller(ManController::class)->group(function () {

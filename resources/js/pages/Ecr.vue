@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-4">ENGINEERING CHANGE REQUESTssss</h4>
+        <h4 class="mt-4">ENGINEERING CHANGE REQUEST</h4>
         <div class="card mt-5"  style="width: 100%;">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">

@@ -38,7 +38,18 @@ export default function useCommon(){
             {"value":"NR","label":"NOT REQUIRED"},
         ]
     });
-
+    const frmSpecialInspection = ref({
+        ecrsId : "",
+        productDetail : "N/A",
+        lotQty : "10",
+        samples : "10",
+        mod : "N/A",
+        modQty : "10",
+        judgement : "PASSED",
+        inspectionDate : "2025-05-01",
+        inspector : 530,
+        remarks : "TEST",
+    });
     const getCurrentApprover = async (params) => {
         let apiParams = {
             ecrsId : params.ecrsId
@@ -62,6 +73,7 @@ export default function useCommon(){
         commonVar,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+        frmSpecialInspection,
     }
 
 }
