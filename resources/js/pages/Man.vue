@@ -237,7 +237,7 @@
                         <span class="input-group-text" id="addon-wrapping">F:</span>
                         <Multiselect
                             v-model="frmMan.firstAssign"
-                            :options="manVar.optYesNo"
+                            :options="commonVar.optYesNo"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -247,7 +247,7 @@
                         <span class="input-group-text" id="addon-wrapping">L:</span>
                         <Multiselect
                             v-model="frmMan.longInterval"
-                            :options="manVar.optYesNo"
+                            :options="commonVar.optYesNo"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -257,7 +257,7 @@
                         <span class="input-group-text" id="addon-wrapping">C:</span>
                         <Multiselect
                             v-model="frmMan.change"
-                            :options="manVar.optYesNo"
+                            :options="commonVar.optYesNo"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -275,7 +275,7 @@
                         <span class="input-group-text" id="addon-wrapping">Qc Inspector/ Operator:</span>
                         <Multiselect
                             v-model="frmMan.qcInspectorOperator"
-                            :options="manVar.optUserMaster"
+                            :options="commonVar.optUserMaster"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -292,7 +292,7 @@
                         <span class="input-group-text" id="addon-wrapping">Trainer:</span>
                         <Multiselect
                             v-model="frmMan.trainer"
-                            :options="manVar.optUserMaster"
+                            :options="commonVar.optUserMaster"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -306,7 +306,7 @@
                         <span class="input-group-text" id="addon-wrapping">Trainer Result:</span>
                         <Multiselect
                             v-model="frmMan.trainerResult"
-                            :options="manVar.optResult"
+                            :options="commonVar.optResult"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -316,7 +316,7 @@
                         <span class="input-group-text" id="addon-wrapping">LQC Supervisor:</span>
                         <Multiselect
                             v-model="frmMan.lqcSupervisor"
-                            :options="manVar.optUserMaster"
+                            :options="commonVar.optUserMaster"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -330,7 +330,7 @@
                         <span class="input-group-text" id="addon-wrapping">LQC Result:</span>
                         <Multiselect
                             v-model="frmMan.lqcResult"
-                            :options="manVar.optJudgment"
+                            :options="commonVar.optJudgment"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -434,76 +434,23 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Special Inspection" @add-event="saveSpecialInspection()" ref="modalSaveSpecialInspection">
         <template #body>
-            <div class="row">
-                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                    <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-                    <input v-model="frmSpecialInspection.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                </div>
-                <div class="input-group flex-nowrap mb-2 input-group-sm">
-                    <span class="input-group-text" id="addon-wrapping">Special Inspection Id:</span>
-                    <input  v-model="frmSpecialInspection.specialInspectionsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                </div>
-                <div class="col-sm-6">
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Product Detail:</span>
-                        <input v-model="frmSpecialInspection.productDetail" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Lot Qty:</span>
-                        <input v-model="frmSpecialInspection.lotQty" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Mod:</span>
-                        <input v-model="frmSpecialInspection.mod" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
-                        <textarea v-model="frmSpecialInspection.remarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                        </textarea>
-                    </div>
-                 </div>
-                <div class="col-sm-6">
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Mod Qty:</span>
-                        <input v-model="frmSpecialInspection.modQty" type="int" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Judgement:</span>
-                        <Multiselect
-                            v-model="frmSpecialInspection.judgement"
-                            :options="commonVar.optJudgment"
-                            placeholder="Select an option"
-                            :searchable="true"
-                            :close-on-select="true"
-                        />
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Inspection Date:</span>
-                        <input v-model="frmSpecialInspection.inspectionDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-                    </div>
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Inspector:</span>
-                        <Multiselect
-                            v-model="frmSpecialInspection.inspector"
-                            :options="manVar.optUserMaster"
-                            placeholder="Select an option"
-                            :searchable="true"
-                            :close-on-select="true"
-                        />
-                    </div>
-                </div>
-            </div>
+            <ModalSpecialInspectionComponent :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
+            </ModalSpecialInspectionComponent>
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+
+
+
 </template>
 
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
+    import ModalSpecialInspectionComponent from '../components/ModalSpecialInspectionComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
     import useMan from '../../js/composables/man.js';
@@ -515,7 +462,6 @@
     const { axiosSaveData } = useForm(); // Call the useFetch function
     //composables export function
     const {
-        modal,
         ecrVar,
         tblEcrDetails,
         frmEcrDetails,
@@ -532,10 +478,14 @@
 
     const {
         frmMan,
-        manVar,
     } = useMan();
     const {
+        modal,
         commonVar,
+        tblSpecialInspection,
+        modalSaveSpecialInspection,
+        specialInsQcInspectorParams,
+        saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         frmSpecialInspection,
@@ -553,8 +503,6 @@
     const modalManChecklist = ref(null);
     const currentManDetailsId = ref(null);
 
-    const tblSpecialInspection = ref(null);
-    const modalSaveSpecialInspection = ref(null);
 
 
     const columns = [
@@ -700,17 +648,18 @@
         }
     ];
     const qcInspectorOperatorParams = {
-        globalVar: manVar.optUserMaster,
+        globalVar: commonVar.optUserMaster,
         formModel: toRef(frmMan.value,'qcInspectorOperator'),
         selectedVal: '',
     };
+
     const trainerParams = {
-        globalVar: manVar.optUserMaster,
+        globalVar: commonVar.optUserMaster,
         formModel: toRef(frmMan.value,'qcInspectorOperator'),
         selectedVal: '',
     };
     const qcSupervisor1Params = {
-        globalVar: manVar.optUserMaster,
+        globalVar: commonVar.optUserMaster,
         formModel: toRef(frmMan.value,'qcInspectorOperator'),
         selectedVal: '',
     };
@@ -725,6 +674,7 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(qcInspectorOperatorParams);
+        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
 
     })
 
@@ -742,6 +692,7 @@
         axiosFetchData(apiParams,'api/get_special_inspection_by_id',function(response){
             let data = response.data;
             let specialInspection = response.data.specialInspection;
+            frmSpecialInspection.value.specialInspectionsId = specialInspection.id;
             frmSpecialInspection.value.ecrsId = specialInspection.ecrs_id;
             frmSpecialInspection.value.productDetail = specialInspection.product_detail;
             frmSpecialInspection.value.lotQty = specialInspection.lot_qty;
@@ -815,33 +766,11 @@
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_man', (response) =>{
-            modal.modalSaveSpecialInspection.show();
-            //load_man_by_ecr_id
+            modal.SaveManDetails.hide();
             tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw()
         });
     }
-    const saveSpecialInspection = async () => {
-        let formData = new FormData();
-         //Append form data
-         [
-            ["ecrs_id" , frmSpecialInspection.value.ecrsId],
-            ["product_detail" , frmSpecialInspection.value.productDetail],
-            ["lot_qty" , frmSpecialInspection.value.lotQty],
-            ["samples" , frmSpecialInspection.value.samples],
-            ["mod" , frmSpecialInspection.value.mod],
-            ["mod_qty" , frmSpecialInspection.value.modQty],
-            ["judgement" , frmSpecialInspection.value.judgement],
-            ["inspection_date" , frmSpecialInspection.value.inspectionDate],
-            ["inspector" , frmSpecialInspection.value.inspector],
-            ["remarks" , frmSpecialInspection.value.remarks],
-        ].forEach(([key, value]) =>
-            formData.append(key, value)
-        );
-        axiosSaveData(formData,'api/save_special_inspection', (response) =>{
-            tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+frmSpecialInspection.value.ecrsId).draw()
-            modal.modalSaveSpecialInspection.hide();
-        });
-    }
+
 
 </script>
 

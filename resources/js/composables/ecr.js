@@ -4,9 +4,7 @@ import useForm from "./utils/useForm";
 
 export default function useEcr(){
     const { axiosFetchData } = useFetch(); // Call  the useFetch function
-    const  {
-        axiosSaveData
-    } = useForm();
+    const  { axiosSaveData } = useForm();
 
     //Constant Object
     const modal = {
