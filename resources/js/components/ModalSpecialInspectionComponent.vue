@@ -22,12 +22,31 @@
                 <input v-model="frmSpecialInspection.mod" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
             </div>
             <div class="input-group flex-nowrap mb-2 input-group-sm">
+                <span class="input-group-text" id="addon-wrapping">Inspection Date:</span>
+                <input v-model="frmSpecialInspection.inspectionDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+            </div>
+
+            <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Remarks:</span>
                 <textarea v-model="frmSpecialInspection.remarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </textarea>
             </div>
             </div>
         <div class="col-sm-6">
+            <div class="input-group flex-nowrap mb-2 input-group-sm">
+                <span class="input-group-text" id="addon-wrapping">Inspector:</span>
+                <Multiselect
+                    v-model="frmSpecialInspection.inspector"
+                    :options="commonVar.optUserMaster"
+                    placeholder="Select an option"
+                    :searchable="true"
+                    :close-on-select="true"
+                />
+            </div>
+            <div class="input-group flex-nowrap mb-2 input-group-sm">
+                <span class="input-group-text" id="addon-wrapping">Samples:</span>
+                <input v-model="frmSpecialInspection.samples" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+            </div>
             <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Mod Qty:</span>
                 <input v-model="frmSpecialInspection.modQty" type="int" class="form-control form-control-lg" aria-describedby="addon-wrapping">
@@ -43,13 +62,9 @@
                 />
             </div>
             <div class="input-group flex-nowrap mb-2 input-group-sm">
-                <span class="input-group-text" id="addon-wrapping">Inspection Date:</span>
-                <input v-model="frmSpecialInspection.inspectionDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
-            </div>
-            <div class="input-group flex-nowrap mb-2 input-group-sm">
-                <span class="input-group-text" id="addon-wrapping">Inspector:</span>
+                <span class="input-group-text" id="addon-wrapping">LQC Section Head:</span>
                 <Multiselect
-                    v-model="frmSpecialInspection.inspector"
+                    v-model="frmSpecialInspection.lqcSectionHead"
                     :options="commonVar.optUserMaster"
                     placeholder="Select an option"
                     :searchable="true"
@@ -61,8 +76,7 @@
 </template>
 
 <script setup>
-    import ModalComponent from './ModalComponent.vue';
-    import {defineProps, ref, onMounted} from 'vue'
+    import {defineProps} from 'vue'
 
     const props = defineProps({
         frmSpecialInspection: {

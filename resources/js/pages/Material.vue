@@ -95,7 +95,7 @@
                                     <span class="input-group-text" id="addon-wrapping">Parts/Direct Material:</span>
                                     <Multiselect
                                         v-model="frmMaterial.pdMaterial"
-                                        :options="manVar.optCheck"
+                                        :options="commonVar.optCheck"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -105,7 +105,7 @@
                                     <span class="input-group-text" id="addon-wrapping">MSDS:</span>
                                     <Multiselect
                                         v-model="frmMaterial.msds"
-                                        :options="manVar.optYesNo"
+                                        :options="commonVar.optYesNo"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -115,7 +115,7 @@
                                     <span class="input-group-text" id="addon-wrapping">ICP:</span>
                                     <Multiselect
                                         v-model="frmMaterial.icp"
-                                        :options="manVar.optYesNo"
+                                        :options="commonVar.optYesNo"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -129,7 +129,7 @@
                                     <span class="input-group-text" id="addon-wrapping">Qoutation</span>
                                     <Multiselect
                                         v-model="frmMaterial.qoutation"
-                                        :options="manVar.optCheck"
+                                        :options="commonVar.optCheck"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -161,7 +161,7 @@
                                     <span class="input-group-text" id="addon-wrapping">ROHS:</span>
                                     <Multiselect
                                         v-model="frmMaterial.rohs"
-                                        :options="manVar.optResult"
+                                        :options="commonVar.optResult"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -171,7 +171,7 @@
                                     <span class="input-group-text" id="addon-wrapping">Material Sample:</span>
                                     <Multiselect
                                         v-model="frmMaterial.materialSample"
-                                        :options="manVar.optCheck"
+                                        :options="commonVar.optCheck"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -181,7 +181,7 @@
                                     <span class="input-group-text" id="addon-wrapping">COC:</span>
                                     <Multiselect
                                         v-model="frmMaterial.coc"
-                                        :options="manVar.optCheck"
+                                        :options="commonVar.optCheck"
                                         placeholder="Select an option"
                                         :searchable="true"
                                         :close-on-select="true"
@@ -462,11 +462,11 @@
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
+    import useCommon from '../../js/composables/common.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import useEcr from '../../js/composables/ecr.js';
     import useMaterial from '../../js/composables/material.js';
     import useSettings from '../composables/settings.js';
-    import useMan from '../../js/composables/man.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore)
@@ -493,10 +493,6 @@
     } = useMaterial();
 
     const {
-        manVar,
-    } = useMan();
-
-    const {
         axiosSaveData
     } = useForm();
 
@@ -506,6 +502,11 @@
         onUserChange,
     } = useSettings();
 
+    const {
+        commonVar,
+        getCurrentApprover,
+        getCurrentPmiInternalApprover,
+    } = useCommon();
 
     const modalSaveEcrDetail = ref(null);
     const modalSaveMaterial = ref(null);
@@ -555,7 +556,6 @@
         formModel: toRef(frmMaterial.value,'ppcApprovedBy'),
         selectedVal: '',
     };
-
 
     //Columns
     const columns = [
@@ -621,6 +621,7 @@
     onMounted( async ()=>{
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
+        modal.SaveMaterial.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);

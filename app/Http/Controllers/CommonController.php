@@ -338,11 +338,12 @@ class CommonController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
-            if( isset($specialInspectionRequest->specialInspectionsId) ){ //Edit
+            if( isset($specialInspectionRequest->special_inspections_id) ){ //Edit
                 $specialInspectionRequestValidated = $specialInspectionRequest->validated();
                 $conditions = [
-                    'id' => $specialInspectionRequest->specialInspectionsId
+                    'id' => $specialInspectionRequest->special_inspections_id
                 ];
+                $specialInspectionRequestValidated['updated_by'] = session('rapidx_user_id');
                 $this->resourceInterface->updateConditions(SpecialInspection::class,$conditions,$specialInspectionRequestValidated);
             }else{ //Add
                 $specialInspectionRequestValidated = $specialInspectionRequest->validated();

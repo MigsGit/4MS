@@ -24,6 +24,7 @@ class CreateSpecialInspectionsTable extends Migration
             $table->string('judgement');
             $table->date('inspection_date');
             $table->bigInteger('inspector')->comment('Rapidx User Id');
+            $table->bigInteger('lqc_section_head')->comment('Rapidx User Id');
             $table->bigInteger('created_by')->comment('Rapidx User Id');
             $table->bigInteger('updated_by')->comment('Rapidx User Id');
             $table->longText('remarks')->nullable();

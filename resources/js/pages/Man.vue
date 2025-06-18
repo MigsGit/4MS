@@ -137,35 +137,35 @@
                     </div>
                     <div class="card-body overflow-auto">
                         <DataTable
-                        width="100%" cellspacing="0"
-                        class="table mt-2"
-                        ref="tblSpecialInspection"
-                        :columns="tblSpecialInspectionColumns"
-                        ajax="api/load_special_inspection_by_ecr_id"
-                        :options="{
-                            serverSide: true, //Serverside true will load the network  //ecrsId
-                            columnDefs:[
-                                // {orderable:false,target:[0]}
-                            ]
-                        }"
-                    >
-                        <thead>
+                            width="100%" cellspacing="0"
+                            class="table mt-2"
+                            ref="tblSpecialInspection"
+                            :columns="tblSpecialInspectionColumns"
+                            ajax="api/load_special_inspection_by_ecr_id"
+                            :options="{
+                                serverSide: true, //Serverside true will load the network  //ecrsId
+                                columnDefs:[
+                                    // {orderable:false,target:[0]}
+                                ]
+                            }"
+                        >
+                        <!-- <thead>
                             <tr>
                                 <th>
                                     <font-awesome-icon class="nav-icon" icon="fa-cogs" />
                                 </th>
-                               <th> Product Detail </th>
-                               <th> Lot Qty </th>
-                               <th> Samples </th>
-                               <th> Mod </th>
-                               <th> Mod Qty </th>
-                               <th> Judgement </th>
-                               <th> Inspection Date </th>
-                               <th> Inspector </th>
-                               <th> Remarks </th>
+                                <th> Product Detail </th>
+                                <th> Lot Qty </th>
+                                <th> Samples </th>
+                                <th> Mod </th>
+                                <th> Mod Qty </th>
+                                <th> Judgement </th>
+                                <th> Inspection Date </th>
+                                <th> Inspector </th>
+                                <th> Remarks </th>
                             </tr>
-                        </thead>
-                    </DataTable>
+                        </thead> -->
+                        </DataTable>
                     </div>
                 </div>
             </div>
@@ -460,6 +460,7 @@
     import useCommon from '../../js/composables/common.js';
     DataTable.use(DataTablesCore)
     const { axiosSaveData } = useForm(); // Call the useFetch function
+
     //composables export function
     const {
         ecrVar,
@@ -483,6 +484,7 @@
         modal,
         commonVar,
         tblSpecialInspection,
+        tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
         specialInsQcInspectorParams,
         saveSpecialInspection,
@@ -502,8 +504,6 @@
     const modalSaveManDetails = ref(null);
     const modalManChecklist = ref(null);
     const currentManDetailsId = ref(null);
-
-
 
     const columns = [
         {   data: 'get_actions',
@@ -600,31 +600,7 @@
         {   data: 'lqc_result'} ,
         {   data: 'process_change_factor'} ,
     ];
-    const tblSpecialInspectionColumns = [
-        {   data: 'get_actions',
-            orderable: false,
-            searchable: false,
-            createdCell(cell){
-                let btnGetSpecialInspectionId = cell.querySelector('#btnGetSpecialInspectionId');
-                if(btnGetSpecialInspectionId != null){
-                    btnGetSpecialInspectionId.addEventListener('click',function(){
-                        let specialInspectionsId = this.getAttribute('special-inspections-id');
-                        getSpecialInspectionById(specialInspectionsId);
-                        modal.modalSaveSpecialInspection.show();
-                    });
-                }
-            }
-        } ,
-        {   data: 'product_detail'} ,
-        {   data: 'lot_qty'} ,
-        {   data: 'samples' } ,
-        {   data: 'mod' } ,
-        {   data: 'mod_qty' } ,
-        {   data: 'judgement' } ,
-        {   data: 'inspection_date' } ,
-        {   data: 'get_inspector' } ,
-        {   data: 'remarks' } ,
-    ];
+
     const tblManChecklistColumns = [
         {   data: 'dropdown_masters_details'} ,
         {   data: 'get_actions',
@@ -684,27 +660,7 @@
     const btnAddSpecialInspection = async () => {
         modal.modalSaveSpecialInspection.show();
     }
-
-    const getSpecialInspectionById = async (specialInspectionsId) => {
-        let apiParams = {
-            specialInspectionsId : specialInspectionsId
-        }
-        axiosFetchData(apiParams,'api/get_special_inspection_by_id',function(response){
-            let data = response.data;
-            let specialInspection = response.data.specialInspection;
-            frmSpecialInspection.value.specialInspectionsId = specialInspection.id;
-            frmSpecialInspection.value.ecrsId = specialInspection.ecrs_id;
-            frmSpecialInspection.value.productDetail = specialInspection.product_detail;
-            frmSpecialInspection.value.lotQty = specialInspection.lot_qty;
-            frmSpecialInspection.value.samples = specialInspection.samples;
-            frmSpecialInspection.value.mod = specialInspection.mod;
-            frmSpecialInspection.value.modQty = specialInspection.mod_qty;
-            frmSpecialInspection.value.judgement = specialInspection.judgement;
-            frmSpecialInspection.value.inspectionDate = specialInspection.inspection_date;
-            frmSpecialInspection.value.inspector = specialInspection.inspector;
-            frmSpecialInspection.value.remarks = specialInspection.remarks;
-        });
-    }
+   
     const getManById = async (manId) =>
     {
         let apiParams = {
@@ -770,8 +726,6 @@
             tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw()
         });
     }
-
-
 </script>
 
 

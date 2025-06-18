@@ -33,6 +33,7 @@ class SpecialInspectionRequest extends FormRequest
             'judgement' => 'required',
             'inspection_date' => 'required',
             'inspector' => 'required',
+            'lqc_section_head' => 'required',
             'remarks' => 'required',
         ];
     }
