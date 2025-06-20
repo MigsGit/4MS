@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function(){
         Route::post('save_ecr_details', 'saveEcrDetails')->name('save_ecr_details');
         Route::post('save_ecr_approval', 'saveEcrApproval')->name('save_ecr_approval');
 
+        Route::get('generate_control_number', 'generateControlNumber')->name('generate_control_number');
         Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
         Route::get('load_ecr', 'loadEcr')->name('load_ecr');
         Route::get('load_ecr_by_status', 'loadEcrByStatus')->name('load_ecr_by_status');

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 use App\Models\Ecr;
 use App\Models\EcrDetail;
+use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\PmiApproval;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\DropdownMaster;
 use App\Models\EcrRequirement;
@@ -12,6 +14,7 @@ use App\Http\Requests\EcrRequest;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
+use App\Models\DropdownMasterDetail;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\EcrDetailRequest;
 use App\Models\ClassificationRequirement;
@@ -24,11 +27,67 @@ class EcrController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
+    public function getFilteredSection($department){
+        try {
+            if ( Str::contains($department, "LQC")) {
+                $filteredSection = "LQC";
+            } elseif (Str::contains($department, "Engineering")) {
+                $filteredSection = "ENG'G";
+            } elseif (Str::contains($department, "Production")) {
+                $filteredSection = "PROD";
+            }elseif (Str::contains($department, "-")) {
+                $filteredSection = "LOG-PCH";
+            }
+            else {
+                $filteredSection = "???";
+            }
+            return $filteredSection;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function generateControlNumber(){
+        date_default_timezone_set('Asia/Manila');
+        //Systemon HRIS / Subcon
+        $hris_data = DB::connection('mysql_systemone_hris')
+        ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
+        $subcon_data = DB::connection('mysql_systemone_subcon')
+        ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
+        if(count($hris_data) > 0){
+            $vwEmployeeinfo =  $hris_data;
+            $filteredSection = $this->getFilteredSection($vwEmployeeinfo[0]->Department);
+            $division = ($vwEmployeeinfo[0]->Division == "TS-F1" || $vwEmployeeinfo[0]->Division == "TS-F3") ? "TS" :  "???";
+        }
+        else{
+            $vwEmployeeinfo =  $subcon_data;
+            $filteredSection = $this->getFilteredSection($vwEmployeeinfo[0]->Department);
+            $division = ($vwEmployeeinfo[0]->Division == "TS-F1" || $vwEmployeeinfo[0]->Division == "TS-F3") ? "TS" :  "???";
+        }
+        // Check if the Created At & App No / Division / Material Category is exisiting
+        // Example:TS-ADMIN-LOG-PCH-25-01-001
+        $ecr = Ecr::orderBy('id','desc')->whereDate('created_at',now())
+            ->whereNull('deleted_at')
+            ->limit(1)->get(['ecr_no']);
+        //If not exist reset the ecr to 1
+        if(count( $ecr ) != 0){
+            $currentCtrlNo = explode('-',$ecr[0]->ecr_no);
+            $arrCtrNo		 	= end($currentCtrlNo);
+            $series 	 	= str_pad(($arrCtrNo+1),3,"0",STR_PAD_LEFT);
+            $currentCtrlNo = $division."-".$filteredSection."-".date('m').date('y').'-'.$series;
+
+        }else{
+            $currentCtrlNo = $division."-".$filteredSection."-".date('m').date('y').'-001';
+        }
+        return [
+            'currentCtrlNo' => $currentCtrlNo
+        ];
+    }
     public function saveEcr(Request $request, EcrRequest $ecrRequest){
         date_default_timezone_set('Asia/Manila');
         try {
             //TODO: EDIT ecr_no, DELETE, Auto Increment Ctrl Number, InsertById, N/A in Dropdown
             DB::beginTransaction();
+            $generatedControlNumber =  $this->generateControlNumber();
             $ecrsId = $request->ecrs_id;
             $ecrRequest = $ecrRequest->validated();
             $ecrConditions = [
@@ -36,11 +95,12 @@ class EcrController extends Controller
             ];
             if( isset($ecrsId) ){
                 $ecrRequest['status'] = 'IA';
-                // return $ecrRequest;
+                $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
                 $this->resourceInterface->updateConditions(Ecr::class,$ecrConditions,$ecrRequest);
                 $currenErcId = $ecrsId;
             }else{
                 $ecrRequest['created_at'] = now();
+                $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
                 $ecr =  $this->resourceInterface->create(Ecr::class,$ecrRequest);
                 $currenErcId = $ecr['data_id'];
             }
@@ -52,8 +112,6 @@ class EcrController extends Controller
                     'created_at' => now(),
                 ];
             });
-            // DB::commit();
-            // return response()->json(['is_success' => 'true']);
             EcrDetail::where('ecrs_id', $currenErcId)->delete();
             foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
                $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
@@ -85,7 +143,7 @@ class EcrController extends Controller
             EcrApproval::insert($ecrApprovalRequest);
             EcrApproval::where('counter', 0)
             ->where('ecrs_id', $currenErcId)
-            ->update(['status','PEN']);
+            ->update(['status'=>'PEN']);
             //PMI Approvers
             $approval_statuss = [
                 'PB' => $request->prepared_by,

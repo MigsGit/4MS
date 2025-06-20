@@ -111,12 +111,11 @@
                     <div class="input flex-nowrap mb-2 input-group-sm">
                         <input  v-model="frmEcr.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
                     </div>
-
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Ecr Ctrl No:</span>
-                        <input v-model="frmEcr.ecrNo" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
-                    </div>
                     <div class="col-sm-6">
+                        <div class="input-group flex-nowrap mb-2 input-group-sm">
+                            <span class="input-group-text" id="addon-wrapping">Ecr Ctrl No:</span>
+                            <input v-model="frmEcr.ecrNo" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
+                        </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Category:</span>
                             <select v-model="frmEcr.category" class="form-select form-select-sm" aria-describedby="addon-wrapping">
@@ -268,8 +267,7 @@
                                             <tr>
                                             <th scope="col">#</th>
                                             <th scope="col" style="width: 30%;">Senior Supervisor</th>
-                                            <th scope="col" style="width: 30%;">QMS Senior Manager</th>
-                                            <th scope="col" style="width: 30%;">External</th>
+                                            <th scope="col" style="width: 30%;">QA Manager</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -764,7 +762,7 @@
         formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
         selectedVal: '',
     };
-    
+
     const otherDispoRequestedByParams = {
         globalVar: ecrVar.requestedBy,
         formModel: toRef(frmEcrOtherDispoRows.value[0],'requestedBy'),
@@ -821,8 +819,15 @@
     const btnEcr = async () => {
         modal.SaveEcr.show();
         isSelectReadonly.value = false;
+        generateControlNumber();
         await getRapidxUserByIdOpt(otherDispoRequestedByParams);
-
+    }
+    const generateControlNumber = async () => {
+        let apiParams = {};
+        axiosFetchData(apiParams,'api/generate_control_number',function(response){
+             console.log(response);
+             frmEcr.value.ecrNo = response.data.currentCtrlNo;
+        });
     }
     const onChangeAdminAccess = async (selectedParams)=>{
         tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS"+"&& adminAccess="+selectedParams).draw();
