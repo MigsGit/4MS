@@ -5,8 +5,7 @@ export default function useCommon(){
     const { axiosFetchData } = useFetch(); // Call  the useFetch function
     const  { axiosSaveData } = useForm();
     const modal ={}
-    const tblSpecialInspection = ref(null);
-    const modalSaveSpecialInspection = ref(null);
+    //Reactive State
     const commonVar = reactive({
         isSessionApprover : false,
         isSessionPmiInternalApprover : false,
@@ -42,6 +41,9 @@ export default function useCommon(){
             {"value":"NR","label":"NOT REQUIRED"},
         ]
     });
+    //Ref State
+    const tblSpecialInspection = ref(null);
+    const modalSaveSpecialInspection = ref(null);
     const frmSpecialInspection = ref({
         ecrsId : "",
         productDetail : "N/A",
@@ -88,13 +90,14 @@ export default function useCommon(){
         {  title: "Inspector" , data: 'get_inspector' } ,
         {  title: "Remarks" , data: 'remarks' } ,
     ];
+    //Functions
     const getCurrentApprover = async (params) => {
         let apiParams = {
             ecrsId : params.ecrsId
         }
         axiosFetchData(apiParams,'api/get_current_approver_session',function(response){
             let data = response.data;
-            commonVar.value.isSessionApprover = data.isSessionApprover;
+            commonVar.isSessionApprover = data.isSessionApprover;
         });
     }
     const getCurrentPmiInternalApprover = async (params) => {
@@ -103,7 +106,10 @@ export default function useCommon(){
         }
         axiosFetchData(apiParams,'api/get_current_pmi_internal_approver',function(response){
             let data = response.data;
-            commonVar.value.isSessionPmiInternalApprover = data.isSessionPmiInternalApprover;
+            console.log('data',data.isSessionPmiInternalApprover);
+            console.log(commonVar.value);
+
+            // commonVar.value.isSessionPmiInternalApprover = data.isSessionPmiInternalApprover;
         });
     }
 
