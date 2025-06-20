@@ -65,7 +65,6 @@ class EcrController extends Controller
                 'OTRVB' => $request->reviewed_by,
                 'QACB' => $request->qad_checked_by,
                 'QAIN' => $request->qad_approved_by_internal,
-                'QAEX' => $request->qad_approved_by_external,
             ];
             $ecrApprovalRequestCtr = 0; //assigned counter
             $ecrApprovalRequest = collect($ecrApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$ecrApprovalRequestCtr,$currenErcId){
@@ -209,10 +208,10 @@ class EcrController extends Controller
         }
     }
     public function loadEcr(Request $request){
-        // return 'true' ;
         try {
             $status = explode(',',$request->status) ?? "";
             $data = [];
+
             $relations = [
                 'ecr_approval_pending'
             ];
@@ -220,7 +219,11 @@ class EcrController extends Controller
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
             $ecr->whereIn('status',$status)
             // ->whereHas('ecr_approval',function($query) use ($request){
-            //     $query->where('status','PEN');
+            //     // if is adminAccess exist deactivate the session condition
+            //     if( $request->adminAccess != 'all'){
+            //         $query->where('status','PEN');
+            //         $query->where('rapidx_user_id',session('rapidx_user_id'));
+            //     }
             // })
             ->get();
             return DataTables($ecr)
@@ -632,9 +635,6 @@ class EcrController extends Controller
                     break;
                 case 'QAIN':
                     $approvalStatus = 'QA Manager';
-                    break;
-                case 'QAEX':
-                    $approvalStatus = 'QMD External';
                     break;
                 default:
                     $approvalStatus = '';

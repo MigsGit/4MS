@@ -17,7 +17,6 @@ export default function useEcr(){
 
         optQadCheckedBy: [],
         optQadApprovedByInternal: [],
-        optQadApprovedByExternal: [],
 
         requestedBy: [],
         technicalEvaluation: [],
@@ -65,7 +64,6 @@ export default function useEcr(){
         {
             qadCheckedBy: '',
             qadApprovedByInternal: '',
-            qadApprovedByExternal: '',
         },
     ]);
     const frmEcrOtherDispoRows = ref([
@@ -211,7 +209,6 @@ export default function useEcr(){
                     let reviewedBy = ecrApprovalCollection.OTRVB;
                     let qaCheckedBy = ecrApprovalCollection.QACB;
                     let qaInternal = ecrApprovalCollection.QAIN;
-                    let qaExternal = ecrApprovalCollection.QAEX;
 
                     // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
                     // Exclude 'QA' from keys
@@ -229,9 +226,8 @@ export default function useEcr(){
                     //QA Approval
                     if (qaCheckedBy.length != 0){
                         frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id ?? 0;
-                        // frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id;
                         frmEcrQadRows.value.qadApprovedByInternal = qaInternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id;
-                        frmEcrQadRows.value.qadApprovedByExternal = qaExternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id;
+
                     }
 
                 }
@@ -261,7 +257,6 @@ export default function useEcr(){
     const resetArrEcrRows = async () => {
         frmEcrQadRows.value.qadCheckedBy =  '';
         frmEcrQadRows.value.qadApprovedByInternal = '';
-        frmEcrQadRows.value.qadApprovedByExternal = '';
         frmEcrPmiApproverRows.value = [];
         frmEcrPmiApproverRows.value.push({
             preparedBy: '' ,
@@ -285,7 +280,6 @@ export default function useEcr(){
             frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
             frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
             frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
-            console.log('ecrDetails',ecrDetails);
         });
     }
     const saveEcrDetails = async () => {

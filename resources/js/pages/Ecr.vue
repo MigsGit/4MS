@@ -1,6 +1,16 @@
 <template>
     <div class="container-fluid px-4">
         <h4 class="mt-4">ENGINEERING CHANGE REQUEST</h4>
+        <div class="row">
+            <div class="col-md-3 offset-md-4">
+                <Multiselect
+                    :close-on-select="true"
+                    :searchable="true"
+                    :options="commonVar.optAdminAccess"
+                    @change="onChangeAdminAccess($event)"
+                />
+            </div>
+        </div>
         <div class="card mt-5"  style="width: 100%;">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
@@ -283,20 +293,10 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optQadApprovedByInternal"
-                                                        @change="onUserChange(qadApprovedByExternalParams)"
+                                                        @change="onUserChange(pmiApproverPreparedByParams)"
                                                         :disabled="isSelectReadonly"
                                                         />
                                                     </td>
-                                                <td>
-                                                    <Multiselect
-                                                        v-model="frmEcrQadRows.qadApprovedByExternal"
-                                                        :close-on-select="true"
-                                                        :searchable="true"
-                                                        :options="ecrVar.optQadApprovedByExternal"
-                                                        @change="onUserChange(pmiApproverPreparedByParams)"
-                                                        :disabled="isSelectReadonly"
-                                                    />
-                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -679,7 +679,6 @@
                     getRapidxUserByIdOpt(otherDispoReviewedByParams);
                     getRapidxUserByIdOpt(qadCheckedByParams);
                     getRapidxUserByIdOpt(qadApprovedByInternalParams);
-                    getRapidxUserByIdOpt(qadApprovedByExternalParams);
                     getRapidxUserByIdOpt(pmiApproverPreparedByParams);
                     getRapidxUserByIdOpt(pmiApproverCheckedByParams);
                     getRapidxUserByIdOpt(pmiApproverApprovedByParams);
@@ -696,7 +695,6 @@
                     getRapidxUserByIdOpt(otherDispoReviewedByParams);
                     getRapidxUserByIdOpt(qadCheckedByParams);
                     getRapidxUserByIdOpt(qadApprovedByInternalParams);
-                    getRapidxUserByIdOpt(qadApprovedByExternalParams);
                     getRapidxUserByIdOpt(pmiApproverPreparedByParams);
                     getRapidxUserByIdOpt(pmiApproverCheckedByParams);
                     getRapidxUserByIdOpt(pmiApproverApprovedByParams);
@@ -766,11 +764,7 @@
         formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
         selectedVal: '',
     };
-    const qadApprovedByExternalParams = {
-        globalVar: ecrVar.optQadApprovedByExternal,
-        formModel: toRef(frmEcrQadRows.value,'qadApprovedByExternal'),
-        selectedVal: '',
-    };
+    
     const otherDispoRequestedByParams = {
         globalVar: ecrVar.requestedBy,
         formModel: toRef(frmEcrOtherDispoRows.value[0],'requestedBy'),
@@ -830,9 +824,10 @@
         await getRapidxUserByIdOpt(otherDispoRequestedByParams);
 
     }
-    // const onUserChange = async (selectedParams)=>{
-    //     await getRapidxUserByIdOpt(selectedParams);
-    // }
+    const onChangeAdminAccess = async (selectedParams)=>{
+        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS"+"&& adminAccess="+selectedParams).draw();
+        tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA"+"&& adminAccess="+selectedParams).draw();
+    }
     const ecrReqDecisionChange = async (ecrReqDecisionParams)=>{
         let apiParams = {
             ecr_req_id : ecrReqDecisionParams.ecrReqId,
@@ -929,7 +924,6 @@
         }
 
         [
-            ["qad_approved_by_external", frmEcrQadRows.value.qadApprovedByExternal],
             ["qad_approved_by_internal", frmEcrQadRows.value.qadApprovedByInternal],
             ["qad_checked_by", frmEcrQadRows.value.qadCheckedBy],
         ].forEach(([key, value]) =>

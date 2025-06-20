@@ -10,6 +10,10 @@ export default function useCommon(){
         isSessionApprover : false,
         isSessionPmiInternalApprover : false,
         optUserMaster:[],
+        optAdminAccess : [
+            // {"value":"","label":"-Select an Admin-", "disabled":true },
+            {"value":"all","label":"Show All"},
+        ],
         optYesNo : [
             {"value":"","label":"-Select an option-"},
             {"value":"N/A","label":"N/A"},
