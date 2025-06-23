@@ -102,6 +102,7 @@ export default function useCommon(){
         axiosFetchData(apiParams,'api/get_current_approver_session',function(response){
             let data = response.data;
             commonVar.isSessionApprover = data.isSessionApprover;
+            // modal.EcrRequirements
         });
     }
     const getCurrentPmiInternalApprover = async (params) => {

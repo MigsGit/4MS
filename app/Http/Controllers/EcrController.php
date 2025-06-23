@@ -94,8 +94,13 @@ class EcrController extends Controller
                 'id' => $ecrsId
             ];
             if( isset($ecrsId) ){
+                $ecr = Ecr::where('id',$ecrsId)->get(['created_by']);
+                if ( $ecr[0]['created_by'] != session('rapidx_user_id') ){
+                    return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
+                }
                 $ecrRequest['status'] = 'IA';
-                $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
+                $ecrRequest['approval_status'] = 'OTRB';
+                // $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
                 $this->resourceInterface->updateConditions(Ecr::class,$ecrConditions,$ecrRequest);
                 $currenErcId = $ecrsId;
             }else{
@@ -179,13 +184,23 @@ class EcrController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
+            $ecrsId = $request->ecrs_id;
+
             //Get Current Ecr Approval is equal to Current Session
-            $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$request->ecrs_id)->where('status','PEN')->limit(1)->get(['rapidx_user_id']);
+            $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$ecrsId)->where('status','PEN')->limit(1)->get(['rapidx_user_id','approval_status']);
             if($ecrApprovalCurrent[0]->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
+
             //Get Current Status
-            $ecrApproval = Ecr::where('id',$request->ecrs_id)->get(['approval_status']);
+            $ecrApproval = Ecr::where('id',$ecrsId)->get(['approval_status','status']);
+            //Verify if the ECR Requirement is Completed.
+            $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
+            if($ecrApproval[0]->status === 'QA'){
+                if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
+                    return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
+                }
+            }
             //Update the ECR Approval Status
             $ecrApprovalValidated = [
                 'status' => $request->status,
@@ -199,7 +214,7 @@ class EcrController extends Controller
             $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
 
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-            $ecrApproval = EcrApproval::where('ecrs_id',$request->ecrs_id)->where('status','-')->limit(1)->get(['id','approval_status']);
+            $ecrApproval = EcrApproval::where('ecrs_id',$ecrsId)->where('status','-')->limit(1)->get(['id','approval_status']);
             if ( count($ecrApproval) != 0){
                 $ecrApprovalValidated = [
                     'status' => 'PEN',
@@ -249,6 +264,11 @@ class EcrController extends Controller
             throw $e;
         }
     }
+    public function isCompletedEcrRequirementComplete($ecrsId){ //Requirement
+        $classificationRequirementCount =  ClassificationRequirement::whereIn('classifications_id',[1,2,3,4,5])->count();
+        $ecrRequirementCount = EcrRequirement::where('ecrs_id',$ecrsId)->count();
+        return $classificationRequirementCount === $ecrRequirementCount ? 'true' : 'false';
+    }
     public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
         date_default_timezone_set('Asia/Manila');
         try {
@@ -276,13 +296,18 @@ class EcrController extends Controller
             $conditions = [];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
             $ecr->whereIn('status',$status)
-            // ->whereHas('ecr_approval',function($query) use ($request){
-            //     // if is adminAccess exist deactivate the session condition
-            //     if( $request->adminAccess != 'all'){
-            //         $query->where('status','PEN');
-            //         $query->where('rapidx_user_id',session('rapidx_user_id'));
-            //     }
-            // })
+            ->whereHas('ecr_approval',function($query) use ($request){
+                // if is adminAccess exist deactivate the session condition
+                if( $request->adminAccess != 'all' && $request->status === 'IA'){
+                    // $query->where('status','PEN');
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                }
+                if( $request->adminAccess != 'all' && $request->status === 'QA'){
+                    $query->where('status','PEN');
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                }
+
+            })
             ->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
@@ -530,6 +555,7 @@ class EcrController extends Controller
                 $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
                 $cSelected = $ecrRequirementMatch['decision'] === 'C' ? 'selected' : '';
                 $xSelected = $ecrRequirementMatch['decision'] === 'X' ? 'selected' : '';
+                $naSelected = $ecrRequirementMatch['decision'] === 'N/A' ? 'selected' : '';
                 if($ecrRequirementId === ''){
                     $isValid = "is-invalid";
                     $emptySelected = "selected";
@@ -541,6 +567,7 @@ class EcrController extends Controller
                 $result .= '<center>';
                 $result .= "<select id='btnChangeEcrReqDecision' class='form-select btn-change-ecr-req-decision ".$isValid."' ref=btnChangeEcrReqDecision ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
                 $result .=  "<option value='' ".$emptySelected." disabled> --Select-- </option>";
+                $result .=  "<option value='N/A' ".$naSelected."> N/A </option>";
                 $result .=  "<option value='C' ".$cSelected."> √ </option>";
                 $result .=  "<option value='X' ".$xSelected."> X </option>";
                 $result .=  "</select>";
@@ -646,7 +673,6 @@ class EcrController extends Controller
             throw $e;
         }
     }
-
    public function getStatus($status){
 
        try {

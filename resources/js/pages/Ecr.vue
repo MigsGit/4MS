@@ -265,9 +265,9 @@
                                     <table class="table table-responsive">
                                         <thead>
                                             <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col" style="width: 30%;">Senior Supervisor</th>
-                                            <th scope="col" style="width: 30%;">QA Manager</th>
+                                            <th scope="col" style="width: 10%;">#</th>
+                                            <th scope="col" style="width: 45%;">Senior Supervisor</th>
+                                            <th scope="col" style="width: 45%;">QA Manager</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -496,7 +496,7 @@
                                 Material
                             </button>
                         </h5>
-                    <div id="collapMat" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapMat" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-12">
@@ -538,7 +538,7 @@
                                 Machine
                             </button>
                         </h5>
-                    <div id="collapseMac" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapseMac" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-12">
@@ -548,6 +548,88 @@
                                         ref="tblEcrMachineRequirements"
                                         :columns="tblEcrManRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=3"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {orderable:false,target:[3]}
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <!-- Method -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMethod" aria-expanded="true" aria-controls="collapseMethod">
+                                Method
+                            </button>
+                        </h5>
+                    <div id="collapseMethod" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrMethodRequirements"
+                                        :columns="tblEcrManRequirementsColumns"
+                                        ajax="api/load_ecr_requirements?category=4"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {orderable:false,target:[3]}
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <!-- Method -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnvironment" aria-expanded="true" aria-controls="collapseEnvironment">
+                                Environment
+                            </button>
+                        </h5>
+                    <div id="collapseEnvironment" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrEnvironmentRequirements"
+                                        :columns="tblEcrManRequirementsColumns"
+                                        ajax="api/load_ecr_requirements?category=5"
                                         :options="{
                                             paging:false,
                                             serverSide: true, //Serverside true will load the network
@@ -650,6 +732,8 @@
     const tblEcrManRequirements = ref(null);
     const tblEcrMatRequirements = ref(null);
     const tblEcrMachineRequirements = ref(null);
+    const tblEcrMethodRequirements = ref(null);
+    const tblEcrEnvironmentRequirements = ref(null);
     const tblEcrApproverSummary = ref(null);
     const btnEcrApproved = ref(null);
     const btnEcrDisapproved = ref(null);
@@ -664,44 +748,39 @@
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 let btnViewEcrId = cell.querySelector('#btnViewEcrId');
-
+                getRapidxUserByIdOpt(otherDispoRequestedByParams);
+                getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
+                getRapidxUserByIdOpt(otherDispoReviewedByParams);
+                getRapidxUserByIdOpt(qadCheckedByParams);
+                getRapidxUserByIdOpt(qadApprovedByInternalParams);
+                getRapidxUserByIdOpt(pmiApproverPreparedByParams);
+                getRapidxUserByIdOpt(pmiApproverCheckedByParams);
+                getRapidxUserByIdOpt(pmiApproverApprovedByParams);
                 btnGetEcrId.addEventListener('click',function(){
                     let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "Edit";
                     isSelectReadonly.value = false;
                     currentEcrsId.value = ecrsId;
-
-                    //:disabled
-                    getRapidxUserByIdOpt(otherDispoRequestedByParams);
-                    getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
-                    getRapidxUserByIdOpt(otherDispoReviewedByParams);
-                    getRapidxUserByIdOpt(qadCheckedByParams);
-                    getRapidxUserByIdOpt(qadApprovedByInternalParams);
-                    getRapidxUserByIdOpt(pmiApproverPreparedByParams);
-                    getRapidxUserByIdOpt(pmiApproverCheckedByParams);
-                    getRapidxUserByIdOpt(pmiApproverApprovedByParams);
                     getEcrById(ecrsId);
-                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrsId).draw()
+                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrsId).draw();
                 });
                 btnViewEcrId.addEventListener('click',function(){
                     let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "View";
                     isSelectReadonly.value = true;
                     currentEcrsId.value = ecrsId;
-                    getRapidxUserByIdOpt(otherDispoRequestedByParams);
-                    getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
-                    getRapidxUserByIdOpt(otherDispoReviewedByParams);
-                    getRapidxUserByIdOpt(qadCheckedByParams);
-                    getRapidxUserByIdOpt(qadApprovedByInternalParams);
-                    getRapidxUserByIdOpt(pmiApproverPreparedByParams);
-                    getRapidxUserByIdOpt(pmiApproverCheckedByParams);
-                    getRapidxUserByIdOpt(pmiApproverApprovedByParams);
                     getEcrById(ecrsId);
                     let approverParams = {
                         ecrsId : ecrsId
                     }
                     getCurrentApprover(approverParams);
-                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw()
+                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw();
+
+                    tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+currentEcrsId.value).draw();
+                    tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+currentEcrsId.value).draw();
+                    tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
+                    tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
+                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
                 });
             }
         } ,
@@ -804,16 +883,6 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         $('#collapse1').addClass('show');
-        // await getRapidxUserByIdOpt(otherDispoRequestedByParams);
-        // await getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams);
-        // await getRapidxUserByIdOpt(otherDispoReviewedByParams);
-        // await getRapidxUserByIdOpt(qadCheckedByParams);
-        // await getRapidxUserByIdOpt(qadApprovedByInternalParams);
-        // await getRapidxUserByIdOpt(qadApprovedByExternalParams);
-        // await getRapidxUserByIdOpt(pmiApproverPreparedByParams);
-        // await getRapidxUserByIdOpt(pmiApproverCheckedByParams);
-        // await getRapidxUserByIdOpt(pmiApproverApprovedByParams);
-
     })
 
     const btnEcr = async () => {
@@ -842,9 +911,12 @@
         }
         axiosFetchData(apiParams,'api/ecr_req_decision_change',function(response){
             ecrReqDecisionParams.btnChangeEcrReqDecisionClass.remove("is-invalid");
+
             tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+currentEcrsId.value).draw();
             tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+currentEcrsId.value).draw();
             tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
+            tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
+            tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
         });
     }
 

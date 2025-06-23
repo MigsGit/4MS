@@ -171,6 +171,7 @@ class CommonController extends Controller
             $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(EcrApproval::class,$data,$relations,$conditions);
             $ecrApproval =  $ecrApprovalQuery->get();
             $isSessionApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
+            $isSessionApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
             $ecrApproval[0]->rapidx_user_id;
             return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover]);
         } catch (Exception $e) {
