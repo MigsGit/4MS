@@ -95,9 +95,9 @@ class EcrController extends Controller
             ];
             if( isset($ecrsId) ){
                 $ecr = Ecr::where('id',$ecrsId)->get(['created_by']);
-                if ( $ecr[0]['created_by'] != session('rapidx_user_id') ){
-                    return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
-                }
+                // if ( $ecr[0]['created_by'] != session('rapidx_user_id') ){
+                //     return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
+                // }
                 $ecrRequest['status'] = 'IA';
                 $ecrRequest['approval_status'] = 'OTRB';
                 // $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
@@ -215,7 +215,17 @@ class EcrController extends Controller
 
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
             $ecrApproval = EcrApproval::where('ecrs_id',$ecrsId)->where('status','-')->limit(1)->get(['id','approval_status']);
-            if ( count($ecrApproval) != 0){
+
+            if ( count($ecrApproval) === 0){
+                $EcrConditions = [
+                    'id' => $request->ecrs_id,
+                ];
+                $ecrValidated = [
+                    'status' => 'OK', //APPROVED ECR / ALL APPROVERS APPROVED
+                ];
+                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+            }
+            if ( count($ecrApproval) != 0   && $request->status === "APP" ){
                 $ecrApprovalValidated = [
                     'status' => 'PEN',
                 ];
@@ -239,16 +249,7 @@ class EcrController extends Controller
                 }
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
             }else{
-                $EcrConditions = [
-                    'id' => $request->ecrs_id,
-                ];
-                $ecrValidated = [
-                    'status' => 'OK', //APPROVED ECR / ALL APPROVERS APPROVED
-                ];
-                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
-            }
-            //DISAPPROVED ECR
-            if($request->status === "DIS"){
+                //DISAPPROVED ECR
                 $EcrConditions = [
                     'id' => $request->ecrs_id,
                 ];
@@ -320,15 +321,19 @@ class EcrController extends Controller
                 $result .= '</br>';
                 return $result;
             })
-            ->addColumn('get_status',function ($row){
+            ->addColumn('get_status',function ($row): string{
                 $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
+
                 $getStatus = $this->getStatus($row->status);
                 $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
-                $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                if($row->status != 'DIS'){
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
+                $result .= '</center>';
                 $result .= '</br>';
                 return $result;
             })
