@@ -13,7 +13,7 @@
                             width="100%" cellspacing="0"
                             class="table mt-2"
                             ref="tblEcrByStatus"
-                            :columns="columns"
+                            :columns="ecrColumns"
                             ajax="api/load_ecr_by_status?category=Man"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
@@ -497,7 +497,7 @@
     const tblEcrByStatus = ref(null);
     const tblManChecklist = ref(null);
     const tblMatChecklist = ref(null);
-    const isSelectReadonly  = ref(null);
+    const isSelectReadonly  = ref(true);
     const tblManDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
@@ -505,7 +505,7 @@
     const modalManChecklist = ref(null);
     const currentManDetailsId = ref(null);
 
-    const columns = [
+    const ecrColumns = [
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
@@ -660,7 +660,7 @@
     const btnAddSpecialInspection = async () => {
         modal.modalSaveSpecialInspection.show();
     }
-   
+
     const getManById = async (manId) =>
     {
         let apiParams = {

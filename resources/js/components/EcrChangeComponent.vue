@@ -6,7 +6,7 @@
                 Description of Change / Reason for Change
             </button>
         </h5>
-        <div id="collapse1" class="collapse" data-bs-parent="#accordionMain">
+        <div id="collapse1" class="collapse show" data-bs-parent="#accordionMain">
             <div class="card-body shadow">
                 <div class="row">
                     <div class="col-12">

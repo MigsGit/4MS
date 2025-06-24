@@ -471,7 +471,6 @@ class EcrController extends Controller
         }
     }
     public function loadEcrDetailsByEcrId(Request $request){
-        // return 'true' ;
         try {
             $data = [];
             $relations = [
