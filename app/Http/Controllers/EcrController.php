@@ -85,7 +85,7 @@ class EcrController extends Controller
     public function saveEcr(Request $request, EcrRequest $ecrRequest){
         date_default_timezone_set('Asia/Manila');
         try {
-            //TODO: EDIT ecr_no, DELETE, Auto Increment Ctrl Number, InsertById, N/A in Dropdown
+            //TODO:  DELETE, InsertById, N/A in Dropdown
             DB::beginTransaction();
             $generatedControlNumber =  $this->generateControlNumber();
             $ecrsId = $request->ecrs_id;
@@ -171,8 +171,12 @@ class EcrController extends Controller
                     ];
                 });
             })->toArray();
+            //Save PMI Internal Approval
             PmiApproval::where('ecrs_id', $currenErcId)->delete();
             PmiApproval::insert($pmiApprovalRequest);
+            PmiApproval::where('counter', 0)
+            ->where('ecrs_id', $currenErcId)
+            ->update(['status'=>'PEN']);
             DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

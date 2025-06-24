@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function(){
 
     Route::controller(ManController::class)->group(function () {
         Route::post('save_man', 'saveMan')->name('save_man');
+
         Route::get('load_man_by_ecr_id', 'loadManByEcrId')->name('load_man_by_ecr_id');
         Route::get('load_man_checklist', 'loadManChecklist')->name('load_man_checklist');
         Route::get('get_man_by_id', 'getManById')->name('get_man_by_id');
@@ -82,7 +83,12 @@ Route::middleware('auth')->group(function(){
 
     Route::controller(MaterialController::class)->group(function () {
         Route::post('save_material', 'saveMaterial')->name('save_material');
+        Route::post('upload_material_ref', 'uploadMaterialRef')->name('upload_material_ref');
+
+        Route::get('load_ecr_material_by_status', 'loadEcrMaterialByStatus')->name('load_ecr_material_by_status');
         Route::get('get_material_ecr_by_id', 'getMaterialEcrById')->name('get_material_ecr_by_id');
+        Route::get('get_material_ref_by_ecrs_id', 'getMaterialRefByEcrsId')->name('get_material_ref_by_ecrs_id');
+        Route::get('view_material_ref', 'viewMaterialRef')->name('view_material_ref');
     });
 
     Route::controller(EnvironmentController::class)->group(function () {
@@ -90,6 +96,6 @@ Route::middleware('auth')->group(function(){
 
         Route::get('load_ecr_environment_by_status', 'loadEcrEnvironmentByStatus')->name('load_ecr_environment_by_status');
         Route::get('get_environment_ref_by_ecrs_id', 'getEnvironmentRefByEcrsId')->name('get_environment_ref_by_ecrs_id');
-        Route::get('/view_environment_ref', 'viewEnvironmentRef')->name('view_environment_ref');
+        Route::get('view_environment_ref', 'viewEnvironmentRef')->name('view_environment_ref');
     });
 });

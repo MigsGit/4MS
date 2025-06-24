@@ -431,7 +431,6 @@
         environmentRef.value =  Array.from(event.target.files);
     }
     const btnLinkViewEnvironmentRef = async (selectedEcrsIdEncrypted,index) => {
-        // alert('aViewEnvironmentRef');
         window.open(`api/view_environment_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
     }
     const getEnvironmentRefByEcrsId = async (ecrsId) => {
@@ -444,8 +443,6 @@
             let originalFilename = data.originalFilename;
             arrOriginalFilenames.value = originalFilename;
             selectedEcrsIdEncrypted.value = ecrsId;
-            console.log(arrOriginalFilenames);
-
             modal.ViewEnvironmentRef.show();
         });
     }

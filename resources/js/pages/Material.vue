@@ -12,8 +12,8 @@
                             width="100%" cellspacing="0"
                             class="table mt-2"
                             ref="tblEcrByCategoryStatus"
-                            :columns="columns"
-                            ajax="api/load_ecr_by_status?category=Material&&status=AP"
+                            :columns="ecrColumns"
+                            ajax="api/load_ecr_material_by_status?category=Material&&status=AP"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -25,6 +25,7 @@
                                 <tr>
                                     <th>Action</th>
                                     <th>Status</th>
+                                    <th>Attachment</th>
                                     <th>ECR Ctrl No.</th>
                                     <th>Category</th>
                                     <th>Internal or External</th>
@@ -457,6 +458,50 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Material Reference" ref="modalUploadMaterialRef" @add-event="frmUploadMaterialRef()">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <input @change="changeMaterialRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Material Reference" ref="modalViewMaterialRef">
+        <template #body>
+            <div class="row mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                PDF Attachment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilename, index) in arrOriginalFilenames" :key="arrOriginalFilename.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="" class="link-primary" ref="aViewMaterialRef" @click="btnLinkViewMaterialRef(selectedEcrsIdEncrypted,index)">
+                                    {{ arrOriginalFilename }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
@@ -510,7 +555,14 @@
 
     const modalSaveEcrDetail = ref(null);
     const modalSaveMaterial = ref(null);
-    const isSelectReadonly  = ref(null);
+    const modalUploadMaterialRef = ref(null);
+    const modalViewMaterialRef = ref(null);
+    const selectedEcrsId = ref(null);
+    const selectedEcrsIdEncrypted = ref(null);
+    const arrOriginalFilenames = ref(null);
+    const materialRef = ref(null);
+
+    const isSelectReadonly  = ref(true);
     const tblEcrByCategoryStatus = ref(null);
 
     //Params
@@ -558,12 +610,13 @@
     };
 
     //Columns
-    const columns = [
+    const ecrColumns = [
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
+                let btnDownloadMaterialRef = cell.querySelector('#btnDownloadMaterialRef');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrId = this.getAttribute('ecr-id');
@@ -579,9 +632,32 @@
                         modal.SaveMaterial.show();
                     });
                 }
+                if(btnDownloadMaterialRef != null){
+                    btnDownloadMaterialRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        selectedEcrsId.value = ecrsId;
+                        alert('asdas')
+                        modal.UploadMaterialRef.show();
+                    });
+                }
             }
         } ,
-        {   data: 'status'} ,
+        {   data: 'get_status'} ,
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewMaterialRef = cell.querySelector('#btnViewMaterialRef');
+                if(btnViewMaterialRef != null){
+                    btnViewMaterialRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        alert('asdasdsa');
+                        getMaterialRefByEcrsId(ecrsId);
+                    });
+                }
+
+            }
+        } ,
         {   data: 'ecr_no'} ,
         {   data: 'category'} ,
         {   data: 'internal_external'} ,
@@ -621,16 +697,36 @@
     onMounted( async ()=>{
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
-        modal.SaveMaterial.show();
+        modal.UploadMaterialRef = new Modal(modalUploadMaterialRef.value.modalRef,{ keyboard: false });
+        modal.ViewMaterialRef = new Modal(modalViewMaterialRef.value.modalRef,{ keyboard: false });
+        // modal.ViewMaterialRef.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getDropdownMasterByOpt(materialSupplierParams);
         await getDropdownMasterByOpt(materialColorParams);
-
     })
-
     //Functions
+
+    const changeMaterialRef = async (event)  => {
+        materialRef.value =  Array.from(event.target.files);
+    }
+    const getMaterialRefByEcrsId = async (ecrsId) => {
+        let apiParams = {
+            ecrsId : ecrsId
+        }
+        axiosFetchData(apiParams,'api/get_material_ref_by_ecrs_id',function(response){
+            let data = response.data;
+            let ecrsId = data.ecrsId;
+            let originalFilename = data.originalFilename;
+            arrOriginalFilenames.value = originalFilename;
+            selectedEcrsIdEncrypted.value = ecrsId;
+            modal.ViewMaterialRef.show();
+        });
+    }
+    const btnLinkViewMaterialRef = async (selectedEcrsIdEncrypted,index) => {
+        window.open(`api/view_material_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
+    }
     const getMaterialEcrById = async (ecrId) => {
         let apiParams = {
             ecrId : ecrId
@@ -686,6 +782,17 @@
         axiosSaveData(formData,'api/save_material', (response) =>{
             modal.SaveMaterial.hide();
             tblEcrByCategoryStatus.value.dt.draw();
+        });
+    }
+    const frmUploadMaterialRef = async () => {
+        let formData = new FormData();
+        materialRef.value.forEach((file, index) => {
+            formData.append('material_ref[]', file);
+        });
+        formData.append("ecrsId", selectedEcrsId.value);
+
+        axiosSaveData(formData,'api/upload_material_ref',(response) =>{
+            console.log(response);
         });
     }
 </script>

@@ -16,6 +16,8 @@ class CreateMaterialApprovalsTable extends Migration
         Schema::create('material_approvals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
+            $table->string('status')->default('RUP')->comment('RUP - For Requestor Update');
+            $table->string('approval_status')->default('RUP')->comment('RUP - For Requestor Update');
             //manually inject relationship in MYSQL relation view
             $table->unsignedBigInteger('rapidx_user_id')->comment('Rapidx User Id');
             $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');

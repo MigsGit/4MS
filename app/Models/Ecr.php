@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Material;
 use App\Models\EcrApproval;
+use App\Models\Environment;
 use App\Models\PmiApproval;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,6 +43,10 @@ class Ecr extends Model
     public function environment()
     {
         return $this->hasMany(Environment::class, 'ecrs_id', 'id');
+    }
+    public function material()
+    {
+        return $this->hasMany(Material::class, 'ecrs_id', 'id');
     }
 
 }
