@@ -464,6 +464,7 @@
     }
     const frmUploadEnvironmentRef = async () => {
         let formData = new FormData();
+        //Append form data
         environmentRef.value.forEach((file, index) => {
             formData.append('environment_ref[]', file);
         });

@@ -12,6 +12,7 @@ use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\PmiApproval;
 use Illuminate\Http\Request;
+use App\Models\MaterialApproval;
 use App\Models\SpecialInspection;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
@@ -158,21 +159,39 @@ class CommonController extends Controller
     }
     public function getCurrentApproverSession(Request $request){
         try {
-            $conditions = [
-                'ecrs_id' => $request->ecrsId,
-                'status' => 'PEN',
-            ];
-            $data = [
-                'rapidx_user_id'
-            ];
-            $relations = [
+            switch  ($request->approvalType) {
+                case 'ecrApproval':
+                    $currentModel = EcrApproval::class;
+                    $conditions = [
+                        'ecrs_id' => $request->ecrsId,
+                        'status' => 'PEN',
+                    ];
+                    $data = [
+                        'rapidx_user_id'
+                    ];
+                    break;
+                case 'materialApproval':
+                    $currentModel = MaterialApproval::class;
+                    $conditions = [
+                        'materials_id' => $request->selectedId,
+                        'status' => 'PEN',
+                    ];
+                    $data = [
+                        'rapidx_user_id'
+                    ];
+                    break;
+                default:
+                    # code...
+                    break;
+            }
 
-            ];
-            $ecrApprovalQuery = $this->resourceInterface->readCustomEloquent(EcrApproval::class,$data,$relations,$conditions);
-            $ecrApproval =  $ecrApprovalQuery->get();
-            $isSessionApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
-            $isSessionApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
-            $ecrApproval[0]->rapidx_user_id;
+            $relations = [];
+            $approvalQuery = $this->resourceInterface->readCustomEloquent($currentModel,$data,$relations,$conditions);
+            $approval =  $approvalQuery
+            ->whereNotNull('rapidx_user_id')
+            ->first();
+            $isSessionApprover =  session('rapidx_user_id') ===  $approval->rapidx_user_id ? true: false ;
+            // $approval[0]->rapidx_user_id;
             return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover]);
         } catch (Exception $e) {
             throw $e;
@@ -236,10 +255,9 @@ class CommonController extends Controller
         }
     }
     public function savePmiInternalApproval(Request $request){
-
-        date_default_timezone_set('Asia/Manila');
-        DB::beginTransaction();
         try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
             $ecrsId = $request->ecrsId;
             //Get Current Ecr Approval is equal to Current Session
             $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)->where('status','PEN')->limit(1)->get(['rapidx_user_id']);

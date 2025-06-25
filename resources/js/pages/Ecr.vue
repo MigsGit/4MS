@@ -766,13 +766,14 @@
                 });
                 btnViewEcrId.addEventListener('click',function(){
                     let ecrsId = this.getAttribute('ecr-id');
+                    let approverParams = {
+                        selectedId : ecrsId,
+                        approvalType : 'ecrApproval'
+                    }
                     modalTitle.value = "View";
                     isSelectReadonly.value = true;
                     currentEcrsId.value = ecrsId;
                     getEcrById(ecrsId);
-                    let approverParams = {
-                        ecrsId : ecrsId
-                    }
                     getCurrentApprover(approverParams);
                     tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw();
 

@@ -34,18 +34,18 @@ export default function useFetch ()
                 responseCallback(response);
 
             }
-        } catch (err) {
-            console.log(err);
-
-            // modalEl.hide();
-            // console.log(modalEl);
-            Swal.fire({
-                title: "Please check your inputs !",
-                text: "System Alert! ",
-                icon: "error",
-                timer: 1000,
-                showConfirmButton: false
-            });
+        } catch (error) {
+            let response = error.response;
+            let errorMsg = response.data.msg;
+            if( response.status === 500){
+                Swal.fire({
+                    title: "System Alert !",
+                    text: errorMsg ?? "Please Contact ISS ! ",
+                    icon: "error",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
             // throw error; // Ensure errors are propagated
         } finally {
             isModalLoadingComponent.value = false;

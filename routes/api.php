@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_current_pmi_internal_approver', 'getCurrentPmiInternalApprover')->name('get_current_pmi_internal_approver');
         Route::get('load_pmi_internal_approval_summary', 'loadPmiInternalApprovalSummary')->name('load_pmi_internal_approval_summary');
         Route::get('load_special_inspection_by_ecr_id', 'loadSpecialInspectionByEcrId')->name('load_special_inspection_by_ecr_id');
+
     });
 
     Route::controller(SettingsController::class)->group(function () {
@@ -85,6 +86,7 @@ Route::middleware('auth')->group(function(){
         Route::post('save_material', 'saveMaterial')->name('save_material');
         Route::post('upload_material_ref', 'uploadMaterialRef')->name('upload_material_ref');
 
+        Route::get('save_material_approval', 'saveMaterialApproval')->name('save_material_approval');
         Route::get('load_ecr_material_by_status', 'loadEcrMaterialByStatus')->name('load_ecr_material_by_status');
         Route::get('get_material_ecr_by_id', 'getMaterialEcrById')->name('get_material_ecr_by_id');
         Route::get('get_material_ref_by_ecrs_id', 'getMaterialRefByEcrsId')->name('get_material_ref_by_ecrs_id');

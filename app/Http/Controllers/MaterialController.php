@@ -47,9 +47,6 @@ class MaterialController extends Controller
                 if($row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
-                if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id') || $row->material[0]->status === "PMIAPP"){ //TODO: Check if the status is PMI Approval
-                    $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                }
                 $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" materials-id="'.$row->material[0]->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 if($row->material[0]->status === "RUP"){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
@@ -95,7 +92,6 @@ class MaterialController extends Controller
             throw $e;
         }
     }
-    // loadMaterialApprovalByMeterialId
     public function loadMaterialApprovalByMeterialId(Request $request){
         try {
             $materialsId = $request->materialsId ?? "";
@@ -313,35 +309,6 @@ class MaterialController extends Controller
             throw $e;
         }
     }
-    public function getStatus($status){
-
-        try {
-             switch ($status) {
-                 case 'RUP':
-                     $status = 'For Requestor Update';
-                     $bgStatus = 'badge rounded-pill bg-primary';
-                     break;
-                 case 'QA':
-                     $status = 'QA Approval';
-                     $bgStatus = 'badge rounded-pill bg-warning';
-                     break;
-                 case 'DIS':
-                     $status = 'DISAPPROVED';
-                     $bgStatus = 'badge rounded-pill bg-danger';
-                     break;
-                 default:
-                     $status = '';
-                     $bgStatus = '';
-                     break;
-             }
-             return [
-                 'status' => $status,
-                 'bgStatus' => $bgStatus,
-             ];
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
     public function uploadMaterialRef(Request $request){
         try {
             date_default_timezone_set('Asia/Manila');
@@ -411,6 +378,111 @@ class MaterialController extends Controller
             throw $e;
         }
     }
+    public function saveMaterialApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $selectedId = $request->selectedId;
+            //Get Current Ecr Approval is equal to Current Session
+            $materialApprovalCurrent = MaterialApproval::where('materials_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->limit(1)
+            ->get(['rapidx_user_id']);
+            if($materialApprovalCurrent[0]->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+
+            //Get Current Status
+            $materialApproval = Material::where('id',$selectedId)->limit(1)->get(['approval_status']);
+            //Update the ECR Approval Status
+            $materialApprovalValidated = [
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ];
+            $materialApprovalConditions = [
+                'materials_id' => $selectedId,
+                'approval_status' => $materialApproval[0]->approval_status,
+            ];
+            $this->resourceInterface->updateConditions(MaterialApproval::class,$materialApprovalConditions,$materialApprovalValidated);
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+           $materialApproval = MaterialApproval::where('materials_id',$selectedId)
+           ->whereNotNull('rapidx_user_id')
+           ->where('status','-')
+           ->limit(1)
+           ->get(['id','approval_status']);
+            if ( count($materialApproval) != 0){
+                $materialApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $materialApprovalConditions = [
+                    'id' => $materialApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(MaterialApproval::class,$materialApprovalConditions,$materialApprovalValidated);
+                //Update the ECR Approval Status
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'approval_status' => $materialApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
+            }else{
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'OK',
+                ];
+                $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
+            }
+             //DISAPPROVED ECR
+             if($request->status === "DIS"){
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'DIS',
+                ];
+                $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    //Common Function
+    public function getStatus($status){
+
+        try {
+             switch ($status) {
+                 case 'RUP':
+                     $status = 'For Requestor Update';
+                     $bgStatus = 'badge rounded-pill bg-primary';
+                     break;
+                 case 'QA':
+                     $status = 'QA Approval';
+                     $bgStatus = 'badge rounded-pill bg-warning';
+                     break;
+                 case 'DIS':
+                     $status = 'DISAPPROVED';
+                     $bgStatus = 'badge rounded-pill bg-danger';
+                     break;
+                 default:
+                     $status = '';
+                     $bgStatus = '';
+                     break;
+             }
+             return [
+                 'status' => $status,
+                 'bgStatus' => $bgStatus,
+             ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function getApprovalStatus($approval_status){
         try {
              switch ($approval_status) {
@@ -432,7 +504,7 @@ class MaterialController extends Controller
                     $approvalStatus = 'Purchasing Checked by:';
                     break;
                 case 'PURAB':
-                    $approvalStatus = 'Production Approved by:';
+                    $approvalStatus = 'Purchasing Approved by:';
                     break;
                 case 'PPCPB':
                     $approvalStatus = 'PPC Prepared by:';

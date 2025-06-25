@@ -521,8 +521,12 @@
             </div>
         </template>
         <template #footer>
-            <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click="saveMaterial()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+            <button @click="btnApprovedDisapproved('DIS')" v-show="isModalMaterial === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalDisapproved" class="btn btn-danger btn-sm">
+                <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
+            </button>
+            <button @click="btnApprovedDisapproved('APP')" v-show="isModalMaterial === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalApproved" class="btn btn-success btn-sm">Approved</button>
+            <button  v-show="isModalMaterial === 'Edit'"  type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button @click="saveMaterial()"  v-show="isModalMaterial === 'Edit'"  type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -616,6 +620,23 @@
         <template #footer>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" title="Approval" ref="modalApproval">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <textarea v-model="approvalRemarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button @click = "saveApproval(selectedMaterialsId,approvalRemarks,isApprovedDisappproved)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
@@ -671,6 +692,7 @@
     const modalSaveMaterial = ref(null);
     const modalUploadMaterialRef = ref(null);
     const modalViewMaterialRef = ref(null);
+
     const isModalMaterial = ref(null);
     const selectedEcrsId = ref(null);
     const selectedEcrsIdEncrypted = ref(null);
@@ -681,6 +703,148 @@
     const tblEcrByCategoryStatus = ref(null);
     const tblMaterialApproval = ref(null);
 
+    const isApprovedDisappproved = ref(null);
+    const approvalRemarks = ref(null);
+    const selectedMaterialsId = ref(null);
+    const modalApproval = ref(null);
+
+    //Columns
+     const ecrColumns = [
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
+                let btnDownloadMaterialRef = cell.querySelector('#btnDownloadMaterialRef');
+                let btnViewMaterialById = cell.querySelector('#btnViewMaterialById');
+                if(btnGetEcrId != null){
+                    btnGetEcrId.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        frmMaterial.value.ecrsId = ecrsId;
+                        isModalMaterial.value = 'Edit';
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        getMaterialEcrById(ecrsId);
+                        getRapidxUserByIdOpt(prdnPreparedByParams);
+                        getRapidxUserByIdOpt(prdnCheckedByParams);
+                        getRapidxUserByIdOpt(prdnApprovedByParams);
+
+                        getRapidxUserByIdOpt(prPreparedByParams);
+                        getRapidxUserByIdOpt(prCheckedByParams);
+                        getRapidxUserByIdOpt(prApprovedByParams);
+
+                        getRapidxUserByIdOpt(ppcPreparedByParams);
+                        getRapidxUserByIdOpt(ppcCheckedByParams);
+                        getRapidxUserByIdOpt(ppcApprovedByParams);
+
+                        getRapidxUserByIdOpt(emsPreparedByParams);
+                        getRapidxUserByIdOpt(emsCheckedByParams);
+                        getRapidxUserByIdOpt(emsApprovedByParams);
+
+                        getRapidxUserByIdOpt(qcPreparedByParams);
+                        getRapidxUserByIdOpt(qcCheckedByParams);
+                        getRapidxUserByIdOpt(qcApprovedByParams);
+
+                        getRapidxUserByIdOpt(proEnggPreparedByParams);
+                        getRapidxUserByIdOpt(proEnggCheckedByParams);
+                        getRapidxUserByIdOpt(proEnggApprovedByParams);
+
+                        getRapidxUserByIdOpt(mainEnggPreparedByParams);
+                        getRapidxUserByIdOpt(mainEnggCheckedByParams);
+                        getRapidxUserByIdOpt(mainEnggApprovedByParams);
+
+                        getRapidxUserByIdOpt(enggPreparedByParams);
+                        getRapidxUserByIdOpt(enggCheckedByParams);
+                        getRapidxUserByIdOpt(enggApprovedByParams);
+
+                        getRapidxUserByIdOpt(qaPreparedByParams);
+                        getRapidxUserByIdOpt(qaCheckedByParams);
+                        getRapidxUserByIdOpt(qaApprovedByParams);
+                        modal.SaveMaterial.show();
+                    });
+                }
+                if(btnDownloadMaterialRef != null){
+                    btnDownloadMaterialRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        selectedEcrsId.value = ecrsId;
+                        modal.UploadMaterialRef.show();
+                    });
+                }
+                if(btnViewMaterialById != null){
+                    btnViewMaterialById.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        let materialsId = this.getAttribute('materials-id');
+                        let approverParams = {
+                            selectedId : materialsId,
+                            approvalType : 'materialApproval'
+                        }
+                        selectedEcrsId.value = ecrsId;
+                        selectedMaterialsId.value = materialsId;
+                        isModalMaterial.value = 'View';
+                        getCurrentApprover(approverParams);
+                        getMaterialEcrById(ecrsId);
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
+                        modal.SaveMaterial.show();
+                    });
+                }
+            }
+        } ,
+        {   data: 'get_status'} ,
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewMaterialRef = cell.querySelector('#btnViewMaterialRef');
+                if(btnViewMaterialRef != null){
+                    btnViewMaterialRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        getMaterialRefByEcrsId(ecrsId);
+                    });
+                }
+            }
+        } ,
+        {   data: 'ecr_no'} ,
+        {   data: 'category'} ,
+        {   data: 'internal_external'} ,
+        {   data: 'customer_name'} ,
+        {   data: 'part_no'} ,
+        {   data: 'part_name'} ,
+        {   data: 'device_name'} ,
+        {   data: 'product_line'} ,
+        {   data: 'section'} ,
+        {   data: 'customer_ec_no'} ,
+        {   data: 'date_of_request'} ,
+    ];
+    const tblEcrDetailColumns = [
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnGetEcrDetailsId = cell.querySelector('#btnGetEcrDetailsId');
+                if(btnGetEcrDetailsId != null){
+                    btnGetEcrDetailsId.addEventListener('click',function(){
+                        let ecrDetailsId = this.getAttribute('ecr-details-id');
+                        getEcrDetailsId(ecrDetailsId);
+                        modal.SaveEcrDetail.show();
+                    });
+                }
+            }
+        } ,
+        {   data: 'description_of_change'} ,
+        {   data: 'reason_of_change'} ,
+        {   data: 'type_of_part'} ,
+        {   data: 'change_imp_date'} ,
+        {   data: 'doc_sub_date'} ,
+        {   data: 'doc_to_be_sub'} ,
+        {   data: 'remarks'} ,
+    ];
+    const tblMaterialApprovalColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
+    ];
     //Params
     const materialSupplierParams = {
         tblReference : 'material_supplier',
@@ -830,145 +994,13 @@
         formModel: toRef(frmMaterial.value,'qaApprovedBy'),
         selectedVal: 530,
     };
-    //Columns
-    const ecrColumns = [
-        {   data: 'get_actions',
-            orderable: false,
-            searchable: false,
-            createdCell(cell){
-                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
-                let btnDownloadMaterialRef = cell.querySelector('#btnDownloadMaterialRef');
-                let btnViewMaterialById = cell.querySelector('#btnViewMaterialById');
-                if(btnGetEcrId != null){
-                    btnGetEcrId.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
-                        frmMaterial.value.ecrsId = ecrsId;
-                        isModalMaterial.value = 'Edit';
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        getMaterialEcrById(ecrsId);
-                        getRapidxUserByIdOpt(prdnPreparedByParams);
-                        getRapidxUserByIdOpt(prdnCheckedByParams);
-                        getRapidxUserByIdOpt(prdnApprovedByParams);
-
-                        getRapidxUserByIdOpt(prPreparedByParams);
-                        getRapidxUserByIdOpt(prCheckedByParams);
-                        getRapidxUserByIdOpt(prApprovedByParams);
-
-                        getRapidxUserByIdOpt(ppcPreparedByParams);
-                        getRapidxUserByIdOpt(ppcCheckedByParams);
-                        getRapidxUserByIdOpt(ppcApprovedByParams);
-
-                        getRapidxUserByIdOpt(emsPreparedByParams);
-                        getRapidxUserByIdOpt(emsCheckedByParams);
-                        getRapidxUserByIdOpt(emsApprovedByParams);
-
-                        getRapidxUserByIdOpt(qcPreparedByParams);
-                        getRapidxUserByIdOpt(qcCheckedByParams);
-                        getRapidxUserByIdOpt(qcApprovedByParams);
-
-                        getRapidxUserByIdOpt(proEnggPreparedByParams);
-                        getRapidxUserByIdOpt(proEnggCheckedByParams);
-                        getRapidxUserByIdOpt(proEnggApprovedByParams);
-
-                        getRapidxUserByIdOpt(mainEnggPreparedByParams);
-                        getRapidxUserByIdOpt(mainEnggCheckedByParams);
-                        getRapidxUserByIdOpt(mainEnggApprovedByParams);
-
-                        getRapidxUserByIdOpt(enggPreparedByParams);
-                        getRapidxUserByIdOpt(enggCheckedByParams);
-                        getRapidxUserByIdOpt(enggApprovedByParams);
-
-                        getRapidxUserByIdOpt(qaPreparedByParams);
-                        getRapidxUserByIdOpt(qaCheckedByParams);
-                        getRapidxUserByIdOpt(qaApprovedByParams);
-                        modal.SaveMaterial.show();
-                    });
-                }
-                if(btnDownloadMaterialRef != null){
-                    btnDownloadMaterialRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
-                        selectedEcrsId.value = ecrsId;
-                        modal.UploadMaterialRef.show();
-                    });
-                }
-                if(btnViewMaterialById != null){
-                    btnViewMaterialById.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
-                        let materialsId = this.getAttribute('materials-id');
-                        selectedEcrsId.value = ecrsId;
-                        // materialsId.value = materialsId;
-                        isModalMaterial.value = 'View';
-                        getMaterialEcrById(ecrsId);
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
-                        modal.SaveMaterial.show();
-                    });
-                }
-            }
-        } ,
-        {   data: 'get_status'} ,
-        {   data: 'get_attachment',
-            orderable: false,
-            searchable: false,
-            createdCell(cell){
-                let btnViewMaterialRef = cell.querySelector('#btnViewMaterialRef');
-                if(btnViewMaterialRef != null){
-                    btnViewMaterialRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
-                        getMaterialRefByEcrsId(ecrsId);
-                    });
-                }
-
-            }
-        } ,
-        {   data: 'ecr_no'} ,
-        {   data: 'category'} ,
-        {   data: 'internal_external'} ,
-        {   data: 'customer_name'} ,
-        {   data: 'part_no'} ,
-        {   data: 'part_name'} ,
-        {   data: 'device_name'} ,
-        {   data: 'product_line'} ,
-        {   data: 'section'} ,
-        {   data: 'customer_ec_no'} ,
-        {   data: 'date_of_request'} ,
-    ];
-    const tblEcrDetailColumns = [
-        {   data: 'get_actions',
-            orderable: false,
-            searchable: false,
-            createdCell(cell){
-                let btnGetEcrDetailsId = cell.querySelector('#btnGetEcrDetailsId');
-                if(btnGetEcrDetailsId != null){
-                    btnGetEcrDetailsId.addEventListener('click',function(){
-                        let ecrDetailsId = this.getAttribute('ecr-details-id');
-                        getEcrDetailsId(ecrDetailsId);
-                        modal.SaveEcrDetail.show();
-                    });
-                }
-            }
-        } ,
-        {   data: 'description_of_change'} ,
-        {   data: 'reason_of_change'} ,
-        {   data: 'type_of_part'} ,
-        {   data: 'change_imp_date'} ,
-        {   data: 'doc_sub_date'} ,
-        {   data: 'doc_to_be_sub'} ,
-        {   data: 'remarks'} ,
-    ];
-    const tblMaterialApprovalColumns = [
-        {   data: 'get_count'} ,
-        {   data: 'get_role'} ,
-        {   data: 'get_approver_name'} ,
-        {   data: 'remarks'},
-        {   data: 'get_status'} ,
-    ];
 
     onMounted( async ()=>{
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
         modal.UploadMaterialRef = new Modal(modalUploadMaterialRef.value.modalRef,{ keyboard: false });
         modal.ViewMaterialRef = new Modal(modalViewMaterialRef.value.modalRef,{ keyboard: false });
+        modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         // modal.ViewMaterialRef.show();
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
@@ -977,7 +1009,26 @@
         await getDropdownMasterByOpt(materialColorParams);
     })
     //Functions
-
+    const btnApprovedDisapproved = async (decision) => {
+        isApprovedDisappproved.value = decision;
+        modal.Approval.show();
+    }
+    const saveApproval = async (selectedId,remarks,isApprovedDisappproved,approvalType = null) => {
+        let apiParams = {
+            selectedId : selectedId,
+            status : isApprovedDisappproved,
+            remarks : remarks,
+        }
+        if(approvalType === 'PmiApproval'){
+            axiosFetchData(apiParams,'api/save_approval',function(response){
+                console.log(response);
+            });
+            return;
+        }
+        axiosFetchData(apiParams,'api/save_material_approval',function(response){
+            console.log(response);
+        });
+    }
     const changeMaterialRef = async (event)  => {
         materialRef.value =  Array.from(event.target.files);
     }
@@ -1055,23 +1106,18 @@
             ["ems_prepared_by", frmMaterial.value.emsPreparedBy],
             ["ems_checked_by", frmMaterial.value.emsCheckedBy],
             ["ems_approved_by", frmMaterial.value.emsApprovedBy],
-
             ["qc_prepared_by", frmMaterial.value.qcPreparedBy],
             ["qc_checked_by", frmMaterial.value.qcCheckedBy],
             ["qc_approved_by", frmMaterial.value.qcApprovedBy],
-
             ["pro_engg_prepared_by", frmMaterial.value.proEnggPreparedBy],
             ["pro_engg_checked_by", frmMaterial.value.proEnggCheckedBy],
             ["pro_engg_approved_by", frmMaterial.value.proEnggApprovedBy],
-
             ["main_engg_prepared_by", frmMaterial.value.mainEnggPreparedBy],
             ["main_engg_checked_by", frmMaterial.value.mainEnggCheckedBy],
             ["main_engg_approved_by", frmMaterial.value.mainEnggApprovedBy],
-
             ["engg_prepared_by", frmMaterial.value.enggPreparedBy],
             ["engg_checked_by", frmMaterial.value.enggCheckedBy],
             ["engg_approved_by", frmMaterial.value.enggApprovedBy],
-
             ["qa_prepared_by", frmMaterial.value.qaPreparedBy],
             ["qa_checked_by", frmMaterial.value.qaCheckedBy],
             ["qa_approved_by", frmMaterial.value.qaApprovedBy],
@@ -1080,7 +1126,7 @@
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_material', (response) =>{
-            // modal.SaveMaterial.hide();
+            modal.SaveMaterial.hide();
             tblEcrByCategoryStatus.value.dt.draw();
         });
     }

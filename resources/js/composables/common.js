@@ -97,12 +97,13 @@ export default function useCommon(){
     //Functions
     const getCurrentApprover = async (params) => {
         let apiParams = {
-            ecrsId : params.ecrsId
+            selectedId : params.selectedId,
+            approvalType : params.approvalType,
         }
         axiosFetchData(apiParams,'api/get_current_approver_session',function(response){
             let data = response.data;
             commonVar.isSessionApprover = data.isSessionApprover;
-            // modal.EcrRequirements
+
         });
     }
     const getCurrentPmiInternalApprover = async (params) => {
@@ -111,10 +112,7 @@ export default function useCommon(){
         }
         axiosFetchData(apiParams,'api/get_current_pmi_internal_approver',function(response){
             let data = response.data;
-            console.log('data',data.isSessionPmiInternalApprover);
-            console.log(commonVar.value);
-
-            // commonVar.value.isSessionPmiInternalApprover = data.isSessionPmiInternalApprover;
+            commonVar.value.isSessionPmiInternalApprover = data.isSessionPmiInternalApprover;
         });
     }
 

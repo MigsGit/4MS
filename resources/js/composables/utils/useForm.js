@@ -31,15 +31,17 @@ export default function useForm ()
                 });
             }
         } catch (error) {
-            let errorMsg = error.response.data.msg;
-            Swal.fire({
-                title: "Error!",
-                text: errorMsg,
-                icon: "error",
-                timer: 2000,
-                showConfirmButton: false
-            });
-            console.log('error',error.response.data);
+            let response = error.response;
+            let errorMsg = response.data.msg;
+            if( response.status === 500){
+                Swal.fire({
+                    title: "System Alert !",
+                    text: errorMsg ?? "Please Contact ISS ! ",
+                    icon: "error",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
             // throw error; // Ensure errors are propagated
         } finally {
             isModalLoadingComponent.value = false;
