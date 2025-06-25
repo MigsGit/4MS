@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Material extends Model
 {
+    protected $fillable = [
+        'approval_status',
+        'status',
+    ];
     /**
-     * Get the user associated with the Material
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -16,4 +19,5 @@ class Material extends Model
     {
         return $this->hasOne(Ecr::class, 'id', 'ecrs_id')->whereNull('deleted_at');
     }
+
 }

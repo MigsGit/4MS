@@ -89,6 +89,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_material_ecr_by_id', 'getMaterialEcrById')->name('get_material_ecr_by_id');
         Route::get('get_material_ref_by_ecrs_id', 'getMaterialRefByEcrsId')->name('get_material_ref_by_ecrs_id');
         Route::get('view_material_ref', 'viewMaterialRef')->name('view_material_ref');
+        Route::get('load_material_approval_by_meterial_id', 'loadMaterialApprovalByMeterialId')->name('load_material_approval_by_meterial_id');
     });
 
     Route::controller(EnvironmentController::class)->group(function () {

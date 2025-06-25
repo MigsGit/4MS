@@ -47,9 +47,10 @@ class MaterialController extends Controller
                 if($row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
-                if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
+                if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id') || $row->material[0]->status === "PMIAPP"){ //TODO: Check if the status is PMI Approval
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
+                $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" materials-id="'.$row->material[0]->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 if($row->material[0]->status === "RUP"){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
@@ -69,8 +70,8 @@ class MaterialController extends Controller
 
                 if( $row->material[0]->status === 'OK' ){ //TODO: Last Status before PMI Internal
                     $approvalStatus = $row->material[0]->approval_status;
-                    $getApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
-                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                    $getPmiApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
                 $result .= '</center>';
                 $result .= '</br>';
@@ -94,26 +95,102 @@ class MaterialController extends Controller
             throw $e;
         }
     }
+    // loadMaterialApprovalByMeterialId
+    public function loadMaterialApprovalByMeterialId(Request $request){
+        try {
+            $materialsId = $request->materialsId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                'materials_id' => $materialsId
+            ];
+            $pmiApproval = $this->resourceInterface->readCustomEloquent(MaterialApproval::class,$data,$relations,$conditions);
+            $pmiApproval = $pmiApproval
+            ->whereNotNull('rapidx_user_id')
+            ->orderBy('counter','asc')
+            ->get();
+            return DataTables($pmiApproval)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
+
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
+            ->make(true);
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function saveMaterial(Request $request,MaterialRequest  $materialRequest,MaterialApprovalRequest $materialApprovalRequest){
         date_default_timezone_set('Asia/Manila');
         try {
+            DB::beginTransaction();
             $materialRequest->all();
             $currentEcrsId =  $request->ecrs_id;
+            $materialsId = $request->material_id;
             $materialRequest = $materialRequest->validated();
             $ecr = Ecr::where('id',$currentEcrsId)->get('internal_external');
 
-            // if ( isset($request->material_id)){
-            //     $conditions = [
-            //        'id' => $request->material_id
-            //     ];
+            if ( isset($request->material_id)){
+                $conditions = [
+                   'id' => $materialsId
+                ];
+                 $currentMaterialId = $materialsId;
             //     $this->resourceInterface->updateConditions(Material::class,$conditions,$materialRequest);
-            //      $currentMaterialId = $request->material_id;
+            }else{
+                $materialRequest['created_at'] = now();
+                $insertMaterialById = $this->resourceInterface->create(Material::class,$materialRequest);
+                $currentMaterialId = $insertMaterialById['data_id'];
+            }
 
-            // }else{
-            //     $materialRequest['created_at'] = now();
-            //     $insertMaterialById = $this->resourceInterface->create(Material::class,$materialRequest);
-            //      $currentMaterialId = $request->material_id;
-            // }
             if($ecr[0]->internal_external === "Internal") {
                 $enggMateriaApprovalInEx = [
                     'ENGPB' => $request->engg_prepared_by,
@@ -137,7 +214,7 @@ class MaterialController extends Controller
                     'PRDNAP' =>  $request->prdn_approved_by,
                 ];
             }
-             //Requested by, Engg, Heads, QA Approval
+
             $materialApprovalTypes = [
                 'PURPB' => $materialApprovalRequest->pr_approved_by,
                 'PURCB' => $materialApprovalRequest->pr_checked_by,
@@ -157,6 +234,8 @@ class MaterialController extends Controller
                 'QACB' => $materialApprovalRequest->qa_checked_by,
                 'QAAB' => $materialApprovalRequest->qa_approved_by,
             ];
+            //Validate if Internal or Extenal
+            //Merge the Material Approval
             $mergeMaterialApprovalRequest = array_merge($prdnMateriaApprovalInEx,$materialApprovalTypes,$enggMateriaApprovalInEx,$qaMaterialApprovalTypes);
 
             $materialApprovalRequestCtr = 0; //assigned counter
@@ -164,8 +243,8 @@ class MaterialController extends Controller
             use ($request,&$materialApprovalRequestCtr,$currentEcrsId){
                 return collect($users)->map(function ($userId) use ($request,$approvalStatus,&$materialApprovalRequestCtr,$currentEcrsId){
                     return [
-                        'ecrs_id' => $request->ecrs_id, //TODO: Material ID
-                        'materials_id' => 1, //TODO: Material ID
+                        'ecrs_id' => $request->ecrs_id,
+                        'materials_id' => $request->material_id,
                         'rapidx_user_id' => $userId == 0 ? NULL : $userId,
                         'approval_status' => $approvalStatus,
                         'counter' => $materialApprovalRequestCtr++,
@@ -174,14 +253,25 @@ class MaterialController extends Controller
                 });
 
             })->toArray();
-            MaterialApproval::where('materials_id',$request->material_id)->delete();
-            MaterialApproval::insert($materialApprovalValidated);
+            // MaterialApproval::where('materials_id',$currentMaterialId)->delete();
+            // MaterialApproval::insert($materialApprovalValidated);
+            $materialApproval =  MaterialApproval::whereNotNull('rapidx_user_id')
+            ->where('materials_id', $currentMaterialId)->first();
+            if ($materialApproval) {
+                $materialApproval->update(['status' => 'PEN']);
+                Material::where('id', $currentMaterialId)->first()
+                ->update([
+                    'approval_status' => $materialApproval->approval_status,
+                    'status' => 'FORAPP', //FOR APPROVAL
+                ]);
+            }
+            DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
+            DB::rollback();
             throw $e;
         }
     }
-
     public function getMaterialEcrById(Request $request){
         try {
             $conditions = [
@@ -317,6 +407,95 @@ class MaterialController extends Controller
                 $pdfPath = storage_path("app/public/".$filePathWithEcrsId."");
                 $this->commonInterface->viewPdfFile($pdfPath);
             }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getApprovalStatus($approval_status){
+        try {
+             switch ($approval_status) {
+                case 'RUP':
+                    $approvalStatus = 'Requestor ECR Update:';
+                    break;
+                case 'PRNDPB':
+                    $approvalStatus = 'Production Prepared by:';
+                    break;
+                case 'PRNDCB':
+                    $approvalStatus = 'Production Checked by:';
+                    break;
+                case 'PRNDAP':
+                    break;
+                case 'PURPB':
+                    $approvalStatus = 'Purchasing Prepared by:';
+                    break;
+                case 'PURCB':
+                    $approvalStatus = 'Purchasing Checked by:';
+                    break;
+                case 'PURAB':
+                    $approvalStatus = 'Production Approved by:';
+                    break;
+                case 'PPCPB':
+                    $approvalStatus = 'PPC Prepared by:';
+                    break;
+                case 'PPCCB':
+                    $approvalStatus = 'PPC Checked by:';
+                    break;
+                case 'PPCAB':
+                    $approvalStatus = 'PPC Approved by:';
+                    break;
+                case 'EMSPB':
+                    $approvalStatus = 'EMS Prepared by:';
+                    break;
+                case 'EMSCB':
+                    $approvalStatus = 'EMS Checked by:';
+                    break;
+                case 'EMSAB':
+                    $approvalStatus = 'EMS Approved by:';
+                    break;
+                case 'LQCPB':
+                    $approvalStatus = 'QC Prepared by';
+                    break;
+                case 'LQCCB':
+                    $approvalStatus = 'QC Checked by';
+                    break;
+                case 'LQCAB':
+                    $approvalStatus = 'QC Approved by';
+                    break;
+                case 'MENGPB':
+                    $approvalStatus = 'Maintenance Engg Prepared by';
+                    break;
+                case 'MENGCB':
+                    $approvalStatus = 'Maintenance Engg Checked by';
+                    break;
+                case 'MENGAB':
+                    $approvalStatus = 'Maintenance Engg Approved by';
+                    break;
+                case 'PENGPB':
+                    $approvalStatus = 'Process Engg Prepared by';
+                    break;
+                case 'PENGCB':
+                    $approvalStatus = 'Process Engg Checked by';
+                    break;
+                case 'PENGAB':
+                    $approvalStatus = 'Process Engg Approved by';
+                    break;
+                case 'QAPB':
+                    $approvalStatus = 'QA Prepared by';
+                    break;
+                case 'QACB':
+                    $approvalStatus = 'QA Checked by';
+                    break;
+                case 'QAAB':
+                    $approvalStatus = 'QA Approved by';
+                    break;
+                 default:
+                     $approvalStatus = '';
+                     break;
+             }
+             return [
+                 'approvalStatus' => $approvalStatus,
+             ];
+
         } catch (Exception $e) {
             throw $e;
         }

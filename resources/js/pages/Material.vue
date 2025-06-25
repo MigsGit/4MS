@@ -191,7 +191,7 @@
                             </div>
                         </div>
                         <!-- Material Approval -->
-                        <div class="card mb-2">
+                        <div class="card mb-2" v-show="isModalMaterial === 'Edit'">
                             <h5 class="mb-0">
                                 <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
                                     Approval:
@@ -488,6 +488,34 @@
                                 </div> -->
                             </div>
                         </div>
+                        <div class="row" v-show="isModalMaterial === 'View'">
+                            <div class="card">
+                                <div class="card-body overflow-auto">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblMaterialApproval"
+                                        :columns="tblMaterialApprovalColumns"
+                                        ajax="api/load_material_approval_by_meterial_id"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering: false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Role</th>
+                                                <th>Approver Name</th>
+                                                <th>Remarks</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -643,6 +671,7 @@
     const modalSaveMaterial = ref(null);
     const modalUploadMaterialRef = ref(null);
     const modalViewMaterialRef = ref(null);
+    const isModalMaterial = ref(null);
     const selectedEcrsId = ref(null);
     const selectedEcrsIdEncrypted = ref(null);
     const arrOriginalFilenames = ref(null);
@@ -650,6 +679,7 @@
     const isInternalExternal = ref(null);
     const isSelectReadonly  = ref(true);
     const tblEcrByCategoryStatus = ref(null);
+    const tblMaterialApproval = ref(null);
 
     //Params
     const materialSupplierParams = {
@@ -770,7 +800,6 @@
         formModel: toRef(frmMaterial.value,'mainEnggApprovedBy'),
         selectedVal: 530,
     };
-
     const enggPreparedByParams = {
         globalVar: materialVar.enggPreparedBy,
         formModel: toRef(frmMaterial.value,'enggPreparedBy'),
@@ -809,12 +838,14 @@
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 let btnDownloadMaterialRef = cell.querySelector('#btnDownloadMaterialRef');
+                let btnViewMaterialById = cell.querySelector('#btnViewMaterialById');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
-                        let ecrId = this.getAttribute('ecr-id');
-                        frmMaterial.value.ecrsId = ecrId;
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw();
-                        getMaterialEcrById(ecrId);
+                        let ecrsId = this.getAttribute('ecr-id');
+                        frmMaterial.value.ecrsId = ecrsId;
+                        isModalMaterial.value = 'Edit';
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        getMaterialEcrById(ecrsId);
                         getRapidxUserByIdOpt(prdnPreparedByParams);
                         getRapidxUserByIdOpt(prdnCheckedByParams);
                         getRapidxUserByIdOpt(prdnApprovedByParams);
@@ -858,6 +889,19 @@
                         let ecrsId = this.getAttribute('ecr-id');
                         selectedEcrsId.value = ecrsId;
                         modal.UploadMaterialRef.show();
+                    });
+                }
+                if(btnViewMaterialById != null){
+                    btnViewMaterialById.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        let materialsId = this.getAttribute('materials-id');
+                        selectedEcrsId.value = ecrsId;
+                        // materialsId.value = materialsId;
+                        isModalMaterial.value = 'View';
+                        getMaterialEcrById(ecrsId);
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
+                        modal.SaveMaterial.show();
                     });
                 }
             }
@@ -911,6 +955,13 @@
         {   data: 'doc_sub_date'} ,
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
+    ];
+    const tblMaterialApprovalColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
     ];
 
     onMounted( async ()=>{
@@ -1033,7 +1084,6 @@
             tblEcrByCategoryStatus.value.dt.draw();
         });
     }
-
     const frmUploadMaterialRef = async () => {
         let formData = new FormData();
         materialRef.value.forEach((file, index) => {

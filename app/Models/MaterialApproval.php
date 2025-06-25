@@ -7,5 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class MaterialApproval extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'status'
+    ];
+    public function rapidx_user()
+    {
+        return $this->hasOne(RapidxUser::class, 'id', 'rapidx_user_id');
+    }
 }
