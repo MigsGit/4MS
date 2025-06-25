@@ -197,7 +197,7 @@
                                     Approval:
                                 </button>
                             </h5>
-                            <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
+                            <div id="collapse2" class="collapse show" data-bs-parent="#accordionMain">
                                 <div class="card-body shadow">
                                     <div class="row">
                                         <div class="col-12 overflow-auto">
@@ -213,9 +213,37 @@
                                                 <!-- @change="onUserChange(qadApprovedByInternalParams)" -->
                                                 <!-- @change="onUserChange(prCheckedByParams)" -->
                                                   <!-- @change="onUserChange(prApprovedByParams)" -->
-
                                                 <tbody>
-                                                    <tr >
+                                                    <tr class="production">
+                                                        <td>
+                                                            Production
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.prdnPreparedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.prdnPreparedBy"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.prdnCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.prdnCheckedBy"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.prdnApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.prdnApprovedBy"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
                                                         <td>
                                                             Purchasing
                                                         </td>
@@ -280,10 +308,10 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
-                                                                v-model="frmMaterial.emsCheckedBy"
+                                                                v-model="frmMaterial.emsPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.emsPreparedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -291,7 +319,7 @@
                                                                 v-model="frmMaterial.emsCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.emsCheckedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -299,7 +327,7 @@
                                                                 v-model="frmMaterial.emsApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.emsApprovedBy"
                                                             />
                                                         </td>
                                                     </tr>
@@ -309,10 +337,10 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
-                                                                v-model="frmMaterial.qcCheckedBy"
+                                                                v-model="frmMaterial.qcPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.qcPreparedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -320,7 +348,7 @@
                                                                 v-model="frmMaterial.qcCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.qcCheckedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -328,20 +356,78 @@
                                                                 v-model="frmMaterial.qcApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.qcApprovedBy"
                                                             />
                                                         </td>
                                                     </tr>
-                                                    <tr >
+                                                    <tr class="pro-engineer d-none">
+                                                        <td>
+                                                            Process Engineering
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.proEnggPreparedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.proEnggPreparedBy"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.proEnggCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.proEnggCheckedBy"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.proEnggApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.proEnggApprovedBy"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="main-engineer d-none">
+                                                        <td>
+                                                            Maintenance Engineering
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.mainEnggPreparedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.mainEnggPreparedBy"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.mainEnggCheckedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.mainEnggCheckedBy"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <Multiselect
+                                                                v-model="frmMaterial.mainEnggApprovedBy"
+                                                                :close-on-select="true"
+                                                                :searchable="true"
+                                                                :options="materialVar.mainEnggApprovedBy"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="engineer">
                                                         <td>
                                                             Engineering
                                                         </td>
                                                         <td>
                                                             <Multiselect
-                                                                v-model="frmMaterial.enggCheckedBy"
+                                                                v-model="frmMaterial.enggPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.enggPreparedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -349,7 +435,7 @@
                                                                 v-model="frmMaterial.enggCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.enggCheckedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -357,7 +443,7 @@
                                                                 v-model="frmMaterial.enggApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.enggApprovedBy"
                                                             />
                                                         </td>
                                                     </tr>
@@ -367,10 +453,10 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
-                                                                v-model="frmMaterial.qaCheckedBy"
+                                                                v-model="frmMaterial.qaPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.qaPreparedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -378,7 +464,7 @@
                                                                 v-model="frmMaterial.qaCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.qaCheckedBy"
                                                             />
                                                         </td>
                                                         <td>
@@ -386,7 +472,7 @@
                                                                 v-model="frmMaterial.qaApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
-                                                                :options="materialVar.optRapidxUser"
+                                                                :options="materialVar.qaApprovedBy"
                                                             />
                                                         </td>
                                                     </tr>
@@ -463,7 +549,7 @@
             <div class="row mt-3">
                 <div class="col-md-12">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <input @change="changeMaterialRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input @change="changeMaterialRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                     </div>
                 </div>
             </div>
@@ -578,6 +664,22 @@
         formModel: toRef(frmMaterial.value,'materialColor'),
         selectedVal: '',
     };
+    //User Params
+    const prdnPreparedByParams = {
+        globalVar: materialVar.prdnPreparedBy,
+        formModel: toRef(frmMaterial.value,'prdnPreparedBy'),
+        selectedVal: '',
+    };
+    const prdnCheckedByParams = {
+        globalVar: materialVar.prdnCheckedBy,
+        formModel: toRef(frmMaterial.value,'prdnCheckedBy'),
+        selectedVal: '',
+    };
+    const prdnApprovedByParams = {
+        globalVar: materialVar.prdnApprovedBy,
+        formModel: toRef(frmMaterial.value,'prdnApprovedBy'),
+        selectedVal: '',
+    };
     const prPreparedByParams = {
         globalVar: materialVar.prPreparedBy,
         formModel: toRef(frmMaterial.value,'prPreparedBy'),
@@ -608,7 +710,97 @@
         formModel: toRef(frmMaterial.value,'ppcApprovedBy'),
         selectedVal: '',
     };
+    const emsPreparedByParams = {
+        globalVar: materialVar.emsPreparedBy,
+        formModel: toRef(frmMaterial.value,'emsPreparedBy'),
+        selectedVal: '',
+    };
+    const emsCheckedByParams = {
+        globalVar: materialVar.emsCheckedBy,
+        formModel: toRef(frmMaterial.value,'emsCheckedBy'),
+        selectedVal: '',
+    };
+    const emsApprovedByParams = {
+        globalVar: materialVar.emsApprovedBy,
+        formModel: toRef(frmMaterial.value,'emsApprovedBy'),
+        selectedVal: '',
+    };
+    const qcPreparedByParams = {
+        globalVar: materialVar.qcPreparedBy,
+        formModel: toRef(frmMaterial.value,'qcPreparedBy'),
+        selectedVal: '',
+    };
+    const qcCheckedByParams = {
+        globalVar: materialVar.qcCheckedBy,
+        formModel: toRef(frmMaterial.value,'qcCheckedBy'),
+        selectedVal: '',
+    };
+    const qcApprovedByParams = {
+        globalVar: materialVar.qcApprovedBy,
+        formModel: toRef(frmMaterial.value,'qcApprovedBy'),
+        selectedVal: '',
+    };
+    const proEnggPreparedByParams = {
+        globalVar: materialVar.proEnggPreparedBy,
+        formModel: toRef(frmMaterial.value,'proEnggPreparedBy'),
+        selectedVal: '',
+    };
+    const proEnggCheckedByParams = {
+        globalVar: materialVar.proEnggCheckedBy,
+        formModel: toRef(frmMaterial.value,'proEnggCheckedBy'),
+        selectedVal: '',
+    };
+    const proEnggApprovedByParams = {
+        globalVar: materialVar.proEnggApprovedBy,
+        formModel: toRef(frmMaterial.value,'proEnggApprovedBy'),
+        selectedVal: '',
+    };
+    const mainEnggPreparedByParams = {
+        globalVar: materialVar.mainEnggPreparedBy,
+        formModel: toRef(frmMaterial.value,'mainEnggPreparedBy'),
+        selectedVal: '',
+    };
+    const mainEnggCheckedByParams = {
+        globalVar: materialVar.mainEnggCheckedBy,
+        formModel: toRef(frmMaterial.value,'mainEnggCheckedBy'),
+        selectedVal: '',
+    };
+    const mainEnggApprovedByParams = {
+        globalVar: materialVar.mainEnggApprovedBy,
+        formModel: toRef(frmMaterial.value,'mainEnggApprovedBy'),
+        selectedVal: '',
+    };
 
+    const enggPreparedByParams = {
+        globalVar: materialVar.enggPreparedBy,
+        formModel: toRef(frmMaterial.value,'enggPreparedBy'),
+        selectedVal: '',
+    };
+    const enggCheckedByParams = {
+        globalVar: materialVar.enggCheckedBy,
+        formModel: toRef(frmMaterial.value,'enggCheckedBy'),
+        selectedVal: '',
+    };
+    const enggApprovedByParams = {
+        globalVar: materialVar.enggApprovedBy,
+        formModel: toRef(frmMaterial.value,'enggApprovedBy'),
+        selectedVal: '',
+    };
+    const qaPreparedByParams = {
+        globalVar: materialVar.qaPreparedBy,
+        formModel: toRef(frmMaterial.value,'qaPreparedBy'),
+        selectedVal: '',
+    };
+    const qaCheckedByParams = {
+        globalVar: materialVar.qaCheckedBy,
+        formModel: toRef(frmMaterial.value,'qaCheckedBy'),
+        selectedVal: '',
+    };
+    const qaApprovedByParams = {
+        globalVar: materialVar.qaApprovedBy,
+        formModel: toRef(frmMaterial.value,'qaApprovedBy'),
+        selectedVal: '',
+    };
     //Columns
     const ecrColumns = [
         {   data: 'get_actions',
@@ -621,14 +813,43 @@
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrId = this.getAttribute('ecr-id');
                         frmMaterial.value.ecrsId = ecrId;
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw();
                         getMaterialEcrById(ecrId);
+                        getRapidxUserByIdOpt(prdnPreparedByParams);
+                        getRapidxUserByIdOpt(prdnCheckedByParams);
+                        getRapidxUserByIdOpt(prdnApprovedByParams);
+
                         getRapidxUserByIdOpt(prPreparedByParams);
                         getRapidxUserByIdOpt(prCheckedByParams);
                         getRapidxUserByIdOpt(prApprovedByParams);
+
                         getRapidxUserByIdOpt(ppcPreparedByParams);
                         getRapidxUserByIdOpt(ppcCheckedByParams);
                         getRapidxUserByIdOpt(ppcApprovedByParams);
+
+                        getRapidxUserByIdOpt(emsPreparedByParams);
+                        getRapidxUserByIdOpt(emsCheckedByParams);
+                        getRapidxUserByIdOpt(emsApprovedByParams);
+
+                        getRapidxUserByIdOpt(qcPreparedByParams);
+                        getRapidxUserByIdOpt(qcCheckedByParams);
+                        getRapidxUserByIdOpt(qcApprovedByParams);
+
+                        getRapidxUserByIdOpt(proEnggPreparedByParams);
+                        getRapidxUserByIdOpt(proEnggCheckedByParams);
+                        getRapidxUserByIdOpt(proEnggApprovedByParams);
+
+                        getRapidxUserByIdOpt(mainEnggPreparedByParams);
+                        getRapidxUserByIdOpt(mainEnggCheckedByParams);
+                        getRapidxUserByIdOpt(mainEnggApprovedByParams);
+
+                        getRapidxUserByIdOpt(enggPreparedByParams);
+                        getRapidxUserByIdOpt(enggCheckedByParams);
+                        getRapidxUserByIdOpt(enggApprovedByParams);
+
+                        getRapidxUserByIdOpt(qaPreparedByParams);
+                        getRapidxUserByIdOpt(qaCheckedByParams);
+                        getRapidxUserByIdOpt(qaApprovedByParams);
                         modal.SaveMaterial.show();
                     });
                 }
@@ -636,7 +857,6 @@
                     btnDownloadMaterialRef.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecr-id');
                         selectedEcrsId.value = ecrsId;
-                        alert('asdas')
                         modal.UploadMaterialRef.show();
                     });
                 }
@@ -651,7 +871,6 @@
                 if(btnViewMaterialRef != null){
                     btnViewMaterialRef.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecr-id');
-                        alert('asdasdsa');
                         getMaterialRefByEcrsId(ecrsId);
                     });
                 }

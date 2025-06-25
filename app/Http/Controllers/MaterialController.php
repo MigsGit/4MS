@@ -230,8 +230,6 @@ class MaterialController extends Controller
             throw $e;
         }
     }
-
-
     public function viewMaterialRef(Request $request){
         try {
             $ecrsId = decrypt($request->ecrsId);
@@ -241,7 +239,7 @@ class MaterialController extends Controller
             $data = $this->resourceInterface->readCustomEloquent(Material::class,[],[],$conditions);
             $materialRefByEcrsId = $data
             ->get([
-                'filtered_document_name',
+                'filter.0ed_document_name',
                 'file_path',
             ]);
             if(count($materialRefByEcrsId) != 0){

@@ -5,12 +5,43 @@ export default function useMaterial(){
     const materialVar = reactive({
         materialSupplier : [],
         materialColor : [],
+        
+        prdnPreparedBy : [],
+        prdnCheckedBy : [],
+        prdnApprovedBy : [],
+
         prPreparedBy : [],
         prCheckedBy : [],
         prApprovedBy : [],
+
         ppcPreparedBy : [],
         ppcCheckedBy : [],
         ppcApprovedBy : [],
+
+        emsPreparedBy : [],
+        emsCheckedBy : [],
+        emsApprovedBy : [],
+
+        qcPreparedBy : [],
+        qcCheckedBy : [],
+        qcApprovedBy : [],
+
+        proEnggPreparedBy : [],
+        proEnggCheckedBy : [],
+        proEnggApprovedBy : [],
+
+        mainEnggPreparedBy : [],
+        mainEnggCheckedBy : [],
+        mainEnggApprovedBy : [],
+
+        enggPreparedBy : [],
+        enggCheckedBy : [],
+        enggApprovedBy : [],
+
+        qaPreparedBy : [],
+        qaCheckedBy : [],
+        qaApprovedBy : [],
+
     });
     const frmMaterial = ref ({
         ecrsId : 'N/A',

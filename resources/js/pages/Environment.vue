@@ -218,7 +218,7 @@
             <div class="row mt-3">
                 <div class="col-md-12">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <input @change="changeEnvironmentRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input @change="changeEnvironmentRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                     </div>
                 </div>
             </div>
