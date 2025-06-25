@@ -149,6 +149,7 @@ export default function useEcr(){
             params.globalVar.splice(0, params.globalVar.length,
                 { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
                 { value: 0, label: 'N/A' }, // Push "N/A" option at the start
+                // { value: null, label: 'N/A' }, // Push "N/A" option at the start
                     ...rapidxUserById.map((value) => {
                     return {
                         value: value.id,

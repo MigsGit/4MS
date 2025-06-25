@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Ecr;
 use App\Models\Material;
 use Illuminate\Http\Request;
+use App\Models\MaterialApproval;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\MaterialRequest;
+use App\Http\Requests\MaterialApprovalRequest;
 
 class MaterialController extends Controller
 {
@@ -92,41 +94,107 @@ class MaterialController extends Controller
             throw $e;
         }
     }
-    public function saveMaterial(Request $request,MaterialRequest  $materialRequest){
+    public function saveMaterial(Request $request,MaterialRequest  $materialRequest,MaterialApprovalRequest $materialApprovalRequest){
         date_default_timezone_set('Asia/Manila');
         try {
-            return $materialRequest->all();
+            $materialRequest->all();
+            $currentEcrsId =  $request->ecrs_id;
             $materialRequest = $materialRequest->validated();
+            $ecr = Ecr::where('id',$currentEcrsId)->get('internal_external');
 
-            if ( isset($request->material_id)){
-                $conditions = [
-                   'id' => $request->material_id
+            // if ( isset($request->material_id)){
+            //     $conditions = [
+            //        'id' => $request->material_id
+            //     ];
+            //     $this->resourceInterface->updateConditions(Material::class,$conditions,$materialRequest);
+            //      $currentMaterialId = $request->material_id;
+
+            // }else{
+            //     $materialRequest['created_at'] = now();
+            //     $insertMaterialById = $this->resourceInterface->create(Material::class,$materialRequest);
+            //      $currentMaterialId = $request->material_id;
+            // }
+            if($ecr[0]->internal_external === "Internal") {
+                $enggMateriaApprovalInEx = [
+                    'ENGPB' => $request->engg_prepared_by,
+                    'ENGCB' => $request->engg_checked_by,
+                    'ENGAB' => $request->engg_approved_by,
                 ];
-                $this->resourceInterface->updateConditions(Material::class,$conditions,$materialRequest);
-            }else{
-                $materialRequest['created_at'] = now();
-                $this->resourceInterface->create(Material::class,$materialRequest);
+                $prdnMateriaApprovalInEx = [];
             }
-            $request->ppcApprovedBy;
-            $request->ppcCheckedBy;
-            $request->ppcPreparedBy;
-            $request->prApprovedBy;
-            $request->prCheckedBy;
-            $request->prPreparedBy;
+            if($ecr[0]->internal_external === "External") {
+                $enggMateriaApprovalInEx = [
+                    'MENGPB' => $request->main_engg_prepared_by,
+                    'MENGCB' => $request->main_engg_checked_by,
+                    'MENGAB' => $request->main_engg_approved_by,
+                    'PENGPB' => $request->pro_engg_prepared_by,
+                    'PENGCB' => $request->pro_engg_checked_by,
+                    'PENGAB' => $request->pro_engg_approved_by,
+                ];
+                $prdnMateriaApprovalInEx = [
+                    'PRDNPB' => $request->prdn_prepared_by,
+                    'PRDNCB' => $request->prdn_checked_by,
+                    'PRDNAP' =>  $request->prdn_approved_by,
+                ];
+            }
+             //Requested by, Engg, Heads, QA Approval
+            $materialApprovalTypes = [
+                'PURPB' => $materialApprovalRequest->pr_approved_by,
+                'PURCB' => $materialApprovalRequest->pr_checked_by,
+                'PURAB' => $materialApprovalRequest->pr_prepared_by,
+                'PPCPB' => $materialApprovalRequest->ppc_approved_by,
+                'PPCCB' => $materialApprovalRequest->ppc_checked_by,
+                'PPCAB' => $materialApprovalRequest->ppc_prepared_by,
+                'EMSPB' => $materialApprovalRequest->ems_prepared_by,
+                'EMSCB' => $materialApprovalRequest->ems_checked_by,
+                'EMSAB' => $materialApprovalRequest->ems_approved_by,
+                'LQCPB' => $materialApprovalRequest->qc_prepared_by,
+                'LQCCB' => $materialApprovalRequest->qc_checked_by,
+                'LQCAB' => $materialApprovalRequest->qc_approved_by,
+            ];
+            $qaMaterialApprovalTypes = [
+                'QAPB' => $materialApprovalRequest->qa_prepared_by,
+                'QACB' => $materialApprovalRequest->qa_checked_by,
+                'QAAB' => $materialApprovalRequest->qa_approved_by,
+            ];
+            $mergeMaterialApprovalRequest = array_merge($prdnMateriaApprovalInEx,$materialApprovalTypes,$enggMateriaApprovalInEx,$qaMaterialApprovalTypes);
+
+            $materialApprovalRequestCtr = 0; //assigned counter
+            $materialApprovalValidated = collect($mergeMaterialApprovalRequest)->flatMap(function ($users,$approvalStatus)
+            use ($request,&$materialApprovalRequestCtr,$currentEcrsId){
+                return collect($users)->map(function ($userId) use ($request,$approvalStatus,&$materialApprovalRequestCtr,$currentEcrsId){
+                    return [
+                        'ecrs_id' => $request->ecrs_id, //TODO: Material ID
+                        'materials_id' => 1, //TODO: Material ID
+                        'rapidx_user_id' => $userId == 0 ? NULL : $userId,
+                        'approval_status' => $approvalStatus,
+                        'counter' => $materialApprovalRequestCtr++,
+                        'created_at' => now(),
+                    ];
+                });
+
+            })->toArray();
+            MaterialApproval::where('materials_id',$request->material_id)->delete();
+            MaterialApproval::insert($materialApprovalValidated);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;
         }
     }
+
     public function getMaterialEcrById(Request $request){
         try {
             $conditions = [
                 'ecrs_id' => $request->ecrId,
             ];
-            $material = $this->resourceInterface->readWithRelationsConditionsActive(Material::class,[],[],$conditions);
+            $relations = [
+                'ecr'
+            ];
+            $material = $this->resourceInterface->readWithRelationsConditionsActive(Material::class,[],$relations,$conditions);
             return response()->json([
-                'is_success' => 'true',
+                'isSuccess' => 'true',
                 'material' => $material,
+                'internalExternal' => $material[0]->ecr['internal_external'],
             ]);
         } catch (Exception $e) {
             throw $e;

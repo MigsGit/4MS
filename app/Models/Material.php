@@ -7,5 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Material extends Model
 {
-    use HasFactory;
+    /**
+     * Get the user associated with the Material
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function ecr()
+    {
+        return $this->hasOne(Ecr::class, 'id', 'ecrs_id')->whereNull('deleted_at');
+    }
 }

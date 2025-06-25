@@ -214,7 +214,7 @@
                                                 <!-- @change="onUserChange(prCheckedByParams)" -->
                                                   <!-- @change="onUserChange(prApprovedByParams)" -->
                                                 <tbody>
-                                                    <tr class="production">
+                                                    <tr class="production" v-show="isInternalExternal == 'External'">
                                                         <td>
                                                             Production
                                                         </td>
@@ -245,7 +245,7 @@
                                                     </tr>
                                                     <tr>
                                                         <td>
-                                                            Purchasing
+                                                            Purchasing {{ isInternalExternal }}
                                                         </td>
                                                         <td>
 
@@ -360,7 +360,7 @@
                                                             />
                                                         </td>
                                                     </tr>
-                                                    <tr class="pro-engineer d-none">
+                                                    <tr class="pro-engineer" v-show="isInternalExternal == 'External'">
                                                         <td>
                                                             Process Engineering
                                                         </td>
@@ -389,7 +389,7 @@
                                                             />
                                                         </td>
                                                     </tr>
-                                                    <tr class="main-engineer d-none">
+                                                    <tr class="main-engineer" v-show="isInternalExternal == 'External'">
                                                         <td>
                                                             Maintenance Engineering
                                                         </td>
@@ -418,7 +418,7 @@
                                                             />
                                                         </td>
                                                     </tr>
-                                                    <tr class="engineer">
+                                                    <tr class="engineer" v-show="isInternalExternal == 'Internal'">
                                                         <td>
                                                             Engineering
                                                         </td>
@@ -647,7 +647,7 @@
     const selectedEcrsIdEncrypted = ref(null);
     const arrOriginalFilenames = ref(null);
     const materialRef = ref(null);
-
+    const isInternalExternal = ref(null);
     const isSelectReadonly  = ref(true);
     const tblEcrByCategoryStatus = ref(null);
 
@@ -668,138 +668,138 @@
     const prdnPreparedByParams = {
         globalVar: materialVar.prdnPreparedBy,
         formModel: toRef(frmMaterial.value,'prdnPreparedBy'),
-        selectedVal: '',
+        selectedVal: 0,
     };
     const prdnCheckedByParams = {
         globalVar: materialVar.prdnCheckedBy,
         formModel: toRef(frmMaterial.value,'prdnCheckedBy'),
-        selectedVal: '',
+        selectedVal: 0,
     };
     const prdnApprovedByParams = {
         globalVar: materialVar.prdnApprovedBy,
         formModel: toRef(frmMaterial.value,'prdnApprovedBy'),
-        selectedVal: '',
+        selectedVal: 0,
     };
     const prPreparedByParams = {
         globalVar: materialVar.prPreparedBy,
         formModel: toRef(frmMaterial.value,'prPreparedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
     const prCheckedByParams = {
         globalVar: materialVar.prCheckedBy,
         formModel: toRef(frmMaterial.value,'prCheckedBy'),
-        selectedVal: '',
+        selectedVal: 461,
     };
     const prApprovedByParams = {
         globalVar: materialVar.prApprovedBy,
         formModel: toRef(frmMaterial.value,'prApprovedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const ppcPreparedByParams = {
         globalVar: materialVar.ppcPreparedBy,
         formModel: toRef(frmMaterial.value,'ppcPreparedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
     const ppcCheckedByParams = {
         globalVar: materialVar.ppcCheckedBy,
         formModel: toRef(frmMaterial.value,'ppcCheckedBy'),
-        selectedVal: '',
+        selectedVal: 461,
     };
     const ppcApprovedByParams = {
         globalVar: materialVar.ppcApprovedBy,
         formModel: toRef(frmMaterial.value,'ppcApprovedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const emsPreparedByParams = {
         globalVar: materialVar.emsPreparedBy,
         formModel: toRef(frmMaterial.value,'emsPreparedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
     const emsCheckedByParams = {
         globalVar: materialVar.emsCheckedBy,
         formModel: toRef(frmMaterial.value,'emsCheckedBy'),
-        selectedVal: '',
+        selectedVal: 461,
     };
     const emsApprovedByParams = {
         globalVar: materialVar.emsApprovedBy,
         formModel: toRef(frmMaterial.value,'emsApprovedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const qcPreparedByParams = {
         globalVar: materialVar.qcPreparedBy,
         formModel: toRef(frmMaterial.value,'qcPreparedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
     const qcCheckedByParams = {
         globalVar: materialVar.qcCheckedBy,
         formModel: toRef(frmMaterial.value,'qcCheckedBy'),
-        selectedVal: '',
+        selectedVal: 461,
     };
     const qcApprovedByParams = {
         globalVar: materialVar.qcApprovedBy,
         formModel: toRef(frmMaterial.value,'qcApprovedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const proEnggPreparedByParams = {
         globalVar: materialVar.proEnggPreparedBy,
         formModel: toRef(frmMaterial.value,'proEnggPreparedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
     const proEnggCheckedByParams = {
         globalVar: materialVar.proEnggCheckedBy,
         formModel: toRef(frmMaterial.value,'proEnggCheckedBy'),
-        selectedVal: '',
+        selectedVal: 461,
     };
     const proEnggApprovedByParams = {
         globalVar: materialVar.proEnggApprovedBy,
         formModel: toRef(frmMaterial.value,'proEnggApprovedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const mainEnggPreparedByParams = {
         globalVar: materialVar.mainEnggPreparedBy,
         formModel: toRef(frmMaterial.value,'mainEnggPreparedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
     const mainEnggCheckedByParams = {
         globalVar: materialVar.mainEnggCheckedBy,
         formModel: toRef(frmMaterial.value,'mainEnggCheckedBy'),
-        selectedVal: '',
+        selectedVal: 461,
     };
     const mainEnggApprovedByParams = {
         globalVar: materialVar.mainEnggApprovedBy,
         formModel: toRef(frmMaterial.value,'mainEnggApprovedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
 
     const enggPreparedByParams = {
         globalVar: materialVar.enggPreparedBy,
         formModel: toRef(frmMaterial.value,'enggPreparedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
     const enggCheckedByParams = {
         globalVar: materialVar.enggCheckedBy,
         formModel: toRef(frmMaterial.value,'enggCheckedBy'),
-        selectedVal: '',
+        selectedVal: 461,
     };
     const enggApprovedByParams = {
         globalVar: materialVar.enggApprovedBy,
         formModel: toRef(frmMaterial.value,'enggApprovedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const qaPreparedByParams = {
         globalVar: materialVar.qaPreparedBy,
         formModel: toRef(frmMaterial.value,'qaPreparedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
     const qaCheckedByParams = {
         globalVar: materialVar.qaCheckedBy,
         formModel: toRef(frmMaterial.value,'qaCheckedBy'),
-        selectedVal: '',
+        selectedVal: 461,
     };
     const qaApprovedByParams = {
         globalVar: materialVar.qaApprovedBy,
         formModel: toRef(frmMaterial.value,'qaApprovedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     //Columns
     const ecrColumns = [
@@ -953,6 +953,7 @@
         axiosFetchData(apiParams,'api/get_material_ecr_by_id',function(response){
             let data = response.data;
             let material = data.material[0];
+            let internalExternal = data.internalExternal;
 
             frmMaterial.value.ecrsId = material.ecrs_id;
             frmMaterial.value.materialId = material.id;
@@ -967,7 +968,11 @@
             frmMaterial.value.materialSample = material.material_sample;
             frmMaterial.value.coc = material.coc;
             frmMaterial.value.remarks = material.remarks;
-            console.log(material);
+            isInternalExternal.value = internalExternal;
+            // if(internalExternal === "External"){
+
+            // }
+
         });
     }
     const saveMaterial = async () =>{
@@ -986,23 +991,49 @@
             ["rohs", frmMaterial.value.rohs],
             ["material_sample", frmMaterial.value.materialSample],
             ["coc", frmMaterial.value.coc],
-            //  , frmMaterial.value.materialSupplier],
-            //  , frmMaterial.value.materialColor],
-            ["prPreparedBy", frmMaterial.value.prPreparedBy],
-            ["prCheckedBy", frmMaterial.value.prCheckedBy],
-            ["prApprovedBy", frmMaterial.value.prApprovedBy],
-            ["ppcPreparedBy", frmMaterial.value.ppcPreparedBy],
-            ["ppcCheckedBy", frmMaterial.value.ppcCheckedBy],
-            ["ppcApprovedBy", frmMaterial.value.ppcApprovedBy],
+
+            ["prdn_prepared_by", frmMaterial.value.prdnPreparedBy],
+            ["prdn_checked_by", frmMaterial.value.prdnCheckedBy],
+            ["prdn_approved_by", frmMaterial.value.prdnApprovedBy],
+            ["pr_prepared_by", frmMaterial.value.prPreparedBy],
+            ["pr_checked_by", frmMaterial.value.prCheckedBy],
+            ["pr_approved_by", frmMaterial.value.prApprovedBy],
+            ["ppc_prepared_by", frmMaterial.value.ppcPreparedBy],
+            ["ppc_checked_by", frmMaterial.value.ppcCheckedBy],
+            ["ppc_approved_by", frmMaterial.value.ppcApprovedBy],
+            ["ems_prepared_by", frmMaterial.value.emsPreparedBy],
+            ["ems_checked_by", frmMaterial.value.emsCheckedBy],
+            ["ems_approved_by", frmMaterial.value.emsApprovedBy],
+
+            ["qc_prepared_by", frmMaterial.value.qcPreparedBy],
+            ["qc_checked_by", frmMaterial.value.qcCheckedBy],
+            ["qc_approved_by", frmMaterial.value.qcApprovedBy],
+
+            ["pro_engg_prepared_by", frmMaterial.value.proEnggPreparedBy],
+            ["pro_engg_checked_by", frmMaterial.value.proEnggCheckedBy],
+            ["pro_engg_approved_by", frmMaterial.value.proEnggApprovedBy],
+
+            ["main_engg_prepared_by", frmMaterial.value.mainEnggPreparedBy],
+            ["main_engg_checked_by", frmMaterial.value.mainEnggCheckedBy],
+            ["main_engg_approved_by", frmMaterial.value.mainEnggApprovedBy],
+
+            ["engg_prepared_by", frmMaterial.value.enggPreparedBy],
+            ["engg_checked_by", frmMaterial.value.enggCheckedBy],
+            ["engg_approved_by", frmMaterial.value.enggApprovedBy],
+
+            ["qa_prepared_by", frmMaterial.value.qaPreparedBy],
+            ["qa_checked_by", frmMaterial.value.qaCheckedBy],
+            ["qa_approved_by", frmMaterial.value.qaApprovedBy],
 
         ].forEach(([key, value]) =>
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_material', (response) =>{
-            modal.SaveMaterial.hide();
+            // modal.SaveMaterial.hide();
             tblEcrByCategoryStatus.value.dt.draw();
         });
     }
+
     const frmUploadMaterialRef = async () => {
         let formData = new FormData();
         materialRef.value.forEach((file, index) => {

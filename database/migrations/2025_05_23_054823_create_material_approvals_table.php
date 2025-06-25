@@ -15,6 +15,7 @@ class CreateMaterialApprovalsTable extends Migration
     {
         Schema::create('material_approvals', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('materials_id')->references('id')->on('materials')->comment ='Material Id';
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
             $table->string('status')->default('RUP')->comment('RUP - For Requestor Update');
             $table->string('approval_status')->default('RUP')->comment('RUP - For Requestor Update');
