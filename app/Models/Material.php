@@ -28,5 +28,9 @@ class Material extends Model
     {
         return $this->hasMany(MaterialApproval::class, 'materials_id', 'id')->whereNull('deleted_at');
     }
+    public function material_approvals_pending()
+    {
+        return $this->hasMany(MaterialApproval::class, 'materials_id', 'id')->where('status','PEN')->whereNull('deleted_at');
+    }
 
 }

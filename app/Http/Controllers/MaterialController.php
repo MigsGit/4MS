@@ -27,6 +27,7 @@ class MaterialController extends Controller
             $data = [];
             $relations = [
                 'pmi_approvals_pending.rapidx_user',
+                'material.material_approvals_pending.rapidx_user',
                 'material',
             ];
             $conditions = [
@@ -45,11 +46,11 @@ class MaterialController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 if($row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
-                $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" materials-id="'.$row->material[0]->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecr-id="'.$row->id.'" materials-id="'.$row->material[0]->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 if($row->material[0]->status === "RUP"){
-                    $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecr-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
                 $result .= '</ul>';
                 $result .= '</div>';
@@ -58,14 +59,17 @@ class MaterialController extends Controller
             })
             ->addColumn('get_status',function ($row) use($request){
                 //TODO: Read Approval Status, Tab Based on Department
-                $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
+                $currentApprover = $row->material[0]->material_approvals_pending[0]['rapidx_user']['name'] ?? '';
                 $getStatus = $this->getStatus($row->material[0]->status);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
-                $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
+                if( $currentApprover != ''){
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
+                }
                 if( $row->material[0]->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
+                    $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                     $approvalStatus = $row->material[0]->approval_status;
                     $getPmiApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
@@ -390,25 +394,15 @@ class MaterialController extends Controller
             $materialApprovalCurrent = MaterialApproval::where('materials_id',$selectedId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
-            ->limit(1)
-            ->get(['rapidx_user_id','id']);
-            if($materialApprovalCurrent[0]->rapidx_user_id != session('rapidx_user_id')){
+            ->first();
+            if($materialApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
-
-            //Get Current Status
-            $materialApproval = Material::where('id',$selectedId)
-            ->limit(1)
-            ->get(['approval_status']);
-            //Update the ECR Approval Status
-            $materialApprovalValidated = [
+            //Update the Material Approval Status
+            $materialApprovalCurrent->update([
                 'status' => $request->status,
                 'remarks' => $request->remarks,
-            ];
-            $materialApprovalConditions = [
-                'id' => $materialApprovalCurrent[0]->id,
-            ];
-            $this->resourceInterface->updateConditions(MaterialApproval::class,$materialApprovalConditions,$materialApprovalValidated);
+            ]);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
            $materialApproval = MaterialApproval::where('materials_id',$selectedId)
            ->whereNotNull('rapidx_user_id')
@@ -432,7 +426,6 @@ class MaterialController extends Controller
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
             }else{
-
                 $enviromentConditions = [
                     'id' => $selectedId,
                 ];
@@ -469,10 +462,14 @@ class MaterialController extends Controller
                      $status = 'For Requestor Update';
                      $bgStatus = 'badge rounded-pill bg-primary';
                      break;
-                 case 'QA':
-                     $status = 'QA Approval';
-                     $bgStatus = 'badge rounded-pill bg-warning';
-                     break;
+                case 'FORAPP':
+                    $status = 'For Approval';
+                    $bgStatus = 'badge rounded-pill bg-warning';
+                    break;
+                 case 'PMIAPP':
+                    $status = 'PMI Approval';
+                    $bgStatus = 'badge rounded-pill bg-info';
+                    break;
                  case 'DIS':
                      $status = 'DISAPPROVED';
                      $bgStatus = 'badge rounded-pill bg-danger';

@@ -372,7 +372,8 @@
                             ecrsId : ecrsId
                         }
                         getCurrentPmiInternalApprover(approverParams);
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw()
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        
                         tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         modal.SaveEnvironment.show();
                     });

@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class MaterialApproval extends Model
 {
     protected $fillable = [
-        'status'
+        'status',
+        'remarks',
     ];
     public function rapidx_user()
     {

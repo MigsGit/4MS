@@ -180,17 +180,26 @@ class CommonController extends Controller
                         'rapidx_user_id'
                     ];
                     break;
+                case 'pmiApproval':
+                    $currentModel = PmiApproval::class;
+                    $conditions = [
+                        'ecrs_id' => $request->selectedId,
+                        'status' => 'PEN',
+                    ];
+                    $data = [
+                        'rapidx_user_id'
+                    ];
+                    break;
                 default:
                     # code...
                     break;
             }
-
             $relations = [];
             $approvalQuery = $this->resourceInterface->readCustomEloquent($currentModel,$data,$relations,$conditions);
             $approval =  $approvalQuery
             ->whereNotNull('rapidx_user_id')
-            ->first();
-            $isSessionApprover =  session('rapidx_user_id') ===  $approval->rapidx_user_id ? true: false ;
+            ->get();
+            $isSessionApprover =  session('rapidx_user_id') ===  $approval[0]->rapidx_user_id ? true: false ;
             // $approval[0]->rapidx_user_id;
             return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover]);
         } catch (Exception $e) {

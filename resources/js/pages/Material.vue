@@ -12,7 +12,7 @@
                             width="100%" cellspacing="0"
                             class="table mt-2"
                             ref="tblEcrByCategoryStatus"
-                            :columns="ecrColumns"
+                            :columns="tblEcrByCategoryStatusColumns"
                             ajax="api/load_ecr_material_by_status?category=Material&&status=AP"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
@@ -488,8 +488,11 @@
                                 </div> -->
                             </div>
                         </div>
-                        <div class="row" v-show="isModalMaterial === 'View'">
+                        <div class="row" v-show="isModalMaterial === 'View'  && currentStatus === 'FORAPP'">
                             <div class="card">
+                                <div class="card-header">
+                                    <h3> Material Approvers</h3>
+                                </div>
                                 <div class="card-body overflow-auto">
                                     <DataTable
                                         width="100%" cellspacing="0"
@@ -497,6 +500,48 @@
                                         ref="tblMaterialApproval"
                                         :columns="tblMaterialApprovalColumns"
                                         ajax="api/load_material_approval_by_meterial_id"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering: false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Role</th>
+                                                <th>Approver Name</th>
+                                                <th>Remarks</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3" v-show="isModalMaterial === 'View' && currentStatus === 'PMIAPP'" >
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
+                                ECR Approver Summary
+                            </button>
+                        </h5>
+                    <div id="collapsePmiInternalApprovalSummary" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-header">
+                            <h3> PMI Approvers </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblPmiInternalApproverSummary"
+                                        :columns="tblPmiInternalApproverSummaryColumns"
+                                        ajax="api/load_pmi_internal_approval_summary"
                                         :options="{
                                             paging:false,
                                             serverSide: true, //Serverside true will load the network
@@ -634,7 +679,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(selectedMaterialsId,approvalRemarks,isApprovedDisappproved)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
 </template>
@@ -695,6 +740,7 @@
 
     const isModalMaterial = ref(null);
     const selectedEcrsId = ref(null);
+    const currentStatus = ref(null);
     const selectedEcrsIdEncrypted = ref(null);
     const arrOriginalFilenames = ref(null);
     const materialRef = ref(null);
@@ -702,6 +748,8 @@
     const isSelectReadonly  = ref(true);
     const tblEcrByCategoryStatus = ref(null);
     const tblMaterialApproval = ref(null);
+    const tblPmiInternalApproverSummary = ref(null);
+
 
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);
@@ -709,7 +757,7 @@
     const modalApproval = ref(null);
 
     //Columns
-     const ecrColumns = [
+     const tblEcrByCategoryStatusColumns = [
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
@@ -727,35 +775,27 @@
                         getRapidxUserByIdOpt(prdnPreparedByParams);
                         getRapidxUserByIdOpt(prdnCheckedByParams);
                         getRapidxUserByIdOpt(prdnApprovedByParams);
-
                         getRapidxUserByIdOpt(prPreparedByParams);
                         getRapidxUserByIdOpt(prCheckedByParams);
                         getRapidxUserByIdOpt(prApprovedByParams);
-
                         getRapidxUserByIdOpt(ppcPreparedByParams);
                         getRapidxUserByIdOpt(ppcCheckedByParams);
                         getRapidxUserByIdOpt(ppcApprovedByParams);
-
                         getRapidxUserByIdOpt(emsPreparedByParams);
                         getRapidxUserByIdOpt(emsCheckedByParams);
                         getRapidxUserByIdOpt(emsApprovedByParams);
-
                         getRapidxUserByIdOpt(qcPreparedByParams);
                         getRapidxUserByIdOpt(qcCheckedByParams);
                         getRapidxUserByIdOpt(qcApprovedByParams);
-
                         getRapidxUserByIdOpt(proEnggPreparedByParams);
                         getRapidxUserByIdOpt(proEnggCheckedByParams);
                         getRapidxUserByIdOpt(proEnggApprovedByParams);
-
                         getRapidxUserByIdOpt(mainEnggPreparedByParams);
                         getRapidxUserByIdOpt(mainEnggCheckedByParams);
                         getRapidxUserByIdOpt(mainEnggApprovedByParams);
-
                         getRapidxUserByIdOpt(enggPreparedByParams);
                         getRapidxUserByIdOpt(enggCheckedByParams);
                         getRapidxUserByIdOpt(enggApprovedByParams);
-
                         getRapidxUserByIdOpt(qaPreparedByParams);
                         getRapidxUserByIdOpt(qaCheckedByParams);
                         getRapidxUserByIdOpt(qaApprovedByParams);
@@ -773,17 +813,31 @@
                     btnViewMaterialById.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecr-id');
                         let materialsId = this.getAttribute('materials-id');
-                        let approverParams = {
+                        let materialStatus = this.getAttribute('material-status');
+                        let materialApproverParams = {
                             selectedId : materialsId,
                             approvalType : 'materialApproval'
                         }
+                        let pmiApproverParams = {
+                            selectedId : ecrsId,
+                            approvalType : 'pmiApproval'
+                        }
                         selectedEcrsId.value = ecrsId;
                         selectedMaterialsId.value = materialsId;
+                        currentStatus.value = materialStatus;
                         isModalMaterial.value = 'View';
-                        getCurrentApprover(approverParams);
                         getMaterialEcrById(ecrsId);
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
+                        if( materialStatus === 'FORAPP'){
+                            getCurrentApprover(materialApproverParams);
+                            tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
+                        }
+                        alert(materialStatus)
+                        if( materialStatus === 'PMIAPP'){
+                            getCurrentApprover(pmiApproverParams);
+                            tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
+                        }
+
                     });
                 }
             }
@@ -838,6 +892,13 @@
         {   data: 'remarks'} ,
     ];
     const tblMaterialApprovalColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
+    ];
+    const tblPmiInternalApproverSummaryColumns = [
         {   data: 'get_count'} ,
         {   data: 'get_role'} ,
         {   data: 'get_approver_name'} ,
@@ -1012,20 +1073,27 @@
         isApprovedDisappproved.value = decision;
         modal.Approval.show();
     }
-    const saveApproval = async (selectedId,remarks,isApprovedDisappproved,approvalType = null) => {
+    const saveApproval = async (selectedId,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
         let apiParams = {
             selectedId : selectedId,
             status : isApprovedDisappproved,
             remarks : remarks,
         }
-        if(approvalType === 'PmiApproval'){
+        if(approvalType === 'PMIAPP'){
+            let apiParams = {
+                ecrsId : selectedEcrsId,
+                status : isApprovedDisappproved,
+                remarks : remarks,
+            }
             axiosFetchData(apiParams,'api/save_approval',function(response){
                 modal.Approval.hide();
+                modal.SaveMaterial.hide();
+                tblEcrByCategoryStatus.value.dt.draw();
             });
             return;
         }
         axiosFetchData(apiParams,'api/save_material_approval',function(response){
-            console.log(response);
+            tblEcrByCategoryStatus.value.dt.draw();
             modal.Approval.hide();
             modal.SaveMaterial.hide();
         });
