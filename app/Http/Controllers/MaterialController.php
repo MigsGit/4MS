@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ecr;
 use App\Models\Material;
+use App\Models\PmiApproval;
 use Illuminate\Http\Request;
 use App\Models\MaterialApproval;
 use Illuminate\Support\Facades\DB;
@@ -184,7 +185,7 @@ class MaterialController extends Controller
                    'id' => $materialsId
                 ];
                  $currentMaterialId = $materialsId;
-            //     $this->resourceInterface->updateConditions(Material::class,$conditions,$materialRequest);
+                $this->resourceInterface->updateConditions(Material::class,$conditions,$materialRequest);
             }else{
                 $materialRequest['created_at'] = now();
                 $insertMaterialById = $this->resourceInterface->create(Material::class,$materialRequest);
@@ -264,6 +265,20 @@ class MaterialController extends Controller
                     'approval_status' => $materialApproval->approval_status,
                     'status' => 'FORAPP', //FOR APPROVAL
                 ]);
+            }
+            //Reset the PMI Approval
+            PmiApproval::whereNotNull('rapidx_user_id')
+            ->where('ecrs_id', $currentEcrsId)
+            ->update([
+                'status' => '-',
+                'remarks' => '',
+            ]);
+            //Update Pending PMI Approval
+            $firstPmiApproval =  PmiApproval::whereNotNull('rapidx_user_id')
+            ->where('ecrs_id', $currentEcrsId)
+            ->first();
+            if ($firstPmiApproval) {
+                $firstPmiApproval->update(['status' => 'PEN']);
             }
             DB::commit();
             return response()->json(['is_success' => 'true']);
@@ -466,9 +481,13 @@ class MaterialController extends Controller
                     $status = 'For Approval';
                     $bgStatus = 'badge rounded-pill bg-warning';
                     break;
-                 case 'PMIAPP':
+                case 'PMIAPP':
                     $status = 'PMI Approval';
                     $bgStatus = 'badge rounded-pill bg-info';
+                    break;
+                case 'OK':
+                    $status = 'Completed';
+                    $bgStatus = 'badge rounded-pill bg-success';
                     break;
                  case 'DIS':
                      $status = 'DISAPPROVED';

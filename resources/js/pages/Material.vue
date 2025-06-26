@@ -679,7 +679,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
 </template>
@@ -832,7 +832,6 @@
                             getCurrentApprover(materialApproverParams);
                             tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
                         }
-                        alert(materialStatus)
                         if( materialStatus === 'PMIAPP'){
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
@@ -1085,7 +1084,7 @@
                 status : isApprovedDisappproved,
                 remarks : remarks,
             }
-            axiosFetchData(apiParams,'api/save_approval',function(response){
+            axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
                 modal.Approval.hide();
                 modal.SaveMaterial.hide();
                 tblEcrByCategoryStatus.value.dt.draw();

@@ -269,8 +269,11 @@ class CommonController extends Controller
             DB::beginTransaction();
             $ecrsId = $request->ecrsId;
             //Get Current Ecr Approval is equal to Current Session
-            $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)->where('status','PEN')->limit(1)->get(['rapidx_user_id']);
-            if($pmiInternalApprovalCurrent[0]->rapidx_user_id != session('rapidx_user_id')){
+            $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            if($pmiInternalApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
             //Get the ECR Category
@@ -306,20 +309,16 @@ class CommonController extends Controller
                     break;
             }
             //Get Current Status
-            $pmiInternalApproval = $currentModel::where('ecrs_id',$ecrsId)->limit(1)->get(['approval_status']);
-            //Update the ECR Approval Status
-            $pmiInternalApprovalValidated = [
+            $pmiInternalApprovalCurrent->update([
                 'status' => $request->status,
                 'remarks' => $request->remarks,
-            ];
-            $pmiInternalApprovalConditions = [
-                'ecrs_id' => $ecrsId,
-                'approval_status' => $pmiInternalApproval[0]->approval_status,
-                'rapidx_user_id' => session('rapidx_user_id'), //Double check the rapidx user id to update status
-            ];
-            $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
+            ]);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-           $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)->where('status','-')->limit(1)->get(['id','approval_status']);
+           $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)
+           ->whereNotNull('rapidx_user_id')
+           ->where('status','-')
+           ->limit(1)
+           ->get(['id','approval_status']);
             if ( count($pmiInternalApproval) != 0){
                 $pmiInternalApprovalValidated = [
                     'status' => 'PEN',
