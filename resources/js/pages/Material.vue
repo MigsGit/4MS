@@ -784,7 +784,6 @@
                         getMaterialEcrById(ecrsId);
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
-                        modal.SaveMaterial.show();
                     });
                 }
             }
@@ -862,137 +861,137 @@
     const prdnPreparedByParams = {
         globalVar: materialVar.prdnPreparedBy,
         formModel: toRef(frmMaterial.value,'prdnPreparedBy'),
-        selectedVal: 0,
+        selectedVal: '',
     };
     const prdnCheckedByParams = {
         globalVar: materialVar.prdnCheckedBy,
         formModel: toRef(frmMaterial.value,'prdnCheckedBy'),
-        selectedVal: 0,
+        selectedVal: '',
     };
     const prdnApprovedByParams = {
         globalVar: materialVar.prdnApprovedBy,
         formModel: toRef(frmMaterial.value,'prdnApprovedBy'),
-        selectedVal: 0,
+        selectedVal: '',
     };
     const prPreparedByParams = {
         globalVar: materialVar.prPreparedBy,
         formModel: toRef(frmMaterial.value,'prPreparedBy'),
-        selectedVal: 237,
+        selectedVal: '',
     };
     const prCheckedByParams = {
         globalVar: materialVar.prCheckedBy,
         formModel: toRef(frmMaterial.value,'prCheckedBy'),
-        selectedVal: 461,
+        selectedVal: '',
     };
     const prApprovedByParams = {
         globalVar: materialVar.prApprovedBy,
         formModel: toRef(frmMaterial.value,'prApprovedBy'),
-        selectedVal: 530,
+        selectedVal: '',
     };
     const ppcPreparedByParams = {
         globalVar: materialVar.ppcPreparedBy,
         formModel: toRef(frmMaterial.value,'ppcPreparedBy'),
-        selectedVal: 237,
+        selectedVal: '',
     };
     const ppcCheckedByParams = {
         globalVar: materialVar.ppcCheckedBy,
         formModel: toRef(frmMaterial.value,'ppcCheckedBy'),
-        selectedVal: 461,
+        selectedVal: '',
     };
     const ppcApprovedByParams = {
         globalVar: materialVar.ppcApprovedBy,
         formModel: toRef(frmMaterial.value,'ppcApprovedBy'),
-        selectedVal: 530,
+        selectedVal: '',
     };
     const emsPreparedByParams = {
         globalVar: materialVar.emsPreparedBy,
         formModel: toRef(frmMaterial.value,'emsPreparedBy'),
-        selectedVal: 237,
+        selectedVal: '',
     };
     const emsCheckedByParams = {
         globalVar: materialVar.emsCheckedBy,
         formModel: toRef(frmMaterial.value,'emsCheckedBy'),
-        selectedVal: 461,
+        selectedVal: '',
     };
     const emsApprovedByParams = {
         globalVar: materialVar.emsApprovedBy,
         formModel: toRef(frmMaterial.value,'emsApprovedBy'),
-        selectedVal: 530,
+        selectedVal: '',
     };
     const qcPreparedByParams = {
         globalVar: materialVar.qcPreparedBy,
         formModel: toRef(frmMaterial.value,'qcPreparedBy'),
-        selectedVal: 237,
+        selectedVal: '',
     };
     const qcCheckedByParams = {
         globalVar: materialVar.qcCheckedBy,
         formModel: toRef(frmMaterial.value,'qcCheckedBy'),
-        selectedVal: 461,
+        selectedVal: '',
     };
     const qcApprovedByParams = {
         globalVar: materialVar.qcApprovedBy,
         formModel: toRef(frmMaterial.value,'qcApprovedBy'),
-        selectedVal: 530,
+        selectedVal: '',
     };
     const proEnggPreparedByParams = {
         globalVar: materialVar.proEnggPreparedBy,
         formModel: toRef(frmMaterial.value,'proEnggPreparedBy'),
-        selectedVal: 237,
+        selectedVal: '',
     };
     const proEnggCheckedByParams = {
         globalVar: materialVar.proEnggCheckedBy,
         formModel: toRef(frmMaterial.value,'proEnggCheckedBy'),
-        selectedVal: 461,
+        selectedVal: '',
     };
     const proEnggApprovedByParams = {
         globalVar: materialVar.proEnggApprovedBy,
         formModel: toRef(frmMaterial.value,'proEnggApprovedBy'),
-        selectedVal: 530,
+        selectedVal: '',
     };
     const mainEnggPreparedByParams = {
         globalVar: materialVar.mainEnggPreparedBy,
         formModel: toRef(frmMaterial.value,'mainEnggPreparedBy'),
-        selectedVal: 237,
+        selectedVal: '',
     };
     const mainEnggCheckedByParams = {
         globalVar: materialVar.mainEnggCheckedBy,
         formModel: toRef(frmMaterial.value,'mainEnggCheckedBy'),
-        selectedVal: 461,
+        selectedVal: '',
     };
     const mainEnggApprovedByParams = {
         globalVar: materialVar.mainEnggApprovedBy,
         formModel: toRef(frmMaterial.value,'mainEnggApprovedBy'),
-        selectedVal: 530,
+        selectedVal: '',
     };
     const enggPreparedByParams = {
         globalVar: materialVar.enggPreparedBy,
         formModel: toRef(frmMaterial.value,'enggPreparedBy'),
-        selectedVal: 237,
+        selectedVal: '',
     };
     const enggCheckedByParams = {
         globalVar: materialVar.enggCheckedBy,
         formModel: toRef(frmMaterial.value,'enggCheckedBy'),
-        selectedVal: 461,
+        selectedVal: '',
     };
     const enggApprovedByParams = {
         globalVar: materialVar.enggApprovedBy,
         formModel: toRef(frmMaterial.value,'enggApprovedBy'),
-        selectedVal: 530,
+        selectedVal: '',
     };
     const qaPreparedByParams = {
         globalVar: materialVar.qaPreparedBy,
         formModel: toRef(frmMaterial.value,'qaPreparedBy'),
-        selectedVal: 237,
+        selectedVal: '',
     };
     const qaCheckedByParams = {
         globalVar: materialVar.qaCheckedBy,
         formModel: toRef(frmMaterial.value,'qaCheckedBy'),
-        selectedVal: 461,
+        selectedVal: '',
     };
     const qaApprovedByParams = {
         globalVar: materialVar.qaApprovedBy,
         formModel: toRef(frmMaterial.value,'qaApprovedBy'),
-        selectedVal: 530,
+        selectedVal: '',
     };
 
     onMounted( async ()=>{
@@ -1021,12 +1020,14 @@
         }
         if(approvalType === 'PmiApproval'){
             axiosFetchData(apiParams,'api/save_approval',function(response){
-                console.log(response);
+                modal.Approval.hide();
             });
             return;
         }
         axiosFetchData(apiParams,'api/save_material_approval',function(response){
             console.log(response);
+            modal.Approval.hide();
+            modal.SaveMaterial.hide();
         });
     }
     const changeMaterialRef = async (event)  => {
@@ -1056,6 +1057,7 @@
             let data = response.data;
             let material = data.material[0];
             let internalExternal = data.internalExternal;
+            let materialApprovalCollection = data.materialApprovalCollection;
 
             frmMaterial.value.ecrsId = material.ecrs_id;
             frmMaterial.value.materialId = material.id;
@@ -1071,10 +1073,86 @@
             frmMaterial.value.coc = material.coc;
             frmMaterial.value.remarks = material.remarks;
             isInternalExternal.value = internalExternal;
-            // if(internalExternal === "External"){
 
-            // }
+            let prPreparedBy = materialApprovalCollection.PURPB[0].rapidx_user_id ?? "0";
+            let prCheckedBy = materialApprovalCollection.PURCB[0].rapidx_user_id ?? "0";
+            let prApprovedBy = materialApprovalCollection.PURAB[0].rapidx_user_id ?? "0";
+            let ppcPreparedBy = materialApprovalCollection.PPCPB[0].rapidx_user_id ?? "0";
+            let ppcCheckedBy = materialApprovalCollection.PPCCB[0].rapidx_user_id ?? "0";
+            let ppcApprovedBy = materialApprovalCollection.PPCAB[0].rapidx_user_id ?? "0";
+            let emsPreparedBy = materialApprovalCollection.EMSPB[0].rapidx_user_id ?? "0";
+            let emsCheckedBy = materialApprovalCollection.EMSCB[0].rapidx_user_id ?? "0";
+            let emsApprovedBy = materialApprovalCollection.EMSAB[0].rapidx_user_id ?? "0";
+            let qcPreparedBy = materialApprovalCollection.LQCPB[0].rapidx_user_id ?? "0";
+            let qcCheckedBy = materialApprovalCollection.LQCCB[0].rapidx_user_id ?? "0";
+            let qcApprovedBy = materialApprovalCollection.LQCAB[0].rapidx_user_id ?? "0";
+            let qaPreparedBy = materialApprovalCollection.QAPB[0].rapidx_user_id ?? "0";
+            let qaCheckedBy = materialApprovalCollection.QACB[0].rapidx_user_id ?? "0";
+            let qaApprovedBy = materialApprovalCollection.QAAB[0].rapidx_user_id ?? "0";
+            setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be
+                frmMaterial.value.prPreparedBy = prPreparedBy
+                frmMaterial.value.prCheckedBy = prCheckedBy
+                frmMaterial.value.prApprovedBy = prApprovedBy
+                frmMaterial.value.ppcPreparedBy = ppcPreparedBy
+                frmMaterial.value.ppcCheckedBy = ppcCheckedBy
+                frmMaterial.value.ppcApprovedBy = ppcApprovedBy
+                frmMaterial.value.emsPreparedBy = emsPreparedBy
+                frmMaterial.value.emsCheckedBy = emsCheckedBy
+                frmMaterial.value.emsApprovedBy = emsApprovedBy
+                frmMaterial.value.qcPreparedBy = qcPreparedBy
+                frmMaterial.value.qcCheckedBy = qcCheckedBy
+                frmMaterial.value.qcApprovedBy = qcApprovedBy
+                frmMaterial.value.qaPreparedBy = qaPreparedBy
+                frmMaterial.value.qaCheckedBy = qaCheckedBy
+                frmMaterial.value.qaApprovedBy = qaApprovedBy
+            }, 500);
+            if (internalExternal === "External"){
+                setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
+                    let prdnPreparedBy = materialApprovalCollection.PRDNPB[0].rapidx_user_id ?? "0";
+                    let prdnCheckedBy = materialApprovalCollection.PRDNCB[0].rapidx_user_id ?? "0";
+                    let prdnApprovedBy = materialApprovalCollection.PRDNAP[0].rapidx_user_id ?? "0";
+                    let mainEnggPreparedBy = materialApprovalCollection.MENGPB[0].rapidx_user_id ?? "0";
+                    let mainEnggCheckedBy = materialApprovalCollection.MENGCB[0].rapidx_user_id ?? "0";
+                    let mainEnggApprovedBy = materialApprovalCollection.MENGAB[0].rapidx_user_id ?? "0";
+                    let proEnggPreparedBy = materialApprovalCollection.PENGPB[0].rapidx_user_id ?? "0";
+                    let proEnggCheckedBy = materialApprovalCollection.PENGCB[0].rapidx_user_id ?? "0";
+                    let proEnggApprovedBy = materialApprovalCollection.PENGAB[0].rapidx_user_id ?? "0";
+                    frmMaterial.value.prdnPreparedBy = prdnPreparedBy;
+                    frmMaterial.value.prdnCheckedBy = prdnCheckedBy;
+                    frmMaterial.value.prdnApprovedBy = prdnApprovedBy;
+                    frmMaterial.value.mainEnggPreparedBy = mainEnggPreparedBy;
+                    frmMaterial.value.mainEnggCheckedBy = mainEnggCheckedBy;
+                    frmMaterial.value.mainEnggApprovedBy = mainEnggApprovedBy;
+                    frmMaterial.value.proEnggPreparedBy = proEnggPreparedBy;
+                    frmMaterial.value.proEnggCheckedBy = proEnggCheckedBy;
+                    frmMaterial.value.proEnggApprovedBy = proEnggApprovedBy;
+                    frmMaterial.value.engPreparedBy = '0'
+                    frmMaterial.value.engCheckedBy = '0'
+                    frmMaterial.value.engApprovedBy = '0'
 
+                }, 500);
+            }
+            if (internalExternal === "Internal"){
+                setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
+                    let engPreparedBy = materialApprovalCollection.ENGPB[0].rapidx_user_id ?? "0";
+                    let engCheckedBy = materialApprovalCollection.ENGCB[0].rapidx_user_id ?? "0";
+                    let engApprovedBy = materialApprovalCollection.ENGAB[0].rapidx_user_id ?? "0";
+
+                    frmMaterial.value.prdnPreparedBy = '0';
+                    frmMaterial.value.prdnCheckedBy = '0';
+                    frmMaterial.value.prdnApprovedBy = '0';
+                    frmMaterial.value.mengPreparedBy = '0';
+                    frmMaterial.value.mengCheckedBy = '0';
+                    frmMaterial.value.mengApprovedBy = '0';
+                    frmMaterial.value.pengPreparedBy = '0';
+                    frmMaterial.value.pengCheckedBy = '0';
+                    frmMaterial.value.pengApprovedBy = '0';
+                    frmMaterial.value.engPreparedBy = engPreparedBy;
+                    frmMaterial.value.engCheckedBy = engCheckedBy;
+                    frmMaterial.value.engApprovedBy = engApprovedBy;
+                }, 500);
+            }
+            modal.SaveMaterial.show();
         });
     }
     const saveMaterial = async () =>{
@@ -1093,7 +1171,6 @@
             ["rohs", frmMaterial.value.rohs],
             ["material_sample", frmMaterial.value.materialSample],
             ["coc", frmMaterial.value.coc],
-
             ["prdn_prepared_by", frmMaterial.value.prdnPreparedBy],
             ["prdn_checked_by", frmMaterial.value.prdnCheckedBy],
             ["prdn_approved_by", frmMaterial.value.prdnApprovedBy],
@@ -1141,5 +1218,6 @@
             console.log(response);
         });
     }
+
 </script>
 

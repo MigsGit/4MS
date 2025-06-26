@@ -158,7 +158,6 @@ export default function useEcr(){
                 }),
             );
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
-            console.log('selectedVal',params.selectedVal);
         });
     }
     const getEcrById = async (ecrId) => {
@@ -229,7 +228,6 @@ export default function useEcr(){
                     if (qaCheckedBy.length != 0){
                         frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id ?? 0;
                         frmEcrQadRows.value.qadApprovedByInternal = qaInternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id;
-
                     }
 
                 }
@@ -303,6 +301,8 @@ export default function useEcr(){
             modal.SaveEcrDetail.hide();
         });
     }
+    
+    //Common Function
     return {
         modal,
         ecrVar,

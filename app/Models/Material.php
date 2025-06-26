@@ -20,4 +20,13 @@ class Material extends Model
         return $this->hasOne(Ecr::class, 'id', 'ecrs_id')->whereNull('deleted_at');
     }
 
+    /**
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function material_approvals()
+    {
+        return $this->hasMany(MaterialApproval::class, 'materials_id', 'id')->whereNull('deleted_at');
+    }
+
 }

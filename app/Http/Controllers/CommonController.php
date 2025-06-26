@@ -326,13 +326,14 @@ class CommonController extends Controller
                 $enviromentValidated = [
                     'approval_status' => $pmiInternalApproval[0]->approval_status,
                 ];
-                $this->resourceInterface->updateConditions(Environment::class,$enviromentConditions,$enviromentValidated);
+                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }else{
                 $enviromentConditions = [
                     'ecrs_id' => $ecrsId,
                 ];
                 $enviromentValidated = [
                     'status' => 'OK',
+                    'approval_status' => 'OK',
                 ];
                 $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }
@@ -343,6 +344,7 @@ class CommonController extends Controller
                 ];
                 $enviromentValidated = [
                     'status' => 'DIS',
+                    'approval_status' => 'PB',
                 ];
                 $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }

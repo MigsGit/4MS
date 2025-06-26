@@ -61,7 +61,6 @@ export default function useSettings(){
                 }),
             );
             params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
-            console.log('selectedVal',params.selectedVal);
         });
     }
     const onUserChange = async (selectedParams)=>{

@@ -57,6 +57,7 @@ class MaterialController extends Controller
                 return $result;
             })
             ->addColumn('get_status',function ($row) use($request){
+                //TODO: Read Approval Status, Tab Based on Department
                 $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                 $getStatus = $this->getStatus($row->material[0]->status);
                 $result = '';
@@ -64,8 +65,7 @@ class MaterialController extends Controller
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
                 $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
-
-                if( $row->material[0]->status === 'OK' ){ //TODO: Last Status before PMI Internal
+                if( $row->material[0]->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                     $approvalStatus = $row->material[0]->approval_status;
                     $getPmiApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
@@ -249,8 +249,8 @@ class MaterialController extends Controller
                 });
 
             })->toArray();
-            // MaterialApproval::where('materials_id',$currentMaterialId)->delete();
-            // MaterialApproval::insert($materialApprovalValidated);
+            MaterialApproval::where('materials_id',$currentMaterialId)->delete();
+            MaterialApproval::insert($materialApprovalValidated);
             $materialApproval =  MaterialApproval::whereNotNull('rapidx_user_id')
             ->where('materials_id', $currentMaterialId)->first();
             if ($materialApproval) {
@@ -274,13 +274,16 @@ class MaterialController extends Controller
                 'ecrs_id' => $request->ecrId,
             ];
             $relations = [
-                'ecr'
+                'ecr',
+                'material_approvals',
             ];
             $material = $this->resourceInterface->readWithRelationsConditionsActive(Material::class,[],$relations,$conditions);
+            $materialApprovalCollection = collect($material[0]->material_approvals)->groupBy('approval_status')->toArray();
             return response()->json([
                 'isSuccess' => 'true',
                 'material' => $material,
                 'internalExternal' => $material[0]->ecr['internal_external'],
+                'materialApprovalCollection' => $materialApprovalCollection,
             ]);
         } catch (Exception $e) {
             throw $e;
@@ -388,21 +391,22 @@ class MaterialController extends Controller
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->limit(1)
-            ->get(['rapidx_user_id']);
+            ->get(['rapidx_user_id','id']);
             if($materialApprovalCurrent[0]->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
 
             //Get Current Status
-            $materialApproval = Material::where('id',$selectedId)->limit(1)->get(['approval_status']);
+            $materialApproval = Material::where('id',$selectedId)
+            ->limit(1)
+            ->get(['approval_status']);
             //Update the ECR Approval Status
             $materialApprovalValidated = [
                 'status' => $request->status,
                 'remarks' => $request->remarks,
             ];
             $materialApprovalConditions = [
-                'materials_id' => $selectedId,
-                'approval_status' => $materialApproval[0]->approval_status,
+                'id' => $materialApprovalCurrent[0]->id,
             ];
             $this->resourceInterface->updateConditions(MaterialApproval::class,$materialApprovalConditions,$materialApprovalValidated);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
@@ -428,11 +432,13 @@ class MaterialController extends Controller
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
             }else{
+
                 $enviromentConditions = [
                     'id' => $selectedId,
                 ];
                 $enviromentValidated = [
-                    'status' => 'OK',
+                    'status' => 'PMIAPP',
+                    'approval_status' => 'PMIAPP',
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
             }
@@ -443,6 +449,7 @@ class MaterialController extends Controller
                 ];
                 $enviromentValidated = [
                     'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
             }
