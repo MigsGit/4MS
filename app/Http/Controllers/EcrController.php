@@ -229,6 +229,7 @@ class EcrController extends Controller
                     'status' => 'OK', //APPROVED ECR
                 ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+                
             }
             if ( count($ecrApproval) != 0 ){
                 $ecrApprovalValidated = [

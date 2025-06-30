@@ -600,7 +600,6 @@
         {   data: 'lqc_result'} ,
         {   data: 'process_change_factor'} ,
     ];
-
     const tblManChecklistColumns = [
         {   data: 'dropdown_masters_details'} ,
         {   data: 'get_actions',

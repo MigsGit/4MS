@@ -15,7 +15,7 @@ use App\Http\Requests\MaterialRequest;
 use App\Http\Requests\MaterialApprovalRequest;
 
 class MaterialController extends Controller
-{
+{ //TODO: Remove View / Approval if Status is OK
     protected $resourceInterface;
     protected $commonInterface;
     public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {

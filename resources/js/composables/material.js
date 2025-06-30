@@ -5,7 +5,7 @@ export default function useMaterial(){
     const materialVar = reactive({
         materialSupplier : [],
         materialColor : [],
-        
+
         prdnPreparedBy : [],
         prdnCheckedBy : [],
         prdnApprovedBy : [],
