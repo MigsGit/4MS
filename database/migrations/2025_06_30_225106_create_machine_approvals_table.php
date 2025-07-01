@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMaterialApprovalsTable extends Migration
+class CreateMachineApprovalsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,14 @@ class CreateMaterialApprovalsTable extends Migration
      */
     public function up()
     {
-        Schema::create('material_approvals', function (Blueprint $table) {
+        Schema::create('machine_approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('materials_id')->references('id')->on('materials')->comment ='Material Id';
+            $table->foreignId('machines_id')->references('id')->on('machines')->comment ='Material Id';
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
             //manually inject relationship in MYSQL relation view
             $table->unsignedBigInteger('rapidx_user_id')->comment('Rapidx User Id');
             $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
             $table->string('approval_status');
-            $table->bigInteger('counter');
             $table->longText('remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -35,6 +34,6 @@ class CreateMaterialApprovalsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('material_approvals');
+        Schema::dropIfExists('machine_approvals');
     }
 }

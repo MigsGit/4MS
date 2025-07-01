@@ -43,6 +43,48 @@ class CommonService implements CommonInterface
             throw $th;
         }
     }
+    public function uploadFileImg($machineRefBefore,$machineRefAfter,$id,$path)
+    {
+        try {
+            $currentPathBefore= 'public/'.$path.'/'.$id.'/before';
+            if (Storage::exists($currentPathBefore)) {
+                Storage::deleteDirectory($currentPathBefore);
+            }
+            $arr_original_filename_before = [];
+            $arr_filtered_filename_before = [];
+            foreach ($machineRefBefore as $key => $file) { //$request->file('txt_docu_reference')
+                $original_filename = $file->getClientOriginalName(); //'/etc#hosts/@Álix Ãxel likes - beer?!.pdf';
+                $filtered_filename = $key.'_'.$this->fileInterface->Slug($original_filename, '_', '.');	 // _etc_hosts_alix_axel_likes_beer.pdf //Interface
+
+                Storage::putFileAs($currentPathBefore, $file, $filtered_filename);//change file to storage //active
+                $arr_original_filename_before[] =$original_filename;
+                $arr_filtered_filename_before[] =$filtered_filename;
+            }
+            $currentPathAfter= 'public/'.$path.'/'.$id.'/after';
+            if (Storage::exists($currentPathAfter)) {
+                Storage::deleteDirectory($currentPathAfter);
+            }
+            $arr_filtered_filename_after = [];
+            $arr_original_filename_after = [];
+            foreach ($machineRefAfter as $key => $file) { //$request->file('txt_docu_reference')
+                $original_filename = $file->getClientOriginalName(); //'/etc#hosts/@Álix Ãxel likes - beer?!.pdf';
+                $filtered_filename = $key.'_'.$this->fileInterface->Slug($original_filename, '_', '.');	 // _etc_hosts_alix_axel_likes_beer.pdf //Interface
+
+                // return $file;
+                Storage::putFileAs($currentPathAfter, $file, $filtered_filename);//change file to storage //active
+                $arr_filtered_filename_after[] =$filtered_filename;
+                $arr_original_filename_after[] =$original_filename;
+            }
+            return [
+                'arr_filtered_document_name_before' => $arr_filtered_filename_before,
+                'arr_original_filename_before' => $arr_original_filename_before,
+                'arr_filtered_document_name_after' => $arr_filtered_filename_after,
+                'arr_original_filename_after' => $arr_original_filename_after,
+            ];
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 
     public function viewPdfFile($pdfPath){
 

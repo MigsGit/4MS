@@ -7,6 +7,7 @@ use App\Http\Controllers\ManController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EdocsController;
 use App\Http\Controllers\CommonController;
+use App\Http\Controllers\MachineController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EnvironmentController;
@@ -93,6 +94,11 @@ Route::middleware('auth')->group(function(){
         Route::get('get_material_ref_by_ecrs_id', 'getMaterialRefByEcrsId')->name('get_material_ref_by_ecrs_id');
         Route::get('view_material_ref', 'viewMaterialRef')->name('view_material_ref');
         Route::get('load_material_approval_by_meterial_id', 'loadMaterialApprovalByMeterialId')->name('load_material_approval_by_meterial_id');
+    });
+
+    Route::controller(MachineController::class)->group(function () {
+        Route::post('save_machine', 'saveMachine')->name('save_machine');
+        Route::get('load_ecr_machine_by_status', 'loadEcrMachineByStatus')->name('load_ecr_machine_by_status');
     });
 
     Route::controller(EnvironmentController::class)->group(function () {

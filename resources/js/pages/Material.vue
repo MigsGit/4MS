@@ -210,9 +210,7 @@
                                                     <th scope="col" style="width: 30%;">Approved By</th>
                                                     </tr>
                                                 </thead>
-                                                <!-- @change="onUserChange(qadApprovedByInternalParams)" -->
-                                                <!-- @change="onUserChange(prCheckedByParams)" -->
-                                                  <!-- @change="onUserChange(prApprovedByParams)" -->
+                                            
                                                 <tbody>
                                                     <tr class="production" v-show="isInternalExternal == 'External'">
                                                         <td>

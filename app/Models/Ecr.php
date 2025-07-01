@@ -48,5 +48,9 @@ class Ecr extends Model
     {
         return $this->hasMany(Material::class, 'ecrs_id', 'id');
     }
+    public function machine()
+    {
+        return $this->hasMany(Machine::class, 'ecrs_id', 'id');
+    }
 
 }

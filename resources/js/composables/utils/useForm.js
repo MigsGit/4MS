@@ -32,6 +32,8 @@ export default function useForm ()
             }
         } catch (error) {
             let response = error.response;
+            console.log(response);
+            return;
             let errorMsg = response.data.msg;
             if( response.status === 500){
                 Swal.fire({

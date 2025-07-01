@@ -47,11 +47,11 @@ class MaterialController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 if($row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
-                $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecr-id="'.$row->id.'" materials-id="'.$row->material[0]->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material[0]->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 if($row->material[0]->status === "RUP"){
-                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecr-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material[0]->status.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
                 $result .= '</ul>';
                 $result .= '</div>';
@@ -82,9 +82,8 @@ class MaterialController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewMaterialRef'><i class='fa-solid fa-file-pdf'></i></a>";
+                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3 btn-get-ecr-id' ecrs-id='".$row->id."' id='btnViewMaterialRef'><i class='fa-solid fa-file-pdf'></i></a>";
                 $result .= '</center>';
-                return $result;
                 return $result;
             })
             ->rawColumns([
@@ -212,7 +211,7 @@ class MaterialController extends Controller
                 $prdnMateriaApprovalInEx = [
                     'PRDNPB' => $request->prdn_prepared_by,
                     'PRDNCB' => $request->prdn_checked_by,
-                    'PRDNAP' =>  $request->prdn_approved_by,
+                    'PRDNAP' =>  $request->prdn_approved_by, //TODO; CHANGE CODE
                 ];
             }
 

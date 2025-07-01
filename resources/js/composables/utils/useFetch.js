@@ -32,11 +32,12 @@ export default function useFetch ()
             });
             if (typeof responseCallback === "function") {
                 responseCallback(response);
-
             }
         } catch (error) {
             let response = error.response;
-            let errorMsg = response.data.msg;
+            console.log(response);
+            return;
+            let errorMsg = response.data.msg ?? '';
             if( response.status === 500){
                 Swal.fire({
                     title: "System Alert !",

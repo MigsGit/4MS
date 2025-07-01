@@ -6,5 +6,6 @@ interface CommonInterface
 {
 
     public function uploadFile($txtDocuReference,$id,$path);
+    public function uploadFileImg($machineRefBefore,$machineRefAfter,$id,$path);
     public function viewPdfFile($pdfPath);
 }

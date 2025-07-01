@@ -13,7 +13,7 @@
                             class="table mt-2"
                             ref="tblEcrByStatus"
                             :columns="tblEcrByStatusColumns"
-                            ajax="api/load_ecr_by_status?category=Machine"
+                            ajax="api/load_ecr_machine_by_status?category=Machine"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -25,6 +25,7 @@
                                 <tr>
                                     <th>Action</th>
                                     <th>Status</th>
+                                    <th>Attachment</th>
                                     <th>ECR Ctrl No.</th>
                                     <th>Category</th>
                                     <th>Internal or External</th>
@@ -44,7 +45,7 @@
             </div>
         </div>
     </div>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="SaveMachine" @add-event="saveMachine()" ref="modalSaveMachine">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="SaveMachine" ref="modalSaveMachine">
         <template #body>
             <div class="row">
                 <div class="card">
@@ -85,6 +86,18 @@
                         </h5>
                         <div id="collapse2" class="collapse show" data-bs-parent="#accordionMain">
                             <div class="card-body shadow">
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                            <input @change="changeMachineRefBefore" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                            <input @change="changeMachineRefAfter" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-12 overflow-auto">
                                         <table class="table table-responsive">
@@ -218,7 +231,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click="saveMaterial()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+            <button @click="saveMachine()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -279,8 +292,9 @@
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
-
     DataTable.use(DataTablesCore);
+
+    const { axiosSaveData } = useForm(); // Call the useForm function
     const {
         ecrVar,
         tblEcrDetails,
@@ -293,6 +307,7 @@
         getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrDetailsId,
+        saveEcrDetails,
     } = useEcr();
     const {
         machineVar,
@@ -314,7 +329,12 @@
     const modalSaveEcrDetail = ref(null);
     const isModal = ref('Edit');
     const isSelectReadonly = ref(true);
-    const tblEcrDetailColumns = [
+    const machineRefBefore = ref(null);
+    const machineRefAfter = ref(null);
+    const selectedEcrsId = ref(null);
+    const selectedMachinesId = ref(null);
+
+    const tblEcrDetailColumns = [ //mitch paulsen
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
@@ -324,7 +344,6 @@
                     btnGetEcrDetailsId.addEventListener('click',function(){
                         let ecrDetailsId = this.getAttribute('ecr-details-id');
                         getEcrDetailsId(ecrDetailsId);
-
                         modal.SaveEcrDetail.show();
                     });
                 }
@@ -338,6 +357,7 @@
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
     ];
+
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -346,9 +366,12 @@
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
-                        let ecrId = this.getAttribute('ecr-id');
-                        // frmMan.value.ecrsId = ecrId;
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw();
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let machinesId = this.getAttribute('machines-id');
+                        selectedEcrsId.value = ecrsId;
+                        selectedMachinesId.value = machinesId;
+
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         getRapidxUserByIdOpt(prdnAssessedByParams);
                         getRapidxUserByIdOpt(prdnCheckedByParams);
                         getRapidxUserByIdOpt(ppcAssessedByParams);
@@ -359,12 +382,14 @@
                         getRapidxUserByIdOpt(proEnggCheckedByParams);
                         getRapidxUserByIdOpt(qcAssessedByParams);
                         getRapidxUserByIdOpt(qcCheckedByParams);
+
                         modal.SaveMachine.show();
                     });
                 }
             }
         } ,
-        {   data: 'status'} ,
+        {   data: 'get_status'} ,
+        {   data: 'get_attachment'} ,
         {   data: 'ecr_no'} ,
         {   data: 'category'} ,
         {   data: 'internal_external'} ,
@@ -377,59 +402,56 @@
         {   data: 'customer_ec_no'} ,
         {   data: 'date_of_request'} ,
     ];
+    //Users Params
     const prdnAssessedByParams = {
         globalVar: machineVar.prdnAssessedBy,
         formModel: toRef(frmMachine.value,'prdnAssessedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const prdnCheckedByParams = {
         globalVar: machineVar.prdnCheckedBy,
         formModel: toRef(frmMachine.value,'prdnCheckedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
-
     const ppcAssessedByParams = {
         globalVar: machineVar.ppcAssessedBy,
         formModel: toRef(frmMachine.value,'ppcAssessedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const ppcCheckedByParams = {
         globalVar: machineVar.ppcCheckedBy,
         formModel: toRef(frmMachine.value,'ppcCheckedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
-
     const mainEnggAssessedByParams = {
         globalVar: machineVar.mainEnggAssessedBy,
         formModel: toRef(frmMachine.value,'mainEnggAssessedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const mainEnggCheckedByParams = {
         globalVar: machineVar.mainEnggCheckedBy,
         formModel: toRef(frmMachine.value,'mainEnggCheckedBy'),
-        selectedVal: '',
+        selectedVal: 237,
     };
-
     const proEnggAssessedByParams = {
         globalVar: machineVar.proEnggAssessedBy,
         formModel: toRef(frmMachine.value,'proEnggAssessedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const proEnggCheckedByParams = {
         globalVar: machineVar.proEnggCheckedBy,
         formModel: toRef(frmMachine.value,'proEnggCheckedBy'),
-        selectedVal: '',
+        selectedVal:237,
     };
-
     const qcAssessedByParams = {
         globalVar: machineVar.qcAssessedBy,
         formModel: toRef(frmMachine.value,'qcAssessedBy'),
-        selectedVal: '',
+        selectedVal: 530,
     };
     const qcCheckedByParams = {
         globalVar: machineVar.qcCheckedBy,
         formModel: toRef(frmMachine.value,'qcCheckedBy'),
-        selectedVal: '',
+        selectedVal:237,
     };
 
     onMounted( async ()=>{
@@ -439,10 +461,43 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
     })
-
-    const saveMachine = async () => {
-        alert('sadas')
+    const changeMachineRefBefore = async (event) => {
+        machineRefBefore.value =  Array.from(event.target.files);
     }
+    const changeMachineRefAfter = async (event) => {
+        machineRefAfter.value =  Array.from(event.target.files);
+    }
+    const saveMachine = async () => {
+        let formData = new FormData();
+
+        //Append form data
+        [
+            ["ecrsId", selectedEcrsId.value],
+            ["machinesId", selectedMachinesId.value],
+            ["prdnAssessedBy", frmMachine.value.prdnAssessedBy],
+            ["prdnCheckedBy", frmMachine.value.prdnCheckedBy],
+            ["ppcAssessedBy", frmMachine.value.ppcAssessedBy],
+            ["ppcCheckedBy", frmMachine.value.ppcCheckedBy],
+            ["qcAssessedBy", frmMachine.value.qcAssessedBy],
+            ["qcCheckedBy", frmMachine.value.qcCheckedBy],
+            ["proEnggAssessedBy", frmMachine.value.proEnggAssessedBy],
+            ["proEnggCheckedBy", frmMachine.value.proEnggCheckedBy],
+            ["mainEnggAssessedBy", frmMachine.value.mainEnggAssessedBy],
+            ["mainEnggCheckedBy", frmMachine.value.mainEnggCheckedBy],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        machineRefBefore.value.forEach((file, index) => {
+            formData.append('machineRefBefore[]', file);
+        });
+        machineRefAfter.value.forEach((file, index) => {
+            formData.append('machineRefAfter[]', file);
+        });
+        axiosSaveData(formData,'api/save_machine',(response) =>{
+            console.log(response);
+        });
+    }
+
 </script>
 
 
