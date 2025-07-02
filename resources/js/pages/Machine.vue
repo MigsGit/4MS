@@ -647,12 +647,10 @@ import { Logger } from 'sass';
     const btnLinkViewMachineRefBefore = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
         console.log('selectedEcrsIdEncrypted',selectedEcrsIdEncrypted);
         console.log('index',index);
-        // window.open(`api/view_material_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
+        window.open(`api/view_machine_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index} && imageType=before`, '_blank');
     }
-    const btnLinkViewMachineRefAfter = async (selectedEcrsIdEncrypted,index) => {
-        console.log('selectedEcrsIdEncrypted',selectedEcrsIdEncrypted);
-        console.log('index',index);
-        // window.open(`api/view_material_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
+    const btnLinkViewMachineRefAfter = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
+        window.open(`api/view_machine_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index} && imageType=after`, '_blank');
     }
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;

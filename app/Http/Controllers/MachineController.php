@@ -427,4 +427,42 @@ class MachineController extends Controller
             throw $e;
         }
     }
+    public function viewMachineRef(Request $request){
+        try {
+            $ecrsId = decrypt($request->ecrsId);
+            $conditions = [
+                'ecrs_id' => $ecrsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Machine::class,[],[],$conditions);
+            $materialRefByEcrsId = $data
+            ->get([
+                'filtered_document_name_before',
+                'filtered_document_name_after',
+                'file_path',
+            ]);
+
+            if( filled($materialRefByEcrsId) ){
+                if ($request->imageType === "before"){
+                    $arrFilteredDocumentName = explode(' | ' ,$materialRefByEcrsId[0]->filtered_document_name_before);
+                    $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                    $filePathWithEcrsId = $materialRefByEcrsId[0]->file_path."/".$ecrsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
+                    $filePath = "app/public/".$filePathWithEcrsId."";
+                }
+                if ($request->imageType === "after"){
+                    $arrFilteredDocumentName = explode(' | ' ,$materialRefByEcrsId[0]->filtered_document_name_after);
+                    $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                    $filePathWithEcrsId = $materialRefByEcrsId[0]->file_path."/".$ecrsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
+                    $filePath = "app/public/".$filePathWithEcrsId."";
+                }
+                // $this->commonInterface->viewImageFile($filePath);
+                $path = storage_path($filePath);
+                if (!file_exists($path)) {
+                    abort(404, 'Image not found');
+                }
+                return response()->file($path);
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 }

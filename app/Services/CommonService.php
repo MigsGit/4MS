@@ -125,4 +125,16 @@ class CommonService implements CommonInterface
             throw $e;
         }
     }
+    public function viewImageFile($filePath){
+
+        try {
+            $path = storage_path($filePath);
+            if (!file_exists($path)) {
+                abort(404, 'Image not found');
+            }
+            return response()->file($path);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 }
