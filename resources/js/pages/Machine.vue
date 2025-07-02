@@ -345,6 +345,56 @@
             <button @click = "saveApproval(selectedMachinesId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,'Machine')" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Machine Reference" ref="modalViewMachineRef">
+        <template #body>
+            <div class="row mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                Before Image Attachment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameBefore, index) in arrOriginalFilenamesBefore" :key="arrOriginalFilenameBefore.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewMaterialRefBefore" @click="btnLinkViewMachineRefBefore(selectedEcrsIdEncrypted,index)">
+                                    {{ arrOriginalFilenameBefore }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                After Image Attachment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameAfter, index) in arrOriginalFilenamesAfter" :key="arrOriginalFilenameAfter.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewMaterialRefAfter" @click="btnLinkViewMachineRefAfter(selectedEcrsIdEncrypted,index)">
+                                    {{ arrOriginalFilenameAfter }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
@@ -356,6 +406,7 @@
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
+import { Logger } from 'sass';
     DataTable.use(DataTablesCore);
 
     const { axiosSaveData } = useForm(); // Call the useForm function
@@ -392,16 +443,23 @@
     const modalSaveMachine = ref(null);
     const modalSaveEcrDetail = ref(null);
     const modalApproval = ref(null);
+    const modalViewMachineRef = ref(null);
     const approvalRemarks = ref(null);
     const isModal = ref('Edit');
     const isSelectReadonly = ref(true);
     const machineRefBefore = ref(null);
     const machineRefAfter = ref(null);
     const selectedEcrsId = ref(null);
+    const selectedEcrsIdEncrypted = ref(null);
     const selectedMachinesId = ref(null);
     const tblMachineEcrByStatus = ref(null);
     const tblMachineApproverSummary = ref(null);
     const isApprovedDisappproved = ref(null);
+    const arrOriginalFilenamesBefore = ref(null);
+    const arrOriginalFilenamesAfter = ref(null);
+    const aViewMaterialRefBefore = ref(null);
+    const aViewMaterialRefAfter = ref(null);
+
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -454,7 +512,19 @@
             }
         } ,
         {   data: 'get_status'} ,
-        {   data: 'get_attachment'} ,
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
+                if(btnViewMachineRef != null){
+                    btnViewMachineRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        getMachineRefByEcrsId(ecrsId);
+                    });
+                }
+            }
+        } ,
         {   data: 'ecr_no'} ,
         {   data: 'category'} ,
         {   data: 'internal_external'} ,
@@ -553,11 +623,37 @@
         modal.SaveMachine = new Modal(modalSaveMachine.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
+        modal.ViewMachineRef = new Modal(modalViewMachineRef.value.modalRef,{ keyboard: false });
 
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
     })
+    const getMachineRefByEcrsId = async (ecrsId) => {
+        let apiParams = {
+            ecrsId : ecrsId
+        }
+
+        axiosFetchData(apiParams,'api/get_machine_ref_by_ecrs_id',function(response){
+
+            let data = response.data;
+            let ecrsId = data.ecrsId;
+            arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
+            arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
+            selectedEcrsIdEncrypted.value = ecrsId;
+            modal.ViewMachineRef.show();
+        });
+    }
+    const btnLinkViewMachineRefBefore = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
+        console.log('selectedEcrsIdEncrypted',selectedEcrsIdEncrypted);
+        console.log('index',index);
+        // window.open(`api/view_material_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
+    }
+    const btnLinkViewMachineRefAfter = async (selectedEcrsIdEncrypted,index) => {
+        console.log('selectedEcrsIdEncrypted',selectedEcrsIdEncrypted);
+        console.log('index',index);
+        // window.open(`api/view_material_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
+    }
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
         modal.Approval.show();

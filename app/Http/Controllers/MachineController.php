@@ -154,7 +154,7 @@ class MachineController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'><i class='fa-solid fa-file-pdf'></i></a>";
+                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' id='btnViewMachineRef'><i class='fa-solid fa-file-pdf'></i></a>";
                 $result .= '</center>';
                 return $result;
             })
@@ -399,6 +399,30 @@ class MachineController extends Controller
                  'status' => $status,
                  'bgStatus' => $bgStatus,
              ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getMachineRefByEcrsId(Request $request){
+        try {
+            $ecrsId = $request->ecrsId;
+            $conditions = [
+                'ecrs_id' => $ecrsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Machine::class,[],[],$conditions);
+            $materialRefByEcrsId = $data
+            ->get([
+                'id',
+                'ecrs_id',
+                'original_filename_before',
+                'original_filename_after',
+            ]);
+            return response()->json([
+                'isSuccess' => 'true',
+                'originalFilenameBefore'=> explode(' | ',$materialRefByEcrsId[0]->original_filename_before),
+                'originalFilenameAfter'=> explode(' | ',$materialRefByEcrsId[0]->original_filename_after),
+                'ecrsId'=> encrypt($materialRefByEcrsId[0]->ecrs_id),
+            ]);
         } catch (Exception $e) {
             throw $e;
         }

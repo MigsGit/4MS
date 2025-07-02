@@ -29,7 +29,6 @@ class MaterialController extends Controller
             $relations = [
                 'pmi_approvals_pending.rapidx_user',
                 'material.material_approvals_pending.rapidx_user',
-                'material.machine_approvals.rapidx_user',
                 'material',
             ];
             $conditions = [
@@ -390,7 +389,7 @@ class MaterialController extends Controller
             $data = $this->resourceInterface->readCustomEloquent(Material::class,[],[],$conditions);
             $materialRefByEcrsId = $data
             ->get([
-                'filter.0ed_document_name',
+                'filtered_document_name',
                 'file_path',
             ]);
             if(count($materialRefByEcrsId) != 0){
