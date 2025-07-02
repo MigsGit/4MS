@@ -226,8 +226,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- v-show="isModalMaterial === 'View' && currentStatus === 'PMIAPP'" -->
-                    <div class="row mt-3"  >
+                    <div class="row mt-3"  v-show="isModal === 'View' && currentStatus != 'PMIAPP'">
                         <div class="card mb-2">
                                 <h5 class="mb-0">
                                     <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMachineApproverSummary" aria-expanded="true" aria-controls="collapseMachineApproverSummary">
@@ -236,7 +235,7 @@
                                 </h5>
                             <div id="collapseMachineApproverSummary" class="collapse show" data-bs-parent="#accordionMain">
                                 <div class="card-header">
-                                    <h3> PMI Approvers </h3>
+                                    <h5> Machine Approver </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
@@ -269,6 +268,90 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row mt-3" v-show="isModal === 'Edit'">
+                        <div class="card">
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <button @click="btnAddSpecialInspection()" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add SA Details</button>
+                                </div>
+                            </div>
+                            <div class="card-body overflow-auto">
+                                <DataTable
+                                    width="100%" cellspacing="0"
+                                    class="table mt-2"
+                                    ref="tblSpecialInspection"
+                                    :columns="tblSpecialInspectionColumns"
+                                    ajax="api/load_special_inspection_by_ecr_id"
+                                    :options="{
+                                        serverSide: true, //Serverside true will load the network  //ecrsId
+                                        columnDefs:[
+                                            // {orderable:false,target:[0]}
+                                        ]
+                                    }"
+                                >
+                                <!-- <thead>
+                                    <tr>
+                                        <th>
+                                            <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                        </th>
+                                        <th> Product Detail </th>
+                                        <th> Lot Qty </th>
+                                        <th> Samples </th>
+                                        <th> Mod </th>
+                                        <th> Mod Qty </th>
+                                        <th> Judgement </th>
+                                        <th> Inspection Date </th>
+                                        <th> Inspector </th>
+                                        <th> Remarks </th>
+                                    </tr>
+                                </thead> -->
+                                </DataTable>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP'" >
+                        <div class="card mb-2">
+                                <h5 class="mb-0">
+                                    <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
+                                        ECR Approver Summary
+                                    </button>
+                                </h5>
+                            <div id="collapsePmiInternalApprovalSummary" class="collapse show" data-bs-parent="#accordionMain">
+                                <div class="card-header">
+                                    <h3> PMI Approvers </h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <DataTable
+                                                width="100%" cellspacing="0"
+                                                class="table mt-2"
+                                                ref="tblPmiInternalApproverSummary"
+                                                :columns="tblPmiInternalApproverSummaryColumns"
+                                                ajax="api/load_pmi_internal_approval_summary"
+                                                :options="{
+                                                    paging:false,
+                                                    serverSide: true, //Serverside true will load the network
+                                                    ordering: false,
+                                                }"
+                                            >
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Role</th>
+                                                        <th>Approver Name</th>
+                                                        <th>Remarks</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                            </DataTable>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </template>
@@ -342,7 +425,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(selectedMachinesId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,'Machine')" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(selectedMachinesId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Machine Reference" ref="modalViewMachineRef">
@@ -395,11 +478,22 @@
         <template #footer>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Special Inspection" @add-event="saveSpecialInspection()" ref="modalSaveSpecialInspection">
+        <template #body>
+            <ModalSpecialInspectionComponent :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
+            </ModalSpecialInspectionComponent>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+        </template>
+    </ModalComponent>
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
+    import ModalSpecialInspectionComponent from '../components/ModalSpecialInspectionComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
     import useMachine from '../../js/composables/machine.js';
     import useForm from '../../js/composables/utils/useForm.js'
@@ -459,7 +553,9 @@ import { Logger } from 'sass';
     const arrOriginalFilenamesAfter = ref(null);
     const aViewMaterialRefBefore = ref(null);
     const aViewMaterialRefAfter = ref(null);
+    const currentStatus = ref(null);
 
+    const tblPmiInternalApproverSummary = ref(null);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -474,8 +570,10 @@ import { Logger } from 'sass';
                         let machinesId = this.getAttribute('machines-id');
                         selectedEcrsId.value = ecrsId;
                         selectedMachinesId.value = machinesId;
+                        isModal.value = 'Edit';
 
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw()
                         getRapidxUserByIdOpt(prdnAssessedByParams);
                         getRapidxUserByIdOpt(prdnCheckedByParams);
                         getRapidxUserByIdOpt(ppcAssessedByParams);
@@ -493,19 +591,29 @@ import { Logger } from 'sass';
                     btnViewMachineById.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
                         let machinesId = this.getAttribute('machines-id');
+                        let machineStatus = this.getAttribute('machine-status');
                         let machineApproverParams = {
                             selectedId : machinesId,
                             approvalType : 'machineApproval'
                         }
+                        let pmiApproverParams = {
+                            selectedId : ecrsId,
+                            approvalType : 'pmiApproval'
+                        }
                         selectedEcrsId.value = ecrsId;
                         selectedMachinesId.value = machinesId;
                         isModal.value = 'View';
+                        currentStatus.value = machineStatus;
 
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        // if( materialStatus === 'FORAPP'){
+                        if( machineStatus === 'FORAPP'){
                             getCurrentApprover(machineApproverParams);
                             tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_material_id?machinesId="+machinesId).draw();
-                        // }
+                        }
+                        if( machineStatus === 'PMIAPP'){
+                            getCurrentApprover(pmiApproverParams);
+                            tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
+                        }
                         modal.SaveMachine.show();
                     });
                 }
@@ -561,6 +669,13 @@ import { Logger } from 'sass';
         {   data: 'remarks'} ,
     ];
     const tblMachineApproverSummaryColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
+    ];
+    const tblPmiInternalApproverSummaryColumns = [
         {   data: 'get_count'} ,
         {   data: 'get_role'} ,
         {   data: 'get_approver_name'} ,
@@ -624,11 +739,17 @@ import { Logger } from 'sass';
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         modal.ViewMachineRef = new Modal(modalViewMachineRef.value.modalRef,{ keyboard: false });
+        modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
 
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
+        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
     })
+    const btnAddSpecialInspection = async () => {
+        frmSpecialInspection.value.ecrsId = selectedEcrsId;
+        modal.SaveSpecialInspection.show();
+    }
     const getMachineRefByEcrsId = async (ecrsId) => {
         let apiParams = {
             ecrsId : ecrsId

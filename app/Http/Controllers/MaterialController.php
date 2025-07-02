@@ -449,7 +449,7 @@ class MaterialController extends Controller
                 ];
                 $enviromentValidated = [
                     'status' => 'PMIAPP',
-                    'approval_status' => 'PMIAPP',
+                    'approval_status' => 'CB',
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
             }

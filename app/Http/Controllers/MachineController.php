@@ -118,12 +118,12 @@ class MachineController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 // if($row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine[0]->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 // }
-                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine[0]->status.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
 
                 if($pmiApprovalsPending === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine[0]->status.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
                 $result .= '</ul>';
                 $result .= '</div>';
@@ -344,7 +344,7 @@ class MachineController extends Controller
                 ];
                 $enviromentValidated = [
                     'status' => 'PMIAPP',
-                    'approval_status' => 'PMIAPP',
+                    'approval_status' => 'CB',
                 ];
                 $this->resourceInterface->updateConditions(Machine::class,$enviromentConditions,$enviromentValidated);
             }
@@ -461,6 +461,29 @@ class MachineController extends Controller
                 }
                 return response()->file($path);
             }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getPmiApprovalStatus($approval_status){
+        try {
+             switch ($approval_status) {
+                 case 'PB':
+                     $approvalStatus = 'Prepared by:';
+                     break;
+                 case 'CB':
+                     $approvalStatus = 'Checked by:';
+                     break;
+                 case 'AP':
+                     $approvalStatus = 'Approved by:';
+                     break;
+                 default:
+                     $approvalStatus = '';
+                     break;
+             }
+             return [
+                 'approvalStatus' => $approvalStatus,
+             ];
         } catch (Exception $e) {
             throw $e;
         }

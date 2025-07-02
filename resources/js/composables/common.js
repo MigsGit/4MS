@@ -121,7 +121,7 @@ export default function useCommon(){
          //Append form data
          [
             ["ecrs_id" , frmSpecialInspection.value.ecrsId],
-            ["special_inspections_id" , frmSpecialInspection.value.specialInspectionsId],
+            ["special_inspections_id" , frmSpecialInspection.value.specialInspectionsId ?? ""],
             ["product_detail" , frmSpecialInspection.value.productDetail],
             ["lot_qty" , frmSpecialInspection.value.lotQty],
             ["samples" , frmSpecialInspection.value.samples],
@@ -130,14 +130,15 @@ export default function useCommon(){
             ["judgement" , frmSpecialInspection.value.judgement],
             ["inspection_date" , frmSpecialInspection.value.inspectionDate],
             ["inspector" , frmSpecialInspection.value.inspector],
+            ["lqc_section_head" , frmSpecialInspection.value.lqcSectionHead],
             ["remarks" , frmSpecialInspection.value.remarks],
         ].forEach(([key, value]) =>
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_special_inspection', (response) =>{
             console.log(response);
-            tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+frmSpecialInspection.value.ecrsId).draw()
-            modal.modalSaveSpecialInspection.hide();
+            tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+frmSpecialInspection.value.ecrsId).draw();
+            modal.SaveSpecialInspection.hide();
         });
     }
     const getSpecialInspectionById = async (specialInspectionsId) => {

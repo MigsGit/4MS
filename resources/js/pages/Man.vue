@@ -124,7 +124,7 @@
                                <th> Process Change Factor </th>
                             </tr>
                         </thead>
-                    </DataTable>
+                        </DataTable>
                     </div>
                 </div>
             </div>

@@ -45,7 +45,7 @@ class CommonController extends Controller
             ->addColumn('get_actions',function ($row){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<button class='btn btn-outline-info btn-sm mr-1' special-inspections-id='".$row->id."' id='btnGetSpecialInspectionId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= "<button type='button' class='btn btn-outline-info btn-sm mr-1' special-inspections-id='".$row->id."' id='btnGetSpecialInspectionId'> <i class='fa-solid fa-pen-to-square'></i></button>";
                 $result .= '</center>';
                 return $result;
             })
@@ -378,7 +378,7 @@ class CommonController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
-            if( isset($specialInspectionRequest->special_inspections_id) ){ //Edit
+            if( isset($specialInspectionRequest->special_inspections_id)){ //Edit
                 $specialInspectionRequestValidated = $specialInspectionRequest->validated();
                 $conditions = [
                     'id' => $specialInspectionRequest->special_inspections_id
