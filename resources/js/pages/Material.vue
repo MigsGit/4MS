@@ -210,7 +210,7 @@
                                                     <th scope="col" style="width: 30%;">Approved By</th>
                                                     </tr>
                                                 </thead>
-                                            
+
                                                 <tbody>
                                                     <tr class="production" v-show="isInternalExternal == 'External'">
                                                         <td>
@@ -677,7 +677,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,'Material')" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
 </template>
@@ -765,7 +765,7 @@
                 let btnViewMaterialById = cell.querySelector('#btnViewMaterialById');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
                         frmMaterial.value.ecrsId = ecrsId;
                         isModalMaterial.value = 'Edit';
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
@@ -802,14 +802,14 @@
                 }
                 if(btnDownloadMaterialRef != null){
                     btnDownloadMaterialRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
                         selectedEcrsId.value = ecrsId;
                         modal.UploadMaterialRef.show();
                     });
                 }
                 if(btnViewMaterialById != null){
                     btnViewMaterialById.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
                         let materialsId = this.getAttribute('materials-id');
                         let materialStatus = this.getAttribute('material-status');
                         let materialApproverParams = {
@@ -847,7 +847,7 @@
                 let btnViewMaterialRef = cell.querySelector('#btnViewMaterialRef');
                 if(btnViewMaterialRef != null){
                     btnViewMaterialRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecr-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
                         getMaterialRefByEcrsId(ecrsId);
                     });
                 }
@@ -1089,6 +1089,7 @@
             });
             return;
         }
+
         axiosFetchData(apiParams,'api/save_material_approval',function(response){
             tblEcrByCategoryStatus.value.dt.draw();
             modal.Approval.hide();

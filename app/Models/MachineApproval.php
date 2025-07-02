@@ -15,4 +15,8 @@ class MachineApproval extends Model
         'approval_status',
         'remarks',
     ];
+    public function rapidx_user()
+    {
+        return $this->hasOne(RapidxUser::class, 'id', 'rapidx_user_id');
+    }
 }

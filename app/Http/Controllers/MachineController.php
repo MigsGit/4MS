@@ -20,12 +20,85 @@ class MachineController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
+    public function loadMachineApproverSummaryMaterialId (Request $request){
+        try {
+            $machinesId = $request->machinesId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                'machines_id' => $machinesId
+            ];
+            $machineApproval = $this->resourceInterface->readCustomEloquent(MachineApproval::class,$data,$relations,$conditions);
+            $machineApproval = $machineApproval
+            ->whereNotNull('rapidx_user_id')
+            ->orderBy('id','asc')
+            ->get();
+            return DataTables($machineApproval)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
+
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function loadEcrMachineByStatus(Request $request){
         try {
 
             $data = [];
             $relations = [
                 'pmi_approvals_pending.rapidx_user',
+                'machine.machine_approvals_pending.rapidx_user',
                 'machine',
             ];
             $conditions = [
@@ -47,6 +120,7 @@ class MachineController extends Controller
                 // if($row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 // }
+                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
 
                 if($pmiApprovalsPending === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
@@ -57,14 +131,22 @@ class MachineController extends Controller
                 return $result;
             })
             ->addColumn('get_status',function ($row) use($request){
-                return $result = '';
-                $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $approvalStatus = $row->environment[0]->approval_status;
-                $getApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
+               $currentApprover = $row->machine[0]->machine_approvals_pending[0]['rapidx_user']['name'] ?? '';
+                $getStatus = $this->getStatus($row->machine[0]->status);
+                $result = '';
                 $result .= '<center>';
-                // $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
+                $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
-                $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                $getApprovalStatus = $this->getApprovalStatus($row->machine[0]->approval_status);
+                if($row->status != 'DIS' && $currentApprover != ''){
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
+                if( $row->machine[0]->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
+                    $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
+                    $approvalStatus = $row->machine[0]->approval_status;
+                    $getPmiApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
                 $result .= '</center>';
                 $result .= '</br>';
                 return $result;
@@ -115,12 +197,12 @@ class MachineController extends Controller
                 'PRDNCB'  => $request->prdnCheckedBy,
                 'PPCAB'   => $request->ppcAssessedBy,
                 'PPCCB'   => $request->ppcCheckedBy,
-                'LQCAB'   => $request->qcAssessedBy,
-                'LQCCB'   => $request->qcCheckedBy,
                 'MENGAB'  => $request->proEnggAssessedBy,
                 'MENGCB'  => $request->proEnggCheckedBy,
                 'PENGAB'  => $request->mainEnggAssessedBy,
                 'PENGCB'  => $request->mainEnggCheckedBy,
+                'LQCAB'   => $request->qcAssessedBy,
+                'LQCCB'   => $request->qcCheckedBy,
             ];
 
            $machineApprovalValidated = collect($arrMachineApprovalRequest)->flatMap(function ($users,$approvalStatus) use ($request,$ecrsId){
@@ -167,6 +249,157 @@ class MachineController extends Controller
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
+            throw $e;
+        }
+    }
+    public function getApprovalStatus($approval_status){
+        try {
+             switch ($approval_status) {
+                case 'PRDNAB':
+                    $approvalStatus = 'Production Assessed by:';
+                    break;
+                case 'PRDNCB':
+                    $approvalStatus = 'Production Checked by:';
+                    break;
+                case 'PPCAB':
+                    $approvalStatus = 'PPC Assessed by:';
+                    break;
+                case 'PPCCB':
+                    $approvalStatus = 'PPC Checked by:';
+                    break;
+                case 'LQCAB':
+                    $approvalStatus = 'QC Assessed by';
+                    break;
+                case 'LQCCB':
+                    $approvalStatus = 'QC Checked by';
+                    break;
+
+                case 'MENGAB':
+                    $approvalStatus = 'Maintenance Engg Assessed by';
+                    break;
+                case 'MENGCB':
+                    $approvalStatus = 'Maintenance Engg Checked by';
+                    break;
+                case 'PENGAB':
+                    $approvalStatus = 'Process Engg Assessed by';
+                    break;
+                case 'PENGCB':
+                    $approvalStatus = 'Process Engg Checked by';
+                    break;
+                 default:
+                     $approvalStatus = '';
+                     break;
+             }
+             return [
+                 'approvalStatus' => $approvalStatus,
+             ];
+
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function saveMachineApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $selectedId = $request->selectedId;
+            //Get Current Ecr Approval is equal to Current Session
+            $machineApprovalCurrent = MachineApproval::where('machines_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            if($machineApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+            //Update the machine Approval Status
+            $machineApprovalCurrent->update([
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ]);
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+           $machineApproval = MachineApproval::where('machines_id',$selectedId)
+           ->whereNotNull('rapidx_user_id')
+           ->where('status','-')
+           ->limit(1)
+           ->get(['id','approval_status']);
+            if ( count($machineApproval) != 0){
+                $machineApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $machineApprovalConditions = [
+                    'id' => $machineApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(MachineApproval::class,$machineApprovalConditions,$machineApprovalValidated);
+                //Update the ECR Approval Status
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'approval_status' => $machineApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions(Machine::class,$enviromentConditions,$enviromentValidated);
+            }else{
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'PMIAPP',
+                    'approval_status' => 'PMIAPP',
+                ];
+                $this->resourceInterface->updateConditions(Machine::class,$enviromentConditions,$enviromentValidated);
+            }
+             //DISAPPROVED ECR
+             if($request->status === "DIS"){
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
+                ];
+                $this->resourceInterface->updateConditions(Machine::class,$enviromentConditions,$enviromentValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function getStatus($status){
+
+        try {
+             switch ($status) {
+                 case 'RUP':
+                     $status = 'For Requestor Update';
+                     $bgStatus = 'badge rounded-pill bg-primary';
+                     break;
+                case 'FORAPP':
+                    $status = 'For Approval';
+                    $bgStatus = 'badge rounded-pill bg-warning';
+                    break;
+                case 'PMIAPP':
+                    $status = 'PMI Approval';
+                    $bgStatus = 'badge rounded-pill bg-info';
+                    break;
+                case 'OK':
+                    $status = 'Completed';
+                    $bgStatus = 'badge rounded-pill bg-success';
+                    break;
+                 case 'DIS':
+                     $status = 'DISAPPROVED';
+                     $bgStatus = 'badge rounded-pill bg-danger';
+                     break;
+                 default:
+                     $status = '';
+                     $bgStatus = '';
+                     break;
+             }
+             return [
+                 'status' => $status,
+                 'bgStatus' => $bgStatus,
+             ];
+        } catch (Exception $e) {
             throw $e;
         }
     }

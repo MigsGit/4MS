@@ -11,7 +11,7 @@
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
-                            ref="tblEcrByStatus"
+                            ref="tblMachineEcrByStatus"
                             :columns="tblEcrByStatusColumns"
                             ajax="api/load_ecr_machine_by_status?category=Machine"
                             :options="{
@@ -226,12 +226,59 @@
                             </div>
                         </div>
                     </div>
+                    <!-- v-show="isModalMaterial === 'View' && currentStatus === 'PMIAPP'" -->
+                    <div class="row mt-3"  >
+                        <div class="card mb-2">
+                                <h5 class="mb-0">
+                                    <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMachineApproverSummary" aria-expanded="true" aria-controls="collapseMachineApproverSummary">
+                                        ECR Approver Summary
+                                    </button>
+                                </h5>
+                            <div id="collapseMachineApproverSummary" class="collapse show" data-bs-parent="#accordionMain">
+                                <div class="card-header">
+                                    <h3> PMI Approvers </h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <DataTable
+                                                width="100%" cellspacing="0"
+                                                class="table mt-2"
+                                                ref="tblMachineApproverSummary"
+                                                :columns="tblMachineApproverSummaryColumns"
+                                                ajax="api/load_machine_approver_summary_material_id"
+                                                :options="{
+                                                    paging:false,
+                                                    serverSide: true, //Serverside true will load the network
+                                                    ordering: false,
+                                                }"
+                                            >
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Role</th>
+                                                        <th>Approver Name</th>
+                                                        <th>Remarks</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                            </DataTable>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </template>
         <template #footer>
-            <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click="saveMachine()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+            <button @click="btnApprovedDisapproved('DIS')" v-show="isModal === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalDisapproved" class="btn btn-danger btn-sm">
+                <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
+            </button>
+            <button @click="btnApprovedDisapproved('APP')" v-show="isModal === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalApproved" class="btn btn-success btn-sm">Approved</button>
+            <button v-show="isModal === 'Edit'" type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button v-show="isModal === 'Edit'" @click="saveMachine()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -281,6 +328,23 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" title="Approval" ref="modalApproval">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <textarea v-model="approvalRemarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button @click = "saveApproval(selectedMachinesId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,'Machine')" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
@@ -327,14 +391,83 @@
     } = useCommon();
     const modalSaveMachine = ref(null);
     const modalSaveEcrDetail = ref(null);
+    const modalApproval = ref(null);
+    const approvalRemarks = ref(null);
     const isModal = ref('Edit');
     const isSelectReadonly = ref(true);
     const machineRefBefore = ref(null);
     const machineRefAfter = ref(null);
     const selectedEcrsId = ref(null);
     const selectedMachinesId = ref(null);
+    const tblMachineEcrByStatus = ref(null);
+    const tblMachineApproverSummary = ref(null);
+    const isApprovedDisappproved = ref(null);
 
-    const tblEcrDetailColumns = [ //mitch paulsen
+    const tblEcrByStatusColumns = [
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
+                let btnViewMachineById = cell.querySelector('#btnViewMachineById');
+                if(btnGetEcrId != null){
+                    btnGetEcrId.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let machinesId = this.getAttribute('machines-id');
+                        selectedEcrsId.value = ecrsId;
+                        selectedMachinesId.value = machinesId;
+
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        getRapidxUserByIdOpt(prdnAssessedByParams);
+                        getRapidxUserByIdOpt(prdnCheckedByParams);
+                        getRapidxUserByIdOpt(ppcAssessedByParams);
+                        getRapidxUserByIdOpt(ppcCheckedByParams);
+                        getRapidxUserByIdOpt(mainEnggAssessedByParams);
+                        getRapidxUserByIdOpt(mainEnggCheckedByParams);
+                        getRapidxUserByIdOpt(proEnggAssessedByParams);
+                        getRapidxUserByIdOpt(proEnggCheckedByParams);
+                        getRapidxUserByIdOpt(qcAssessedByParams);
+                        getRapidxUserByIdOpt(qcCheckedByParams);
+                        modal.SaveMachine.show();
+                    });
+                }
+                if(btnViewMachineById != null){ //madi krstevski
+                    btnViewMachineById.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let machinesId = this.getAttribute('machines-id');
+                        let machineApproverParams = {
+                            selectedId : machinesId,
+                            approvalType : 'machineApproval'
+                        }
+                        selectedEcrsId.value = ecrsId;
+                        selectedMachinesId.value = machinesId;
+                        isModal.value = 'View';
+
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        // if( materialStatus === 'FORAPP'){
+                            getCurrentApprover(machineApproverParams);
+                            tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_material_id?machinesId="+machinesId).draw();
+                        // }
+                        modal.SaveMachine.show();
+                    });
+                }
+            }
+        } ,
+        {   data: 'get_status'} ,
+        {   data: 'get_attachment'} ,
+        {   data: 'ecr_no'} ,
+        {   data: 'category'} ,
+        {   data: 'internal_external'} ,
+        {   data: 'customer_name'} ,
+        {   data: 'part_no'} ,
+        {   data: 'part_name'} ,
+        {   data: 'device_name'} ,
+        {   data: 'product_line'} ,
+        {   data: 'section'} ,
+        {   data: 'customer_ec_no'} ,
+        {   data: 'date_of_request'} ,
+    ];
+    const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
             searchable: false,
@@ -357,50 +490,12 @@
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
     ];
-
-    const tblEcrByStatusColumns = [
-        {   data: 'get_actions',
-            orderable: false,
-            searchable: false,
-            createdCell(cell){
-                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
-                if(btnGetEcrId != null){
-                    btnGetEcrId.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecrs-id');
-                        let machinesId = this.getAttribute('machines-id');
-                        selectedEcrsId.value = ecrsId;
-                        selectedMachinesId.value = machinesId;
-
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        getRapidxUserByIdOpt(prdnAssessedByParams);
-                        getRapidxUserByIdOpt(prdnCheckedByParams);
-                        getRapidxUserByIdOpt(ppcAssessedByParams);
-                        getRapidxUserByIdOpt(ppcCheckedByParams);
-                        getRapidxUserByIdOpt(mainEnggAssessedByParams);
-                        getRapidxUserByIdOpt(mainEnggCheckedByParams);
-                        getRapidxUserByIdOpt(proEnggAssessedByParams);
-                        getRapidxUserByIdOpt(proEnggCheckedByParams);
-                        getRapidxUserByIdOpt(qcAssessedByParams);
-                        getRapidxUserByIdOpt(qcCheckedByParams);
-
-                        modal.SaveMachine.show();
-                    });
-                }
-            }
-        } ,
+    const tblMachineApproverSummaryColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
         {   data: 'get_status'} ,
-        {   data: 'get_attachment'} ,
-        {   data: 'ecr_no'} ,
-        {   data: 'category'} ,
-        {   data: 'internal_external'} ,
-        {   data: 'customer_name'} ,
-        {   data: 'part_no'} ,
-        {   data: 'part_name'} ,
-        {   data: 'device_name'} ,
-        {   data: 'product_line'} ,
-        {   data: 'section'} ,
-        {   data: 'customer_ec_no'} ,
-        {   data: 'date_of_request'} ,
     ];
     //Users Params
     const prdnAssessedByParams = {
@@ -457,10 +552,16 @@
     onMounted( async ()=>{
         modal.SaveMachine = new Modal(modalSaveMachine.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
+
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
     })
+    const btnApprovedDisapproved = async (decision) => {
+        isApprovedDisappproved.value = decision;
+        modal.Approval.show();
+    }
     const changeMachineRefBefore = async (event) => {
         machineRefBefore.value =  Array.from(event.target.files);
     }
@@ -495,6 +596,33 @@
         });
         axiosSaveData(formData,'api/save_machine',(response) =>{
             console.log(response);
+        });
+    }
+    const saveApproval = async (selectedId,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
+
+        if(approvalType === 'PMIAPP'){
+            let apiParams = {
+                ecrsId : selectedEcrsId,
+                status : isApprovedDisappproved,
+                remarks : remarks,
+            }
+            axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
+                modal.Approval.hide();
+                modal.SaveMaterial.hide();
+                tblEcrByCategoryStatus.value.dt.draw();
+            });
+            return;
+        }
+        let apiParams = {
+            selectedId : selectedId,
+            status : isApprovedDisappproved,
+            remarks : remarks,
+        }
+        axiosFetchData(apiParams,'api/save_machine_approval',function(response){
+            console.log(response);
+            tblMachineEcrByStatus.value.dt.draw();
+            modal.Approval.hide();
+            modal.SaveMachine.hide();
         });
     }
 

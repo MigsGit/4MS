@@ -12,6 +12,7 @@ use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\PmiApproval;
 use Illuminate\Http\Request;
+use App\Models\MachineApproval;
 use App\Models\MaterialApproval;
 use App\Models\SpecialInspection;
 use Illuminate\Support\Facades\DB;
@@ -180,6 +181,16 @@ class CommonController extends Controller
                         'rapidx_user_id'
                     ];
                     break;
+                case 'machineApproval':
+                    $currentModel = MachineApproval::class;
+                    $conditions = [
+                        'machines_id' => $request->selectedId,
+                        'status' => 'PEN',
+                    ];
+                    $data = [
+                        'rapidx_user_id'
+                    ];
+                    break;
                 case 'pmiApproval':
                     $currentModel = PmiApproval::class;
                     $conditions = [
@@ -201,7 +212,7 @@ class CommonController extends Controller
             ->get();
             $isSessionApprover =  session('rapidx_user_id') ===  $approval[0]->rapidx_user_id ? true: false ;
             // $approval[0]->rapidx_user_id;
-            return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover]);
+            return response()->json(['isSuccess' => 'true','isSessionApprover'=>$isSessionApprover,'type'=>$currentModel]);
         } catch (Exception $e) {
             throw $e;
         }

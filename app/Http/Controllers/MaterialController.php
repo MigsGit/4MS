@@ -29,6 +29,7 @@ class MaterialController extends Controller
             $relations = [
                 'pmi_approvals_pending.rapidx_user',
                 'material.material_approvals_pending.rapidx_user',
+                'material.machine_approvals.rapidx_user',
                 'material',
             ];
             $conditions = [
@@ -288,6 +289,7 @@ class MaterialController extends Controller
     }
     public function getMaterialEcrById(Request $request){
         try {
+            // return 'dasads';
             $conditions = [
                 'ecrs_id' => $request->ecrId,
             ];
@@ -295,14 +297,17 @@ class MaterialController extends Controller
                 'ecr',
                 'material_approvals',
             ];
-            $material = $this->resourceInterface->readWithRelationsConditionsActive(Material::class,[],$relations,$conditions);
-            $materialApprovalCollection = collect($material[0]->material_approvals)->groupBy('approval_status')->toArray();
-            return response()->json([
-                'isSuccess' => 'true',
-                'material' => $material,
-                'internalExternal' => $material[0]->ecr['internal_external'],
-                'materialApprovalCollection' => $materialApprovalCollection,
-            ]);
+           $material = $this->resourceInterface->readWithRelationsConditionsActive(Material::class,[],$relations,$conditions);
+           if( filled($material) ){
+                $materialApprovalCollection = collect($material[0]->material_approvals)->groupBy('approval_status')->toArray();
+                return response()->json([
+                    'isSuccess' => 'true',
+                    'material' => $material,
+                    'internalExternal' => $material[0]->ecr['internal_external'],
+                    'materialApprovalCollection' => $materialApprovalCollection,
+                ]);
+           }
+
         } catch (Exception $e) {
             throw $e;
         }
@@ -518,6 +523,7 @@ class MaterialController extends Controller
                     $approvalStatus = 'Production Checked by:';
                     break;
                 case 'PRNDAP':
+                    $approvalStatus = 'Production Approved by:';
                     break;
                 case 'PURPB':
                     $approvalStatus = 'Purchasing Prepared by:';

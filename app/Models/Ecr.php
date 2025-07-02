@@ -40,6 +40,7 @@ class Ecr extends Model
     {
         return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id')->where('status','PEN');
     }
+   
     public function environment()
     {
         return $this->hasMany(Environment::class, 'ecrs_id', 'id');
