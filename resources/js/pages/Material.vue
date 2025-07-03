@@ -699,9 +699,7 @@
         frmEcrReasonRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
-        typeOfPartParams,
         axiosFetchData,
-
     } = useEcr();
      // getDropdownMasterByOpt,
      // getRapidxUserByIdOpt,
@@ -732,6 +730,7 @@
         frmSpecialInspection,
         modalSaveSpecialInspection,
         specialInsQcInspectorParams,
+        typeOfPartParams,
         isApprovedDisappproved,
         approvalRemarks,
         saveSpecialInspection,

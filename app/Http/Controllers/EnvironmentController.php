@@ -58,7 +58,7 @@ class EnvironmentController extends Controller
             })
             ->addColumn('get_status',function ($row) use($request){
                 $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $approvalStatus = $row->environment[0]->approval_status;
+                $approvalStatus = $row->environment->approval_status;
                 $getApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
                 $result = '';
                 $result .= '<center>';

@@ -1,9 +1,15 @@
 import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
 import useForm from "./utils/useForm";
+import useEcr from "./ecr";
 export default function useCommon(){
     const { axiosFetchData } = useFetch(); // Call  the useFetch function
     const  { axiosSaveData } = useForm();
+    const  {
+        frmEcrReasonRows
+    } = useEcr();
+    console.log('frmEcrReasonRows',frmEcrReasonRows.value);
+
     const modal ={}
     //Reactive State
     const commonVar = reactive({
@@ -88,6 +94,7 @@ export default function useCommon(){
         formModel: toRef(frmEcrDetails.typeOfPart,'reasonOfChange'),
         selectedVal: '',
     }
+
     //DT Columns
     const tblSpecialInspectionColumns = [
         {   title: '<i class="fa fa-cogs"></i>',
@@ -216,8 +223,12 @@ export default function useCommon(){
             frmEcrDetails.value.customerApproval = ecrDetails.customer_approval
             frmEcrDetails.value.remarks =ecrDetails.remarks
             frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
-            frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
-            frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
+            // setTimeout(() => {
+                console.log(ecrDetails.dropdown_master_detail_description_of_change.id);
+
+                frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
+                frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
+            // }, 1000);
         });
     }
 
