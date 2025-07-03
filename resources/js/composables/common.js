@@ -224,7 +224,6 @@ export default function useCommon(){
             frmEcrDetails.value.remarks =ecrDetails.remarks
             frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
             // setTimeout(() => {
-                console.log(ecrDetails.dropdown_master_detail_description_of_change.id);
 
                 frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
                 frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
