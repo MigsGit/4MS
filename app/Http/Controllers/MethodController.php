@@ -144,7 +144,7 @@ class MethodController extends Controller
                 }
                 if( $row->method->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                     $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                    $approvalStatus = $row->method[0]->approval_status;
+                    $approvalStatus = $row->method->approval_status;
                     $getPmiApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
@@ -278,7 +278,7 @@ class MethodController extends Controller
                 'LQCCB'   => $request->qcCheckedBy,
             ];
 
-           $machineApprovalValidated = collect($arrMachineApprovalRequest)->flatMap(function ($users,$approvalStatus) use ($request,$ecrsId){
+           $methodApprovalValidated = collect($arrMachineApprovalRequest)->flatMap(function ($users,$approvalStatus) use ($request,$ecrsId){
                 return collect($users)->map(function ($userId) use ($request,$approvalStatus,&$ecrsId){
                     return [
                         'ecrs_id' => $ecrsId,
@@ -291,14 +291,14 @@ class MethodController extends Controller
 
             })->toArray();
             MethodApproval::where('methods_id',$methodsId)->delete();
-            MethodApproval::insert($machineApprovalValidated);
-            $machineApproval =  MethodApproval::whereNotNull('rapidx_user_id')
+            MethodApproval::insert($methodApprovalValidated);
+            $methodApproval =  MethodApproval::whereNotNull('rapidx_user_id')
             ->where('methods_id', $methodsId)->first();
-            if ($machineApproval) {
-                $machineApproval->update(['status' => 'PEN']);
+            if ($methodApproval) {
+                $methodApproval->update(['status' => 'PEN']);
                 Method::where('id', $methodsId)->first()
                 ->update([
-                    'approval_status' => $machineApproval->approval_status,
+                    'approval_status' => $methodApproval->approval_status,
                     'status' => 'FORAPP', //FOR APPROVAL
                 ]);
             }
@@ -489,6 +489,74 @@ class MethodController extends Controller
                  'approvalStatus' => $approvalStatus,
              ];
         } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function saveMethodApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $selectedId = $request->selectedId;
+            //Get Current Ecr Approval is equal to Current Session
+            $methodApprovalCurrent = MethodApproval::where('methods_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            if($methodApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+            //Update the machine Approval Status
+            $methodApprovalCurrent->update([
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ]);
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+           $methodApproval = MethodApproval::where('methods_id',$selectedId)
+           ->whereNotNull('rapidx_user_id')
+           ->where('status','-')
+           ->limit(1)
+           ->get(['id','approval_status']);
+            if ( count($methodApproval) != 0){
+                $methodApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $methodApprovalConditions = [
+                    'id' => $methodApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(MethodApproval::class,$methodApprovalConditions,$methodApprovalValidated);
+                //Update the ECR Approval Status
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'approval_status' => $methodApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
+            }else{
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'PMIAPP',
+                    'approval_status' => 'PB',
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
+            }
+             //DISAPPROVED ECR
+             if($request->status === "DIS"){
+                $conditions = [
+                    'id' => $selectedId,
+                ];
+                $requestValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$conditions,$requestValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
             throw $e;
         }
     }

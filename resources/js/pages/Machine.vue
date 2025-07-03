@@ -379,7 +379,7 @@
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
                         <Multiselect
                             v-model="frmEcrDetails.typeOfPart"
-                            :options="ecrVar.optTypeOfPart"
+                            :options="commonVar.optTypeOfPart"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -505,17 +505,12 @@
     const { axiosSaveData } = useForm(); // Call the useForm function
     const {
         ecrVar,
-        tblEcrDetails,
-        frmEcrDetails,
         frmEcrReasonRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
-        typeOfPartParams,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,
-        getEcrDetailsId,
-        saveEcrDetails,
     } = useEcr();
     const {
         machineVar,
@@ -526,18 +521,27 @@
         commonVar,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
+        tblPmiInternalApproverSummary,//
+        tblEcrDetails,//
+        frmEcrDetails,//
+        frmSpecialInspection,
         modalSaveSpecialInspection,
-        specialInsQcInspectorParams,
+        specialInsQcInspectorParams,//
+        typeOfPartParams,
+        isApprovedDisappproved,//
+        approvalRemarks,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        frmSpecialInspection,
+        saveEcrDetails,//
+        getEcrDetailsId,
+
     } = useCommon();
+
     const modalSaveMachine = ref(null);
     const modalSaveEcrDetail = ref(null);
     const modalApproval = ref(null);
     const modalViewMachineRef = ref(null);
-    const approvalRemarks = ref(null);
     const isModal = ref('Edit');
     const isSelectReadonly = ref(true);
     const machineRefBefore = ref(null);
@@ -547,14 +551,12 @@
     const selectedMachinesId = ref(null);
     const tblMachineEcrByStatus = ref(null);
     const tblMachineApproverSummary = ref(null);
-    const isApprovedDisappproved = ref(null);
     const arrOriginalFilenamesBefore = ref(null);
     const arrOriginalFilenamesAfter = ref(null);
     const aViewMaterialRefBefore = ref(null);
     const aViewMaterialRefAfter = ref(null);
     const currentStatus = ref(null);
 
-    const tblPmiInternalApproverSummary = ref(null);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',

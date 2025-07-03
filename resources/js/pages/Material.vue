@@ -587,7 +587,7 @@
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
                         <Multiselect
                             v-model="frmEcrDetails.typeOfPart"
-                            :options="ecrVar.optTypeOfPart"
+                            :options="commonVar.optTypeOfPart"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -695,17 +695,13 @@
     DataTable.use(DataTablesCore)
 
     const {
-        modal,
         ecrVar,
-        tblEcrDetails,
-        frmEcrDetails,
         frmEcrReasonRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
         typeOfPartParams,
         axiosFetchData,
-        getEcrDetailsId,
-        saveEcrDetails,
+
     } = useEcr();
      // getDropdownMasterByOpt,
      // getRapidxUserByIdOpt,
@@ -726,9 +722,23 @@
     } = useSettings();
 
     const {
+        modal,
         commonVar,
+        tblSpecialInspection,
+        tblSpecialInspectionColumns,
+        tblPmiInternalApproverSummary,//
+        tblEcrDetails,//
+        frmEcrDetails,//
+        frmSpecialInspection,
+        modalSaveSpecialInspection,
+        specialInsQcInspectorParams,//
+        isApprovedDisappproved,//
+        approvalRemarks,//
+        saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+        saveEcrDetails,//
+        getEcrDetailsId,
     } = useCommon();
 
     const modalSaveEcrDetail = ref(null);
@@ -746,11 +756,8 @@
     const isSelectReadonly  = ref(true);
     const tblEcrByCategoryStatus = ref(null);
     const tblMaterialApproval = ref(null);
-    const tblPmiInternalApproverSummary = ref(null);
 
 
-    const isApprovedDisappproved = ref(null);
-    const approvalRemarks = ref(null);
     const selectedMaterialsId = ref(null);
     const modalApproval = ref(null);
 

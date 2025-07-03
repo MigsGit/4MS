@@ -298,7 +298,7 @@
                             </div>
                         </div>
             </div>
-            <!-- <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP'" >
+            <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP'" >
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
@@ -339,11 +339,15 @@
                         </div>
                     </div>
                 </div>
-            </div> -->
+            </div>
         </template>
         <template #footer>
-            <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click="saveMethod()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+            <button @click="btnApprovedDisapproved('DIS')" v-show="isModal === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalDisapproved" class="btn btn-danger btn-sm">
+                <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
+            </button>
+            <button @click="btnApprovedDisapproved('APP')" v-show="isModal === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalApproved" class="btn btn-success btn-sm">Approved</button>
+            <button v-show="isModal === 'Edit'" type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button v-show="isModal === 'Edit'" @click="saveMethod()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -361,7 +365,7 @@
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
                         <Multiselect
                             v-model="frmEcrDetails.typeOfPart"
-                            :options="ecrVar.optTypeOfPart"
+                            :options="commonVar.optTypeOfPart"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -453,6 +457,23 @@
         <template #footer>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" title="Approval" ref="modalApproval">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <textarea v-model="approvalRemarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button @click = "saveApproval(selectedMethodsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -471,17 +492,12 @@
     const { axiosSaveData } = useForm(); // Call the useForm function
     const {
         ecrVar,
-        tblEcrDetails,
-        frmEcrDetails,
         frmEcrReasonRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
-        typeOfPartParams,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,
-        getEcrDetailsId,
-        saveEcrDetails,
     } = useEcr();
     const {
         methodVar,
@@ -493,12 +509,20 @@
         commonVar,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
+        tblPmiInternalApproverSummary,//
+        tblEcrDetails,//
+        frmEcrDetails,
+        frmSpecialInspection,
         modalSaveSpecialInspection,
-        specialInsQcInspectorParams,
+        specialInsQcInspectorParams,//
+        typeOfPartParams,
+        isApprovedDisappproved,//
+        approvalRemarks,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        frmSpecialInspection,
+        saveEcrDetails,
+        getEcrDetailsId,
     } = useCommon();
 
     const modalSaveMethod = ref(null);
@@ -511,6 +535,7 @@
     const tblMethodApproverSummary = ref(null);
 
     const modalViewMethodRef = ref(null);
+    const modalApproval = ref(null);
     const aViewMethodRefBefore = ref(null);
     const aViewMethodRefAfter = ref(null);
     const arrOriginalFilenamesBefore = ref(null);
@@ -700,12 +725,16 @@
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         modal.ViewMethodRef = new Modal(modalViewMethodRef.value.modalRef,{ keyboard: false });
+        modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
-        // modal.SaveEcrDetail.show();
     })
+    const btnApprovedDisapproved = async (decision) => {
+        isApprovedDisappproved.value = decision;
+        modal.Approval.show();
+    }
     const btnLinkViewMethodRefBefore = async (selectedMethodsId,index) => { //TODO: View Image
         console.log('selectedMethodsId',selectedMethodsId);
         console.log('index',index);
@@ -766,6 +795,33 @@
         });
         axiosSaveData(formData,'api/save_method',(response) =>{
             console.log(response);
+        });
+    }
+    const saveApproval = async (selectedId,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
+
+        if(approvalType === 'PMIAPP'){
+            let apiParams = {
+                ecrsId : selectedEcrsId,
+                status : isApprovedDisappproved,
+                remarks : remarks,
+            }
+            axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
+                modal.Approval.hide();
+                modal.SaveMethod.hide();
+                tblEcrByCategoryStatus.value.dt.draw();
+            });
+            return;
+        }
+        let apiParams = {
+            selectedId : selectedId,
+            status : isApprovedDisappproved,
+            remarks : remarks,
+        }
+        axiosFetchData(apiParams,'api/save_method_approval',function(response){
+            console.log(response);
+            tblEcrByStatus.value.dt.draw();
+            modal.Approval.hide();
+            modal.SaveMethod.hide();
         });
     }
 </script>

@@ -371,7 +371,6 @@ class MachineController extends Controller
                     $filePathWithEcrsId = $materialRefById[0]->file_path."/".$machinesId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
                     $filePath = "app/public/".$filePathWithEcrsId."";
                 }
-                // $this->commonInterface->viewImageFile($filePath);
                 $path = storage_path($filePath);
                 if (!file_exists($path)) {
                     abort(404, 'Image not found');
