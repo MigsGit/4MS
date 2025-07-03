@@ -509,14 +509,14 @@
         commonVar,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
-        tblPmiInternalApproverSummary,//
-        tblEcrDetails,//
+        tblPmiInternalApproverSummary,
+        tblEcrDetails,
         frmEcrDetails,
         frmSpecialInspection,
         modalSaveSpecialInspection,
-        specialInsQcInspectorParams,//
+        specialInsQcInspectorParams,
         typeOfPartParams,
-        isApprovedDisappproved,//
+        isApprovedDisappproved,
         approvalRemarks,
         saveSpecialInspection,
         getCurrentApprover,

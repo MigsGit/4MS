@@ -521,19 +521,19 @@
         commonVar,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
-        tblPmiInternalApproverSummary,//
-        tblEcrDetails,//
-        frmEcrDetails,//
+        tblPmiInternalApproverSummary,
+        tblEcrDetails,
+        frmEcrDetails,
         frmSpecialInspection,
         modalSaveSpecialInspection,
-        specialInsQcInspectorParams,//
+        specialInsQcInspectorParams,
         typeOfPartParams,
-        isApprovedDisappproved,//
+        isApprovedDisappproved,
         approvalRemarks,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        saveEcrDetails,//
+        saveEcrDetails,
         getEcrDetailsId,
 
     } = useCommon();

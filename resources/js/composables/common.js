@@ -53,8 +53,8 @@ export default function useCommon(){
         typeOfPart: '',
         changeImpDate: '',
         docSubDate: '',
-        docToBeSub: 'test',
-        remarks: 'test',
+        docToBeSub: '',
+        remarks: '',
     });
 
     const isApprovedDisappproved = ref(null);
@@ -65,16 +65,16 @@ export default function useCommon(){
     const modalSaveSpecialInspection = ref(null);
     const frmSpecialInspection = ref({
         ecrsId : "",
-        productDetail : "N/A",
-        lotQty : "10",
-        samples : "10",
-        mod : "N/A",
-        modQty : "10",
-        judgement : "PASSED",
-        inspectionDate : "2025-05-01",
-        inspector : 530,
-        lqcSectionHead : 530,
-        remarks : "TEST",
+        productDetail : "",
+        lotQty : "",
+        samples : "",
+        mod : "",
+        modQty : "",
+        judgement : "",
+        inspectionDate : "",
+        inspector : "",
+        lqcSectionHead : "",
+        remarks : "",
     });
     //Params
     const specialInsQcInspectorParams = {
@@ -100,7 +100,7 @@ export default function useCommon(){
                     btnGetSpecialInspectionId.addEventListener('click',function(){
                         let specialInspectionsId = this.getAttribute('special-inspections-id');
                         getSpecialInspectionById(specialInspectionsId);
-                        modal.modalSaveSpecialInspection.show();
+                        modal.SaveSpecialInspection.show();
                     });
                 }
             }
@@ -153,6 +153,7 @@ export default function useCommon(){
             frmSpecialInspection.value.judgement = specialInspection.judgement;
             frmSpecialInspection.value.inspectionDate = specialInspection.inspection_date;
             frmSpecialInspection.value.inspector = specialInspection.inspector;
+            frmSpecialInspection.value.lqcSectionHead = specialInspection.inspector;
             frmSpecialInspection.value.remarks = specialInspection.remarks;
         });
     }
