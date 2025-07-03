@@ -1,8 +1,8 @@
 import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
 
-export default function useMethod(){
-    const machineVar = reactive({
+export default function useMachine(){
+    const methodVar = reactive({
         prdnAssessedBy : [],
         prdnCheckedBy : [],
         ppcAssessedBy : [],
@@ -14,7 +14,7 @@ export default function useMethod(){
         qcAssessedBy : [],
         qcCheckedBy : [],
     });
-    const frmMachine = ref ({
+    const frmMethod = ref ({
         ecrsId : "",
         prdnAssessedBy : "",
         prdnCheckedBy : "",
@@ -29,7 +29,7 @@ export default function useMethod(){
 
     });
     return {
-        machineVar,
-        frmMachine,
+        methodVar,
+        frmMethod,
     };
 }

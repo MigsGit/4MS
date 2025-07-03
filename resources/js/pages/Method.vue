@@ -49,7 +49,7 @@
             </div>
         </div>
     </div>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="SaveMethod" @add-event="" ref="modalSaveMethod">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="SaveMethod" ref="modalSaveMethod">
         <template #body>
             <div class="row">
                 <div class="card">
@@ -83,10 +83,230 @@
                     </div>
                 </div>
             </div>
+            <div class="card mb-2" v-show="isModal === 'Edit'">
+                <h5 class="mb-0">
+                    <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
+                        Approval:
+                    </button>
+                </h5>
+                <div id="collapse2" class="collapse show" data-bs-parent="#accordionMain">
+                    <div class="card-body shadow">
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <input @change="changeMethodRefBefore" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <input @change="changeMethodRefAfter" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 overflow-auto">
+                                <table class="table table-responsive">
+                                    <thead>
+                                        <tr>
+                                        <th scope="col" style="width: 10%;">Section</th>
+                                        <th scope="col" style="width: 30%;">Assessed by</th>
+                                        <th scope="col" style="width: 30%;">Checked by</th>
+                                        </tr>
+                                    </thead>
+                                    <!-- @change="onUserChange(qadApprovedByInternalParams)" -->
+                                    <!-- @change="onUserChange(prCheckedByParams)" -->
+                                        <!-- @change="onUserChange(prApprovedByParams)" -->
+                                    <tbody>
+                                        <tr class="production">
+                                            <td>
+                                                Production
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.prdnAssessedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.prdnAssessedBy"
+                                                />
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.prdnCheckedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.prdnCheckedBy"
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr class="ppc">
+                                            <td>
+                                                Conformed: PPC
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.ppcAssessedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.ppcAssessedBy"
+                                                />
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.ppcCheckedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.ppcCheckedBy"
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr class="pro-engineer">
+                                            <td>
+                                                Process Engineering
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.proEnggAssessedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.proEnggAssessedBy"
+                                                />
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.proEnggCheckedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.proEnggCheckedBy"
+                                                />
+                                            </td>
+
+                                        </tr>
+                                        <tr class="main-engineer">
+                                            <td>
+                                                Maintenance Engineering
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.mainEnggAssessedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.mainEnggAssessedBy"
+                                                />
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.mainEnggCheckedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.mainEnggCheckedBy"
+                                                />
+                                            </td>
+
+                                        </tr>
+                                        <tr class="qc">
+                                            <td>
+                                                QC
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.qcAssessedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.qcAssessedBy"
+                                                />
+                                            </td>
+                                            <td>
+                                                <Multiselect
+                                                    v-model="frmMethod.qcCheckedBy"
+                                                    :close-on-select="true"
+                                                    :searchable="true"
+                                                    :options="methodVar.qcCheckedBy"
+                                                />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3" v-show="isModal === 'Edit'">
+                        <div class="card">
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <button @click="btnAddSpecialInspection()" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add SA Details</button>
+                                </div>
+                            </div>
+                            <div class="card-body overflow-auto">
+                                <DataTable
+                                    width="100%" cellspacing="0"
+                                    class="table mt-2"
+                                    ref="tblSpecialInspection"
+                                    :columns="tblSpecialInspectionColumns"
+                                    ajax="api/load_special_inspection_by_ecr_id"
+                                    :options="{
+                                        serverSide: true, //Serverside true will load the network  //ecrsId
+                                        columnDefs:[
+                                            // {orderable:false,target:[0]}
+                                        ]
+                                    }"
+                                >
+                                </DataTable>
+                            </div>
+                        </div>
+                    </div>
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click="saveMaterial()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+            <button @click="saveMethod()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+        </template>
+    </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
+        <template #body>
+             <!-- Description of Change / Reason for Change -->
+             <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+            </EcrChangeComponent>
+            <div class="row">
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                    <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
+                    <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
+                        <Multiselect
+                            v-model="frmEcrDetails.typeOfPart"
+                            :options="ecrVar.optTypeOfPart"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
+                        <input v-model="frmEcrDetails.changeImpDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Docs To Be Submitted</span>
+                        <input v-model="frmEcrDetails.docToBeSub" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                 </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Docs Submission Date:</span>
+                        <input v-model="frmEcrDetails.docSubDate"  type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <input v-model="frmEcrDetails.remarks"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
 </template>
@@ -97,7 +317,7 @@
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import ModalSpecialInspectionComponent from '../components/ModalSpecialInspectionComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
-    import useMachine from '../../js/composables/machine.js';
+    import useMethod from '../../js/composables/method.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
@@ -120,9 +340,10 @@
         saveEcrDetails,
     } = useEcr();
     const {
-        machineVar,
-        frmMachine,
-    } = useMachine();
+        methodVar,
+        frmMethod,
+    } = useMethod();
+
     const {
         modal,
         commonVar,
@@ -137,12 +358,15 @@
     } = useCommon();
 
     const modalSaveMethod = ref(null);
+    const modalSaveEcrDetail = ref(null);
     const tblEcrByStatus = ref(null);
     const isModal = ref('Edit');
+    const isSelectReadonly = ref(true);
     const selectedEcrsId = ref(null);
-    const selectedMachinesId = ref(null);
+    const selectedMethodsId = ref(null);
 
-    
+    const methodRefBefore = ref(null);
+    const methodRefAfter = ref(null);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -150,17 +374,17 @@
             searchable: false,
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
-                let btnViewMachineById = cell.querySelector('#btnViewMachineById');
+                let btnViewMethodById = cell.querySelector('#btnViewMethodById');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
-                        let machinesId = this.getAttribute('machines-id');
+                        let methodsId = this.getAttribute('methods-id');
                         selectedEcrsId.value = ecrsId;
-                        selectedMachinesId.value = machinesId;
+                        selectedMethodsId.value = methodsId;
                         isModal.value = 'Edit';
 
-                        // tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        // tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw();
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw();
                         getRapidxUserByIdOpt(prdnAssessedByParams);
                         getRapidxUserByIdOpt(prdnCheckedByParams);
                         getRapidxUserByIdOpt(ppcAssessedByParams);
@@ -174,30 +398,31 @@
                         modal.SaveMethod.show();
                     });
                 }
-                if(btnViewMachineById != null){ //madi krstevski
-                    btnViewMachineById.addEventListener('click',function(){
+                if(btnViewMethodById != null){ //madi krstevski
+                    btnViewMethodById.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
-                        let machinesId = this.getAttribute('machines-id');
-                        let machineStatus = this.getAttribute('machine-status');
-                        let machineApproverParams = {
-                            selectedId : machinesId,
-                            approvalType : 'machineApproval'
+                        let methodsId = this.getAttribute('methods-id');
+                        let methodStatus = this.getAttribute('method-status');
+                        let methodApproverParams = {
+                            selectedId : methodsId,
+                            approvalType : 'methodApproval'
                         }
                         let pmiApproverParams = {
                             selectedId : ecrsId,
                             approvalType : 'pmiApproval'
                         }
+                        return;
                         selectedEcrsId.value = ecrsId;
-                        selectedMachinesId.value = machinesId;
+                        selectedMachinesId.value = methodsId;
                         isModal.value = 'View';
-                        currentStatus.value = machineStatus;
+                        currentStatus.value = methodStatus;
 
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        if( machineStatus === 'FORAPP'){
-                            getCurrentApprover(machineApproverParams);
-                            tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_material_id?machinesId="+machinesId).draw();
+                        if( methodStatus === 'FORAPP'){
+                            getCurrentApprover(methodApproverParams);
+                            tblMachineApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
                         }
-                        if( machineStatus === 'PMIAPP'){
+                        if( methodStatus === 'PMIAPP'){
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
@@ -255,11 +480,103 @@
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
     ];
+//Users Params
+    const prdnAssessedByParams = {
+        globalVar: methodVar.prdnAssessedBy,
+        formModel: toRef(frmMethod.value,'prdnAssessedBy'),
+        selectedVal: 530,
+    };
+    const prdnCheckedByParams = {
+        globalVar: methodVar.prdnCheckedBy,
+        formModel: toRef(frmMethod.value,'prdnCheckedBy'),
+        selectedVal: 237,
+    };
+    const ppcAssessedByParams = {
+        globalVar: methodVar.ppcAssessedBy,
+        formModel: toRef(frmMethod.value,'ppcAssessedBy'),
+        selectedVal: 530,
+    };
+    const ppcCheckedByParams = {
+        globalVar: methodVar.ppcCheckedBy,
+        formModel: toRef(frmMethod.value,'ppcCheckedBy'),
+        selectedVal: 237,
+    };
+    const mainEnggAssessedByParams = {
+        globalVar: methodVar.mainEnggAssessedBy,
+        formModel: toRef(frmMethod.value,'mainEnggAssessedBy'),
+        selectedVal: 530,
+    };
+    const mainEnggCheckedByParams = {
+        globalVar: methodVar.mainEnggCheckedBy,
+        formModel: toRef(frmMethod.value,'mainEnggCheckedBy'),
+        selectedVal: 237,
+    };
+    const proEnggAssessedByParams = {
+        globalVar: methodVar.proEnggAssessedBy,
+        formModel: toRef(frmMethod.value,'proEnggAssessedBy'),
+        selectedVal: 530,
+    };
+    const proEnggCheckedByParams = {
+        globalVar: methodVar.proEnggCheckedBy,
+        formModel: toRef(frmMethod.value,'proEnggCheckedBy'),
+        selectedVal:237,
+    };
+    const qcAssessedByParams = {
+        globalVar: methodVar.qcAssessedBy,
+        formModel: toRef(frmMethod.value,'qcAssessedBy'),
+        selectedVal: 530,
+    };
+    const qcCheckedByParams = {
+        globalVar: methodVar.qcCheckedBy,
+        formModel: toRef(frmMethod.value,'qcCheckedBy'),
+        selectedVal:237,
+    };
+    const changeMethodRefBefore = async (event) => {
+        methodRefBefore.value =  Array.from(event.target.files);
+    }
+    const changeMethodRefAfter = async (event) => {
+        methodRefAfter.value =  Array.from(event.target.files);
+    }
 
     onMounted( async ()=>{
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });
-        // modal.SaveMethod.show();
+        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
+        await getDropdownMasterByOpt(typeOfPartParams);
+        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+        // modal.SaveEcrDetail.show();
     })
+    const saveMethod = async () => {
+        let formData = new FormData();
+
+        //Append form data
+        [
+            ["ecrsId", selectedEcrsId.value],
+            ["methodsId", selectedMethodsId.value],
+            ["prdnAssessedBy", frmMethod.value.prdnAssessedBy],
+            ["prdnCheckedBy", frmMethod.value.prdnCheckedBy],
+            ["ppcAssessedBy", frmMethod.value.ppcAssessedBy],
+            ["ppcCheckedBy", frmMethod.value.ppcCheckedBy],
+            ["qcAssessedBy", frmMethod.value.qcAssessedBy],
+            ["qcCheckedBy", frmMethod.value.qcCheckedBy],
+            ["proEnggAssessedBy", frmMethod.value.proEnggAssessedBy],
+            ["proEnggCheckedBy", frmMethod.value.proEnggCheckedBy],
+            ["mainEnggAssessedBy", frmMethod.value.mainEnggAssessedBy],
+            ["mainEnggCheckedBy", frmMethod.value.mainEnggCheckedBy],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        methodRefBefore.value.forEach((file, index) => {
+            formData.append('methodRefBefore[]', file);
+        });
+        methodRefAfter.value.forEach((file, index) => {
+            formData.append('methodRefAfter[]', file);
+        });
+        axiosSaveData(formData,'api/save_method',(response) =>{
+            console.log(response);
+        });
+    }
 </script>
 
 

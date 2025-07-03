@@ -108,7 +108,7 @@ Route::middleware('auth')->group(function(){
         Route::get('view_machine_ref', 'viewMachineRef')->name('view_machine_ref');
     });
     Route::controller(MethodController::class)->group(function () {
-        Route::post('save_machine', 'saveMachine')->name('save_machine');
+        Route::post('save_method', 'saveMethod')->name('save_method');
 
         Route::get('load_method_ecr_by_status', 'loadMethodEcrByStatus')->name('load_method_ecr_by_status');
     });
