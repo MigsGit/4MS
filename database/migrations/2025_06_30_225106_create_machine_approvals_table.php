@@ -15,11 +15,11 @@ class CreateMachineApprovalsTable extends Migration
     {
         Schema::create('machine_approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('machines_id')->references('id')->on('machines')->comment ='Material Id';
+            $table->foreignId('machines_id')->references('id')->on('machines')->comment ='Machine Id';
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
             //manually inject relationship in MYSQL relation view
             $table->unsignedBigInteger('rapidx_user_id')->comment('Rapidx User Id');
-            $table->string('status')->default('PE')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
+            $table->string('status')->default('-')->comment('PEN-Pending | APP-Approved | DIS-Disapproved');
             $table->string('approval_status');
             $table->longText('remarks')->nullable();
             $table->timestamps();

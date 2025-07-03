@@ -40,18 +40,22 @@ class Ecr extends Model
     {
         return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id')->where('status','PEN');
     }
-   
+
     public function environment()
     {
-        return $this->hasMany(Environment::class, 'ecrs_id', 'id');
+        return $this->hasOne(Environment::class, 'ecrs_id', 'id');
     }
     public function material()
     {
-        return $this->hasMany(Material::class, 'ecrs_id', 'id');
+        return $this->hasOne(Material::class, 'ecrs_id', 'id');
     }
     public function machine()
     {
-        return $this->hasMany(Machine::class, 'ecrs_id', 'id');
+        return $this->hasOne(Machine::class, 'ecrs_id', 'id');
+    }
+    public function method()
+    {
+        return $this->hasOne(Method::class, 'ecrs_id', 'id');
     }
 
 }

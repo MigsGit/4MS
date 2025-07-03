@@ -15,7 +15,7 @@
                                     class="table mt-2"
                                     ref="tblEcrByStatus"
                                     :columns="tblEcrByStatusColumns"
-                                    ajax="api/load_ecr_by_status?category=Method"
+                                    ajax="api/load_method_ecr_by_status?category=Method"
                                     :options="{
                                         serverSide: true, //Serverside true will load the network
                                         columnDefs:[
@@ -27,6 +27,7 @@
                                         <tr>
                                             <th>Action</th>
                                             <th>Status</th>
+                                            <th>Attachment</th>
                                             <th>ECR Ctrl No.</th>
                                             <th>Category</th>
                                             <th>Internal or External</th>
@@ -91,17 +92,20 @@
 </template>
 
 <script setup>
-    import {ref , onMounted,reactive, toRef} from 'vue';
+   import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
+    import ModalSpecialInspectionComponent from '../components/ModalSpecialInspectionComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
-    import useMan from '../../js/composables/man.js';
+    import useMachine from '../../js/composables/machine.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
+    import useCommon from '../../js/composables/common.js';
     DataTable.use(DataTablesCore);
+
+    const { axiosSaveData } = useForm(); // Call the useForm function
     const {
-        modal,
         ecrVar,
         tblEcrDetails,
         frmEcrDetails,
@@ -113,8 +117,121 @@
         getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrDetailsId,
+        saveEcrDetails,
     } = useEcr();
+    const {
+        machineVar,
+        frmMachine,
+    } = useMachine();
+    const {
+        modal,
+        commonVar,
+        tblSpecialInspection,
+        tblSpecialInspectionColumns,
+        modalSaveSpecialInspection,
+        specialInsQcInspectorParams,
+        saveSpecialInspection,
+        getCurrentApprover,
+        getCurrentPmiInternalApprover,
+        frmSpecialInspection,
+    } = useCommon();
+
     const modalSaveMethod = ref(null);
+    const tblEcrByStatus = ref(null);
+    const isModal = ref('Edit');
+    const selectedEcrsId = ref(null);
+    const selectedMachinesId = ref(null);
+
+    
+
+    const tblEcrByStatusColumns = [
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
+                let btnViewMachineById = cell.querySelector('#btnViewMachineById');
+                if(btnGetEcrId != null){
+                    btnGetEcrId.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let machinesId = this.getAttribute('machines-id');
+                        selectedEcrsId.value = ecrsId;
+                        selectedMachinesId.value = machinesId;
+                        isModal.value = 'Edit';
+
+                        // tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        // tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw();
+                        getRapidxUserByIdOpt(prdnAssessedByParams);
+                        getRapidxUserByIdOpt(prdnCheckedByParams);
+                        getRapidxUserByIdOpt(ppcAssessedByParams);
+                        getRapidxUserByIdOpt(ppcCheckedByParams);
+                        getRapidxUserByIdOpt(mainEnggAssessedByParams);
+                        getRapidxUserByIdOpt(mainEnggCheckedByParams);
+                        getRapidxUserByIdOpt(proEnggAssessedByParams);
+                        getRapidxUserByIdOpt(proEnggCheckedByParams);
+                        getRapidxUserByIdOpt(qcAssessedByParams);
+                        getRapidxUserByIdOpt(qcCheckedByParams);
+                        modal.SaveMethod.show();
+                    });
+                }
+                if(btnViewMachineById != null){ //madi krstevski
+                    btnViewMachineById.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let machinesId = this.getAttribute('machines-id');
+                        let machineStatus = this.getAttribute('machine-status');
+                        let machineApproverParams = {
+                            selectedId : machinesId,
+                            approvalType : 'machineApproval'
+                        }
+                        let pmiApproverParams = {
+                            selectedId : ecrsId,
+                            approvalType : 'pmiApproval'
+                        }
+                        selectedEcrsId.value = ecrsId;
+                        selectedMachinesId.value = machinesId;
+                        isModal.value = 'View';
+                        currentStatus.value = machineStatus;
+
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        if( machineStatus === 'FORAPP'){
+                            getCurrentApprover(machineApproverParams);
+                            tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_material_id?machinesId="+machinesId).draw();
+                        }
+                        if( machineStatus === 'PMIAPP'){
+                            getCurrentApprover(pmiApproverParams);
+                            tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
+                        }
+                        modal.SaveMethod.show();
+                    });
+                }
+            }
+        } ,
+        {   data: 'get_status'} ,
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
+                if(btnViewMachineRef != null){
+                    btnViewMachineRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        getMachineRefByEcrsId(ecrsId);
+                    });
+                }
+            }
+        } ,
+        {   data: 'ecr_no'} ,
+        {   data: 'category'} ,
+        {   data: 'internal_external'} ,
+        {   data: 'customer_name'} ,
+        {   data: 'part_no'} ,
+        {   data: 'part_name'} ,
+        {   data: 'device_name'} ,
+        {   data: 'product_line'} ,
+        {   data: 'section'} ,
+        {   data: 'customer_ec_no'} ,
+        {   data: 'date_of_request'} ,
+    ];
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -138,35 +255,7 @@
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
     ];
-    const tblEcrByStatusColumns = [
-        {   data: 'get_actions',
-            orderable: false,
-            searchable: false,
-            createdCell(cell){
-                let btnGetEcrId = cell.querySelector('#btnGetEcrId');
-                if(btnGetEcrId != null){
-                    btnGetEcrId.addEventListener('click',function(){
-                        let ecrId = this.getAttribute('ecr-id');
-                        frmMan.value.ecrsId = ecrId;
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
-                        modal.SaveMan.show();
-                    });
-                }
-            }
-        } ,
-        {   data: 'status'} ,
-        {   data: 'ecr_no'} ,
-        {   data: 'category'} ,
-        {   data: 'internal_external'} ,
-        {   data: 'customer_name'} ,
-        {   data: 'part_no'} ,
-        {   data: 'part_name'} ,
-        {   data: 'device_name'} ,
-        {   data: 'product_line'} ,
-        {   data: 'section'} ,
-        {   data: 'customer_ec_no'} ,
-        {   data: 'date_of_request'} ,
-    ];
+
     onMounted( async ()=>{
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });
         // modal.SaveMethod.show();

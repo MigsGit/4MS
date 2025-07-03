@@ -252,52 +252,7 @@ class MachineController extends Controller
             throw $e;
         }
     }
-    public function getApprovalStatus($approval_status){
-        try {
-             switch ($approval_status) {
-                case 'PRDNAB':
-                    $approvalStatus = 'Production Assessed by:';
-                    break;
-                case 'PRDNCB':
-                    $approvalStatus = 'Production Checked by:';
-                    break;
-                case 'PPCAB':
-                    $approvalStatus = 'PPC Assessed by:';
-                    break;
-                case 'PPCCB':
-                    $approvalStatus = 'PPC Checked by:';
-                    break;
-                case 'LQCAB':
-                    $approvalStatus = 'QC Assessed by';
-                    break;
-                case 'LQCCB':
-                    $approvalStatus = 'QC Checked by';
-                    break;
 
-                case 'MENGAB':
-                    $approvalStatus = 'Maintenance Engg Assessed by';
-                    break;
-                case 'MENGCB':
-                    $approvalStatus = 'Maintenance Engg Checked by';
-                    break;
-                case 'PENGAB':
-                    $approvalStatus = 'Process Engg Assessed by';
-                    break;
-                case 'PENGCB':
-                    $approvalStatus = 'Process Engg Checked by';
-                    break;
-                 default:
-                     $approvalStatus = '';
-                     break;
-             }
-             return [
-                 'approvalStatus' => $approvalStatus,
-             ];
-
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
     public function saveMachineApproval(Request $request){
         try {
             date_default_timezone_set('Asia/Manila');
@@ -344,7 +299,7 @@ class MachineController extends Controller
                 ];
                 $enviromentValidated = [
                     'status' => 'PMIAPP',
-                    'approval_status' => 'CB',
+                    'approval_status' => 'PB',
                 ];
                 $this->resourceInterface->updateConditions(Machine::class,$enviromentConditions,$enviromentValidated);
             }
@@ -363,43 +318,6 @@ class MachineController extends Controller
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
-            throw $e;
-        }
-    }
-    public function getStatus($status){
-
-        try {
-             switch ($status) {
-                 case 'RUP':
-                     $status = 'For Requestor Update';
-                     $bgStatus = 'badge rounded-pill bg-primary';
-                     break;
-                case 'FORAPP':
-                    $status = 'For Approval';
-                    $bgStatus = 'badge rounded-pill bg-warning';
-                    break;
-                case 'PMIAPP':
-                    $status = 'PMI Approval';
-                    $bgStatus = 'badge rounded-pill bg-info';
-                    break;
-                case 'OK':
-                    $status = 'Completed';
-                    $bgStatus = 'badge rounded-pill bg-success';
-                    break;
-                 case 'DIS':
-                     $status = 'DISAPPROVED';
-                     $bgStatus = 'badge rounded-pill bg-danger';
-                     break;
-                 default:
-                     $status = '';
-                     $bgStatus = '';
-                     break;
-             }
-             return [
-                 'status' => $status,
-                 'bgStatus' => $bgStatus,
-             ];
-        } catch (Exception $e) {
             throw $e;
         }
     }
@@ -461,6 +379,89 @@ class MachineController extends Controller
                 }
                 return response()->file($path);
             }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getStatus($status){
+
+        try {
+             switch ($status) {
+                 case 'RUP':
+                     $status = 'For Requestor Update';
+                     $bgStatus = 'badge rounded-pill bg-primary';
+                     break;
+                case 'FORAPP':
+                    $status = 'For Approval';
+                    $bgStatus = 'badge rounded-pill bg-warning';
+                    break;
+                case 'PMIAPP':
+                    $status = 'PMI Approval';
+                    $bgStatus = 'badge rounded-pill bg-info';
+                    break;
+                case 'OK':
+                    $status = 'Completed';
+                    $bgStatus = 'badge rounded-pill bg-success';
+                    break;
+                 case 'DIS':
+                     $status = 'DISAPPROVED';
+                     $bgStatus = 'badge rounded-pill bg-danger';
+                     break;
+                 default:
+                     $status = '';
+                     $bgStatus = '';
+                     break;
+             }
+             return [
+                 'status' => $status,
+                 'bgStatus' => $bgStatus,
+             ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getApprovalStatus($approval_status){
+        try {
+             switch ($approval_status) {
+                case 'PRDNAB':
+                    $approvalStatus = 'Production Assessed by:';
+                    break;
+                case 'PRDNCB':
+                    $approvalStatus = 'Production Checked by:';
+                    break;
+                case 'PPCAB':
+                    $approvalStatus = 'PPC Assessed by:';
+                    break;
+                case 'PPCCB':
+                    $approvalStatus = 'PPC Checked by:';
+                    break;
+                case 'LQCAB':
+                    $approvalStatus = 'QC Assessed by';
+                    break;
+                case 'LQCCB':
+                    $approvalStatus = 'QC Checked by';
+                    break;
+
+                case 'MENGAB':
+                    $approvalStatus = 'Maintenance Engg Assessed by';
+                    break;
+                case 'MENGCB':
+                    $approvalStatus = 'Maintenance Engg Checked by';
+                    break;
+                case 'PENGAB':
+                    $approvalStatus = 'Process Engg Assessed by';
+                    break;
+                case 'PENGCB':
+                    $approvalStatus = 'Process Engg Checked by';
+                    break;
+                 default:
+                     $approvalStatus = '';
+                     break;
+             }
+             return [
+                 'approvalStatus' => $approvalStatus,
+             ];
+
         } catch (Exception $e) {
             throw $e;
         }

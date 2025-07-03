@@ -500,7 +500,6 @@
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
-import { Logger } from 'sass';
     DataTable.use(DataTablesCore);
 
     const { axiosSaveData } = useForm(); // Call the useForm function
