@@ -403,6 +403,56 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Method Reference" ref="modalViewMethodRef">
+        <template #body>
+            <div class="row mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                Before Image Attachment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameBefore, index) in arrOriginalFilenamesBefore" :key="arrOriginalFilenameBefore.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewMethodRefBefore" @click="btnLinkViewMethodRefBefore(selectedMethodsId,index)">
+                                    {{ arrOriginalFilenameBefore }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                After Image Attachment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameAfter, index) in arrOriginalFilenamesAfter" :key="arrOriginalFilenameAfter.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewMethodRefAfter" @click="btnLinkViewMethodRefAfter(selectedMethodsId,index)">
+                                    {{ arrOriginalFilenameAfter }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -458,9 +508,14 @@
     const isSelectReadonly = ref(true);
     const currentStatus = ref(null);
     const selectedEcrsId = ref(null);
-    const selectedMethodsId = ref(null);
     const tblMethodApproverSummary = ref(null);
 
+    const modalViewMethodRef = ref(null);
+    const aViewMethodRefBefore = ref(null);
+    const aViewMethodRefAfter = ref(null);
+    const arrOriginalFilenamesBefore = ref(null);
+    const arrOriginalFilenamesAfter = ref(null);
+    const selectedMethodsId = ref(null);
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
 
@@ -531,11 +586,11 @@
             orderable: false,
             searchable: false,
             createdCell(cell){
-                let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
-                if(btnViewMachineRef != null){
-                    btnViewMachineRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecrs-id');
-                        getMachineRefByEcrsId(ecrsId);
+                let btnViewMethodRef = cell.querySelector('#btnViewMethodRef');
+                if(btnViewMethodRef != null){
+                    btnViewMethodRef.addEventListener('click',function(){
+                        let methodsId = this.getAttribute('methods-id');
+                        getMethodRefByEcrsId(methodsId);
                     });
                 }
             }
@@ -640,18 +695,39 @@
         formModel: toRef(frmMethod.value,'qcCheckedBy'),
         selectedVal:237,
     };
-
-
     onMounted( async ()=>{
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
+        modal.ViewMethodRef = new Modal(modalViewMethodRef.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
         // modal.SaveEcrDetail.show();
     })
+    const btnLinkViewMethodRefBefore = async (selectedMethodsId,index) => { //TODO: View Image
+        console.log('selectedMethodsId',selectedMethodsId);
+        console.log('index',index);
+        window.open(`api/view_method_ref?methodsId=${selectedMethodsId} && index=${index} && imageType=before`, '_blank');
+    }
+    const btnLinkViewMethodRefAfter = async (selectedMethodsId,index) => { //TODO: View Image
+        window.open(`api/view_method_ref?methodsId=${selectedMethodsId} && index=${index} && imageType=after`, '_blank');
+    }
+    const getMethodRefByEcrsId = async (methodsId) => {
+        let apiParams = {
+            methodsId : methodsId
+        }
+        axiosFetchData(apiParams,'api/get_method_ref_by_id',function(response){
+
+            let data = response.data;
+            let methodsId = data.methodsId;
+            arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
+            arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
+            selectedMethodsId.value = methodsId;
+            modal.ViewMethodRef.show();
+        });
+    }
     const btnAddSpecialInspection = async () => {
         frmSpecialInspection.value.ecrsId = selectedEcrsId;
         modal.SaveSpecialInspection.show();

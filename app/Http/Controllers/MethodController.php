@@ -124,7 +124,7 @@ class MethodController extends Controller
                     $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
 
                 if($pmiApprovalsPending === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
                 $result .= '</ul>';
                 $result .= '</div>';
@@ -155,7 +155,7 @@ class MethodController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' id='btnViewMachineRef'><i class='fa-solid fa-file-pdf'></i></a>";
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodRef"><i class="fa-solid fa-file-pdf"></i> </a>';
                 $result .= '</center>';
                 return $result;
             })
@@ -164,6 +164,78 @@ class MethodController extends Controller
                 'get_status',
                 'get_attachment',
             ])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function loadMethodApproverSummaryMaterialId (Request $request){
+        try {
+            $methodsId = $request->methodsId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                'methods_id' => $methodsId
+            ];
+            $methodpproval = $this->resourceInterface->readCustomEloquent(MethodApproval::class,$data,$relations,$conditions);
+            $methodpproval = $methodpproval
+            ->whereNotNull('rapidx_user_id')
+            ->orderBy('id','asc')
+            ->get();
+            return DataTables($methodpproval)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
+
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
             ->make(true);
         } catch (Exception $e) {
             throw $e;
@@ -253,74 +325,63 @@ class MethodController extends Controller
             throw $e;
         }
     }
-    public function loadMethodApproverSummaryMaterialId (Request $request){
+    public function viewMethodRef(Request $request){
         try {
-            $methodsId = $request->methodsId ?? "";
-            $data = [];
-            $relations = [
-                'rapidx_user'
-            ];
+            $methodsId = decrypt($request->methodsId);
             $conditions = [
-                'methods_id' => $methodsId
+                'id' => $methodsId,
             ];
-            $methodpproval = $this->resourceInterface->readCustomEloquent(MethodApproval::class,$data,$relations,$conditions);
-            $methodpproval = $methodpproval
-            ->whereNotNull('rapidx_user_id')
-            ->orderBy('id','asc')
-            ->get();
-            return DataTables($methodpproval)
-            ->addColumn('get_count',function ($row) use(&$ctr){
-                $ctr++;
-                $result = '';
-                $result .= $ctr;
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_approver_name',function ($row){
-                $result = '';
-                $result .= $row->rapidx_user['name'];
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_role',function ($row){
-                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
-                $result = '';
-                $result .= '<center>';
-                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
-                $result .= '<center>';
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_status',function ($row){
-                switch ($row->status) {
+            $data = $this->resourceInterface->readCustomEloquent(Method::class,[],[],$conditions);
+            $methodRefByEcrsId = $data
+            ->get([
+                'filtered_document_name_before',
+                'filtered_document_name_after',
+                'file_path',
+            ]);
 
-                    case 'PEN':
-                        $status = 'PENDING';
-                        $bgColor = 'badge rounded-pill bg-warning';
-                        break;
-                    case 'APP':
-                        $status = 'APPROVED';
-                        $bgColor = 'badge rounded-pill bg-success';
-                        break;
-                    case 'DIS':
-                        $status = 'DISAPPROVED';
-                        $bgColor = 'badge rounded-pill bg-danger';
-                        break;
-                    default:
-                        $status = '---';
-                        $bgColor = '';
-                        break;
+            if( filled($methodRefByEcrsId) ){
+                if ($request->imageType === "before"){
+                    $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_before);
+                    $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                    $filePathWithEcrsId = $methodRefByEcrsId[0]->file_path."/".$methodsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
+                    $filePath = "app/public/".$filePathWithEcrsId."";
                 }
-
-                $result = '';
-                $result .= '<center>';
-                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
-                $result .= '<br>';
-                $result .= '</br>';
-                return $result;
-            })
-            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
-            ->make(true);
+                if ($request->imageType === "after"){
+                    $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_after);
+                    $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                    $filePathWithEcrsId = $methodRefByEcrsId[0]->file_path."/".$methodsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
+                    $filePath = "app/public/".$filePathWithEcrsId."";
+                }
+                // $this->commonInterface->viewImageFile($filePath);
+                $path = storage_path($filePath);
+                if (!file_exists($path)) {
+                    abort(404, 'Image not found');
+                }
+                return response()->file($path);
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getMethodRefById(Request $request){
+        try {
+            $conditions = [
+                'id' => $request->methodsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Method::class,[],[],$conditions);
+            $methodRefByEcrsId = $data
+            ->get([
+                'id',
+                'ecrs_id',
+                'original_filename_before',
+                'original_filename_after',
+            ]);
+            return response()->json([
+                'isSuccess' => 'true',
+                'originalFilenameBefore'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_before),
+                'originalFilenameAfter'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_after),
+                'methodsId'=> encrypt($methodRefByEcrsId[0]->id),
+            ]);
         } catch (Exception $e) {
             throw $e;
         }

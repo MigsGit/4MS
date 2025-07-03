@@ -118,12 +118,12 @@ class MachineController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 // if($row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine[0]->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 // }
-                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine[0]->status.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
 
                 if($pmiApprovalsPending === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine[0]->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine[0]->status.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
                 $result .= '</ul>';
                 $result .= '</div>';
@@ -131,19 +131,19 @@ class MachineController extends Controller
                 return $result;
             })
             ->addColumn('get_status',function ($row) use($request){
-               $currentApprover = $row->machine[0]->machine_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $getStatus = $this->getStatus($row->machine[0]->status);
+               $currentApprover = $row->machine->machine_approvals_pending[0]['rapidx_user']['name'] ?? '';
+                $getStatus = $this->getStatus($row->machine->status);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
-                $getApprovalStatus = $this->getApprovalStatus($row->machine[0]->approval_status);
+                $getApprovalStatus = $this->getApprovalStatus($row->machine->approval_status);
                 if($row->status != 'DIS' && $currentApprover != ''){
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
-                if( $row->machine[0]->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
+                if( $row->machine->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                     $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                    $approvalStatus = $row->machine[0]->approval_status;
+                    $approvalStatus = $row->machine->approval_status;
                     $getPmiApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
@@ -154,7 +154,7 @@ class MachineController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' id='btnViewMachineRef'><i class='fa-solid fa-file-pdf'></i></a>";
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewMachineRef"><i class="fa-solid fa-file-pdf"></i> </a>';
                 $result .= '</center>';
                 return $result;
             })
@@ -252,7 +252,6 @@ class MachineController extends Controller
             throw $e;
         }
     }
-
     public function saveMachineApproval(Request $request){
         try {
             date_default_timezone_set('Asia/Manila');
@@ -321,14 +320,14 @@ class MachineController extends Controller
             throw $e;
         }
     }
-    public function getMachineRefByEcrsId(Request $request){
+    public function getMachineRefById(Request $request){
         try {
-            $ecrsId = $request->ecrsId;
+            $machinesId = $request->machinesId;
             $conditions = [
-                'ecrs_id' => $ecrsId,
+                'id' => $machinesId,
             ];
             $data = $this->resourceInterface->readCustomEloquent(Machine::class,[],[],$conditions);
-            $materialRefByEcrsId = $data
+            $materialRefById = $data
             ->get([
                 'id',
                 'ecrs_id',
@@ -337,9 +336,9 @@ class MachineController extends Controller
             ]);
             return response()->json([
                 'isSuccess' => 'true',
-                'originalFilenameBefore'=> explode(' | ',$materialRefByEcrsId[0]->original_filename_before),
-                'originalFilenameAfter'=> explode(' | ',$materialRefByEcrsId[0]->original_filename_after),
-                'ecrsId'=> encrypt($materialRefByEcrsId[0]->ecrs_id),
+                'originalFilenameBefore'=> explode(' | ',$materialRefById[0]->original_filename_before),
+                'originalFilenameAfter'=> explode(' | ',$materialRefById[0]->original_filename_after),
+                'machinesId'=> encrypt($materialRefById[0]->id),
             ]);
         } catch (Exception $e) {
             throw $e;
@@ -347,29 +346,29 @@ class MachineController extends Controller
     }
     public function viewMachineRef(Request $request){
         try {
-            $ecrsId = decrypt($request->ecrsId);
+            $machinesId = decrypt($request->machinesId);
             $conditions = [
-                'ecrs_id' => $ecrsId,
+                'id' => $machinesId,
             ];
             $data = $this->resourceInterface->readCustomEloquent(Machine::class,[],[],$conditions);
-            $materialRefByEcrsId = $data
+            $materialRefById = $data
             ->get([
                 'filtered_document_name_before',
                 'filtered_document_name_after',
                 'file_path',
             ]);
 
-            if( filled($materialRefByEcrsId) ){
+            if( filled($materialRefById) ){
                 if ($request->imageType === "before"){
-                    $arrFilteredDocumentName = explode(' | ' ,$materialRefByEcrsId[0]->filtered_document_name_before);
+                   $arrFilteredDocumentName = explode(' | ' ,$materialRefById[0]->filtered_document_name_before);
                     $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
-                    $filePathWithEcrsId = $materialRefByEcrsId[0]->file_path."/".$ecrsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
+                    $filePathWithEcrsId = $materialRefById[0]->file_path."/".$machinesId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
                     $filePath = "app/public/".$filePathWithEcrsId."";
                 }
                 if ($request->imageType === "after"){
-                    $arrFilteredDocumentName = explode(' | ' ,$materialRefByEcrsId[0]->filtered_document_name_after);
+                    $arrFilteredDocumentName = explode(' | ' ,$materialRefById[0]->filtered_document_name_after);
                     $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
-                    $filePathWithEcrsId = $materialRefByEcrsId[0]->file_path."/".$ecrsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
+                    $filePathWithEcrsId = $materialRefById[0]->file_path."/".$machinesId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
                     $filePath = "app/public/".$filePathWithEcrsId."";
                 }
                 // $this->commonInterface->viewImageFile($filePath);

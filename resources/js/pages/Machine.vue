@@ -445,7 +445,7 @@
                         <tr v-for="(arrOriginalFilenameBefore, index) in arrOriginalFilenamesBefore" :key="arrOriginalFilenameBefore.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="#" class="link-primary" ref="aViewMaterialRefBefore" @click="btnLinkViewMachineRefBefore(selectedEcrsIdEncrypted,index)">
+                                <a href="#" class="link-primary" ref="aViewMaterialRefBefore" @click="btnLinkViewMachineRefBefore(selectedMachinesIdEncrypted,index)">
                                     {{ arrOriginalFilenameBefore }}
                                 </a>
                             </td>
@@ -466,7 +466,7 @@
                         <tr v-for="(arrOriginalFilenameAfter, index) in arrOriginalFilenamesAfter" :key="arrOriginalFilenameAfter.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="#" class="link-primary" ref="aViewMaterialRefAfter" @click="btnLinkViewMachineRefAfter(selectedEcrsIdEncrypted,index)">
+                                <a href="#" class="link-primary" ref="aViewMaterialRefAfter" @click="btnLinkViewMachineRefAfter(selectedMachinesIdEncrypted,index)">
                                     {{ arrOriginalFilenameAfter }}
                                 </a>
                             </td>
@@ -543,7 +543,7 @@
     const machineRefBefore = ref(null);
     const machineRefAfter = ref(null);
     const selectedEcrsId = ref(null);
-    const selectedEcrsIdEncrypted = ref(null);
+    const selectedMachinesIdEncrypted = ref(null);
     const selectedMachinesId = ref(null);
     const tblMachineEcrByStatus = ref(null);
     const tblMachineApproverSummary = ref(null);
@@ -626,8 +626,8 @@
                 let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
                 if(btnViewMachineRef != null){
                     btnViewMachineRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecrs-id');
-                        getMachineRefByEcrsId(ecrsId);
+                        let machinesId = this.getAttribute('machine-id');
+                        getMachineRefById(machinesId);
                     });
                 }
             }
@@ -749,28 +749,26 @@
         frmSpecialInspection.value.ecrsId = selectedEcrsId;
         modal.SaveSpecialInspection.show();
     }
-    const getMachineRefByEcrsId = async (ecrsId) => {
+    const getMachineRefById = async (machinesId) => {
         let apiParams = {
-            ecrsId : ecrsId
+            machinesId : machinesId
         }
-
-        axiosFetchData(apiParams,'api/get_machine_ref_by_ecrs_id',function(response){
-
+        axiosFetchData(apiParams,'api/get_machine_ref_by_id',function(response){
             let data = response.data;
-            let ecrsId = data.ecrsId;
+            let machinesId = data.machinesId;
             arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
             arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
-            selectedEcrsIdEncrypted.value = ecrsId;
+            selectedMachinesIdEncrypted.value = machinesId;
             modal.ViewMachineRef.show();
         });
     }
-    const btnLinkViewMachineRefBefore = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
-        console.log('selectedEcrsIdEncrypted',selectedEcrsIdEncrypted);
+    const btnLinkViewMachineRefBefore = async (selectedMachinesIdEncrypted,index) => { //TODO: View Image
+        console.log('selectedMachinesIdEncrypted',selectedMachinesIdEncrypted);
         console.log('index',index);
-        window.open(`api/view_machine_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index} && imageType=before`, '_blank');
+        window.open(`api/view_machine_ref?machinesId=${selectedMachinesIdEncrypted} && index=${index} && imageType=before`, '_blank');
     }
-    const btnLinkViewMachineRefAfter = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
-        window.open(`api/view_machine_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index} && imageType=after`, '_blank');
+    const btnLinkViewMachineRefAfter = async (selectedMachinesIdEncrypted,index) => { //TODO: View Image
+        window.open(`api/view_machine_ref?machinesId=${selectedMachinesIdEncrypted} && index=${index} && imageType=after`, '_blank');
     }
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
