@@ -253,7 +253,78 @@ class MethodController extends Controller
             throw $e;
         }
     }
+    public function loadMethodApproverSummaryMaterialId (Request $request){
+        try {
+            $methodsId = $request->methodsId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                'methods_id' => $methodsId
+            ];
+            $methodpproval = $this->resourceInterface->readCustomEloquent(MethodApproval::class,$data,$relations,$conditions);
+            $methodpproval = $methodpproval
+            ->whereNotNull('rapidx_user_id')
+            ->orderBy('id','asc')
+            ->get();
+            return DataTables($methodpproval)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
 
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function getStatus($status){
 
         try {

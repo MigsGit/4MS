@@ -231,6 +231,48 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-3"  v-show="isModal === 'View' && currentStatus != 'PMIAPP'">
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMachineApproverSummary" aria-expanded="true" aria-controls="collapseMachineApproverSummary">
+                                ECR Approver Summary
+                            </button>
+                        </h5>
+                    <div id="collapseMachineApproverSummary" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-header">
+                            <h5> Machine Approver </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblMethodApproverSummary"
+                                        :columns="tblMethodApproverSummaryColumns"
+                                        ajax="api/load_machine_approver_summary_material_id"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering: false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Role</th>
+                                                <th>Approver Name</th>
+                                                <th>Remarks</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row mt-3" v-show="isModal === 'Edit'">
                         <div class="card">
                             <div class="row mt-2">
@@ -255,7 +297,49 @@
                                 </DataTable>
                             </div>
                         </div>
+            </div>
+            <!-- <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP'" >
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
+                                ECR Approver Summary
+                            </button>
+                        </h5>
+                    <div id="collapsePmiInternalApprovalSummary" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-header">
+                            <h3> PMI Approvers </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblPmiInternalApproverSummary"
+                                        :columns="tblPmiInternalApproverSummaryColumns"
+                                        ajax="api/load_pmi_internal_approval_summary"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering: false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Role</th>
+                                                <th>Approver Name</th>
+                                                <th>Remarks</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div> -->
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -372,8 +456,10 @@
     const tblEcrByStatus = ref(null);
     const isModal = ref('Edit');
     const isSelectReadonly = ref(true);
+    const currentStatus = ref(null);
     const selectedEcrsId = ref(null);
     const selectedMethodsId = ref(null);
+    const tblMethodApproverSummary = ref(null);
 
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
@@ -422,14 +508,14 @@
                             approvalType : 'pmiApproval'
                         }
                         selectedEcrsId.value = ecrsId;
-                        selectedMachinesId.value = methodsId;
+                        selectedMethodsId.value = methodsId;
                         isModal.value = 'View';
                         currentStatus.value = methodStatus;
 
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         if( methodStatus === 'FORAPP'){
                             getCurrentApprover(methodApproverParams);
-                            tblMachineApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
+                            tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
                         }
                         if( methodStatus === 'PMIAPP'){
                             getCurrentApprover(pmiApproverParams);
@@ -488,6 +574,20 @@
         {   data: 'doc_sub_date'} ,
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
+    ];
+    const tblMethodApproverSummaryColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
+    ];
+    const tblPmiInternalApproverSummaryColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
     ];
     //Users Params
     const prdnAssessedByParams = {

@@ -12,6 +12,7 @@ use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\PmiApproval;
 use Illuminate\Http\Request;
+use App\Models\MethodApproval;
 use App\Models\MachineApproval;
 use App\Models\MaterialApproval;
 use App\Models\SpecialInspection;
@@ -191,6 +192,16 @@ class CommonController extends Controller
                         'rapidx_user_id'
                     ];
                     break;
+                case 'methodApproval':
+                    $currentModel = MethodApproval::class;
+                    $conditions = [
+                        'methods_id' => $request->selectedId,
+                        'status' => 'PEN',
+                    ];
+                    $data = [
+                        'rapidx_user_id'
+                    ];
+                    break;
                 case 'pmiApproval':
                     $currentModel = PmiApproval::class;
                     $conditions = [
@@ -202,7 +213,7 @@ class CommonController extends Controller
                     ];
                     break;
                 default:
-                    # code...
+                    //TODO:Error Handling
                     break;
             }
             $relations = [];

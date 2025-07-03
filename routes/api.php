@@ -111,6 +111,7 @@ Route::middleware('auth')->group(function(){
         Route::post('save_method', 'saveMethod')->name('save_method');
 
         Route::get('load_method_ecr_by_status', 'loadMethodEcrByStatus')->name('load_method_ecr_by_status');
+        Route::get('load_method_approver_summary_material_id', 'loadMethodApproverSummaryMaterialId')->name('load_method_approver_summary_material_id');
     });
 
     Route::controller(EnvironmentController::class)->group(function () {
