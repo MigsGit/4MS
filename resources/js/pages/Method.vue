@@ -309,6 +309,16 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Special Inspection" @add-event="saveSpecialInspection()" ref="modalSaveSpecialInspection">
+        <template #body>
+            <ModalSpecialInspectionComponent :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
+            </ModalSpecialInspectionComponent>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -411,7 +421,6 @@
                             selectedId : ecrsId,
                             approvalType : 'pmiApproval'
                         }
-                        return;
                         selectedEcrsId.value = ecrsId;
                         selectedMachinesId.value = methodsId;
                         isModal.value = 'View';
@@ -480,7 +489,7 @@
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
     ];
-//Users Params
+    //Users Params
     const prdnAssessedByParams = {
         globalVar: methodVar.prdnAssessedBy,
         formModel: toRef(frmMethod.value,'prdnAssessedBy'),
@@ -531,22 +540,28 @@
         formModel: toRef(frmMethod.value,'qcCheckedBy'),
         selectedVal:237,
     };
-    const changeMethodRefBefore = async (event) => {
-        methodRefBefore.value =  Array.from(event.target.files);
-    }
-    const changeMethodRefAfter = async (event) => {
-        methodRefAfter.value =  Array.from(event.target.files);
-    }
+
 
     onMounted( async ()=>{
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });
         modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
         // modal.SaveEcrDetail.show();
     })
+    const btnAddSpecialInspection = async () => {
+        frmSpecialInspection.value.ecrsId = selectedEcrsId;
+        modal.SaveSpecialInspection.show();
+    }
+    const changeMethodRefBefore = async (event) => {
+        methodRefBefore.value =  Array.from(event.target.files);
+    }
+    const changeMethodRefAfter = async (event) => {
+        methodRefAfter.value =  Array.from(event.target.files);
+    }
     const saveMethod = async () => {
         let formData = new FormData();
 
