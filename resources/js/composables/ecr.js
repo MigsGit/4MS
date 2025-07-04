@@ -220,15 +220,15 @@ export default function useEcr(){
                     );
                     ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
                         frmEcrOtherDispoRows.value.push({
-                            requestedBy: requestedBy[index] === undefined ? 0: requestedBy[index].rapidx_user_id ,
-                            reviewedBy: technicalEvaluation[index] === undefined ? 0: technicalEvaluation[index].rapidx_user_id ,
-                            technicalEvaluation:reviewedBy[index] === undefined ? 0: reviewedBy[index].rapidx_user_id,
+                            requestedBy: requestedBy[index] ?? 0,
+                            reviewedBy: technicalEvaluation[index] ?? 0,
+                            technicalEvaluation:reviewedBy[index] ?? 0,
                         });
                     });
                     //QA Approval
                     if (qaCheckedBy.length != 0){
                         frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id ?? 0;
-                        frmEcrQadRows.value.qadApprovedByInternal = qaInternal[0].rapidx_user_id === undefined ? 0: qaCheckedBy[0].rapidx_user_id;
+                        frmEcrQadRows.value.qadApprovedByInternal = qaInternal[0].rapidx_user_id ?? 0;
                     }
 
                 }
@@ -244,11 +244,10 @@ export default function useEcr(){
 
                     pmiApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
                             frmEcrPmiApproverRows.value.push({
-                                preparedBy: preparedBy[index] === undefined ? 0: preparedBy[index].rapidx_user_id ,
-                                checkedBy: checkedBy[index] === undefined ? 0: checkedBy[index].rapidx_user_id ,
-                                approvedBy:approvedBy[index] === undefined ? 0: approvedBy[index].rapidx_user_id,
+                                preparedBy: preparedBy[index] ?? 0,
+                                checkedBy: checkedBy[index] ?? 0,
+                                approvedBy:approvedBy[index] ?? 0,
                             });
-
                     });
                 }
             }, 1000);
