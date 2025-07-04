@@ -166,7 +166,7 @@ class CommonController extends Controller
                 case 'ecrApproval':
                     $currentModel = EcrApproval::class;
                     $conditions = [
-                        'ecrs_id' => $request->ecrsId,
+                        'ecrs_id' => $request->selectedId,
                         'status' => 'PEN',
                     ];
                     $data = [
@@ -217,6 +217,7 @@ class CommonController extends Controller
                     //TODO:Error Handling
                     break;
             }
+            // return ['type'=>$currentModel];
             $relations = [];
             $approvalQuery = $this->resourceInterface->readCustomEloquent($currentModel,$data,$relations,$conditions);
             $approval =  $approvalQuery

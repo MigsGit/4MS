@@ -56,12 +56,20 @@ class EcrController extends Controller
         if(count($hris_data) > 0){
             $vwEmployeeinfo =  $hris_data;
             $filteredSection = $this->getFilteredSection($vwEmployeeinfo[0]->Department);
-            $division = ($vwEmployeeinfo[0]->Division == "TS-F1" || $vwEmployeeinfo[0]->Division == "TS-F3") ? "TS" :  "???";
+            $division = ($vwEmployeeinfo[0]->Division == "TS-F1" ||
+            $vwEmployeeinfo[0]->Division == "TS-F3" ? "TS" :
+            $vwEmployeeinfo[0]->Division == "Administration") ? "ADMIN" :
+            "???";
         }
         else{
             $vwEmployeeinfo =  $subcon_data;
             $filteredSection = $this->getFilteredSection($vwEmployeeinfo[0]->Department);
-            $division = ($vwEmployeeinfo[0]->Division == "TS-F1" || $vwEmployeeinfo[0]->Division == "TS-F3") ? "TS" :  "???";
+            $division = ($vwEmployeeinfo[0]->Division == "TS-F1" ||
+            $vwEmployeeinfo[0]->Division == "TS-F3" ? "TS" :
+            $vwEmployeeinfo[0]->Division == "CN-F1" ? "CN" :
+            $vwEmployeeinfo[0]->Division == "CN-F3" ? "CN" :
+            $vwEmployeeinfo[0]->Division == "Administration") ? "ADMIN" :
+            "???";
         }
         // Check if the Created At & App No / Division / Material Category is exisiting
         // Example:TS-ADMIN-LOG-PCH-25-01-001
@@ -93,19 +101,21 @@ class EcrController extends Controller
             $ecrConditions = [
                 'id' => $ecrsId
             ];
-            if( isset($ecrsId) ){
+            if( isset($ecrsId) ){ //Edit
                 $ecr = Ecr::where('id',$ecrsId)->get(['created_by']);
-                // if ( $ecr[0]['created_by'] != session('rapidx_user_id') ){
-                //     return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
-                // }
+                if ( $ecr[0]['created_by'] != session('rapidx_user_id') ){
+                    return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
+                }
                 $ecrRequest['status'] = 'IA';
                 $ecrRequest['approval_status'] = 'OTRB';
                 // $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
                 $this->resourceInterface->updateConditions(Ecr::class,$ecrConditions,$ecrRequest);
                 $currenErcId = $ecrsId;
-            }else{
+            }else{ //Add
                 $ecrRequest['created_at'] = now();
                 $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
+                $ecrRequest['created_by'] = session('rapidx_user_id');
+
                 $ecr =  $this->resourceInterface->create(Ecr::class,$ecrRequest);
                 $currenErcId = $ecr['data_id'];
             }
@@ -229,7 +239,7 @@ class EcrController extends Controller
                     'status' => 'OK', //APPROVED ECR
                 ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
-                
+                $this->saveDetailsByCategory($ecrApproval[0]->category,$ecrsId);
             }
             if ( count($ecrApproval) != 0 ){
                 $ecrApprovalValidated = [
@@ -314,17 +324,16 @@ class EcrController extends Controller
                     $query->where('status','PEN');
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
                 }
-
             })
             ->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= "<button ecr-id='".$row->id."' ecr-status='".$row->status."' class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
                 $result .= '<br>';
                 $result .= '<br>';
-                $result .= "<button class='btn btn-outline-primary btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEcrId'> <i class='fa-solid fa-eye'></i></button>";
+                $result .= "<button ecr-id='".$row->id."' ecr-status='".$row->status."' class='btn btn-outline-primary btn-sm mr-1 btn-get-ecr-id'  id='btnViewEcrId'> <i class='fa-solid fa-eye'></i></button>";
                 $result .= '</br>';
                 return $result;
             })
@@ -684,6 +693,7 @@ class EcrController extends Controller
             throw $e;
         }
     }
+    //Common Function
    public function getStatus($status){
 
        try {
@@ -765,4 +775,22 @@ class EcrController extends Controller
            throw $e;
        }
    }
+   public function saveDetailsByCategory($category,$ecrsId){
+       try {
+            switch ($category) {
+                case 'value':
+                    # code...
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+            return response()->json(['is_success' => 'true']);
+       } catch (Exception $e) {
+           throw $e;
+       }
+   }
+
+
 }

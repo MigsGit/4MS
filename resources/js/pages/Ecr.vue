@@ -424,7 +424,7 @@
                 </div>
                 <div class="row">
                     <div class="modal-footer justify-content-end">
-                        <button @click="btnEcrRequirement(frmEcr.ecrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
+                        <button v-show="modalTitle === 'View' && currentStatus === 'QA'" @click="btnEcrRequirement(frmEcr.ecrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
                             <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp;QA ECR Requirements
                         </button>
                     </div>
@@ -728,6 +728,7 @@
     const modalEcrRequirements = ref(null);
     const modalEcrApproval = ref(null);
     const isSelectReadonly = ref(null);
+    const currentStatus = ref(null);
     const tblEcr = ref(null);
     const tblEcrQa = ref(null);
     const tblEcrManRequirements = ref(null);
@@ -767,6 +768,7 @@
                 });
                 btnViewEcrId.addEventListener('click',function(){
                     let ecrsId = this.getAttribute('ecr-id');
+                    let ecrStatus = this.getAttribute('ecr-status');
                     let approverParams = {
                         selectedId : ecrsId,
                         approvalType : 'ecrApproval'
@@ -774,6 +776,7 @@
                     modalTitle.value = "View";
                     isSelectReadonly.value = true;
                     currentEcrsId.value = ecrsId;
+                    currentStatus.value = ecrStatus;
                     getEcrById(ecrsId);
                     getCurrentApprover(approverParams);
                     tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw();
@@ -831,7 +834,6 @@
         {   data: 'remarks'},
         {   data: 'get_status'} ,
     ];
-
     //constant object params
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
@@ -886,7 +888,6 @@
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         $('#collapse1').addClass('show');
     })
-
     const btnEcr = async () => {
         modalEcr.SaveEcr.show();
         isSelectReadonly.value = false;
@@ -921,7 +922,6 @@
             tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
         });
     }
-
     //Functions
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({
