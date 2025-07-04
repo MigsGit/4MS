@@ -114,6 +114,7 @@ Route::middleware('auth')->group(function(){
         Route::get('load_method_approver_summary_material_id', 'loadMethodApproverSummaryMaterialId')->name('load_method_approver_summary_material_id');
         Route::get('get_method_ref_by_id', 'getMethodRefById')->name('get_method_ref_by_id');
         Route::get('view_method_ref', 'viewMethodRef')->name('view_method_ref');
+        Route::get('save_method_approval', 'saveMethodApproval')->name('save_method_approval');
     });
 
     Route::controller(EnvironmentController::class)->group(function () {
