@@ -149,7 +149,7 @@ class EcrController extends Controller
                     return collect($users)->map(function ($userId) use ($request,$approval_status,&$ecrApprovalRequestCtr,$currenErcId){
                         return [
                             'ecrs_id' =>  $currenErcId,
-                            'rapidx_user_id' => $userId,
+                            'rapidx_user_id' => $userId == 0 ? NULL : $userId,
                             'approval_status' => $approval_status,
                             'counter' => $ecrApprovalRequestCtr++,
                             'remarks' => $request->remarks,
@@ -178,7 +178,7 @@ class EcrController extends Controller
                     //return array users id, defined type by use keyword,
                     return [
                         'ecrs_id' => $currenErcId,
-                        'rapidx_user_id' => $userId,
+                        'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
                         'approval_status' => $approval_status,
                         'counter' => $pmiApprovalRequestCtr++,
                         'remarks' => $request->remarks,
