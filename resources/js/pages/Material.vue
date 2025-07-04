@@ -695,12 +695,13 @@
     DataTable.use(DataTablesCore)
 
     const {
-        modal,
+        modalEcr,
         ecrVar,
         tblEcrDetails,
         frmEcrDetails,
         frmEcrReasonRows,
         descriptionOfChangeParams,
+        typeOfPartParams,
         reasonOfChangeParams,
         axiosFetchData,
         getEcrDetailsId,
@@ -725,6 +726,7 @@
     } = useSettings();
 
     const {
+        modal,
         commonVar,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
@@ -874,7 +876,7 @@
                     btnGetEcrDetailsId.addEventListener('click',function(){
                         let ecrDetailsId = this.getAttribute('ecr-details-id');
                         getEcrDetailsId(ecrDetailsId);
-                        modal.SaveEcrDetail.show();
+                        modalEcr.SaveEcrDetail.show();
                     });
                 }
             }
@@ -1052,7 +1054,7 @@
     };
 
     onMounted( async ()=>{
-        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
         modal.UploadMaterialRef = new Modal(modalUploadMaterialRef.value.modalRef,{ keyboard: false });
         modal.ViewMaterialRef = new Modal(modalViewMaterialRef.value.modalRef,{ keyboard: false });

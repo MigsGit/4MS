@@ -504,6 +504,7 @@
 
     const { axiosSaveData } = useForm(); // Call the useForm function
     const {
+        modalEcr,
         ecrVar,
         tblEcrDetails,
         frmEcrDetails,
@@ -654,7 +655,7 @@
                     btnGetEcrDetailsId.addEventListener('click',function(){
                         let ecrDetailsId = this.getAttribute('ecr-details-id');
                         getEcrDetailsId(ecrDetailsId);
-                        modal.SaveEcrDetail.show();
+                        modalEcr.SaveEcrDetail.show();
                     });
                 }
             }
@@ -735,7 +736,7 @@
 
     onMounted( async ()=>{
         modal.SaveMachine = new Modal(modalSaveMachine.value.modalRef,{ keyboard: false });
-        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         modal.ViewMachineRef = new Modal(modalViewMachineRef.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });

@@ -463,6 +463,7 @@
 
     //composables export function
     const {
+        modalEcr,
         ecrVar,
         tblEcrDetails,
         frmEcrDetails,
@@ -547,7 +548,7 @@
                     btnGetEcrDetailsId.addEventListener('click',function(){
                         let ecrDetailsId = this.getAttribute('ecr-details-id');
                         getEcrDetailsId(ecrDetailsId);
-                        modal.SaveEcrDetail.show();
+                        modalEcr.SaveEcrDetail.show();
                     });
                 }
             }
@@ -641,7 +642,7 @@
 
     onMounted( async ()=>{
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
-        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveManDetails = new Modal(modalSaveManDetails.value.modalRef,{ keyboard: false });
         modal.ManChecklist = new Modal(modalManChecklist.value.modalRef,{ keyboard: false });
         modal.modalSaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });

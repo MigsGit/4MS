@@ -273,7 +273,7 @@
 
     const { axiosSaveData } = useForm(); // Call the useFetch function
     const {
-        modal,
+        modalEcr,
         ecrVar,
         tblEcrDetails,
         frmEcrDetails,
@@ -288,6 +288,7 @@
         saveEcrDetails,
     } = useEcr();
     const {
+        modal,
         commonVar,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
@@ -329,7 +330,7 @@
                     btnGetEcrDetailsId.addEventListener('click',function(){
                         let ecrDetailsId = this.getAttribute('ecr-details-id');
                         getEcrDetailsId(ecrDetailsId);
-                        modal.SaveEcrDetail.show();
+                        modalEcr.SaveEcrDetail.show();
                     });
                 }
             }
@@ -416,7 +417,7 @@
     ];
     onMounted( async ()=>{
         modal.SaveEnvironment = new Modal(modalSaveEnvironment.value.modalRef,{ keyboard: false });
-        modal.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.PmiInternalApproval = new Modal(modalPmiInternalApproval.value.modalRef,{ keyboard: false });
         modal.UploadEnvironmentRef = new Modal(modalUploadEnvironmentRef.value.modalRef,{ keyboard: false });
         modal.ViewEnvironmentRef = new Modal(modalViewEnvironmentRef.value.modalRef,{ keyboard: false });

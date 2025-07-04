@@ -1,15 +1,9 @@
 import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
 import useForm from "./utils/useForm";
-import useEcr from "./ecr";
 export default function useCommon(){
     const { axiosFetchData } = useFetch(); // Call  the useFetch function
     const  { axiosSaveData } = useForm();
-    const  {
-        frmEcrReasonRows
-    } = useEcr();
-    console.log('frmEcrReasonRows',frmEcrReasonRows.value);
-
     const modal ={}
     //Reactive State
     const commonVar = reactive({

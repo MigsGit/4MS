@@ -694,7 +694,7 @@
     const { axiosSaveData } = useForm(); // Call the useFetch function
     //composables export function
     const {
-        modal,
+        modalEcr,
         ecrVar,
         frmEcr,
         frmEcrReasonRows,
@@ -715,6 +715,7 @@
         onUserChange,
     } = useSettings();
     const {
+        modal,
         commonVar,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
@@ -877,8 +878,8 @@
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js clas
-        modal.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
-        modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modalEcr.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
+        modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
@@ -887,7 +888,7 @@
     })
 
     const btnEcr = async () => {
-        modal.SaveEcr.show();
+        modalEcr.SaveEcr.show();
         isSelectReadonly.value = false;
         generateControlNumber();
         await getRapidxUserByIdOpt(otherDispoRequestedByParams);
@@ -950,7 +951,7 @@
         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
         tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
         tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
-        modal.EcrRequirements.show();
+        modalEcr.EcrRequirements.show();
     }
     const frmSaveEcrApproval = async () => {
         let formData = new FormData();
@@ -967,7 +968,7 @@
             tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
             tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
             modal.EcrApproval.hide();
-            modal.SaveEcr.hide();
+            modalEcr.SaveEcr.hide();
         });
     }
     const frmSaveEcr = async () => {
@@ -1036,7 +1037,7 @@
         axiosSaveData(formData,'api/save_ecr', (response) =>{
             tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
             tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
-            modal.SaveEcr.hide();
+            modalEcr.SaveEcr.hide();
         });
     }
 

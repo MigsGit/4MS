@@ -10,6 +10,7 @@ export default function useEcr(){
     const modal = {
         SaveEcrDetail : null,
     };
+    const modalEcr = {};
     //Reactive State
     const ecrVar = reactive({
         optDescriptionOfChange: [],
@@ -168,7 +169,7 @@ export default function useEcr(){
             let data = response.data;
             let ecr = data.ecr;
             if(ecr.status === "QA"){
-                modal.EcrRequirements.show();
+                modalEcr.EcrRequirements.show();
             }
             frmEcr.value.ecrsId = ecr.id;
             frmEcr.value.ecrNo = ecr.ecr_no;;
@@ -251,7 +252,7 @@ export default function useEcr(){
                     });
                 }
             }, 1000);
-            modal.SaveEcr.show();
+            modalEcr.SaveEcr.show();
         });
     }
     const resetArrEcrRows = async () => {
@@ -298,13 +299,13 @@ export default function useEcr(){
         );
         axiosSaveData(formData,'api/save_ecr_details', (response) =>{
             tblEcrDetails.value.dt.draw();
-            modal.SaveEcrDetail.hide();
+            modalEcr.SaveEcrDetail.hide();
         });
     }
-    
+
     //Common Function
     return {
-        modal,
+        modalEcr,
         ecrVar,
         frmEcr,
         frmEcrDetails,
