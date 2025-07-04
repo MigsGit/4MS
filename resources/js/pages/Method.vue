@@ -727,10 +727,6 @@
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         modal.ViewMethodRef = new Modal(modalViewMethodRef.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
-        await getDropdownMasterByOpt(descriptionOfChangeParams);
-        await getDropdownMasterByOpt(reasonOfChangeParams);
-        await getDropdownMasterByOpt(typeOfPartParams);
-        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
         modalSaveMethod.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMethod.value);
         });
@@ -740,6 +736,10 @@
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmSpecialInspection.value);
         });
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
+        await getDropdownMasterByOpt(typeOfPartParams);
+        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
     })
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {

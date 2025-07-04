@@ -883,13 +883,14 @@
         modalEcr.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
+        modalSaveEcr.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmEcr.value);
+        });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         $('#collapse1').addClass('show');
-        modalSaveEcr.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            resetEcrForm(frmEcr.value);
-        });
+
     })
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {

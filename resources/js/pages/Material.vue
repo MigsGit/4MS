@@ -1059,18 +1059,19 @@
         modal.UploadMaterialRef = new Modal(modalUploadMaterialRef.value.modalRef,{ keyboard: false });
         modal.ViewMaterialRef = new Modal(modalViewMaterialRef.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
-        // modal.ViewMaterialRef.show();
-        await getDropdownMasterByOpt(descriptionOfChangeParams);
-        await getDropdownMasterByOpt(reasonOfChangeParams);
-        await getDropdownMasterByOpt(typeOfPartParams);
-        await getDropdownMasterByOpt(materialSupplierParams);
-        await getDropdownMasterByOpt(materialColorParams);
         modalSaveMaterial.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMaterial.value);
         });
         modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcrDetails.value);
         });
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
+        await getDropdownMasterByOpt(typeOfPartParams);
+        await getDropdownMasterByOpt(materialSupplierParams);
+        await getDropdownMasterByOpt(materialColorParams);
+
+
     })
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {

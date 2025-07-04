@@ -749,7 +749,7 @@
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
 
         modalSaveMachine.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            resetEcrForm(frmMaterial.value);
+            resetEcrForm(frmMachine.value);
         });
         modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcrDetails.value);

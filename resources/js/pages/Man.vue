@@ -442,9 +442,6 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
-
-
-
 </template>
 
 <script setup>
@@ -660,7 +657,6 @@
     const btnAddSpecialInspection = async () => {
         modal.modalSaveSpecialInspection.show();
     }
-
     const getManById = async (manId) =>
     {
         let apiParams = {
