@@ -731,8 +731,21 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
-        // modalEcr.SaveEcrDetail.show();
+        modalSaveMethod.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmMethod.value);
+        });
+        modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmEcrDetails.value);
+        });
+        modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmSpecialInspection.value);
+        });
     })
+    const resetEcrForm = async (frmElement) => {
+        for (const key in frmElement) {
+            frmElement[key] = '';
+        }
+    };
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
         modal.Approval.show();

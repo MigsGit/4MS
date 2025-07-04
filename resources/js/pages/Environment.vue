@@ -87,8 +87,7 @@
             <!-- Pmi Internal Approver -->
             <!-- <PmiInternalApprover :tblEcrPmiInternalApproverSummary="tblEcrPmiInternalApproverSummary" :tblEcrPmiInternalApproverSummaryColumns = tblEcrPmiInternalApproverSummaryColumns>
             </PmiInternalApprover> -->
-            <!-- <div class="row mt-3" v-show="isSelectReadonly === true"> -->
-            <div class="row mt-3">
+            <div class="row mt-3" v-show="isSelectReadonly === true">
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
@@ -135,8 +134,6 @@
             <button @click="btnPmiInternalApproval('APP')" v-show="isSelectReadonly === true && commonVar.isSessionPmiInternalApprover === true" type="button" ref= "btnPmiInternalApproved" class="btn btn-success btn-sm">
                 <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-up" />&nbsp;Approved
             </button>
-            <!-- <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click="saveMaterial()" type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button> -->
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -424,7 +421,15 @@
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
+        modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmEcrDetails.value);
+        });
     })
+    const resetEcrForm = async (frmElement) => {
+        for (const key in frmElement) {
+            frmElement[key] = '';
+        }
+    };
     const btnPmiInternalApproval = async (isEcrApproved) => {
         modal.PmiInternalApproval.show();
         isPmiInternalApproved.value = isEcrApproved;

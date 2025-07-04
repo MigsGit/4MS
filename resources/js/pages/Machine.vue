@@ -489,6 +489,7 @@
         </template>
     </ModalComponent>
 </template>
+
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
@@ -501,7 +502,9 @@
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
     DataTable.use(DataTablesCore);
-
+    // aobeguico CN ENGG
+    // aatamolang TS ENGG
+    // jmfaraon PPD ENGG
     const { axiosSaveData } = useForm(); // Call the useForm function
     const {
         modalEcr,
@@ -740,12 +743,26 @@
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         modal.ViewMachineRef = new Modal(modalViewMachineRef.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
-
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+
+        modalSaveMachine.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmMaterial.value);
+        });
+        modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmEcrDetails.value);
+        });
+        modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmSpecialInspection.value);
+        });
     })
+    const resetEcrForm = async (frmElement) => {
+        for (const key in frmElement) {
+            frmElement[key] = '';
+        }
+    };
     const btnAddSpecialInspection = async () => {
         frmSpecialInspection.value.ecrsId = selectedEcrsId;
         modal.SaveSpecialInspection.show();

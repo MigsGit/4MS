@@ -148,7 +148,7 @@ export default function useEcr(){
 
             let rapidxUserById = data.rapidxUserById;
             params.globalVar.splice(0, params.globalVar.length,
-                { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
+                // { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
                 { value: 0, label: 'N/A' }, // Push "N/A" option at the start
                 // { value: null, label: 'N/A' }, // Push "N/A" option at the start
                     ...rapidxUserById.map((value) => {
@@ -302,8 +302,6 @@ export default function useEcr(){
             modalEcr.SaveEcrDetail.hide();
         });
     }
-
-    //Common Function
     return {
         modalEcr,
         ecrVar,

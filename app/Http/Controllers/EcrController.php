@@ -53,27 +53,28 @@ class EcrController extends Controller
     public function generateControlNumber(){
         date_default_timezone_set('Asia/Manila');
         //Systemon HRIS / Subcon
+        $rapidx_user = DB::connection('mysql_rapidx')
+        ->select(" SELECT department_group
+            FROM departments
+            WHERE department_id = '".session('rapidx_department_id')."'
+        ");
         $hris_data = DB::connection('mysql_systemone_hris')
         ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
         $subcon_data = DB::connection('mysql_systemone_subcon')
         ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
-        if(count($hris_data) > 0){
+        if(count($hris_data) > 0 && count($rapidx_user)> 0){
             $vwEmployeeinfo =  $hris_data;
-            $filteredSection = $this->getFilteredSection($vwEmployeeinfo[0]->Department);
-            $division = ($vwEmployeeinfo[0]->Division == "TS-F1" ||
-            $vwEmployeeinfo[0]->Division == "TS-F3" ? "TS" :
-            $vwEmployeeinfo[0]->Division == "Administration") ? "ADMIN" :
-            "???";
+            $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
+            $division = ($rapidx_user[0]->department_group === "PPS" || $rapidx_user[0]->department_group === "PPD") ? "PPD" :
+            ($rapidx_user[0]->department_group === "LOG" || $rapidx_user[0]->department_group === "ISS") ? "ADMIN" :
+            $rapidx_user[0]->department_group;
         }
-        else{
+        if(count($subcon_data) > 0 && count($rapidx_user) > 0){
             $vwEmployeeinfo =  $subcon_data;
-            $filteredSection = $this->getFilteredSection($vwEmployeeinfo[0]->Department);
-            $division = ($vwEmployeeinfo[0]->Division == "TS-F1" ||
-            $vwEmployeeinfo[0]->Division == "TS-F3" ? "TS" :
-            $vwEmployeeinfo[0]->Division == "CN-F1" ? "CN" :
-            $vwEmployeeinfo[0]->Division == "CN-F3" ? "CN" :
-            $vwEmployeeinfo[0]->Division == "Administration") ? "ADMIN" :
-            "???";
+            $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
+            $division = ($rapidx_user[0]->department_group === "PPS" || $rapidx_user[0]->department_group === "PPD") ? "PPD" :
+            ($rapidx_user[0]->department_group === "LOG" || $rapidx_user[0]->department_group === "ISS") ? "ADMIN" :
+            $rapidx_user[0]->department_group;
         }
         // Check if the Created At & App No / Division / Material Category is exisiting
         // Example:TS-ADMIN-LOG-PCH-25-01-001

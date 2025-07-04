@@ -1065,7 +1065,18 @@
         await getDropdownMasterByOpt(typeOfPartParams);
         await getDropdownMasterByOpt(materialSupplierParams);
         await getDropdownMasterByOpt(materialColorParams);
+        modalSaveMaterial.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmMaterial.value);
+        });
+        modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmEcrDetails.value);
+        });
     })
+    const resetEcrForm = async (frmElement) => {
+        for (const key in frmElement) {
+            frmElement[key] = '';
+        }
+    };
     //Functions
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;

@@ -204,6 +204,7 @@
                                                 </td>
                                                 <td>
                                                     <Multiselect
+                                                        placeholder="Select an option"
                                                         v-model="frmEcrOtherDispoRow.requestedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -724,7 +725,7 @@
     // const item = ref();
     //ref state
     const modalSaveEcr = ref(null);
-    const modalTitle = ref(null);
+    const modalTitle = ref('Add');
     const modalEcrRequirements = ref(null);
     const modalEcrApproval = ref(null);
     const isSelectReadonly = ref(null);
@@ -845,7 +846,6 @@
         formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
         selectedVal: '',
     };
-
     const otherDispoRequestedByParams = {
         globalVar: ecrVar.requestedBy,
         formModel: toRef(frmEcrOtherDispoRows.value[0],'requestedBy'),
