@@ -42,15 +42,15 @@ class EnvironmentController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->created_by === session('rapidx_user_id')){
+
+
+                if($row->approval_status === "PB" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-                }
-                if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                }
-                if($row->approval_status === "PB"){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadEnvironmentRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
+                // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
+                    $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                // }
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';

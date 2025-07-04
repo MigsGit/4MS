@@ -46,13 +46,11 @@ class MaterialController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-                }
                 if($row->material->status === "FORAPP" || $row->material->status === "PMIAPP"){
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
-                if($row->material->status === "RUP"){
+                if($row->material->status === "RUP" && $row->created_by === session('rapidx_user_id')){
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
                 $result .= '</ul>';
