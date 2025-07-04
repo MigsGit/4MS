@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 use App\Models\Ecr;
+use App\Models\Method;
+use App\Models\Machine;
+use App\Models\Material;
 use App\Models\EcrDetail;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;
+use App\Models\Environment;
 use App\Models\PmiApproval;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -210,14 +214,14 @@ class EcrController extends Controller
             }
 
             //Get Current Status
-            $ecrApproval = Ecr::where('id',$ecrsId)->get(['approval_status','status']);
+            $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category',]);
             //Verify if the ECR Requirement is Completed.
             $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
-            if($ecrApproval[0]->status === 'QA'){
-                if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
-                    return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
-                }
-            }
+            // if($ecrApproval[0]->status === 'QA'){
+            //     if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
+            //         return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
+            //     }
+            // }
             //Update the ECR Approval Status
             $ecrApprovalCurrent->update([
                 'status' => $request->status,
@@ -239,7 +243,7 @@ class EcrController extends Controller
                     'status' => 'OK', //APPROVED ECR
                 ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
-                $this->saveDetailsByCategory($ecrApproval[0]->category,$ecrsId);
+                $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
             }
             if ( count($ecrApproval) != 0 ){
                 $ecrApprovalValidated = [
@@ -777,15 +781,30 @@ class EcrController extends Controller
    }
    public function saveDetailsByCategory($category,$ecrsId){
        try {
-            switch ($category) {
-                case 'value':
-                    # code...
+            switch  ($category) {
+                case 'Man':
+                    $currentModel = Man::class; //TODO Create DB with the column below
                     break;
-
+                case 'Material':
+                    $currentModel = Material::class;
+                    break;
+                case 'Machine':
+                    $currentModel = Machine::class;
+                    break;
+                case 'Method':
+                    $currentModel = Method::class;
+                    break;
+                case 'Environment':
+                    $currentModel = Environment::class;
+                    break;
                 default:
-                    # code...
+                    //TODO:Error Handling
                     break;
             }
+            $requestValidated = [
+                'ecrs_id' => $ecrsId,
+            ];
+            $this->resourceInterface->create($currentModel,$requestValidated);
             return response()->json(['is_success' => 'true']);
        } catch (Exception $e) {
            throw $e;
