@@ -879,7 +879,7 @@
 
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
-        //Do not name the Modal it is same new Modal js clas
+        //Do not name the Modal it is same new Modal js class
         modalEcr.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
@@ -887,7 +887,15 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         $('#collapse1').addClass('show');
+        modalSaveEcr.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmEcr.value);
+        });
     })
+    const resetEcrForm = async (frmElement) => {
+        for (const key in frmElement) {
+            frmElement[key] = '';
+        }
+    };
     const btnEcr = async () => {
         modalEcr.SaveEcr.show();
         isSelectReadonly.value = false;
