@@ -35,6 +35,7 @@ Route::get('check_session', function (Request $request) {
 });
 //session_start in Authenticate Middleware, then passed it to the queries to get session
 Route::middleware('auth')->group(function(){
+
     Route::controller(EcrController::class)->group(function () {
         Route::post('save_ecr', 'saveEcr')->name('save_ecr');
         Route::post('save_ecr_details', 'saveEcrDetails')->name('save_ecr_details');
@@ -53,9 +54,10 @@ Route::middleware('auth')->group(function(){
     });
 
     Route::controller(CommonController::class)->group(function (): void {
+        // Route::post('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
+        Route::get('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::post('save_special_inspection', 'saveSpecialInspection')->name('save_special_inspection');
 
-        Route::get('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::get('get_special_inspection_by_id', 'getSpecialInspectionById')->name('get_special_inspection_by_id');
         Route::get('get_rapidx_user_by_id_opt', 'getRapidxUserByIdOpt')->name('get_rapidx_user_by_id_opt');
         Route::get('get_current_approver_session', 'getCurrentApproverSession')->name('get_current_approver_session');
@@ -112,7 +114,6 @@ Route::middleware('auth')->group(function(){
         Route::get('load_method_approver_summary_material_id', 'loadMethodApproverSummaryMaterialId')->name('load_method_approver_summary_material_id');
         Route::get('get_method_ref_by_id', 'getMethodRefById')->name('get_method_ref_by_id');
         Route::get('view_method_ref', 'viewMethodRef')->name('view_method_ref');
-        Route::get('save_method_approval', 'saveMethodApproval')->name('save_method_approval');
     });
 
     Route::controller(EnvironmentController::class)->group(function () {

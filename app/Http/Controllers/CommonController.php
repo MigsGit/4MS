@@ -6,7 +6,6 @@ use Mail;
 use Helpers;
 use App\Models\Ecr;
 use App\Models\Man;
-use App\Models\Method;
 use App\Models\Material;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;

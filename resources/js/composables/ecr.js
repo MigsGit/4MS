@@ -26,6 +26,7 @@ export default function useEcr(){
         checkedBy: [],
         approvedBy: [],
 
+        optTypeOfPart: [],
     });
     //Ref State
     const frmEcr = ref({
@@ -44,7 +45,15 @@ export default function useEcr(){
         dateOfRequest: '',
         approvalRemarks: '',
     });
-
+    const frmEcrDetails = ref({
+        ecrDetailsId: '',
+        ecrsId: '',
+        typeOfPart: '',
+        changeImpDate: '',
+        docSubDate: '',
+        docToBeSub: 'test',
+        remarks: 'test',
+    });
     const frmEcrReasonRows = ref([
         {
             descriptionOfChange: '',
@@ -71,6 +80,7 @@ export default function useEcr(){
             approvedBy: '',
         },
     ]);
+    const tblEcrDetails = ref(null);
 
     //Obj Params
     const descriptionOfChangeParams ={
@@ -85,7 +95,12 @@ export default function useEcr(){
         formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),
         selectedVal: '',
     };
-
+    const typeOfPartParams = {
+        tblReference : 'type_of_part',
+        globalVar: ecrVar.optTypeOfPart,
+        formModel: toRef(frmEcrDetails.typeOfPart,'reasonOfChange'),
+        selectedVal: '',
+    }
     //Functions
     const addEcrReasonRows = async () => {
         frmEcrReasonRows.value.push({
@@ -249,17 +264,58 @@ export default function useEcr(){
             approvedBy: '' ,
         });
     }
+    const getEcrDetailsId = async (ecrDetailsId) =>
+    {
+        let params = {
+            ecrDetailsId : ecrDetailsId
+        }
+        axiosFetchData(params,'api/get_ecr_details_id',function(response){
+            let ecrDetails = response.data.ecrDetail;
+            frmEcrDetails.value.ecrDetailsId = ecrDetailsId;
+            frmEcrDetails.value.changeImpDate =ecrDetails.change_imp_date
+            frmEcrDetails.value.docSubDate =ecrDetails.doc_sub_date
+            frmEcrDetails.value.docToBeSub =ecrDetails.doc_to_be_sub
+            frmEcrDetails.value.customerApproval = ecrDetails.customer_approval
+            frmEcrDetails.value.remarks =ecrDetails.remarks
+            frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
+            frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
+            frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
+        });
+    }
+    const saveEcrDetails = async () => {
+        let formData = new FormData();
+        //Append form data
+        [
+            ["ecr_details_id", frmEcrDetails.value.ecrDetailsId],
+            ["change_imp_date", frmEcrDetails.value.changeImpDate],
+            ["type_of_part", frmEcrDetails.value.typeOfPart],
+            ["doc_sub_date", frmEcrDetails.value.docSubDate],
+            ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
+            ["customer_approval", frmEcrDetails.value.customerApproval],
+            ["remarks", frmEcrDetails.value.remarks],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+        axiosSaveData(formData,'api/save_ecr_details', (response) =>{
+            tblEcrDetails.value.dt.draw();
+            modal.SaveEcrDetail.hide();
+        });
+    }
+    
     //Common Function
     return {
         modal,
         ecrVar,
         frmEcr,
+        frmEcrDetails,
         frmEcrReasonRows,
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
+        typeOfPartParams,
+        tblEcrDetails,
         resetArrEcrRows,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
@@ -267,5 +323,7 @@ export default function useEcr(){
         getEcrById,
         addEcrReasonRows,
         removeEcrReasonRows,
+        getEcrDetailsId,
+        saveEcrDetails,
     };
 }

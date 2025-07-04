@@ -189,7 +189,7 @@
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
                         <Multiselect
                             v-model="frmEcrDetails.typeOfPart"
-                            :options="commonVar.optTypeOfPart"
+                            :options="ecrVar.optTypeOfPart"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -464,12 +464,17 @@
     //composables export function
     const {
         ecrVar,
+        tblEcrDetails,
+        frmEcrDetails,
         frmEcrReasonRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
+        typeOfPartParams,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,
+        getEcrDetailsId,
+        saveEcrDetails,
     } = useEcr();
 
     const {
@@ -480,22 +485,12 @@
         commonVar,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
-        tblPmiInternalApproverSummary,
-        tblEcrDetails,
-        frmEcrDetails,
-        frmSpecialInspection,
         modalSaveSpecialInspection,
         specialInsQcInspectorParams,
-        typeOfPartParams,
-
-        isApprovedDisappproved,
-        approvalRemarks,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        saveEcrDetails,
-        getEcrDetailsId,
-
+        frmSpecialInspection,
     } = useCommon();
 
     //ref state

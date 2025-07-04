@@ -16,7 +16,6 @@ export default function useCommon(){
         isSessionApprover : false,
         isSessionPmiInternalApprover : false,
         optUserMaster:[],
-        optTypeOfPart: [],
         optAdminAccess : [
             // {"value":"","label":"-Select an Admin-", "disabled":true },
             {"value":"all","label":"Show All"},
@@ -53,21 +52,7 @@ export default function useCommon(){
         ]
     });
     //Ref State
-    const frmEcrDetails = ref({
-        ecrDetailsId: '',
-        ecrsId: '',
-        typeOfPart: '',
-        changeImpDate: '',
-        docSubDate: '',
-        docToBeSub: '',
-        remarks: '',
-    });
-
-    const isApprovedDisappproved = ref(null);
-    const approvalRemarks = ref(null);
     const tblSpecialInspection = ref(null);
-    const tblPmiInternalApproverSummary = ref(null);
-    const tblEcrDetails = ref(null);
     const modalSaveSpecialInspection = ref(null);
     const frmSpecialInspection = ref({
         ecrsId : "",
@@ -88,13 +73,6 @@ export default function useCommon(){
         formModel: toRef(frmSpecialInspection.value,'inspector'),
         selectedVal: '',
     };
-    const typeOfPartParams = {
-        tblReference : 'type_of_part',
-        globalVar: commonVar.optTypeOfPart,
-        formModel: toRef(frmEcrDetails.typeOfPart,'reasonOfChange'),
-        selectedVal: '',
-    }
-
     //DT Columns
     const tblSpecialInspectionColumns = [
         {   title: '<i class="fa fa-cogs"></i>',
@@ -143,27 +121,6 @@ export default function useCommon(){
             commonVar.value.isSessionPmiInternalApprover = data.isSessionPmiInternalApprover;
         });
     }
-    const getSpecialInspectionById = async (specialInspectionsId) => {
-        let apiParams = {
-            specialInspectionsId : specialInspectionsId
-        }
-        axiosFetchData(apiParams,'api/get_special_inspection_by_id',function(response){
-            let data = response.data;
-            let specialInspection = response.data.specialInspection;
-            frmSpecialInspection.value.specialInspectionsId = specialInspection.id;
-            frmSpecialInspection.value.ecrsId = specialInspection.ecrs_id;
-            frmSpecialInspection.value.productDetail = specialInspection.product_detail;
-            frmSpecialInspection.value.lotQty = specialInspection.lot_qty;
-            frmSpecialInspection.value.samples = specialInspection.samples;
-            frmSpecialInspection.value.mod = specialInspection.mod;
-            frmSpecialInspection.value.modQty = specialInspection.mod_qty;
-            frmSpecialInspection.value.judgement = specialInspection.judgement;
-            frmSpecialInspection.value.inspectionDate = specialInspection.inspection_date;
-            frmSpecialInspection.value.inspector = specialInspection.inspector;
-            frmSpecialInspection.value.lqcSectionHead = specialInspection.inspector;
-            frmSpecialInspection.value.remarks = specialInspection.remarks;
-        });
-    }
     const saveSpecialInspection = async () => {
         let formData = new FormData();
          //Append form data
@@ -189,45 +146,24 @@ export default function useCommon(){
             modal.SaveSpecialInspection.hide();
         });
     }
-
-    const saveEcrDetails = async () => {
-        let formData = new FormData();
-        //Append form data
-        [
-            ["ecr_details_id", frmEcrDetails.value.ecrDetailsId],
-            ["change_imp_date", frmEcrDetails.value.changeImpDate],
-            ["type_of_part", frmEcrDetails.value.typeOfPart],
-            ["doc_sub_date", frmEcrDetails.value.docSubDate],
-            ["doc_to_be_sub", frmEcrDetails.value.docToBeSub],
-            ["customer_approval", frmEcrDetails.value.customerApproval],
-            ["remarks", frmEcrDetails.value.remarks],
-        ].forEach(([key, value]) =>
-            formData.append(key, value)
-        );
-        axiosSaveData(formData,'api/save_ecr_details', (response) =>{
-            tblEcrDetails.value.dt.draw();
-            modal.SaveEcrDetail.hide();
-        });
-    }
-    const getEcrDetailsId = async (ecrDetailsId) =>
-    {
-        let params = {
-            ecrDetailsId : ecrDetailsId
+    const getSpecialInspectionById = async (specialInspectionsId) => {
+        let apiParams = {
+            specialInspectionsId : specialInspectionsId
         }
-        axiosFetchData(params,'api/get_ecr_details_id',function(response){
-            let ecrDetails = response.data.ecrDetail;
-            frmEcrDetails.value.ecrDetailsId = ecrDetailsId;
-            frmEcrDetails.value.changeImpDate =ecrDetails.change_imp_date
-            frmEcrDetails.value.docSubDate =ecrDetails.doc_sub_date
-            frmEcrDetails.value.docToBeSub =ecrDetails.doc_to_be_sub
-            frmEcrDetails.value.customerApproval = ecrDetails.customer_approval
-            frmEcrDetails.value.remarks =ecrDetails.remarks
-            frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
-            // setTimeout(() => {
-
-                frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
-                frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
-            // }, 1000);
+        axiosFetchData(apiParams,'api/get_special_inspection_by_id',function(response){
+            let data = response.data;
+            let specialInspection = response.data.specialInspection;
+            frmSpecialInspection.value.specialInspectionsId = specialInspection.id;
+            frmSpecialInspection.value.ecrsId = specialInspection.ecrs_id;
+            frmSpecialInspection.value.productDetail = specialInspection.product_detail;
+            frmSpecialInspection.value.lotQty = specialInspection.lot_qty;
+            frmSpecialInspection.value.samples = specialInspection.samples;
+            frmSpecialInspection.value.mod = specialInspection.mod;
+            frmSpecialInspection.value.modQty = specialInspection.mod_qty;
+            frmSpecialInspection.value.judgement = specialInspection.judgement;
+            frmSpecialInspection.value.inspectionDate = specialInspection.inspection_date;
+            frmSpecialInspection.value.inspector = specialInspection.inspector;
+            frmSpecialInspection.value.remarks = specialInspection.remarks;
         });
     }
 
@@ -236,20 +172,12 @@ export default function useCommon(){
         commonVar,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
-        tblPmiInternalApproverSummary,
-        tblEcrDetails,
         modalSaveSpecialInspection,
         specialInsQcInspectorParams,
-        typeOfPartParams,
-        isApprovedDisappproved,
-        approvalRemarks,
-        frmSpecialInspection,
-        frmEcrDetails,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        saveEcrDetails,
-        getEcrDetailsId,
+        frmSpecialInspection,
     }
 
 }

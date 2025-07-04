@@ -154,7 +154,7 @@
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
                         <Multiselect
                             v-model="frmEcrDetails.typeOfPart"
-                            :options="commonVar.optTypeOfPart"
+                            :options="ecrVar.optTypeOfPart"
                             placeholder="Select an option"
                             :searchable="true"
                             :close-on-select="true"
@@ -273,35 +273,24 @@
 
     const { axiosSaveData } = useForm(); // Call the useFetch function
     const {
+        modal,
         ecrVar,
+        tblEcrDetails,
+        frmEcrDetails,
         frmEcrReasonRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
+        typeOfPartParams,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
         axiosFetchData,
+        getEcrDetailsId,
+        saveEcrDetails,
     } = useEcr();
     const {
-        modal,
         commonVar,
-        tblSpecialInspection,
-        tblSpecialInspectionColumns,
-        tblPmiInternalApproverSummary,
-        tblEcrDetails,
-        frmEcrDetails,
-        frmSpecialInspection,
-        modalSaveSpecialInspection,
-        specialInsQcInspectorParams,
-        typeOfPartParams,
-
-        isApprovedDisappproved,
-        approvalRemarks,
-        saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        saveEcrDetails,
-        getEcrDetailsId,
-
     } = useCommon();
     // console.log(commonVar.isSessionPmiInternalApprover);
 
@@ -319,6 +308,8 @@
     const arrOriginalFilenames = ref([]);
 
     const modalPmiInternalApproval = ref(null);
+    const tblPmiInternalApproverSummary = ref(null);
+    const approvalRemarks = ref(null);
     const selectedEcrsId = ref(null);
     const isPmiInternalApproved = ref(null);
     const tblPmiInternalApproverSummaryColumns = [
