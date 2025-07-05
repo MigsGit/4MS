@@ -198,6 +198,7 @@ export default function useEcr(){
             frmEcrPmiApproverRows.value = [];
             let ecrApprovalCollection = data.ecrApprovalCollection;
             let pmiApprovalCollection = data.pmiApprovalCollection;
+            let pmiExternalApprovalCollection = data.pmiExternalApprovalCollection;
             let ecrDetails = ecr.ecr_details;
             setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
                 //Reasons
@@ -244,21 +245,30 @@ export default function useEcr(){
                 //PMI Approval
                 if (pmiApprovalCollection.length != 0){
                     let preparedBy = pmiApprovalCollection.PB;
-                    let checkedBy = pmiApprovalCollection.CB                ;
-                    let approvedBy = pmiApprovalCollection.AB                ;
+                    let checkedBy = pmiApprovalCollection.CB;
+                    let approvedBy = pmiApprovalCollection.AB;
+                    let externalPreparedBy = pmiApprovalCollection.EXQC;
+                    let externalPheckedBy = pmiApprovalCollection.EXOH;
+                    let externalPpprovedBy = pmiApprovalCollection.EXQA;
                     // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
                     const maxKey = Object.keys(pmiApprovalCollection).reduce((a, b) =>
                         pmiApprovalCollection[a].length > pmiApprovalCollection[b].length ? a : b
                     );
 
                     pmiApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
-                            frmEcrPmiApproverRows.value.push({
-                                preparedBy: preparedBy[index].rapidx_user_id ?? 0,
-                                checkedBy: checkedBy[index].rapidx_user_id ?? 0,
-                                approvedBy:approvedBy[index].rapidx_user_id ?? 0,
-                            });
+                        frmEcrPmiApproverRows.value.push({
+                            preparedBy: preparedBy[index].rapidx_user_id ?? 0,
+                            checkedBy: checkedBy[index].rapidx_user_id ?? 0,
+                            approvedBy:approvedBy[index].rapidx_user_id ?? 0,
+                        });
+                        frmEcrPmiExternalApproverRows.value.push({
+                            preparedBy: externalPreparedBy[index].rapidx_user_id ?? 0,
+                            checkedBy: externalPheckedBy[index].rapidx_user_id ?? 0,
+                            approvedBy:externalPpprovedBy[index].rapidx_user_id ?? 0,
+                        });
                     });
                 }
+
             }, 1000);
             modalEcr.SaveEcr.show();
         });

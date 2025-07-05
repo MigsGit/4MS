@@ -1145,6 +1145,18 @@
                 formData.append(key, value)
             );
         }
+        for (let index = 0; index < frmEcrPmiExternalApproverRows.value.length; index++) {
+            const externalPreparedBy = frmEcrPmiExternalApproverRows.value[index].preparedBy;
+            const externalPheckedBy = frmEcrPmiExternalApproverRows.value[index].checkedBy;
+            const externalPpprovedBy = frmEcrPmiExternalApproverRows.value[index].approvedBy;
+            [
+                ["external_prepared_by[]", externalPreparedBy],
+                ["external_checked_by[]", externalPheckedBy],
+                ["external_approved_by[]", externalPpprovedBy],
+            ].forEach(([key, value]) =>
+                formData.append(key, value)
+            );
+        }
         //TODO: Save Successfully
         axiosSaveData(formData,'api/save_ecr', (response) =>{
             tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();

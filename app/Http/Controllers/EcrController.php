@@ -193,12 +193,12 @@ class EcrController extends Controller
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
             if($request->internal_external === "External"){
-                $ext_approval_status = [
-                    'EXPB' => $request->ext_prepared_by,
-                    'EXCB' => $request->ext_checked_by,
-                    'EXAB' => $request->ext_approved_by,
+                $external_approval_status = [
+                    'EXQC' => $request->external_prepared_by,
+                    'EXOH' => $request->external_checked_by,
+                    'EXQA' => $request->external_approved_by,
                 ];
-                $pmiApprovalRequest = collect($ext_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
+                return $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                     //return array users id as array value
                     return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
                         // $approval_status as a array name
