@@ -9,4 +9,5 @@ interface CommonInterface
     public function uploadFileImg($machineRefBefore,$machineRefAfter,$id,$path);
     public function viewPdfFile($pdfPath);
     public function viewImageFile($filePath);
+    public function getApprovalStatus($approvalStatus);
 }

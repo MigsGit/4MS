@@ -79,7 +79,10 @@ class CommonController extends Controller
                 'ecrs_id' => $ecrsId
             ];
             $pmiApproval = $this->resourceInterface->readCustomEloquent(PmiApproval::class,$data,$relations,$conditions);
-            $pmiApproval = $pmiApproval->orderBy('counter','asc')->get();
+            $pmiApproval = $pmiApproval
+            ->whereNotNull('rapidx_user_id')
+            ->orderBy('counter','asc')
+            ->get();
             return DataTables($pmiApproval)
             ->addColumn('get_count',function ($row) use(&$ctr){
                 $ctr++;
@@ -95,7 +98,7 @@ class CommonController extends Controller
                 return $result;
             })
             ->addColumn('get_role',function ($row){
-                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $getApprovalStatus = $this->commonInterface->getApprovalStatus($row->approval_status);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
@@ -138,7 +141,6 @@ class CommonController extends Controller
             throw $e;
         }
     }
-
     public function getRapidxUserByIdOpt(Request $request){
         try {
             // $rapidxUserById = RapidxUser::where('department_id',22)->where('logdel',0)->get(); //22 QAD
@@ -246,29 +248,6 @@ class CommonController extends Controller
             $ecrApproval =  $ecrApprovalQuery->get();
             $isSessionPmiInternalApprover =  session('rapidx_user_id') ===  $ecrApproval[0]->rapidx_user_id ? true: false ;
             return response()->json(['isSuccess' => 'true','isSessionPmiInternalApprover'=>$isSessionPmiInternalApprover]);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function getApprovalStatus($approval_status){
-        try {
-             switch ($approval_status) {
-                 case 'PB':
-                     $approvalStatus = 'Prepared by:';
-                     break;
-                 case 'CB':
-                     $approvalStatus = 'Checked by:';
-                     break;
-                 case 'AB':
-                     $approvalStatus = 'Approved by:';
-                     break;
-                 default:
-                     $approvalStatus = '---';
-                     break;
-             }
-             return [
-                 'approvalStatus' => $approvalStatus,
-             ];
         } catch (Exception $e) {
             throw $e;
         }
@@ -408,6 +387,38 @@ class CommonController extends Controller
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
+            throw $e;
+        }
+    }
+    public function getApprovalStatus($approval_status){
+        try {
+             switch ($approval_status) {
+                 case 'PB':
+                     $approvalStatus = 'Prepared by:';
+                     break;
+                 case 'CB':
+                     $approvalStatus = 'Checked by:';
+                     break;
+                 case 'AB':
+                     $approvalStatus = 'Approved by:';
+                     break;
+                 case 'EXQC':
+                     $approvalStatus = 'QC Head:';
+                     break;
+                 case 'EXOH':
+                     $approvalStatus = 'Operation Head:';
+                     break;
+                 case 'EXQA':
+                     $approvalStatus = 'QA Head:';
+                     break;
+                 default:
+                     $approvalStatus = '---';
+                     break;
+             }
+             return [
+                 'approvalStatus' => $approvalStatus,
+             ];
+        } catch (Exception $e) {
             throw $e;
         }
     }
