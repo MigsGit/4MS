@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function(){
     Route::controller(ManController::class)->group(function () {
         Route::post('save_man', 'saveMan')->name('save_man');
 
+        Route::get('load_ecr_man_by_status', 'loadEcrManByStatus')->name('load_ecr_man_by_status');
         Route::get('load_man_by_ecr_id', 'loadManByEcrId')->name('load_man_by_ecr_id');
         Route::get('load_man_checklist', 'loadManChecklist')->name('load_man_checklist');
         Route::get('get_man_by_id', 'getManById')->name('get_man_by_id');
