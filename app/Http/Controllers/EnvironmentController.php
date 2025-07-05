@@ -59,7 +59,7 @@ class EnvironmentController extends Controller
             ->addColumn('get_status',function ($row) use($request){
                 $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                 $approvalStatus = $row->environment->approval_status;
-                $getApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
+                $getApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
                 $result = '';
                 $result .= '<center>';
                 // $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
@@ -156,29 +156,4 @@ class EnvironmentController extends Controller
             throw $e;
         }
     }
-
-    public function getPmiApprovalStatus($approval_status){
-        try {
-             switch ($approval_status) {
-                 case 'PB':
-                     $approvalStatus = 'Prepared by:';
-                     break;
-                 case 'CB':
-                     $approvalStatus = 'Checked by:';
-                     break;
-                 case 'AP':
-                     $approvalStatus = 'Approved by:';
-                     break;
-                 default:
-                     $approvalStatus = '';
-                     break;
-             }
-             return [
-                 'approvalStatus' => $approvalStatus,
-             ];
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
 }

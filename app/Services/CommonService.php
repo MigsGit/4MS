@@ -136,7 +136,7 @@ class CommonService implements CommonInterface
             throw $e;
         }
     }
-    public function getApprovalStatus($approvalStatus){
+    public function getPmiApprovalStatus($approvalStatus){
         try {
              switch ($approvalStatus) {
                  case 'PB':

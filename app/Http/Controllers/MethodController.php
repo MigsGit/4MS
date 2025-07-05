@@ -144,7 +144,7 @@ class MethodController extends Controller
                 if( $row->method->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                     $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                     $approvalStatus = $row->method->approval_status;
-                    $getPmiApprovalStatus = $this->getPmiApprovalStatus($approvalStatus);
+                    $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
                 $result .= '</center>';
@@ -464,29 +464,6 @@ class MethodController extends Controller
                  'approvalStatus' => $approvalStatus,
              ];
 
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function getPmiApprovalStatus($approval_status){
-        try {
-             switch ($approval_status) {
-                 case 'PB':
-                     $approvalStatus = 'Prepared by:';
-                     break;
-                 case 'CB':
-                     $approvalStatus = 'Checked by:';
-                     break;
-                 case 'AP':
-                     $approvalStatus = 'Approved by:';
-                     break;
-                 default:
-                     $approvalStatus = '';
-                     break;
-             }
-             return [
-                 'approvalStatus' => $approvalStatus,
-             ];
         } catch (Exception $e) {
             throw $e;
         }

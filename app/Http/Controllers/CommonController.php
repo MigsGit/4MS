@@ -98,7 +98,7 @@ class CommonController extends Controller
                 return $result;
             })
             ->addColumn('get_role',function ($row){
-                $getApprovalStatus = $this->commonInterface->getApprovalStatus($row->approval_status);
+                $getApprovalStatus = $this->commonInterface->getPmiApprovalStatus($row->approval_status);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
