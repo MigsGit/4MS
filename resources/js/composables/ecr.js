@@ -81,6 +81,13 @@ export default function useEcr(){
             approvedBy: '',
         },
     ]);
+    const frmEcrPmiExternalApproverRows = ref([
+        {
+            preparedBy: '',
+            checkedBy: '',
+            approvedBy: '',
+        },
+    ]);
     const tblEcrDetails = ref(null);
 
     //Obj Params
@@ -312,6 +319,7 @@ export default function useEcr(){
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
+        frmEcrPmiExternalApproverRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
         typeOfPartParams,

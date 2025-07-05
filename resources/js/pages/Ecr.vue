@@ -301,11 +301,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- TODO ECR | 4M Requirement Add Edit Sr. Sup |  View Manager
-                        <div class="card-footer justify-content-end">
-                            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-eye" />&nbsp;     View</button>
-                        </div> -->
                     </div>
                 </div>
                 <!-- PMI Approvers -->
@@ -364,6 +359,81 @@
                                                 <td>
                                                     <Multiselect
                                                         v-model="frmEcrPmiApproverRow.approvedBy"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.approvedBy"
+                                                        @change="onUserChange(pmiApproverApprovedByParams)"
+                                                        :disabled="isSelectReadonly"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <button @click="btnRemoveEcrPmiApproverRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                        <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- External PMI Approvers -->
+                <div class="card mb-2" v-show="isSelectReadonly === false">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiExternal" aria-expanded="true" aria-controls="collapsePmiExternal">
+                                PMI External Approvers
+                            </button>
+                        </h5>
+                    <div id="collapsePmiExternal" class="collapse" data-bs-parent="#accordionMain">
+                        <div class="card-body shadow">
+                            <div class="row">
+                                <div class="col-12">
+                                    <!-- @click="btnAddEcrPmiApproverRows" -->
+                                    <button type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI Approvers</button>
+                                </div>
+                                <div class="col-12">
+                                    <table class="table table-responsive">
+                                        <thead>
+                                            <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col" style="width: 30%;">Qc Head</th>
+                                            <th scope="col" style="width: 30%;">Operation Head</th>
+                                            <th scope="col" style="width: 30%;">QA Head</th>
+                                            <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <tr  v-for="(frmEcrPmiExternalApproverRow,index) in frmEcrPmiExternalApproverRows" :key="frmEcrPmiExternalApproverRows.index">
+                                                <td>
+                                                    {{ index+1 }}
+                                                </td>
+                                                <td>
+                                                    <Multiselect
+                                                        v-model="frmEcrPmiExternalApproverRow.preparedBy"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.preparedBy"
+                                                        :disabled="isSelectReadonly"
+
+
+                                                    />
+
+                                                </td>
+                                                <td>
+                                                    <Multiselect
+                                                        v-model="frmEcrPmiExternalApproverRow.checkedBy"
+                                                        :close-on-select="true"
+                                                        :searchable="true"
+                                                        :options="ecrVar.checkedBy"
+                                                        :disabled="isSelectReadonly"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <Multiselect
+                                                        v-model="frmEcrPmiExternalApproverRow.approvedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.approvedBy"
@@ -701,6 +771,7 @@
         frmEcrQadRows,
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
+        frmEcrPmiExternalApproverRows,
         descriptionOfChangeParams,
         reasonOfChangeParams,
         resetArrEcrRows,
@@ -758,6 +829,10 @@
                 getRapidxUserByIdOpt(pmiApproverPreparedByParams);
                 getRapidxUserByIdOpt(pmiApproverCheckedByParams);
                 getRapidxUserByIdOpt(pmiApproverApprovedByParams);
+
+                getRapidxUserByIdOpt(pmiExternalApproverPreparedByParams);
+                getRapidxUserByIdOpt(pmiExternalApproverCheckedByParams);
+                getRapidxUserByIdOpt(pmiExternalApproverApprovedByParams);
                 btnGetEcrId.addEventListener('click',function(){
                     let ecrsId = this.getAttribute('ecr-id');
                     modalTitle.value = "Edit";
@@ -873,6 +948,21 @@
     const pmiApproverApprovedByParams = {
         globalVar: ecrVar.approvedBy,
         formModel: toRef(frmEcrPmiApproverRows.value[0],'approvedBy'),
+        selectedVal: '0',
+    };
+    const pmiExternalApproverPreparedByParams = {
+        globalVar: ecrVar.preparedBy,
+        formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'preparedBy'),
+        selectedVal: '0',
+    };
+    const pmiExternalApproverCheckedByParams = {
+        globalVar: ecrVar.checkedBy,
+        formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'checkedBy'),
+        selectedVal: '0',
+    };
+    const pmiExternalApproverApprovedByParams = {
+        globalVar: ecrVar.approvedBy,
+        formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'approvedBy'),
         selectedVal: '0',
     };
 
