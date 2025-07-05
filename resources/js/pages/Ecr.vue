@@ -180,7 +180,7 @@
                                 Others Disposition
                             </button>
                         </h5>
-                    <div id="collapse2" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapse2" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
@@ -208,7 +208,6 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.requestedBy"
-                                                        @change="onUserChange(otherDispoTechnicalEvaluationParams)"
                                                         :disabled="isSelectReadonly"
                                                     />
                                                     {{frmEcrOtherDispoRows.remarks}}
@@ -219,7 +218,6 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.technicalEvaluation"
-                                                        @change="onUserChange(otherDispoReviewedByParams)"
                                                         :disabled="isSelectReadonly"
                                                     />
                                                 </td>
@@ -229,7 +227,6 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.reviewedBy"
-                                                        @change="onUserChange(qadCheckedByParams)"
                                                         :disabled="isSelectReadonly"
                                                     />
 
@@ -254,7 +251,7 @@
                                 QA Dispositions
                             </button>
                         </h5>
-                    <div id="collapse3" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapse3" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body shadow">
                             <div class="row">
                                 <!-- style="height: 200px;-->
@@ -281,7 +278,6 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optQadCheckedBy"
-                                                        @change="onUserChange(qadApprovedByInternalParams)"
                                                         :disabled="isSelectReadonly"
                                                         />
                                                     </td>
@@ -291,7 +287,6 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.optQadApprovedByInternal"
-                                                        @change="onUserChange(pmiApproverPreparedByParams)"
                                                         :disabled="isSelectReadonly"
                                                         />
                                                     </td>
@@ -310,7 +305,7 @@
                                 PMI Approvers
                             </button>
                         </h5>
-                    <div id="collapse4" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapse4" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
@@ -339,7 +334,6 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.preparedBy"
-                                                        @change="onUserChange(pmiApproverCheckedByParams)"
                                                         :disabled="isSelectReadonly"
 
 
@@ -352,7 +346,6 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.checkedBy"
-                                                        @change="onUserChange(pmiApproverApprovedByParams)"
                                                         :disabled="isSelectReadonly"
                                                     />
                                                 </td>
@@ -362,7 +355,6 @@
                                                         :close-on-select="true"
                                                         :searchable="true"
                                                         :options="ecrVar.approvedBy"
-                                                        @change="onUserChange(pmiApproverApprovedByParams)"
                                                         :disabled="isSelectReadonly"
                                                     />
                                                 </td>
@@ -386,7 +378,7 @@
                                 PMI External Approvers
                             </button>
                         </h5>
-                    <div id="collapsePmiExternal" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapsePmiExternal" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">

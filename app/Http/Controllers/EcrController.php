@@ -198,7 +198,7 @@ class EcrController extends Controller
                     'EXOH' => $request->external_checked_by,
                     'EXQA' => $request->external_approved_by,
                 ];
-                return $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
+               $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                     //return array users id as array value
                     return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
                         // $approval_status as a array name
