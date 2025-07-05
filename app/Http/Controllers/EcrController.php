@@ -99,6 +99,7 @@ class EcrController extends Controller
         try {
             //TODO:  DELETE, InsertById, N/A in Dropdown
             DB::beginTransaction();
+
             $generatedControlNumber =  $this->generateControlNumber();
             $ecrsId = $request->ecrs_id;
             $ecrRequest = $ecrRequest->validated();
@@ -164,13 +165,13 @@ class EcrController extends Controller
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
             //PMI Approvers
-            $approval_statuss = [
+            $approval_status = [
                 'PB' => $request->prepared_by,
                 'CB' => $request->checked_by,
                 'AB' => $request->approved_by,
             ];
             $pmiApprovalRequestCtr = 0;
-            $pmiApprovalRequest = collect($approval_statuss)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
+            $pmiApprovalRequest = collect($approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                 //return array users id as array value
                 return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
                     // $approval_status as a array name
@@ -191,6 +192,30 @@ class EcrController extends Controller
             PmiApproval::where('counter', 0)
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
+            if($request->internal_external === "External"){
+                $ext_approval_status = [
+                    'EXPB' => $request->ext_prepared_by,
+                    'EXCB' => $request->ext_checked_by,
+                    'EXAB' => $request->ext_approved_by,
+                ];
+                $pmiApprovalRequest = collect($ext_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
+                    //return array users id as array value
+                    return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
+                        // $approval_status as a array name
+                        //return array users id, defined type by use keyword,
+                        return [
+                            'ecrs_id' => $currenErcId,
+                            'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
+                            'approval_status' => $approval_status,
+                            'counter' => $pmiApprovalRequestCtr++,
+                            'remarks' => $request->remarks,
+                            'created_at' => now(),
+                        ];
+                    });
+                })->toArray();
+                //Save PMI Internal Approval
+                PmiApproval::insert($pmiApprovalRequest);
+            }
             DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

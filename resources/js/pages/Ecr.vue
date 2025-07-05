@@ -884,6 +884,20 @@
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
         modalSaveEcr.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcr.value);
+            frmEcrPmiApproverRows.value = [];
+            frmEcrOtherDispoRows.value = [];
+            frmEcrQadRows.value.qadCheckedBy =  '0';
+            frmEcrQadRows.value.qadApprovedByInternal =  '0';
+            frmEcrOtherDispoRows.value.push({
+                requestedBy: '0',
+                technicalEvaluation: '0',
+                reviewedBy: '0',
+            });
+            frmEcrPmiApproverRows.value.push({
+                preparedBy: '0',
+                checkedBy: '0',
+                approvedBy: '0',
+            });
         });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
