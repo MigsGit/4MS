@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 use App\Models\Ecr;
+use App\Models\Man;
 use App\Models\Method;
 use App\Models\Machine;
 use App\Models\Material;
 use App\Models\EcrDetail;
+use App\Models\ManDetail;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\Environment;
@@ -237,11 +239,11 @@ class EcrController extends Controller
             if($ecrApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
-
             //Get Current Status
             $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category',]);
             //Verify if the ECR Requirement is Completed.
             $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
+            //TODO:QA Requirements
             // if($ecrApproval[0]->status === 'QA'){
             //     if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
             //         return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
@@ -268,6 +270,7 @@ class EcrController extends Controller
                     'status' => 'OK', //APPROVED ECR
                 ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+                // If approved, Save Man, Method, Machine, Material, Environment
                 $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
             }
             if ( count($ecrApproval) != 0 ){
@@ -811,7 +814,7 @@ class EcrController extends Controller
        try {
             switch  ($category) {
                 case 'Man':
-                    $currentModel = Man::class; //TODO Create DB with the column below
+                    $currentModel = ManDetail::class; //TODO Create DB with the column below
                     break;
                 case 'Material':
                     $currentModel = Material::class;

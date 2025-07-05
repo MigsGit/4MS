@@ -972,6 +972,10 @@
             frmEcrPmiExternalApproverRows.value = [];
             frmEcrQadRows.value.qadCheckedBy =  '0';
             frmEcrQadRows.value.qadApprovedByInternal =  '0';
+            frmEcrReasonRows.value.push({
+                descriptionOfChange: '',
+                reasonOfChange: '',
+            });
             frmEcrOtherDispoRows.value.push({
                 requestedBy: '0',
                 technicalEvaluation: '0',

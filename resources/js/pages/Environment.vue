@@ -242,7 +242,7 @@
                         <tr v-for="(arrOriginalFilename, index) in arrOriginalFilenames" :key="arrOriginalFilename.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="" class="link-primary" ref="aViewEnvironmentRef" @click="btnLinkViewEnvironmentRef(selectedEcrsIdEncrypted,index)">
+                                <a href="#" class="link-primary" ref="aViewEnvironmentRef" @click="btnLinkViewEnvironmentRef(selectedEcrsIdEncrypted,index)">
                                     {{ arrOriginalFilename }}
                                 </a>
                             </td>
