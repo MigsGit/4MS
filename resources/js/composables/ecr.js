@@ -193,9 +193,10 @@ export default function useEcr(){
             frmEcr.value.approvalStatus = ecr.approval_status;
             //Multiselect
             frmEcrReasonRows.value = [];
-            frmEcrOtherDispoRows.value = [];
             frmEcrQadRows.value = [];
             frmEcrPmiApproverRows.value = [];
+            frmEcrOtherDispoRows.value = [];
+            frmEcrPmiExternalApproverRows.value = [];
             let ecrApprovalCollection = data.ecrApprovalCollection;
             let pmiApprovalCollection = data.pmiApprovalCollection;
             let pmiExternalApprovalCollection = data.pmiExternalApprovalCollection;

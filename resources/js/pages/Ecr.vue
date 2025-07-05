@@ -372,7 +372,7 @@
                     </div>
                 </div>
                 <!-- External PMI Approvers -->
-                <div class="card mb-2" v-show="isSelectReadonly === false">
+                <div class="card mb-2" v-show="isSelectReadonly === false && frmEcr.internalExternal ==='External'">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiExternal" aria-expanded="true" aria-controls="collapsePmiExternal">
                                 PMI External Approvers
@@ -409,8 +409,6 @@
                                                         :searchable="true"
                                                         :options="ecrVar.preparedBy"
                                                         :disabled="isSelectReadonly"
-
-
                                                     />
 
                                                 </td>
@@ -432,7 +430,8 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <button @click="btnRemoveEcrPmiApproverRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                    <!-- @click="btnRemoveEcrPmiApproverRows(index)" -->
+                                                    <button  class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
                                                 </td>
@@ -966,8 +965,11 @@
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
         modalSaveEcr.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcr.value);
+            frmEcrReasonRows.value = [];
+            frmEcrQadRows.value = [];
             frmEcrPmiApproverRows.value = [];
             frmEcrOtherDispoRows.value = [];
+            frmEcrPmiExternalApproverRows.value = [];
             frmEcrQadRows.value.qadCheckedBy =  '0';
             frmEcrQadRows.value.qadApprovedByInternal =  '0';
             frmEcrOtherDispoRows.value.push({
@@ -976,6 +978,11 @@
                 reviewedBy: '0',
             });
             frmEcrPmiApproverRows.value.push({
+                preparedBy: '0',
+                checkedBy: '0',
+                approvedBy: '0',
+            });
+            frmEcrPmiExternalApproverRows.value.push({
                 preparedBy: '0',
                 checkedBy: '0',
                 approvedBy: '0',
