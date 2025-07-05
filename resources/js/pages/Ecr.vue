@@ -204,7 +204,6 @@
                                                 </td>
                                                 <td>
                                                     <Multiselect
-                                                        placeholder="Select an option"
                                                         v-model="frmEcrOtherDispoRow.requestedBy"
                                                         :close-on-select="true"
                                                         :searchable="true"
@@ -839,42 +838,42 @@
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
         formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
-        selectedVal: '',
+        selectedVal: '0',
     };
     const qadApprovedByInternalParams = {
         globalVar: ecrVar.optQadApprovedByInternal,
         formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
-        selectedVal: '',
+        selectedVal: '0',
     };
     const otherDispoRequestedByParams = {
         globalVar: ecrVar.requestedBy,
         formModel: toRef(frmEcrOtherDispoRows.value[0],'requestedBy'),
-        selectedVal: '',
+        selectedVal: '0',
     };
     const otherDispoTechnicalEvaluationParams = {
         globalVar: ecrVar.technicalEvaluation,
         formModel: toRef(frmEcrOtherDispoRows.value[0],'technicalEvaluation'),
-        selectedVal: '',
+        selectedVal: '0',
     };
     const otherDispoReviewedByParams = {
         globalVar: ecrVar.reviewedBy,
         formModel: toRef(frmEcrOtherDispoRows.value[0],'reviewedBy'),
-        selectedVal: '',
+        selectedVal: '0',
     };
     const pmiApproverPreparedByParams = {
         globalVar: ecrVar.preparedBy,
         formModel: toRef(frmEcrPmiApproverRows.value[0],'preparedBy'),
-        selectedVal: '',
+        selectedVal: '0',
     };
     const pmiApproverCheckedByParams = {
         globalVar: ecrVar.checkedBy,
         formModel: toRef(frmEcrPmiApproverRows.value[0],'checkedBy'),
-        selectedVal: '',
+        selectedVal: '0',
     };
     const pmiApproverApprovedByParams = {
         globalVar: ecrVar.approvedBy,
         formModel: toRef(frmEcrPmiApproverRows.value[0],'approvedBy'),
-        selectedVal: '',
+        selectedVal: '0',
     };
 
     onMounted( async ()=>{
@@ -934,9 +933,9 @@
     //Functions
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({
-            requestedBy: '',
-            technicalEvaluation: '',
-            reviewedBy: '',
+            requestedBy: '0',
+            technicalEvaluation: '0',
+            reviewedBy: '0',
         });
     }
     const btnRemoveEcrOtherDispoRows = async (index) => {
@@ -944,9 +943,9 @@
     }
     const btnAddEcrPmiApproverRows = async () => {
         frmEcrPmiApproverRows.value.push({
-            preparedBy: [],
-            checkedBy: [],
-            approvedBy: [],
+            preparedBy: '0',
+            checkedBy: '0',
+            approvedBy: '0',
         });
     }
     const btnRemoveEcrPmiApproverRows = async (index) => {

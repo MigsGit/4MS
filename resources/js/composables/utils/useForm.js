@@ -42,6 +42,15 @@ export default function useForm ()
                     showConfirmButton: false
                 });
             }
+            if( response.status === 422 ){
+                Swal.fire({
+                    title: "System Alert !",
+                    text: errorMsg ?? "Please Fill up all required inputs ! ",
+                    icon: "error",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
             // throw error; // Ensure errors are propagated
         } finally {
             isModalLoadingComponent.value = false;

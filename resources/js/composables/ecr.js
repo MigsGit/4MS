@@ -148,7 +148,7 @@ export default function useEcr(){
 
             let rapidxUserById = data.rapidxUserById;
             params.globalVar.splice(0, params.globalVar.length,
-                // { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
+                { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
                 { value: 0, label: 'N/A' }, // Push "N/A" option at the start
                 // { value: null, label: 'N/A' }, // Push "N/A" option at the start
                     ...rapidxUserById.map((value) => {
@@ -219,10 +219,12 @@ export default function useEcr(){
                         ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
                     );
                     ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
+                        console.log('requestedBy',requestedBy[index]);
+
                         frmEcrOtherDispoRows.value.push({
-                            requestedBy: requestedBy[index] ?? 0,
-                            reviewedBy: technicalEvaluation[index] ?? 0,
-                            technicalEvaluation:reviewedBy[index] ?? 0,
+                            requestedBy: requestedBy[index].rapidx_user_id ?? 0,
+                            reviewedBy: technicalEvaluation[index].rapidx_user_id ?? 0,
+                            technicalEvaluation:reviewedBy[index].rapidx_user_id ?? 0,
                         });
                     });
                     //QA Approval
@@ -244,9 +246,9 @@ export default function useEcr(){
 
                     pmiApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
                             frmEcrPmiApproverRows.value.push({
-                                preparedBy: preparedBy[index] ?? 0,
-                                checkedBy: checkedBy[index] ?? 0,
-                                approvedBy:approvedBy[index] ?? 0,
+                                preparedBy: preparedBy[index].rapidx_user_id ?? 0,
+                                checkedBy: checkedBy[index].rapidx_user_id ?? 0,
+                                approvedBy:approvedBy[index].rapidx_user_id ?? 0,
                             });
                     });
                 }
