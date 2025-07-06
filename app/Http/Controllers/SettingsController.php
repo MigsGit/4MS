@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\DropdownMaster;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Models\DropdownMasterDetail;
 use App\Interfaces\ResourceInterface;
@@ -22,8 +23,17 @@ class SettingsController extends Controller
 
     public function getUserMaster(Request $request){
         try {
-            $user = User::whereNull('deleted_at')->get();
-
+            // DB::table('user')-
+            $user = DB::connection('mysql_rapidx')->select(
+                'SELECT users.*,user_accesses.module_id,departments.department_name
+                FROM  users
+                LEFT JOIN user_accesses user_accesses ON user_accesses.user_id = users.id
+                LEFT JOIN departments departments ON departments.department_id = users.department_id
+                WHERE 1=1
+                AND users.user_stat = 1
+                AND user_accesses.module_id = 46
+                '
+            );
             return DataTables::of($user)
             ->addColumn('get_action',function($row){
                 // return $row->id;
@@ -35,7 +45,16 @@ class SettingsController extends Controller
                 $result .= '<span class="badge rounded-pill bg-primary"> Active </span>';
                 return $result;
             })
-            ->rawColumns(['get_action','get_status'])
+            ->addColumn('get_departments',function($row){
+                $result = '';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$row->department_name.' </span>';
+                return $result;
+            })
+            ->rawColumns([
+                'get_action',
+                'get_status',
+                'get_departments',
+            ])
             ->make(true);
             // return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

@@ -910,7 +910,6 @@
             remarks : remarks,
         }
         axiosFetchData(apiParams,'api/save_man_approval',function(response){
-            console.log(response);
             tblEcrByStatus.value.dt.draw();
             modal.Approval.hide();
             modal.SaveMan.hide();
