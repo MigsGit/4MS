@@ -555,7 +555,7 @@
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
-                        let ecrId = this.getAttribute('ecr-id');
+                        let ecrId = this.getAttribute('ecrs-id');
                         frmMan.value.ecrsId = ecrId;
                         frmSpecialInspection.value.ecrsId = ecrId;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
@@ -568,7 +568,7 @@
                 }
             }
         } ,
-        {   data: 'status'} ,
+        {   data: 'get_status'} ,
         {   data: 'ecr_no'} ,
         {   data: 'category'} ,
         {   data: 'internal_external'} ,

@@ -464,63 +464,6 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function loadEcrByStatus(Request $request){
-        $data = [];
-        $relations = [
-            'pmi_approvals_pending.rapidx_user',
-            'environment',
-        ];
-        $conditions = [
-            'status' => 'OK',
-            'category' => $request->category
-        ];
-        $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
-        return DataTables($ecr)
-        ->addColumn('get_actions',function ($row) use ($request){
-            $result = '';
-            $result .= '<center>';
-            $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
-            if($request->category === 'Environment'){
-                $result .= '</br>';
-                $result .= '</br>';
-                $result .= "<button class='btn btn-outline-danger btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnDownloadEnvironmentRef'> <i class='fa-solid fa-upload'></i></button>";
-            }
-            $result .= '</center>';
-            return $result;
-            return $result;
-        })
-        ->addColumn('get_status',function ($row) use($request){
-            $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
-            $result = '';
-            $result .= '<center>';
-            // $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
-            $result .= '<br>';
-            $result .= '<span class="badge rounded-pill bg-danger"> '.$row->approval_status.' '.$currentApprover.' </span>';
-            $result .= '</br>';
-            return $result;
-        })
-        ->addColumn('get_attachment',function ($row) use ($request){
-            $result = '';
-            $result .= '<center>';
-            if($request->category  === 'Environment'){
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'> View Attachment</a>";
-            }
-            $result .= '</center>';
-            return $result;
-            return $result;
-        })
-        ->rawColumns([
-            'get_actions',
-            'get_status',
-            'get_attachment',
-        ])
-        ->make(true);
-        try {
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
-        }
-    }
     public function loadEcrDetailsByEcrId(Request $request){
         try {
             $data = [];
@@ -814,7 +757,19 @@ class EcrController extends Controller
        try {
             switch  ($category) {
                 case 'Man':
-                    $currentModel = ManDetail::class; //TODO Create DB with the column below
+                    $currentModel = ManDetail::class;
+                    $ecrApproval = EcrAppproval::whereNotNull('rapidx_user_id')
+                    ->where('ecrs_id')
+                    ->where('approval_status','OTRB')
+                    ->get(['rapidx_user_id']);
+                    foreach ($ecrApproval as $key => $ecrApprovalValue) {
+                        ManApproval::create([
+                            'ecrs_id' => $ecrsId,
+                            'approval_status' => 'RUP',
+                            'rapidx_user' => $ecrApprovalValue->rapidx_user_id,
+                            'created_at' => now(),
+                        ]);
+                    }
                     break;
                 case 'Material':
                     $currentModel = Material::class;

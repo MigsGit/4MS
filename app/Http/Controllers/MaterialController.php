@@ -39,7 +39,7 @@ class MaterialController extends Controller
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
-               $result = "";
+                $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
                 $result .= '<button type="button" class="btn btn-secondary dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-expanded="false">';
