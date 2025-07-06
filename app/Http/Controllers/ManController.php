@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Ecr;
 use App\Models\Man;
+use App\Models\ManDetail;
+use App\Models\ManApproval;
 use App\Models\ManChecklist;
 use Illuminate\Http\Request;
 use App\Http\Requests\ManRequest;
@@ -42,13 +44,12 @@ class ManController extends Controller
             $result .= '    Action';
             $result .= '</button>';
             $result .= '<ul class="dropdown-menu">';
-            if($row->man_detail->status === "FORAPP" || $row->man_detail->status === "PMIAPP"){
-                $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" materials-id="'.$row->man_detail->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+            if($row->man_detail->status === "RUP" || $row->man_detail->status === "PMIAPP"){
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" materials-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
             }
             // if($row->man_detail->status === "RUP" && $row->created_by === session('rapidx_user_id')){
             if($row->man_detail->status === "RUP"){
-                $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-                $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
             }
             $result .= '</ul>';
             $result .= '</div>';
@@ -228,6 +229,78 @@ class ManController extends Controller
             throw $e;
         }
     }
+    public function loadManApproverSummaryEcrsId (Request $request){
+        try {
+            $ecrsId = $request->ecrsId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                'ecrs_id' => $ecrsId
+            ];
+            $methodpproval = $this->resourceInterface->readCustomEloquent(ManApproval::class,$data,$relations,$conditions);
+            $methodpproval = $methodpproval
+            ->whereNotNull('rapidx_user_id')
+            ->orderBy('id','asc')
+            ->get();
+            return DataTables($methodpproval)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
+
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function saveMan(Request $request,ManRequest $manRequest){
         try {
             date_default_timezone_set('Asia/Manila');
@@ -296,6 +369,74 @@ class ManController extends Controller
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
 
+            throw $e;
+        }
+    }
+    public function saveManApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $selectedId = $request->selectedId;
+            //Get Current Ecr Approval is equal to Current Session
+            $methodApprovalCurrent = ManApproval::where('ecrs_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            if($methodApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+            //Update the machine Approval Status
+            $methodApprovalCurrent->update([
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ]);
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+           $methodApproval = ManApproval::where('ecrs_id',$selectedId)
+           ->whereNotNull('rapidx_user_id')
+           ->where('status','-')
+           ->limit(1)
+           ->get(['id','approval_status']);
+            if ( count($methodApproval) != 0){
+                $methodApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $methodApprovalConditions = [
+                    'id' => $methodApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(ManApproval::class,$methodApprovalConditions,$methodApprovalValidated);
+                //Update the ECR Approval Status
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'approval_status' => $methodApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions(ManDetail::class,$enviromentConditions,$enviromentValidated);
+            }else{
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'PMIAPP',
+                    'approval_status' => 'PB',
+                ];
+                $this->resourceInterface->updateConditions(ManDetail::class,$enviromentConditions,$enviromentValidated);
+            }
+             //DISAPPROVED ECR
+             if($request->status === "DIS"){
+                $conditions = [
+                    'id' => $selectedId,
+                ];
+                $requestValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
+                ];
+                $this->resourceInterface->updateConditions(ManDetail::class,$conditions,$requestValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
             throw $e;
         }
     }

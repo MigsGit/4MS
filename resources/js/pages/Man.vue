@@ -169,8 +169,50 @@
                     </div>
                 </div>
             </div>
-            <!-- v-show="isModal === 'View' && currentStatus === 'PMIAPP'"  -->
-            <div class="row mt-3">
+            <div class="row mt-3"  v-show="isModal === 'View' && currentStatus != 'PMIAPP'">
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManApproverSummary" aria-expanded="true" aria-controls="collapseManApproverSummary">
+                                ECR Approver Summary
+                            </button>
+                        </h5>
+                    <div id="collapseManApproverSummary" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-header">
+                            <h5> Man Approver </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblManApproverSummary"
+                                        :columns="tblManApproverSummaryColumns"
+                                        ajax="api/load_man_approver_summary_ecrs_id"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering: false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Role</th>
+                                                <th>Approver Name</th>
+                                                <th>Remarks</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP'">
+            <!-- <div class="row mt-3"> -->
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
@@ -214,7 +256,12 @@
             </div>
         </template>
         <template #footer>
-            <button type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+
+            <button @click="btnApprovedDisapproved('DIS')" v-show="isModal === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalDisapproved" class="btn btn-danger btn-sm">
+                <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
+            </button>
+            <button @click="btnApprovedDisapproved('APP')" v-show="isModal === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalApproved" class="btn btn-success btn-sm">Approved</button>
+            <button v-show="isModal === 'Edit'" type="button" id= "closeBtn" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Ecr Details" @add-event="saveEcrDetails()" ref="modalSaveEcrDetail">
@@ -485,6 +532,23 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" title="Approval" ref="modalApproval">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                        <textarea v-model="approvalRemarks" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button @click = "saveApproval(selectedManId,frmMan.ecrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -539,13 +603,21 @@
     const tblManChecklist = ref(null);
     const tblMatChecklist = ref(null);
     const isSelectReadonly  = ref(true);
+    const currentStatus = ref('Edit');
+    const selectedEcrsId = ref('Edit');
     const tblManDetails = ref(null);
     const modalSaveMan = ref(null);
     const modalSaveEcrDetail = ref(null);
     const modalSaveManDetails = ref(null);
     const modalManChecklist = ref(null);
+    const modalApproval = ref(null);
     const currentManDetailsId = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
+    const tblManApproverSummary = ref(null);
+
+    const isModal = ref(null);
+    const isApprovedDisappproved  = ref(true);
+    const approvalRemarks = ref(null);
 
     const ecrColumns = [
         {   data: 'get_actions',
@@ -555,16 +627,47 @@
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
-                        let ecrId = this.getAttribute('ecrs-id');
-                        frmMan.value.ecrsId = ecrId;
-                        frmSpecialInspection.value.ecrsId = ecrId;
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrId).draw()
-                        tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrId).draw()
-                        tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrId).draw()
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        frmMan.value.ecrsId = ecrsId;
+                        frmSpecialInspection.value.ecrsId = ecrsId;
+                        isModal.value = 'Edit';
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrsId).draw();
+                        tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw()
                         modal.SaveMan.show();
-                        tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrId).draw()
-                        modal.SaveMan.show();
+
                     });
+                    let btnViewManById = cell.querySelector('#btnViewManById');
+                    if(btnViewManById != null){
+                        btnViewManById.addEventListener('click',function(){
+                            let ecrsId = this.getAttribute('ecrs-id');
+                            let manStatus = this.getAttribute('man-status');
+                            let manApproverParams = {
+                                selectedId : ecrsId,
+                                approvalType : 'manApproval'
+                            }
+                            let pmiApproverParams = {
+                                selectedId : ecrsId,
+                                approvalType : 'pmiApproval'
+                            }
+                            frmMan.value.ecrsId = ecrsId;
+                            frmSpecialInspection.value.ecrsId = ecrsId;
+                            currentStatus.value = manStatus;
+                            isModal.value = 'View';
+                            tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                            tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrsId).draw();
+                            tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw()
+                            if( manStatus === 'RUP'){
+                                getCurrentApprover(manApproverParams);
+                                tblManApproverSummary.value.dt.ajax.url("api/load_man_approver_summary_ecrs_id?ecrsId="+ecrsId).draw();
+                            }
+                            if( manStatus === 'PMIAPP'){
+                                getCurrentApprover(pmiApproverParams);
+                                tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
+                            }
+                            modal.SaveMan.show();
+                        });
+                    }
                 }
             }
         } ,
@@ -678,6 +781,13 @@
         {   data: 'remarks'},
         {   data: 'get_status'} ,
     ];
+    const tblManApproverSummaryColumns = [
+        {   data: 'get_count'} ,
+        {   data: 'get_role'} ,
+        {   data: 'get_approver_name'} ,
+        {   data: 'remarks'},
+        {   data: 'get_status'} ,
+    ];
 
     const trainerParams = {
         globalVar: commonVar.optUserMaster,
@@ -695,7 +805,8 @@
         modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveManDetails = new Modal(modalSaveManDetails.value.modalRef,{ keyboard: false });
         modal.ManChecklist = new Modal(modalManChecklist.value.modalRef,{ keyboard: false });
-        modal.modalSaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
+        modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
+        modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -704,11 +815,15 @@
 
     })
 
+    const btnApprovedDisapproved = async (decision) => {
+        isApprovedDisappproved.value = decision;
+        modal.Approval.show();
+    }
     const addManDetails = async () => {
         modal.SaveManDetails.show();
     }
     const btnAddSpecialInspection = async () => {
-        modal.modalSaveSpecialInspection.show();
+        modal.SaveSpecialInspection.show();
     }
     const getManById = async (manId) =>
     {
@@ -773,6 +888,32 @@
         axiosSaveData(formData,'api/save_man', (response) =>{
             modal.SaveManDetails.hide();
             tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw()
+        });
+    }
+    const saveApproval = async (selectedId=null,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
+        if(approvalType === 'PMIAPP'){
+            let apiParams = {
+                ecrsId : selectedEcrsId,
+                status : isApprovedDisappproved,
+                remarks : remarks,
+            }
+            axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
+                modal.Approval.hide();
+                modal.SaveMethod.hide();
+                tblEcrByStatus.value.dt.draw();
+            });
+            return;
+        }
+        let apiParams = {
+            selectedId : selectedEcrsId,
+            status : isApprovedDisappproved,
+            remarks : remarks,
+        }
+        axiosFetchData(apiParams,'api/save_man_approval',function(response){
+            console.log(response);
+            tblEcrByStatus.value.dt.draw();
+            modal.Approval.hide();
+            modal.SaveMan.hide();
         });
     }
 </script>

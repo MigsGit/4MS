@@ -11,6 +11,7 @@ use App\Models\Material;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\Environment;
+use App\Models\ManApproval;
 use App\Models\PmiApproval;
 use Illuminate\Http\Request;
 use App\Models\MethodApproval;
@@ -167,6 +168,16 @@ class CommonController extends Controller
             switch  ($request->approvalType) {
                 case 'ecrApproval':
                     $currentModel = EcrApproval::class;
+                    $conditions = [
+                        'ecrs_id' => $request->selectedId,
+                        'status' => 'PEN',
+                    ];
+                    $data = [
+                        'rapidx_user_id'
+                    ];
+                    break;
+                case 'manApproval':
+                    $currentModel = ManApproval::class;
                     $conditions = [
                         'ecrs_id' => $request->selectedId,
                         'status' => 'PEN',
