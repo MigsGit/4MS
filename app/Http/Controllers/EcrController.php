@@ -11,6 +11,7 @@ use App\Models\ManDetail;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\Environment;
+use App\Models\ManApproval;
 use App\Models\PmiApproval;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -758,18 +759,23 @@ class EcrController extends Controller
             switch  ($category) {
                 case 'Man':
                     $currentModel = ManDetail::class;
-                    $ecrApproval = EcrAppproval::whereNotNull('rapidx_user_id')
-                    ->where('ecrs_id')
-                    ->where('approval_status','OTRB')
-                    ->get(['rapidx_user_id']);
-                    foreach ($ecrApproval as $key => $ecrApprovalValue) {
-                        ManApproval::create([
-                            'ecrs_id' => $ecrsId,
-                            'approval_status' => 'RUP',
-                            'rapidx_user' => $ecrApprovalValue->rapidx_user_id,
-                            'created_at' => now(),
-                        ]);
-                    }
+                    //TODO: Save Man Approval status RequestBy
+                    // $ecrApproval = EcrAppproval::whereNotNull('rapidx_user_id')
+                    // ->where('ecrs_id')
+                    // ->where('approval_status','OTRB')
+                    // ->get(['rapidx_user_id']);
+                    // ManApproval::where('ecrs_id', $ecrsId)->delete();
+                    // foreach ($ecrApproval as $key => $ecrApprovalValue) {
+                    //     ManApproval::insert([
+                    //         'ecrs_id' => $ecrsId,
+                    //         'approval_status' => 'RUP',
+                    //         'rapidx_user' => $ecrApprovalValue->rapidx_user_id,
+                    //         'created_at' => now(),
+                    //     ]);
+                    // }
+                    // ManApproval::where('counter', 0)
+                    // ->where('ecrs_id', $ecrsId)
+                    // ->update(['status'=>'PEN']);
                     break;
                 case 'Material':
                     $currentModel = Material::class;
