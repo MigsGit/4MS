@@ -19,4 +19,12 @@ class ManDetail extends Model
     {
         return $this->hasOne(Ecr::class, 'id', 'ecrs_id')->whereNull('deleted_at');
     }
+    public function man_approvals()
+    {
+        return $this->hasMany(ManApproval::class, 'ecrs_id', 'ecrs_id')->whereNull('deleted_at');
+    }
+    public function man_approvals_pending()
+    {
+        return $this->hasMany(ManApproval::class, 'ecrs_id', 'ecrs_id')->where('status','PEN')->whereNull('deleted_at');
+    }
 }

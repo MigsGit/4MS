@@ -7,5 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ManApproval extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'status',
+        'remarks',
+    ];
+    public function rapidx_user()
+    {
+        return $this->hasOne(RapidxUser::class, 'id', 'rapidx_user_id');
+    }
 }

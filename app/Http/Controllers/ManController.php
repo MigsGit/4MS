@@ -25,6 +25,7 @@ class ManController extends Controller
         $data = [];
         $relations = [
             'pmi_approvals_pending.rapidx_user',
+            'man_detail.man_approvals_pending.rapidx_user',
             'man_detail',
         ];
         $conditions = [
@@ -33,7 +34,7 @@ class ManController extends Controller
         ];
         $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
         return DataTables($ecr)
-        ->addColumn('get_actions',function ($row) use ($request){
+    ->addColumn('get_actions',function ($row) use ($request){
             $result = "";
             $result .= '<center>';
             $result .= '<div class="btn-group dropstart mt-4">';
@@ -55,15 +56,15 @@ class ManController extends Controller
             return $result;
         })
         ->addColumn('get_status',function ($row) use($request){
-            // $currentApprover = $row->man_detail_approvals_pending[0]['rapidx_user']['name'] ?? '';
+            $currentApprover = $row->man_detail->man_approvals_pending[0]['rapidx_user']['name'] ?? '';
             $getStatus = $this->getStatus($row->man_detail->status);
             $result = '';
             $result .= '<center>';
             $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
             $result .= '<br>';
-            // if( $currentApprover != ''){
-            //     $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
-            // }
+            if( $currentApprover != ''){
+                $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
+            }
             if( $row->man_detail->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                 $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                 $approvalStatus = $row->man_detail->approval_status;
