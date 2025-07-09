@@ -112,9 +112,7 @@ class MethodController extends Controller
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
                 $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";
-                if($row->method->status === "OK"){
-                    return $result = "";
-                }
+
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -122,15 +120,16 @@ class MethodController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
+                if($row->material->status === "EXDISPO" || $row->material->status === "OK"){
+                    //Upload External Disposition
+                    $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'"id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
+                }
                 if($row->method->status === "RUP" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
                 $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 // if($row->method->status === "EXDISPO" && $row->created_by === session('rapidx_user_id')){
-                if($row->method->status === "EXDISPO"){
-                    //Upload External Disposition
-                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
-                }
+
 
                 $result .= '</ul>';
                 $result .= '</div>';

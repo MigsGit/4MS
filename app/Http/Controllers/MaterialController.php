@@ -38,7 +38,10 @@ class MaterialController extends Controller
             $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
-                // Dropdown menu links
+                if($row->material->status === "EXDISPO" || $row->material->status === "OK"){
+                    //Upload External Disposition
+                    return $result = '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
+                }
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -53,6 +56,7 @@ class MaterialController extends Controller
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
+
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';

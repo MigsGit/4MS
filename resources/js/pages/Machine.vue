@@ -11,7 +11,7 @@
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
-                            ref="tblMachineEcrByStatus"
+                            ref="tblEcrByStatus"
                             :columns="tblEcrByStatusColumns"
                             ajax="api/load_ecr_machine_by_status?category=Machine"
                             :options="{
@@ -488,6 +488,21 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Upload External Disposition" ref="modalExternalDisposition" @add-event="frmExternalDisposition()">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <input @change="changeExternalDisposition" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -528,13 +543,18 @@
     const {
         modal,
         commonVar,
+        commonModal,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
+        modalExternalDisposition,
         specialInsQcInspectorParams,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+        saveExternalDisposition,
+        changeExternalDisposition,
+
         frmSpecialInspection,
     } = useCommon();
     const modalSaveMachine = ref(null);
@@ -549,7 +569,7 @@
     const selectedEcrsId = ref(null);
     const selectedMachinesIdEncrypted = ref(null);
     const selectedMachinesId = ref(null);
-    const tblMachineEcrByStatus = ref(null);
+    const tblEcrByStatus = ref(null);
     const tblMachineApproverSummary = ref(null);
     const isApprovedDisappproved = ref(null);
     const arrOriginalFilenamesBefore = ref(null);
@@ -567,6 +587,7 @@
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 let btnViewMachineById = cell.querySelector('#btnViewMachineById');
+                let btnViewDispotionById = cell.querySelector('#btnViewDispotionById');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
@@ -618,6 +639,13 @@
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
                         modal.SaveMachine.show();
+                    });
+                }
+                if(btnViewDispotionById != null){
+                    btnViewDispotionById.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
+                        modal.ExternalDisposition.show();
                     });
                 }
             }
@@ -738,11 +766,15 @@
     };
 
     onMounted( async ()=>{
+
+
         modal.SaveMachine = new Modal(modalSaveMachine.value.modalRef,{ keyboard: false });
         modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         modal.ViewMachineRef = new Modal(modalViewMachineRef.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
+        modal.ExternalDisposition = new Modal(modalExternalDisposition.value.modalRef,{ keyboard: false });
+
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -850,12 +882,18 @@
         }
         axiosFetchData(apiParams,'api/save_machine_approval',function(response){
             console.log(response);
-            tblMachineEcrByStatus.value.dt.draw();
+            tblEcrByStatus.value.dt.draw();
             modal.Approval.hide();
             modal.SaveMachine.hide();
         });
     }
-
+    const frmExternalDisposition = async ()=>{
+        tblEcrByStatus.value.dt.draw();
+        let params = {
+            ecrsId : selectedEcrsId.value,
+        }
+        saveExternalDisposition(params);
+    }
 </script>
 
 

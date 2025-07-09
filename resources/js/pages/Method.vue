@@ -495,7 +495,7 @@
             <button @click = "saveApproval(selectedMachinesId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Material Reference" ref="modalExternalDisposition" @add-event="saveExternalDisposition()">
+    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload External Disposition" ref="modalExternalDisposition" @add-event="saveExternalDisposition()">
         <template #body>
             <div class="row mt-3">
                 <div class="col-md-12">
@@ -548,6 +548,7 @@
     const {
         modal,
         commonVar,
+        externalDisposition,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
@@ -555,6 +556,7 @@
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+        changeExternalDisposition,
         frmSpecialInspection,
     } = useCommon();
 
@@ -571,7 +573,7 @@
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);
     const modalApproval = ref(null);
-
+    const modalExternalDisposition  = ref(null);
     const modalViewMethodRef = ref(null);
     const aViewMethodRefBefore = ref(null);
     const aViewMethodRefAfter = ref(null);
@@ -581,10 +583,6 @@
     const selectedMethodsId = ref(null);
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
-
-
-    const modalExternalDisposition  = ref(null);
-    const externalDisposition  = ref(null);
 
 
     const tblEcrByStatusColumns = [
@@ -857,9 +855,7 @@
     const changeMethodRefAfter = async (event) => {
         methodRefAfter.value =  Array.from(event.target.files);
     }
-    const changeExternalDisposition = async (event) => {
-        externalDisposition.value =  Array.from(event.target.files);
-    }
+
 
     const saveMethod = async () => {
         let formData = new FormData();

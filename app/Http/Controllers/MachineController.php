@@ -119,6 +119,10 @@ class MachineController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
+                if($row->machine->status === "EXDISPO" || $row->machine->status === "OK"){
+                    //Upload External Disposition
+                    return $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
+                }
                 if($row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
@@ -157,7 +161,7 @@ class MachineController extends Controller
                 $result = '';
                 $result .= '<center>';
                 $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewMachineRef"><i class="fa-solid fa-file-pdf"></i> </a>';
-              
+
                 $result .= '</center>';
                 return $result;
             })
@@ -405,10 +409,14 @@ class MachineController extends Controller
                     $status = 'Completed';
                     $bgStatus = 'badge rounded-pill bg-success';
                     break;
-                 case 'DIS':
+                case 'DIS':
                      $status = 'DISAPPROVED';
                      $bgStatus = 'badge rounded-pill bg-danger';
                      break;
+                case 'EXDISPO':
+                    $status = 'Waiting for External Disposition';
+                    $bgStatus = 'badge rounded-pill bg-warning';
+                    break;
                  default:
                      $status = '';
                      $bgStatus = '';

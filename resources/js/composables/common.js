@@ -48,6 +48,7 @@ export default function useCommon(){
     //Ref State
     const tblSpecialInspection = ref(null);
     const modalSaveSpecialInspection = ref(null);
+    const modalExternalDisposition = ref(null);
     const externalDisposition  = ref(null);
 
     const frmSpecialInspection = ref({
@@ -166,6 +167,18 @@ export default function useCommon(){
     const changeExternalDisposition = async (event) => {
         externalDisposition.value =  Array.from(event.target.files);
     }
+    const saveExternalDisposition = async (params) => {
+        let formData = new FormData();
+        externalDisposition.value.forEach((file, index) => {
+            formData.append('externalDisposition[]', file);
+        });
+        formData.append("ecrsId", params.ecrsId);
+        alert(params.ecrsId)
+        axiosSaveData(formData,'api/save_external_disposition',(response) =>{
+            modal.ExternalDisposition.hide();
+        });
+    }
+
 
     return {
         modal,
@@ -174,11 +187,13 @@ export default function useCommon(){
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
+        modalExternalDisposition,
         specialInsQcInspectorParams,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         changeExternalDisposition,
+        saveExternalDisposition,
         frmSpecialInspection,
     }
 

@@ -8,6 +8,7 @@ use App\Models\Ecr;
 use App\Models\Man;
 use App\Models\Method;
 use App\Models\Material;
+use App\Models\Machine;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\Environment;
