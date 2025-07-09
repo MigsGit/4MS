@@ -436,7 +436,6 @@ class CommonController extends Controller
             throw $e;
         }
     }
-
     public function downloadExcelById(Request $request){
         $iqc_dropdown_category_section = 'TS';
         return Excel::download(new ChangeControlManagementExport(
@@ -450,7 +449,6 @@ class CommonController extends Controller
             throw $e;
         }
     }
-
     public function saveExternalDisposition(Request $request){
         try {
             date_default_timezone_set('Asia/Manila');
@@ -514,6 +512,26 @@ class CommonController extends Controller
         } catch (Exception $e) {
             DB::rollback();
             throw $e;
+        }
+    }
+    public function viewExternalDisposition(Request $request){
+        $ecrsId = decrypt($request->ecrsId);
+        $conditions = [
+            'ecrs_id' => $ecrsId,
+        ];
+        $data = $this->resourceInterface->readCustomEloquent(ExternalDisposition::class,[],[],$conditions);
+        $externalDispositionByEcrsId = $data
+        ->whereNull('deleted_at')
+        ->get([
+            'filtered_document_name',
+            'file_path',
+        ]);
+        if(count($externalDispositionByEcrsId) != 0){
+            $arrFilteredDocumentName = explode(' | ' ,$externalDispositionByEcrsId[0]->filtered_document_name);
+            $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+            $filePathWithEcrsId = $externalDispositionByEcrsId[0]->file_path."/".$ecrsId."/".$selectedFilteredDocumentName;
+            $pdfPath = storage_path("app/public/".$filePathWithEcrsId."");
+            $this->commonInterface->viewPdfFile($pdfPath);
         }
     }
 }

@@ -452,6 +452,27 @@
                         </tr>
                     </tbody>
                 </table>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                External Disposition
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameExternalDisposition, index) in arrOriginalFilenameExternalDispositions" :key="arrOriginalFilenameExternalDisposition.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewExternalDisposition" @click="btnLinkViewExternalDisposition(selectedEcrsId,index)">
+                                    {{ arrOriginalFilenameExternalDisposition }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </template>
         <template #footer>
@@ -556,6 +577,7 @@
     const aViewMethodRefAfter = ref(null);
     const arrOriginalFilenamesBefore = ref(null);
     const arrOriginalFilenamesAfter = ref(null);
+    const arrOriginalFilenameExternalDispositions = ref(null);
     const selectedMethodsId = ref(null);
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
@@ -644,6 +666,9 @@
                 if(btnViewMethodRef != null){
                     btnViewMethodRef.addEventListener('click',function(){
                         let methodsId = this.getAttribute('methods-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
+
                         getMethodRefByEcrsId(methodsId);
                     });
                 }
@@ -793,25 +818,32 @@
         isApprovedDisappproved.value = decision;
         modal.Approval.show();
     }
-    const btnLinkViewMethodRefBefore = async (selectedMethodsId,index) => { //TODO: View Image
+    const btnLinkViewMethodRefBefore = async (selectedMethodsId,index) => {
         console.log('selectedMethodsId',selectedMethodsId);
         console.log('index',index);
         window.open(`api/view_method_ref?methodsId=${selectedMethodsId} && index=${index} && imageType=before`, '_blank');
     }
-    const btnLinkViewMethodRefAfter = async (selectedMethodsId,index) => { //TODO: View Image
+    const btnLinkViewMethodRefAfter = async (selectedMethodsId,index) => {
         window.open(`api/view_method_ref?methodsId=${selectedMethodsId} && index=${index} && imageType=after`, '_blank');
+    }
+    const btnLinkViewExternalDisposition = async (selectedEcrsId,index) => {
+        window.open(`api/view_external_disposition?ecrsId=${selectedEcrsId} && index=${index} && imageType=after`, '_blank');
     }
     const getMethodRefByEcrsId = async (methodsId) => {
         let apiParams = {
-            methodsId : methodsId
+            methodsId : methodsId,
+            ecrsId : selectedEcrsId.value,
         }
         axiosFetchData(apiParams,'api/get_method_ref_by_id',function(response){
 
-            let data = response.data;
+            let data = response.data[0];
             let methodsId = data.methodsId;
+            let ecrsId = data.ecrsId;
             arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
             arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
+            arrOriginalFilenameExternalDispositions.value = data.originalFilenameExternalDisposition;
             selectedMethodsId.value = methodsId;
+            selectedEcrsId.value = ecrsId;
             modal.ViewMethodRef.show();
         });
     }

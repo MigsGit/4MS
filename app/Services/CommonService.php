@@ -85,7 +85,6 @@ class CommonService implements CommonInterface
             throw $th;
         }
     }
-
     public function viewPdfFile($pdfPath){
 
         try {

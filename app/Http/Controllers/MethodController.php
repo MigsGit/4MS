@@ -9,6 +9,7 @@ use App\Models\MethodApproval;
 use App\Models\MachineApproval;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
+use App\Models\ExternalDisposition;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\MethodFileRequest;
@@ -382,12 +383,32 @@ class MethodController extends Controller
                 'original_filename_before',
                 'original_filename_after',
             ]);
-            return response()->json([
-                'isSuccess' => 'true',
-                'originalFilenameBefore'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_before),
-                'originalFilenameAfter'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_after),
-                'methodsId'=> encrypt($methodRefByEcrsId[0]->id),
+            $externalDispoConditions = [
+                'ecrs_id' => $request->ecrsId,
+            ];
+            $externalDispoData = $this->resourceInterface->readCustomEloquent(ExternalDisposition::class,[],[],$externalDispoConditions);
+            $externalDispoEcrsId = $externalDispoData
+            ->get([
+                'id',
+                'ecrs_id',
+                'original_filename',
+                'original_filename',
             ]);
+            if ( filled($methodRefByEcrsId) ){
+                $arrMethodRefResponse = [
+                    'originalFilenameBefore'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_before),
+                    'originalFilenameAfter'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_after),
+                    'methodsId'=> encrypt($methodRefByEcrsId[0]->id),
+                ];
+            }
+            if ( filled($externalDispoEcrsId) ){
+                $arrExternalDispoResponse = [
+                    'originalFilenameExternalDisposition'=> explode(' | ',$externalDispoEcrsId[0]->original_filename),
+                    'ecrsId'=> encrypt($externalDispoEcrsId[0]->ecrs_id),
+                ];
+            }
+            return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse,$arrExternalDispoResponse)]);
+
         } catch (Exception $e) {
             throw $e;
         }

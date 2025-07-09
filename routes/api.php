@@ -65,8 +65,7 @@ Route::middleware('auth')->group(function(){
         Route::get('load_pmi_internal_approval_summary', 'loadPmiInternalApprovalSummary')->name('load_pmi_internal_approval_summary');
         Route::get('load_special_inspection_by_ecr_id', 'loadSpecialInspectionByEcrId')->name('load_special_inspection_by_ecr_id');
         Route::get('download_excel_by_id', 'downloadExcelById')->name('download.common_excel');
-
-
+        Route::get('view_external_disposition', 'viewExternalDisposition')->name('view_external_disposition');
     });
 
     Route::controller(SettingsController::class)->group(function () {
