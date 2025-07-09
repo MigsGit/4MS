@@ -48,6 +48,8 @@ export default function useCommon(){
     //Ref State
     const tblSpecialInspection = ref(null);
     const modalSaveSpecialInspection = ref(null);
+    const externalDisposition  = ref(null);
+
     const frmSpecialInspection = ref({
         ecrsId : "",
         productDetail : "",
@@ -161,9 +163,14 @@ export default function useCommon(){
         });
     }
 
+    const changeExternalDisposition = async (event) => {
+        externalDisposition.value =  Array.from(event.target.files);
+    }
+
     return {
         modal,
         commonVar,
+        externalDisposition,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
@@ -171,6 +178,7 @@ export default function useCommon(){
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+        changeExternalDisposition,
         frmSpecialInspection,
     }
 
