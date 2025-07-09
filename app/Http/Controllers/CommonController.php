@@ -461,18 +461,23 @@ class CommonController extends Controller
                 switch ($ecr->category) {
                     case 'Man':
                         $path = 'external_disposition/man';
+                        $model = Man::class;
                         break;
                     case 'Material':
                         $path = 'external_disposition/material';
+                        $model = Material::class;
                         break;
                     case 'Machine':
                         $path = 'external_disposition/machine';
+                        $model = Machine::class;
                         break;
                     case 'Method':
                         $path = 'external_disposition/method';
+                        $model = Method::class;
                         break;
                     case 'Environment':
                         $path = 'external_disposition/environment';
+                        $model = Environment::class;
                         break;
                     default:
                         return response()->json(['isSuccess' => 'false','Invalid Category'],500);
@@ -485,19 +490,24 @@ class CommonController extends Controller
                 $conditions = [
                    'ecrs_id' =>  $ecrsId
                 ];
-                $materialRequestValidated['ecrs_id'] = $ecrsId;
                 $materialRequestValidated['original_filename'] = $impOriginalFilename;
                 $materialRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
                 $materialRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
                 $materialRequestValidated['file_path'] = $path;
-                $materialRequestValidated['created_at'] = now();
 
-                $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)->count();
+                $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)
+                ->whereNull('deleted_at')
+                ->count();
                 if($externalDisposition === 0 ){
+                    $materialRequestValidated['ecrs_id'] = $ecrsId;
+                    $materialRequestValidated['created_at'] = now();
                     $this->resourceInterface->create(ExternalDisposition::class,$materialRequestValidated);
                 }else{
                     $this->resourceInterface->updateConditions(ExternalDisposition::class,$conditions,$materialRequestValidated);
                 }
+                $ecrRequestValidated['status'] = 'OK';
+                $ecrRequestValidated['approval_status'] = 'OK';
+                $this->resourceInterface->updateConditions($model,$conditions,$ecrRequestValidated);
             }
             DB::commit();
             return response()->json(['isSuccess' => 'true']);

@@ -895,7 +895,8 @@
         formData.append("ecrsId", selectedEcrsId.value);
 
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
-            console.log(response);
+            modal.ExternalDisposition.hide();
+            tblEcrByStatus.value.dt.draw();
         });
     }
 </script>
