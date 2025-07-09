@@ -474,6 +474,21 @@
             <button @click = "saveApproval(selectedMachinesId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Material Reference" ref="modalExternalDisposition" @add-event="saveExternalDisposition()">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <input @change="changeExternalDisposition" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -545,6 +560,11 @@
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
 
+
+    const modalExternalDisposition  = ref(null);
+    const externalDisposition  = ref(null);
+
+
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -552,6 +572,7 @@
             createdCell(cell){
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 let btnViewMethodById = cell.querySelector('#btnViewMethodById');
+                let btnViewDispotionById = cell.querySelector('#btnViewDispotionById');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
@@ -603,6 +624,13 @@
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
                         modal.SaveMethod.show();
+                    });
+                }
+                if(btnViewDispotionById != null){
+                    btnViewDispotionById.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
+                        modal.ExternalDisposition.show();
                     });
                 }
             }
@@ -749,6 +777,8 @@
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmSpecialInspection.value);
         });
+
+        modal.ExternalDisposition = new Modal(modalExternalDisposition.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -795,6 +825,10 @@
     const changeMethodRefAfter = async (event) => {
         methodRefAfter.value =  Array.from(event.target.files);
     }
+    const changeExternalDisposition = async (event) => {
+        externalDisposition.value =  Array.from(event.target.files);
+    }
+
     const saveMethod = async () => {
         let formData = new FormData();
 
@@ -850,6 +884,18 @@
             tblEcrByStatus.value.dt.draw();
             modal.Approval.hide();
             modal.SaveMethod.hide();
+        });
+    }
+    const saveExternalDisposition = async () => {
+        let formData = new FormData();
+        console.log('dasds');
+        externalDisposition.value.forEach((file, index) => {
+            formData.append('externalDisposition[]', file);
+        });
+        formData.append("ecrsId", selectedEcrsId.value);
+
+        axiosSaveData(formData,'api/save_external_disposition',(response) =>{
+            console.log(response);
         });
     }
 </script>

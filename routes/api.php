@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function(){
         // Route::post('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::get('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::post('save_special_inspection', 'saveSpecialInspection')->name('save_special_inspection');
+        Route::post('save_external_disposition', 'saveExternalDisposition')->name('save_external_disposition');
 
         Route::get('get_special_inspection_by_id', 'getSpecialInspectionById')->name('get_special_inspection_by_id');
         Route::get('get_rapidx_user_by_id_opt', 'getRapidxUserByIdOpt')->name('get_rapidx_user_by_id_opt');
@@ -64,6 +65,7 @@ Route::middleware('auth')->group(function(){
         Route::get('load_pmi_internal_approval_summary', 'loadPmiInternalApprovalSummary')->name('load_pmi_internal_approval_summary');
         Route::get('load_special_inspection_by_ecr_id', 'loadSpecialInspectionByEcrId')->name('load_special_inspection_by_ecr_id');
         Route::get('download_excel_by_id', 'downloadExcelById')->name('download.common_excel');
+
 
     });
 

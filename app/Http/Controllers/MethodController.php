@@ -125,6 +125,12 @@ class MethodController extends Controller
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
                 $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                // if($row->method->status === "EXDISPO" && $row->created_by === session('rapidx_user_id')){
+                if($row->method->status === "EXDISPO"){
+                    //Upload External Disposition
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
+                }
+
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';
@@ -409,6 +415,10 @@ class MethodController extends Controller
                  case 'DIS':
                      $status = 'DISAPPROVED';
                      $bgStatus = 'badge rounded-pill bg-danger';
+                     break;
+                 case 'EXDISPO':
+                     $status = 'Waiting for External Disposition';
+                     $bgStatus = 'badge rounded-pill bg-warning';
                      break;
                  default:
                      $status = '';

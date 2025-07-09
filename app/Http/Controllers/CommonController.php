@@ -20,6 +20,7 @@ use App\Models\MaterialApproval;
 use App\Models\SpecialInspection;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
+use App\Models\ExternalDisposition;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
 use App\Exports\ChangeControlManagementExport;
@@ -446,6 +447,62 @@ class CommonController extends Controller
         try {
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function saveExternalDisposition(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $ecrsId = $request->ecrsId;
+            $ecr = Ecr::find($ecrsId,['category']);
+            if($request->hasfile('externalDisposition') ){
+                switch ($ecr->category) {
+                    case 'Man':
+                        $path = 'external_disposition/man';
+                        break;
+                    case 'Material':
+                        $path = 'external_disposition/material';
+                        break;
+                    case 'Machine':
+                        $path = 'external_disposition/machine';
+                        break;
+                    case 'Method':
+                        $path = 'external_disposition/method';
+                        break;
+                    case 'Environment':
+                        $path = 'external_disposition/environment';
+                        break;
+                    default:
+                        return response()->json(['isSuccess' => 'false','Invalid Category'],500);
+                        break;
+                }
+               $arrUploadFile = $this->commonInterface->uploadFile($request->externalDisposition,$ecrsId,$path);
+                $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
+                $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
+
+                $conditions = [
+                   'ecrs_id' =>  $ecrsId
+                ];
+                $materialRequestValidated['ecrs_id'] = $ecrsId;
+                $materialRequestValidated['original_filename'] = $impOriginalFilename;
+                $materialRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $materialRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $materialRequestValidated['file_path'] = $path;
+                $materialRequestValidated['created_at'] = now();
+
+                $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)->count();
+                if($externalDisposition === 0 ){
+                    $this->resourceInterface->create(ExternalDisposition::class,$materialRequestValidated);
+                }else{
+                    $this->resourceInterface->updateConditions(ExternalDisposition::class,$conditions,$materialRequestValidated);
+                }
+            }
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
             throw $e;
         }
     }
