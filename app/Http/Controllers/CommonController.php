@@ -20,7 +20,9 @@ use App\Models\MaterialApproval;
 use App\Models\SpecialInspection;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
+use App\Exports\ChangeControlManagementExport;
 use App\Http\Requests\SpecialInspectionRequest;
 
 
@@ -429,6 +431,20 @@ class CommonController extends Controller
              return [
                  'approvalStatus' => $approvalStatus,
              ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function downloadExcelById(Request $request){
+        $iqc_dropdown_category_section = 'TS';
+        return Excel::download(new ChangeControlManagementExport(
+            // $iqcInspectionByDateMaterialGroupBySheet,
+            // $iqcInspectionRawSheet
+        ),
+        $iqc_dropdown_category_section."4M.xlsx");
+        try {
+            return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;
         }

@@ -110,6 +110,8 @@ class MachineController extends Controller
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
                 $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";
+                $currentApprover = $row->machine->machine_approvals_pending[0]['rapidx_user']['id'] ?? '';
+
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -122,9 +124,9 @@ class MachineController extends Controller
                 }
                     $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
 
-                // if($pmiApprovalsPending === session('rapidx_user_id')){
+                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                // }
+                }
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';
@@ -155,6 +157,7 @@ class MachineController extends Controller
                 $result = '';
                 $result .= '<center>';
                 $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewMachineRef"><i class="fa-solid fa-file-pdf"></i> </a>';
+              
                 $result .= '</center>';
                 return $result;
             })

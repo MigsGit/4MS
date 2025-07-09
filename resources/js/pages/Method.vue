@@ -6,7 +6,7 @@
                     <div class="card-body overflow-auto">
                         <div class="container-fluid px-4">
                             <ol class="breadcrumb mb-4">
-                                <li class="breadcrumb-item active">Method</li>
+                                <li class="breadcrumb-item active">Methodss</li>
                             </ol>
                             <div class="table-responsive">
                                 <!-- :ajax="api/load_ecr_by_status?status=AP" -->
@@ -617,6 +617,19 @@
                     btnViewMethodRef.addEventListener('click',function(){
                         let methodsId = this.getAttribute('methods-id');
                         getMethodRefByEcrsId(methodsId);
+                    });
+                }
+                let btnDownloadExcel = cell.querySelector('#btnDownloadExcel');
+                if(btnDownloadExcel != null){
+                    btnDownloadExcel.addEventListener('click',function(){
+                        let methodsId = this.getAttribute('methods-id');
+                        let params = {
+                            selectedId : methodsId,
+                        };
+                        var queryString = $.param(params);
+                        window.location.href="api/download_excel_by_id?" + queryString;
+
+                        // window.location.href = "{{ route('download.common_excel') }}?" + queryString;
                     });
                 }
             }

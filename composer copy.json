@@ -15,8 +15,6 @@
         "laravel/tinker": "^2.5",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.6",
-        "phpoffice/phpspreadsheet": "^1.10",
-        "maatwebsite/excel": "3.1.9",
         "yajra/laravel-datatables-oracle": "~9.0"
     },
     "require-dev": {
