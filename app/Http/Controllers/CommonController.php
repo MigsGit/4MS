@@ -7,9 +7,10 @@ use Helpers;
 use App\Models\Ecr;
 use App\Models\Man;
 use App\Models\Method;
-use App\Models\Material;
 use App\Models\Machine;
+use App\Models\Material;
 use App\Models\RapidxUser;
+use App\Exports\TestExport;
 use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\ManApproval;
@@ -439,16 +440,12 @@ class CommonController extends Controller
     }
     public function downloadExcelById(Request $request){
         $iqc_dropdown_category_section = 'TS';
-        return Excel::download(new ChangeControlManagementExport(
-            // $iqcInspectionByDateMaterialGroupBySheet,
-            // $iqcInspectionRawSheet
-        ),
-        $iqc_dropdown_category_section."4M.xlsx");
-        try {
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            throw $e;
-        }
+        $test = 'test';
+
+        return Excel::download(
+            new ChangeControlManagementExport($test),
+            $iqc_dropdown_category_section . "4M.xlsx"
+        );
     }
     public function saveExternalDisposition(Request $request){
         try {
