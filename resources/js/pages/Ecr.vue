@@ -45,7 +45,7 @@
                                 <tr>
                                     <th>Action</th>
                                     <th>Status</th>
-                                    <th>ECR Ctrl No.</th>
+                                    <th style="width:50%;">ECR Ctrl No.</th>
                                     <th>Category</th>
                                     <th>Internal or External</th>
                                     <th>Customer Name</th>

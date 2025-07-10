@@ -488,7 +488,7 @@
             <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Upload External Disposition" ref="modalExternalDisposition" @add-event="frmExternalDisposition()">
+    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Upload External Disposition" ref="modalExternalDisposition" @add-event="saveExternalDisposition()">
         <template #body>
             <div class="row mt-3">
                 <div class="col-md-12">
@@ -543,7 +543,7 @@
     const {
         modal,
         commonVar,
-        commonModal,
+        externalDisposition,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
@@ -552,7 +552,6 @@
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        saveExternalDisposition,
         changeExternalDisposition,
 
         frmSpecialInspection,
@@ -887,12 +886,19 @@
             modal.SaveMachine.hide();
         });
     }
-    const frmExternalDisposition = async ()=>{
-        tblEcrByStatus.value.dt.draw();
+    const saveExternalDisposition = async () =>{
         let params = {
             ecrsId : selectedEcrsId.value,
         }
-        saveExternalDisposition(params);
+        let formData = new FormData();
+        externalDisposition.value.forEach((file, index) => {
+            formData.append('externalDisposition[]', file);
+        });
+        formData.append("ecrsId", selectedEcrsId.value);
+        axiosSaveData(formData,'api/save_external_disposition',(response) =>{
+            modal.ExternalDisposition.hide();
+            tblEcrByStatus.value.dt.draw();
+        });
     }
 </script>
 

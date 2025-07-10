@@ -916,7 +916,6 @@
     }
     const saveExternalDisposition = async () => {
         let formData = new FormData();
-        console.log('dasds');
         externalDisposition.value.forEach((file, index) => {
             formData.append('externalDisposition[]', file);
         });

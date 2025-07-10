@@ -167,19 +167,6 @@ export default function useCommon(){
     const changeExternalDisposition = async (event) => {
         externalDisposition.value =  Array.from(event.target.files);
     }
-    const saveExternalDisposition = async (params) => {
-        let formData = new FormData();
-        externalDisposition.value.forEach((file, index) => {
-            formData.append('externalDisposition[]', file);
-        });
-        formData.append("ecrsId", params.ecrsId);
-        alert(params.ecrsId)
-        axiosSaveData(formData,'api/save_external_disposition',(response) =>{
-            modal.ExternalDisposition.hide();
-        });
-    }
-
-
     return {
         modal,
         commonVar,
@@ -193,7 +180,6 @@ export default function useCommon(){
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         changeExternalDisposition,
-        saveExternalDisposition,
         frmSpecialInspection,
     }
 

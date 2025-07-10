@@ -489,20 +489,20 @@ class CommonController extends Controller
                 $conditions = [
                    'ecrs_id' =>  $ecrsId
                 ];
-                $materialRequestValidated['original_filename'] = $impOriginalFilename;
-                $materialRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
-                $materialRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
-                $materialRequestValidated['file_path'] = $path;
+                $externalDispositionValidated['original_filename'] = $impOriginalFilename;
+                $externalDispositionValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $externalDispositionValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $externalDispositionValidated['file_path'] = $path;
 
                 $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)
                 ->whereNull('deleted_at')
                 ->count();
                 if($externalDisposition === 0 ){
-                    $materialRequestValidated['ecrs_id'] = $ecrsId;
-                    $materialRequestValidated['created_at'] = now();
-                    $this->resourceInterface->create(ExternalDisposition::class,$materialRequestValidated);
+                    $externalDispositionValidated['ecrs_id'] = $ecrsId;
+                    $externalDispositionValidated['created_at'] = now();
+                    $this->resourceInterface->create(ExternalDisposition::class,$externalDispositionValidated);
                 }else{
-                    $this->resourceInterface->updateConditions(ExternalDisposition::class,$conditions,$materialRequestValidated);
+                    $this->resourceInterface->updateConditions(ExternalDisposition::class,$conditions,$externalDispositionValidated);
                 }
                 $ecrRequestValidated['status'] = 'OK';
                 $ecrRequestValidated['approval_status'] = 'OK';

@@ -13,10 +13,10 @@
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
+        "maatwebsite/excel": "3.1.32",
+        "psr/http-message": "^1.0",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.6",
-        "phpoffice/phpspreadsheet": "^1.10",
-        "maatwebsite/excel": "3.1.9",
         "yajra/laravel-datatables-oracle": "~9.0"
     },
     "require-dev": {
