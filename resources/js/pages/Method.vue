@@ -564,7 +564,6 @@
     const currentStatus = ref(null);
     const selectedEcrsId = ref(null);
     const tblMethodApproverSummary = ref(null);
-
     const tblPmiInternalApproverSummary = ref(null);
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);

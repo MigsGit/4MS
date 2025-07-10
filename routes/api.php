@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_material_ref_by_ecrs_id', 'getMaterialRefByEcrsId')->name('get_material_ref_by_ecrs_id');
         Route::get('view_material_ref', 'viewMaterialRef')->name('view_material_ref');
         Route::get('load_material_approval_by_meterial_id', 'loadMaterialApprovalByMeterialId')->name('load_material_approval_by_meterial_id');
+        Route::get('download_internal_material', 'downloadInternalMaterial')->name('download_internal_material');
     });
 
     Route::controller(MachineController::class)->group(function () {
@@ -112,6 +113,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_machine_ref_by_id', 'getMachineRefById')->name('get_machine_ref_by_id');
         Route::get('view_machine_ref', 'viewMachineRef')->name('view_machine_ref');
     });
+
     Route::controller(MethodController::class)->group(function () {
         Route::post('save_method', 'saveMethod')->name('save_method');
 

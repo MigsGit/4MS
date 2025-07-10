@@ -658,6 +658,33 @@
                         </tr>
                     </tbody>
                 </table>
+                <table class="table">
+                    <thead>
+
+                        <tr>
+                            <th scope="col">
+                                Internal Material
+                            </th>
+                            <th scope="col">
+                                External Material
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a href="#" class="link-success" @click="btnLinkDownloadInternalMaterial(selectedEcrsId)">
+                                    Download Internal Material
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" class="link-warning" @click="btnLinkDownloadExternalMaterial(selectedEcrsId)">
+                                    Download External Material
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </template>
         <template #footer>
@@ -1125,12 +1152,22 @@
             modal.ViewMaterialRef.show();
         });
     }
+
     const btnLinkViewMaterialRef = async (selectedEcrsIdEncrypted,index) => {
         window.open(`api/view_material_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
     }
     const btnLinkViewExternalDisposition = async (selectedEcrsId,index) => {
         window.open(`api/view_external_disposition?ecrsId=${selectedEcrsId} && index=${index} && imageType=after`, '_blank');
     }
+    const btnLinkDownloadInternalMaterial = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId
+        }
+        var queryString = $.param(params);
+        window.location.href="api/download_internal_material?" + queryString;
+    }
+    btnLinkDownloadInternalMaterial
+
     const getMaterialEcrById = async (ecrId) => {
         let apiParams = {
             ecrId : ecrId

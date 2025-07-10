@@ -38,10 +38,7 @@ class MaterialController extends Controller
             $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
-                if($row->material->status === "EXDISPO" || $row->material->status === "OK"){
-                    //Upload External Disposition
-                    return $result = '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
-                }
+
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -49,6 +46,10 @@ class MaterialController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
+                if($row->material->status === "EXDISPO" || $row->material->status === "OK"){
+                    //Upload External Disposition
+                    return $result = '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
+                }
                 if($row->material->status === "FORAPP" || $row->material->status === "PMIAPP"){
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
@@ -86,7 +87,7 @@ class MaterialController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3 btn-get-ecr-id' ecrs-id='".$row->id."' id='btnViewMaterialRef'><i class='fa-solid fa-file-pdf'></i></a>";
+                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3 btn-get-ecr-id' ecrs-id='".$row->id."' id='btnViewMaterialRef'>Attachment</a>";
                 $result .= '</center>';
                 return $result;
             })
@@ -449,6 +450,19 @@ class MaterialController extends Controller
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
+            throw $e;
+        }
+    }
+    public function downloadInternalMaterial(Request $request){
+        try {
+            $iqc_dropdown_category_section = 'TS';
+            $test = 'test';
+
+            return Excel::download(
+                new InternalMaterialExport($test),
+                $iqc_dropdown_category_section . "4M.xlsx"
+            );
+        } catch (Exception $e) {
             throw $e;
         }
     }
