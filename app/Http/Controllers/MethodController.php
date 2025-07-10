@@ -120,7 +120,7 @@ class MethodController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->material->status === "EXDISPO" || $row->material->status === "OK"){
+                if($row->method->status === "EXDISPO" || $row->method->status === "OK"){
                     //Upload External Disposition
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'"id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
                 }
@@ -391,7 +391,6 @@ class MethodController extends Controller
                 'id',
                 'ecrs_id',
                 'original_filename',
-                'original_filename',
             ]);
             if ( filled($methodRefByEcrsId) ){
                 $arrMethodRefResponse = [
@@ -406,7 +405,7 @@ class MethodController extends Controller
                     'ecrsId'=> encrypt($externalDispoEcrsId[0]->ecrs_id),
                 ];
             }
-            return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse,$arrExternalDispoResponse)]);
+            return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse??[],$arrExternalDispoResponse??[])]);
 
         } catch (Exception $e) {
             throw $e;

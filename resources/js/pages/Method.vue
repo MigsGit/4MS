@@ -1,49 +1,43 @@
 <template>
     <div class="container-fluid px-4">
-        <div class="card-body overflow-auto">
-            <div class="container-fluid px-4">
-                <div class="card mt-5"  style="width: 100%;">
-                    <div class="card-body overflow-auto">
-                        <div class="container-fluid px-4">
-                            <ol class="breadcrumb mb-4">
-                                <li class="breadcrumb-item active">Methodss</li>
-                            </ol>
-                            <div class="table-responsive">
-                                <!-- :ajax="api/load_ecr_by_status?status=AP" -->
-                                <DataTable
-                                    width="100%" cellspacing="0"
-                                    class="table mt-2"
-                                    ref="tblEcrByStatus"
-                                    :columns="tblEcrByStatusColumns"
-                                    ajax="api/load_method_ecr_by_status?category=Method"
-                                    :options="{
-                                        serverSide: true, //Serverside true will load the network
-                                        columnDefs:[
-                                            {orderable:false,target:[0]}
-                                        ]
-                                    }"
-                                >
-                                    <thead>
-                                        <tr>
-                                            <th>Action</th>
-                                            <th>Status</th>
-                                            <th>Attachment</th>
-                                            <th>ECR Ctrl No.</th>
-                                            <th>Category</th>
-                                            <th>Internal or External</th>
-                                            <th>Customer Name</th>
-                                            <th>Part Number</th>
-                                            <th>Part Name</th>
-                                            <th>Device Name</th>
-                                            <th>Product Line</th>
-                                            <th>Section</th>
-                                            <th>Customer Ec. No</th>
-                                            <th>Date Of Request</th>
-                                        </tr>
-                                    </thead>
-                                </DataTable>
-                            </div>
-                        </div>
+        <h4 class="mt-5">Methods</h4>
+        <div class="card"  style="width: 100%;">
+            <div class="card-body overflow-auto">
+                <div class="container-fluid px-4">
+                    <div class="table-responsive">
+                        <!-- :ajax="api/load_ecr_by_status?status=AP" -->
+                        <DataTable
+                            width="100%" cellspacing="0"
+                            class="table mt-2"
+                            ref="tblEcrByStatus"
+                            :columns="tblEcrByStatusColumns"
+                            ajax="api/load_method_ecr_by_status?category=Method"
+                            :options="{
+                                serverSide: true, //Serverside true will load the network
+                                columnDefs:[
+                                    {orderable:false,target:[0]}
+                                ]
+                            }"
+                        >
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                    <th>Attachment</th>
+                                    <th>ECR Ctrl No.</th>
+                                    <th>Category</th>
+                                    <th>Internal or External</th>
+                                    <th>Customer Name</th>
+                                    <th>Part Number</th>
+                                    <th>Part Name</th>
+                                    <th>Device Name</th>
+                                    <th>Product Line</th>
+                                    <th>Section</th>
+                                    <th>Customer Ec. No</th>
+                                    <th>Date Of Request</th>
+                                </tr>
+                            </thead>
+                        </DataTable>
                     </div>
                 </div>
             </div>
@@ -552,11 +546,13 @@
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
+        modalExternalDisposition,
         specialInsQcInspectorParams,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         changeExternalDisposition,
+        btnLinkViewExternalDisposition,
         frmSpecialInspection,
     } = useCommon();
 
@@ -573,7 +569,6 @@
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);
     const modalApproval = ref(null);
-    const modalExternalDisposition  = ref(null);
     const modalViewMethodRef = ref(null);
     const aViewMethodRefBefore = ref(null);
     const aViewMethodRefAfter = ref(null);
@@ -679,10 +674,9 @@
                         };
                         var queryString = $.param(params);
                         window.location.href="api/download_excel_by_id?" + queryString;
-
-                        // window.location.href = "{{ route('download.common_excel') }}?" + queryString;
                     });
                 }
+
             }
         } ,
         {   data: 'ecr_no'} ,
@@ -800,7 +794,6 @@
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmSpecialInspection.value);
         });
-
         modal.ExternalDisposition = new Modal(modalExternalDisposition.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
@@ -824,9 +817,7 @@
     const btnLinkViewMethodRefAfter = async (selectedMethodsId,index) => {
         window.open(`api/view_method_ref?methodsId=${selectedMethodsId} && index=${index} && imageType=after`, '_blank');
     }
-    const btnLinkViewExternalDisposition = async (selectedEcrsId,index) => {
-        window.open(`api/view_external_disposition?ecrsId=${selectedEcrsId} && index=${index} && imageType=after`, '_blank');
-    }
+
     const getMethodRefByEcrsId = async (methodsId) => {
         let apiParams = {
             methodsId : methodsId,

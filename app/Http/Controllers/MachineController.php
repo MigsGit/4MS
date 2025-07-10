@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\MachineApproval;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
+use App\Models\ExternalDisposition;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\MachineFileRequest;
@@ -334,19 +335,37 @@ class MachineController extends Controller
                 'id' => $machinesId,
             ];
             $data = $this->resourceInterface->readCustomEloquent(Machine::class,[],[],$conditions);
-            $materialRefById = $data
+            $machineRefById = $data
             ->get([
                 'id',
                 'ecrs_id',
                 'original_filename_before',
                 'original_filename_after',
             ]);
-            return response()->json([
-                'isSuccess' => 'true',
-                'originalFilenameBefore'=> explode(' | ',$materialRefById[0]->original_filename_before),
-                'originalFilenameAfter'=> explode(' | ',$materialRefById[0]->original_filename_after),
-                'machinesId'=> encrypt($materialRefById[0]->id),
+            $externalDispoConditions = [
+                'ecrs_id' => $request->ecrsId,
+            ];
+            $externalDispoData = $this->resourceInterface->readCustomEloquent(ExternalDisposition::class,[],[],$externalDispoConditions);
+            $externalDispoEcrsId = $externalDispoData
+            ->get([
+                'id',
+                'ecrs_id',
+                'original_filename',
             ]);
+            if ( filled($machineRefById) ){
+                $arrMethodRefResponse = [
+                    'originalFilenameBefore'=> explode(' | ',$machineRefById[0]->original_filename_before),
+                    'originalFilenameAfter'=> explode(' | ',$machineRefById[0]->original_filename_after),
+                    'methodsId'=> encrypt($machineRefById[0]->id),
+                ];
+            }
+            if ( filled($externalDispoEcrsId) ){
+                $arrExternalDispoResponse = [
+                    'originalFilenameExternalDisposition'=> explode(' | ',$externalDispoEcrsId[0]->original_filename),
+                    'ecrsId'=> encrypt($externalDispoEcrsId[0]->ecrs_id),
+                ];
+            }
+            return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse??[],$arrExternalDispoResponse??[])]);
         } catch (Exception $e) {
             throw $e;
         }

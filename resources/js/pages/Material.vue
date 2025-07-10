@@ -1128,6 +1128,9 @@
     const btnLinkViewMaterialRef = async (selectedEcrsIdEncrypted,index) => {
         window.open(`api/view_material_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
     }
+    const btnLinkViewExternalDisposition = async (selectedEcrsId,index) => {
+        window.open(`api/view_external_disposition?ecrsId=${selectedEcrsId} && index=${index} && imageType=after`, '_blank');
+    }
     const getMaterialEcrById = async (ecrId) => {
         let apiParams = {
             ecrId : ecrId

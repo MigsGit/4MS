@@ -1,11 +1,9 @@
 <template>
     <div class="container-fluid px-4">
-        <div class="card mt-5"  style="width: 100%;">
+        <h4 class="mt-5">Material</h4>
+        <div class="card"  style="width: 100%;">
             <div class="card-body overflow-auto">
                 <div class="container-fluid px-4">
-                    <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Man</li>
-                    </ol>
                     <div class="table-responsive">
                         <!-- :ajax="api/load_ecr_by_status?status=AP" -->
                         <DataTable
@@ -473,6 +471,27 @@
                         </tr>
                     </tbody>
                 </table>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                External Disposition
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameExternalDisposition, index) in arrOriginalFilenameExternalDispositions" :key="arrOriginalFilenameExternalDisposition.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewExternalDisposition" @click="btnLinkViewExternalDisposition(selectedEcrsId,index)">
+                                    {{ arrOriginalFilenameExternalDisposition }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </template>
         <template #footer>
@@ -553,7 +572,7 @@
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         changeExternalDisposition,
-
+        btnLinkViewExternalDisposition,
         frmSpecialInspection,
     } = useCommon();
     const modalSaveMachine = ref(null);
@@ -576,6 +595,8 @@
     const aViewMaterialRefBefore = ref(null);
     const aViewMaterialRefAfter = ref(null);
     const currentStatus = ref(null);
+    const arrOriginalFilenameExternalDispositions = ref(null);
+
 
     const tblPmiInternalApproverSummary = ref(null);
 
@@ -658,6 +679,9 @@
                 if(btnViewMachineRef != null){
                     btnViewMachineRef.addEventListener('click',function(){
                         let machinesId = this.getAttribute('machine-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
+
                         getMachineRefById(machinesId);
                     });
                 }
@@ -800,14 +824,17 @@
     }
     const getMachineRefById = async (machinesId) => {
         let apiParams = {
-            machinesId : machinesId
+            machinesId : machinesId,
+            ecrsId : selectedEcrsId.value
         }
         axiosFetchData(apiParams,'api/get_machine_ref_by_id',function(response){
-            let data = response.data;
+            let data = response.data[0];
             let machinesId = data.machinesId;
             arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
             arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
+            arrOriginalFilenameExternalDispositions.value = data.originalFilenameExternalDisposition;
             selectedMachinesIdEncrypted.value = machinesId;
+            selectedEcrsId.value = data.ecrsId;
             modal.ViewMachineRef.show();
         });
     }

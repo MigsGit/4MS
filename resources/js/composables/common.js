@@ -167,6 +167,9 @@ export default function useCommon(){
     const changeExternalDisposition = async (event) => {
         externalDisposition.value =  Array.from(event.target.files);
     }
+    const btnLinkViewExternalDisposition = async (selectedEcrsId,index) => {
+        window.open(`api/view_external_disposition?ecrsId=${selectedEcrsId} && index=${index} && imageType=after`, '_blank');
+    }
     return {
         modal,
         commonVar,
@@ -180,6 +183,7 @@ export default function useCommon(){
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         changeExternalDisposition,
+        btnLinkViewExternalDisposition,
         frmSpecialInspection,
     }
 
