@@ -825,35 +825,39 @@
                 getRapidxUserByIdOpt(pmiExternalApproverPreparedByParams);
                 getRapidxUserByIdOpt(pmiExternalApproverCheckedByParams);
                 getRapidxUserByIdOpt(pmiExternalApproverApprovedByParams);
-                btnGetEcrId.addEventListener('click',function(){
-                    let ecrsId = this.getAttribute('ecr-id');
-                    modalTitle.value = "Edit";
-                    isSelectReadonly.value = false;
-                    currentEcrsId.value = ecrsId;
-                    getEcrById(ecrsId);
-                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrsId).draw();
-                });
-                btnViewEcrId.addEventListener('click',function(){
-                    let ecrsId = this.getAttribute('ecr-id');
-                    let ecrStatus = this.getAttribute('ecr-status');
-                    let approverParams = {
-                        selectedId : ecrsId,
-                        approvalType : 'ecrApproval'
-                    }
-                    modalTitle.value = "View";
-                    isSelectReadonly.value = true;
-                    currentEcrsId.value = ecrsId;
-                    currentStatus.value = ecrStatus;
-                    getEcrById(ecrsId);
-                    getCurrentApprover(approverParams);
-                    tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw();
+                if(btnGetEcrId !=null){
+                    btnGetEcrId.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        modalTitle.value = "Edit";
+                        isSelectReadonly.value = false;
+                        currentEcrsId.value = ecrsId;
+                        getEcrById(ecrsId);
+                        tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrsId).draw();
+                    });
+                }
+                if(btnViewEcrId !=null){
+                    btnViewEcrId.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        let ecrStatus = this.getAttribute('ecr-status');
+                        let approverParams = {
+                            selectedId : ecrsId,
+                            approvalType : 'ecrApproval'
+                        }
+                        modalTitle.value = "View";
+                        isSelectReadonly.value = true;
+                        currentEcrsId.value = ecrsId;
+                        currentStatus.value = ecrStatus;
+                        getEcrById(ecrsId);
+                        getCurrentApprover(approverParams);
+                        tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw();
 
-                    tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+currentEcrsId.value).draw();
-                    tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+currentEcrsId.value).draw();
-                    tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
-                    tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
-                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
-                });
+                        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
+                    });
+                }
             }
         } ,
         {   data: 'get_status'} ,

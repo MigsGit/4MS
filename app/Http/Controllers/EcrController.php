@@ -34,6 +34,270 @@ class EcrController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
+    public function loadEcr(Request $request){
+        try {
+            // return  $request->adminAccess;
+            $status = explode(',',$request->status) ?? "";
+            $data = [
+
+            ];
+
+            $relations = [
+                'ecr_approval_pending'
+            ];
+            $conditions = [
+            ];
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+            $ecr->whereIn('status',$status)
+            // ->orWhere('created_by' , session('rapidx_user_id'))
+            ->whereHas('ecr_approval',function($query) use ($request,$status){
+                // if is adminAccess exist deactivate the session condition
+                if( $request->adminAccess != 'all' && in_array("IA" ,$status)){
+                    $query->where('status','PEN');
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                }
+                if( $request->adminAccess != 'all' && in_array("DIS" ,$status)){
+                    $query->where('status','PEN');
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                }
+                if( $request->adminAccess != 'all' && in_array("QA", $status) ){
+                    $query->where('status','PEN');
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                }
+            })
+            ->get();
+            return DataTables($ecr)
+            ->addColumn('get_actions',function ($row){
+                $result = "";
+                $result .= '<center>';
+                $result .= '<div class="btn-group dropstart mt-4">';
+                $result .= '<button type="button" class="btn btn-secondary dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-expanded="false">';
+                $result .= '    Action';
+                $result .= '</button>';
+                $result .= '<ul class="dropdown-menu">';
+                if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
+                    $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
+                }
+                // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
+                    $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item'  id='btnViewEcrId'> <i class='fa-solid fa-eye'></i> View/Approval</button>
+                    </li>";
+                // }
+                $result .= '</ul>';
+                $result .= '</div>';
+                $result .= '</center>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row): string{
+                $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
+
+                $getStatus = $this->getStatus($row->status);
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
+                $result .= '<br>';
+                if($row->status != 'DIS'){
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
+                $result .= '</center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_actions','get_status'])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function loadEcrApprovalSummary(Request $request){
+        try {
+            $ecrsId = $request->ecrsId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                'ecrs_id' => $ecrsId
+            ];
+
+            $ecr = $this->resourceInterface->readCustomEloquent(EcrApproval::class,$data,$relations,$conditions);
+            $ecr = $ecr
+            ->whereNotNull('rapidx_user_id')
+            ->orderBy('counter','asc')
+            ->get();
+            return DataTables($ecr)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].' </span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
+
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function loadEcrDetailsByEcrId(Request $request){
+        try {
+            $data = [];
+            $relations = [
+                'dropdown_master_detail_description_of_change',
+                'dropdown_master_detail_reason_of_change',
+                'dropdown_master_detail_type_of_part',
+            ];
+            $conditions = [
+                'ecrs_id' => $request->ecr_id
+            ];
+            $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
+            return DataTables($ecrDetail)
+            ->addColumn('get_actions',function ($row){
+                $result = '';
+                $result .= '<center>';
+                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-details-id='".$row->id."' id='btnGetEcrDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                $result .= '</center>';
+                return $result;
+            })
+            ->addColumn('reason_of_change',function ($row){
+                $result = '';
+                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? '';
+                return $result;
+            })
+            ->addColumn('description_of_change',function ($row){
+                $result = '';
+                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details ?? '';
+                return $result;
+            })
+            ->addColumn('type_of_part',function ($row){
+                $result = '';
+                $result .= $row->dropdown_master_detail_type_of_part->dropdown_masters_details ?? '';
+                return $result;
+            })
+            ->addColumn('get_customer_approval',function ($row){
+                $result = '';
+                $result .= $row->customer_approval;
+                $result = '';
+                switch ($row->customer_approval) {
+                    case 'R':
+                        $bgColor = 'bg-success text-white';
+                        $customerApproval = 'REQUIRED';
+                        break;
+                    case 'NR':
+                        $bgColor = 'bg-warning text-white';
+                        $customerApproval = 'NOT REQUIRED';
+                        break;
+                    default:
+                        $bgColor = 'bg-secondary text-white';
+                        $customerApproval = 'N/A';
+                        break;
+                }
+                $result .='<span class="badge '.$bgColor.'"> '.$customerApproval.' </span>';
+                return $result;
+            })
+            ->rawColumns([
+                'get_actions',
+                'reason_of_change',
+                'description_of_change',
+                'type_of_part',
+                'get_customer_approval',
+            ])
+            ->make(true);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
+    public function loadEcrRequirements(Request $request){
+        try {
+            $data = [];
+            $relations = [];
+            $conditions = [
+                'classifications_id' => $request->category
+            ];
+            $ecr_req_data = [];
+            $ecr_req_relations = [];
+            $ecr_req_conditions = [
+                'ecrs_id' => $request->ecrsId ?? "",
+            ];
+            $classificationRequirement = $this->resourceInterface->readWithRelationsConditionsActive(ClassificationRequirement::class,$data,$relations,$conditions);
+            $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,$ecr_req_data,$ecr_req_relations,$ecr_req_conditions);
+            return DataTables($classificationRequirement)
+            ->addColumn('get_actions',function ($row) use($ecrRequirement) {
+                $ecrRequirementCollection = collect($ecrRequirement);
+                $ecrRequirementMatch = $ecrRequirementCollection->firstWhere('classification_requirements_id', $row->id);
+                $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
+                $cSelected = $ecrRequirementMatch['decision'] === 'C' ? 'selected' : '';
+                $xSelected = $ecrRequirementMatch['decision'] === 'X' ? 'selected' : '';
+                $naSelected = $ecrRequirementMatch['decision'] === 'N/A' ? 'selected' : '';
+                if($ecrRequirementId === ''){
+                    $isValid = "is-invalid";
+                    $emptySelected = "selected";
+                }else{
+                    $isValid = "";
+                    $emptySelected = "";
+                }
+                $result = '';
+                $result .= '<center>';
+                $result .= "<select id='btnChangeEcrReqDecision' class='form-select btn-change-ecr-req-decision ".$isValid."' ref=btnChangeEcrReqDecision ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
+                $result .=  "<option value='' ".$emptySelected." disabled> --Select-- </option>";
+                $result .=  "<option value='N/A' ".$naSelected."> N/A </option>";
+                $result .=  "<option value='C' ".$cSelected."> √ </option>";
+                $result .=  "<option value='X' ".$xSelected."> X </option>";
+                $result .=  "</select>";
+                $result .= '</center>';
+                return $result;
+            })
+            ->rawColumns([
+                'get_actions',
+            ])
+            ->make(true);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
     public function getFilteredSection($department){
         try {
             if ( Str::contains($department, "LQC")) {
@@ -334,251 +598,6 @@ class EcrController extends Controller
              return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
              throw $e;
-        }
-    }
-    public function loadEcr(Request $request){
-        try {
-            $status = explode(',',$request->status) ?? "";
-            $data = [];
-
-            $relations = [
-                'ecr_approval_pending'
-            ];
-            $conditions = [];
-            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-            $ecr->whereIn('status',$status)
-            ->whereHas('ecr_approval',function($query) use ($request){
-                // if is adminAccess exist deactivate the session condition
-                if( $request->adminAccess != 'all' && $request->status === 'IA'){
-                    // $query->where('status','PEN');
-                    $query->where('rapidx_user_id',session('rapidx_user_id'));
-                }
-                if( $request->adminAccess != 'all' && $request->status === 'QA'){
-                    $query->where('status','PEN');
-                    $query->where('rapidx_user_id',session('rapidx_user_id'));
-                }
-            })
-            ->get();
-            return DataTables($ecr)
-            ->addColumn('get_actions',function ($row){
-                $result = '';
-                $result .= '<center>';
-                $result .= "<button ecr-id='".$row->id."' ecr-status='".$row->status."' class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i></button>";
-                $result .= '<br>';
-                $result .= '<br>';
-                $result .= "<button ecr-id='".$row->id."' ecr-status='".$row->status."' class='btn btn-outline-primary btn-sm mr-1 btn-get-ecr-id'  id='btnViewEcrId'> <i class='fa-solid fa-eye'></i></button>";
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_status',function ($row): string{
-                $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
-
-                $getStatus = $this->getStatus($row->status);
-                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
-                $result = '';
-                $result .= '<center>';
-                $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
-                $result .= '<br>';
-                if($row->status != 'DIS'){
-                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
-                }
-                $result .= '</center>';
-                $result .= '</br>';
-                return $result;
-            })
-            ->rawColumns(['get_actions','get_status'])
-            ->make(true);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function loadEcrApprovalSummary(Request $request){
-        try {
-            $ecrsId = $request->ecrsId ?? "";
-            $data = [];
-            $relations = [
-                'rapidx_user'
-            ];
-            $conditions = [
-                'ecrs_id' => $ecrsId
-            ];
-
-            $ecr = $this->resourceInterface->readCustomEloquent(EcrApproval::class,$data,$relations,$conditions);
-            $ecr = $ecr
-            ->whereNotNull('rapidx_user_id')
-            ->orderBy('counter','asc')
-            ->get();
-            return DataTables($ecr)
-            ->addColumn('get_count',function ($row) use(&$ctr){
-                $ctr++;
-                $result = '';
-                $result .= $ctr;
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_approver_name',function ($row){
-                $result = '';
-                $result .= $row->rapidx_user['name'];
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_role',function ($row){
-                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
-                $result = '';
-                $result .= '<center>';
-                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].' </span>';
-                $result .= '<center>';
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_status',function ($row){
-                switch ($row->status) {
-
-                    case 'PEN':
-                        $status = 'PENDING';
-                        $bgColor = 'badge rounded-pill bg-warning';
-                        break;
-                    case 'APP':
-                        $status = 'APPROVED';
-                        $bgColor = 'badge rounded-pill bg-success';
-                        break;
-                    case 'DIS':
-                        $status = 'DISAPPROVED';
-                        $bgColor = 'badge rounded-pill bg-danger';
-                        break;
-                    default:
-                        $status = '---';
-                        $bgColor = '';
-                        break;
-                }
-
-                $result = '';
-                $result .= '<center>';
-                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
-                $result .= '<br>';
-                $result .= '</br>';
-                return $result;
-            })
-            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
-            ->make(true);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function loadEcrDetailsByEcrId(Request $request){
-        try {
-            $data = [];
-            $relations = [
-                'dropdown_master_detail_description_of_change',
-                'dropdown_master_detail_reason_of_change',
-                'dropdown_master_detail_type_of_part',
-            ];
-            $conditions = [
-                'ecrs_id' => $request->ecr_id
-            ];
-            $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
-            return DataTables($ecrDetail)
-            ->addColumn('get_actions',function ($row){
-                $result = '';
-                $result .= '<center>';
-                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-details-id='".$row->id."' id='btnGetEcrDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
-                $result .= '</center>';
-                return $result;
-            })
-            ->addColumn('reason_of_change',function ($row){
-                $result = '';
-                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? '';
-                return $result;
-            })
-            ->addColumn('description_of_change',function ($row){
-                $result = '';
-                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details ?? '';
-                return $result;
-            })
-            ->addColumn('type_of_part',function ($row){
-                $result = '';
-                $result .= $row->dropdown_master_detail_type_of_part->dropdown_masters_details ?? '';
-                return $result;
-            })
-            ->addColumn('get_customer_approval',function ($row){
-                $result = '';
-                $result .= $row->customer_approval;
-                $result = '';
-                switch ($row->customer_approval) {
-                    case 'R':
-                        $bgColor = 'bg-success text-white';
-                        $customerApproval = 'REQUIRED';
-                        break;
-                    case 'NR':
-                        $bgColor = 'bg-warning text-white';
-                        $customerApproval = 'NOT REQUIRED';
-                        break;
-                    default:
-                        $bgColor = 'bg-secondary text-white';
-                        $customerApproval = 'N/A';
-                        break;
-                }
-                $result .='<span class="badge '.$bgColor.'"> '.$customerApproval.' </span>';
-                return $result;
-            })
-            ->rawColumns([
-                'get_actions',
-                'reason_of_change',
-                'description_of_change',
-                'type_of_part',
-                'get_customer_approval',
-            ])
-            ->make(true);
-        } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
-        }
-    }
-    public function loadEcrRequirements(Request $request){
-        try {
-            $data = [];
-            $relations = [];
-            $conditions = [
-                'classifications_id' => $request->category
-            ];
-            $ecr_req_data = [];
-            $ecr_req_relations = [];
-            $ecr_req_conditions = [
-                'ecrs_id' => $request->ecrsId ?? "",
-            ];
-            $classificationRequirement = $this->resourceInterface->readWithRelationsConditionsActive(ClassificationRequirement::class,$data,$relations,$conditions);
-            $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,$ecr_req_data,$ecr_req_relations,$ecr_req_conditions);
-            return DataTables($classificationRequirement)
-            ->addColumn('get_actions',function ($row) use($ecrRequirement) {
-                $ecrRequirementCollection = collect($ecrRequirement);
-                $ecrRequirementMatch = $ecrRequirementCollection->firstWhere('classification_requirements_id', $row->id);
-                $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
-                $cSelected = $ecrRequirementMatch['decision'] === 'C' ? 'selected' : '';
-                $xSelected = $ecrRequirementMatch['decision'] === 'X' ? 'selected' : '';
-                $naSelected = $ecrRequirementMatch['decision'] === 'N/A' ? 'selected' : '';
-                if($ecrRequirementId === ''){
-                    $isValid = "is-invalid";
-                    $emptySelected = "selected";
-                }else{
-                    $isValid = "";
-                    $emptySelected = "";
-                }
-                $result = '';
-                $result .= '<center>';
-                $result .= "<select id='btnChangeEcrReqDecision' class='form-select btn-change-ecr-req-decision ".$isValid."' ref=btnChangeEcrReqDecision ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
-                $result .=  "<option value='' ".$emptySelected." disabled> --Select-- </option>";
-                $result .=  "<option value='N/A' ".$naSelected."> N/A </option>";
-                $result .=  "<option value='C' ".$cSelected."> √ </option>";
-                $result .=  "<option value='X' ".$xSelected."> X </option>";
-                $result .=  "</select>";
-                $result .= '</center>';
-                return $result;
-            })
-            ->rawColumns([
-                'get_actions',
-            ])
-            ->make(true);
-        } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
     public function getDropdownMasterByOpt(Request $request){

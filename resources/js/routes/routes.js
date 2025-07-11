@@ -52,41 +52,49 @@ export default [
             {
                 path: 'man',
                 name: 'Man',
+                // beforeEnter: checkIfSessionExist,
                 component: Man,
             },
             {
                 path: 'material',
                 name: 'Material',
+                // beforeEnter: checkIfSessionExist,
                 component: Material,
             },
             {
                 path: 'machine',
                 name: 'Machine',
+                // beforeEnter: checkIfSessionExist,
                 component: Machine,
             },
             {
                 path: 'machine',
                 name: 'Machine',
+                // beforeEnter: checkIfSessionExist,
                 component: Machine,
             },
             {
                 path: 'method',
                 name: 'Method',
+                // beforeEnter: checkIfSessionExist,
                 component: Method,
             },
             {
                 path: 'environment',
                 name: 'Environment',
+                // beforeEnter: checkIfSessionExist,
                 component: Environment,
             },
             {
                 path: 'user_master',
                 name: 'UserMaster',
+                // beforeEnter: checkIfSessionExist,
                 component: UserMaster,
             },
             {
                 path: 'dropdown_master',
                 name: 'DropdownMaster',
+                // beforeEnter: checkIfSessionExist,
                 component: DropdownMaster,
             },
         ]

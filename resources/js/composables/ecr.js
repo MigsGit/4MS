@@ -248,9 +248,7 @@ export default function useEcr(){
                     let preparedBy = pmiApprovalCollection.PB;
                     let checkedBy = pmiApprovalCollection.CB;
                     let approvedBy = pmiApprovalCollection.AB;
-                    let externalPreparedBy = pmiApprovalCollection.EXQC;
-                    let externalPheckedBy = pmiApprovalCollection.EXOH;
-                    let externalPpprovedBy = pmiApprovalCollection.EXQA;
+
                     // Find the key with the longest array, Loops through all keys using Object.keys(),Compares array lengths using .reduce(),Returns the key and array with the highest length
                     const maxKey = Object.keys(pmiApprovalCollection).reduce((a, b) =>
                         pmiApprovalCollection[a].length > pmiApprovalCollection[b].length ? a : b
@@ -262,11 +260,16 @@ export default function useEcr(){
                             checkedBy: checkedBy[index].rapidx_user_id ?? 0,
                             approvedBy:approvedBy[index].rapidx_user_id ?? 0,
                         });
-                        frmEcrPmiExternalApproverRows.value.push({
-                            preparedBy: externalPreparedBy[index].rapidx_user_id ?? 0,
-                            checkedBy: externalPheckedBy[index].rapidx_user_id ?? 0,
-                            approvedBy:externalPpprovedBy[index].rapidx_user_id ?? 0,
-                        });
+                        if(ecr.internal_external === "External"){
+                            let externalPreparedBy = pmiApprovalCollection.EXQC;
+                            let externalPheckedBy = pmiApprovalCollection.EXOH;
+                            let externalPpprovedBy = pmiApprovalCollection.EXQA;
+                            frmEcrPmiExternalApproverRows.value.push({
+                                preparedBy: externalPreparedBy[index].rapidx_user_id ?? 0,
+                                checkedBy: externalPheckedBy[index].rapidx_user_id ?? 0,
+                                approvedBy:externalPpprovedBy[index].rapidx_user_id ?? 0,
+                            });
+                        }
                     });
                 }
 

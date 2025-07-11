@@ -34,7 +34,6 @@ class EnvironmentController extends Controller
             $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
-                // Dropdown menu links
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -42,7 +41,6 @@ class EnvironmentController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-
 
                 if($row->approval_status === "PB" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
