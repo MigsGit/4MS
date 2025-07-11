@@ -4,6 +4,7 @@
         <div class="row">
             <div class="col-md-3 offset-md-4">
                 <Multiselect
+                        placeholder="-Select an Option-"
                     :close-on-select="true"
                     :searchable="true"
                     :options="commonVar.optAdminAccess"
@@ -16,7 +17,7 @@
                 <li class="nav-item">
                     <a class="nav-link active .menuTab" id="Pending-tab" data-bs-toggle="tab" href="#menu1" role="tab" aria-controls="menu1" aria-selected="true">For Approval</a>
                 </li>
-                <li class="nav-item">
+                <li v-show="commonVar.rapidxUserDeptGroup ==='ISS' || commonVar.rapidxUserDeptGroup ==='QA'" class="nav-item">
                     <a class="nav-link .menuTab" id="Completed-tab" data-bs-toggle="tab" href="#menu2" role="tab" aria-controls="menu2" aria-selected="false">QA Approval</a>
                 </li>
             </ul>
@@ -56,7 +57,7 @@
                     </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="menu2" role="tabpanel" aria-labelledby="menu1-tab">
+                <div v-show="commonVar.rapidxUserDeptGroup ==='ISS' || commonVar.rapidxUserDeptGroup ==='QA'" class="tab-pane fade" id="menu2" role="tabpanel" aria-labelledby="menu1-tab">
                     <div class="container-fluid px-4">
                             <ol class="breadcrumb mb-4">
                                 <li class="breadcrumb-item active">QA Approval</li>
@@ -77,19 +78,13 @@
                             >
                                 <thead>
                                     <tr>
-                                        <th>Action</th>
-                                        <th>Status</th>
-                                        <th>ECR Ctrl No.</th>
-                                        <th>Category</th>
-                                        <th>Internal or External</th>
-                                        <th>Customer Name</th>
-                                        <th>Part Number</th>
-                                        <th>Part Name</th>
-                                        <th>Device Name</th>
-                                        <th>Product Line</th>
-                                        <th>Section</th>
-                                        <th>Customer Ec. No</th>
-                                        <th>Date Of Request</th>
+                                        <th style=""width="5%">Action</th>
+                                        <th style=""width="10%">Status</th>
+                                        <th style=""width="20%">ECR Ctrl No.</th>
+                                        <th style=""width="25%">Details</th>
+                                        <th style=""width="10%">Category</th>
+                                        <th style=""width="10%">Section</th>
+                                        <th style=""width="10%">Customer EC No</th>
                                     </tr>
                                 </thead>
                             </DataTable>
@@ -102,8 +97,8 @@
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" :title="modalTitle+' '+'ECR'" @add-event="frmSaveEcr()" ref="modalSaveEcr">
         <template #body>
                 <div class="row">
-                    <div class="input flex-nowrap mb-2 input-group-sm">
-                        <input  v-model="frmEcr.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                    <div class="input flex-nowrap mb-2 input-group-sm d-none">
+                        <input  v-model="frmEcr.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                     </div>
                     <div class="col-sm-6">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -776,6 +771,7 @@
         commonVar,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+        getAdminAccessOpt,
     } = useCommon();
 
     // const item = ref();
@@ -987,6 +983,7 @@
         });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
+        await getAdminAccessOpt();
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         $('#collapse1').addClass('show');
 

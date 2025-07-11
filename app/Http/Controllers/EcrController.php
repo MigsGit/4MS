@@ -38,40 +38,38 @@ class EcrController extends Controller
         try {
             // return  $request->adminAccess;
             $status = explode(',',$request->status) ?? "";
-            $data = [
-
-            ];
-
+            $adminAccess = $request->adminAccess;
+            $data = [];
             $relations = [
-                'ecr_approval_pending'
+                'ecr_approval_pending',
+                'rapidx_user_created_by'
             ];
-            $conditions = [
-            ];
+            $conditions = [];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-            $ecr->whereIn('status',$status)
-            // ->orWhere('created_by' , session('rapidx_user_id'))
-            ->whereHas('ecr_approval',function($query) use ($request,$status){
-                // if is adminAccess exist deactivate the session condition
-                if( $request->adminAccess != 'all' && in_array("IA" ,$status)){
+
+            if( $adminAccess === 'null' || blank($adminAccess) ){
+                $ecr->whereIn('status',$status)
+                ->whereHas('ecr_approval',function($query) use ($request,$status){
+                    // if is adminAccess exist deactivate the session condition
                     $query->where('status','PEN');
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
-                }
-                if( $request->adminAccess != 'all' && in_array("DIS" ,$status)){
-                    $query->where('status','PEN');
-                    $query->where('rapidx_user_id',session('rapidx_user_id'));
-                }
-                if( $request->adminAccess != 'all' && in_array("QA", $status) ){
-                    $query->where('status','PEN');
-                    $query->where('rapidx_user_id',session('rapidx_user_id'));
-                }
-            })
-            ->get();
+                })->get();
+            }
+            if( $adminAccess === 'created'){
+                $ecr->whereIn('status',$status)
+                ->where('created_by' , session('rapidx_user_id'))
+                ->get();
+            }
+            if( $adminAccess === 'all') {
+                $ecr->whereIn('status',$status)
+                ->get();
+            }
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
-                $result .= '<button type="button" class="btn btn-secondary dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-expanded="false">';
+                $result .= "<button ecr-id='".$row->id."' ecr-status='".$row->status."'  type='button' class='btn btn-secondary dropdown-toggle btn-sm' data-bs-toggle='dropdown' aria-expanded='false'>";
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
@@ -110,6 +108,7 @@ class EcrController extends Controller
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })
             ->rawColumns([

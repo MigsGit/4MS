@@ -10,10 +10,9 @@ export default function useCommon(){
         isSessionApprover : false,
         isSessionPmiInternalApprover : false,
         optUserMaster:[],
-        optAdminAccess : [
-            // {"value":"","label":"-Select an Admin-", "disabled":true },
-            {"value":"all","label":"Show All"},
-        ],
+        optAdminAccess : [],
+        rapidxUserDeptGroup : '',
+        isActiveTab : '',
         optYesNo : [
             {"value":"","label":"-Select an option-"},
             {"value":"N/A","label":"N/A"},
@@ -98,6 +97,27 @@ export default function useCommon(){
         {  title: "Remarks" , data: 'remarks' } ,
     ];
     //Functions
+
+    const getAdminAccessOpt = async () => {
+        let apiParams = {};
+        axiosFetchData(apiParams,'api/get_admin_access_opt',function(response){
+            let data = response.data;
+            let rapidxUserDeptGroup = data.departmentGroup;
+            commonVar.rapidxUserDeptGroup = rapidxUserDeptGroup;
+            // departmentGroup
+            if(rapidxUserDeptGroup === "ISS" ||  rapidxUserDeptGroup === "QAD"){
+                commonVar.optAdminAccess = [
+                    {"value":"all","label":"Show All"},
+                    {"value":"created","label":"Show my request"},
+                ];
+            }else{
+                commonVar.optAdminAccess = [
+                    {"value":"created","label":"Show my request"},
+                ];
+            }
+
+        });
+    }
     const getCurrentApprover = async (params) => {
         let apiParams = {
             selectedId : params.selectedId,
@@ -163,13 +183,13 @@ export default function useCommon(){
             frmSpecialInspection.value.remarks = specialInspection.remarks;
         });
     }
-
     const changeExternalDisposition = async (event) => {
         externalDisposition.value =  Array.from(event.target.files);
     }
     const btnLinkViewExternalDisposition = async (selectedEcrsId,index) => {
         window.open(`api/view_external_disposition?ecrsId=${selectedEcrsId} && index=${index} && imageType=after`, '_blank');
     }
+
     return {
         modal,
         commonVar,
@@ -184,6 +204,7 @@ export default function useCommon(){
         getCurrentPmiInternalApprover,
         changeExternalDisposition,
         btnLinkViewExternalDisposition,
+        getAdminAccessOpt,
         frmSpecialInspection,
     }
 

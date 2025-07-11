@@ -16,6 +16,10 @@ class Ecr extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
+    public function rapidx_user_created_by()
+    {
+        return $this->hasOne(RapidxUser::class, 'id', 'created_by');
+    }
     public function ecr_details()
     {
         return $this->hasMany(EcrDetail::class, 'ecrs_id', 'id');
