@@ -44,7 +44,9 @@ export default function useSettings(){
         });
     }
     const getRapidxUserByIdOpt = async (params) => {
-        let apiParams = {}
+        let apiParams = {
+            rapidxUserDeptGroup : params.rapidxUserDeptGroup ?? '',
+        }
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
         await axiosFetchData(apiParams, `api/get_rapidx_user_by_id_opt`, (response) => { //url
             let data = response.data;

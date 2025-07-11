@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-4">ENGINEERING CHANGE REQUEST</h4>
+        <h4 class="mt-4">ENGINEERING CHANGE REQUEST {{ commonVar.rapidxUserDeptGroup }}</h4>
         <div class="row">
             <div class="col-md-3 offset-md-4">
                 <Multiselect
@@ -99,6 +99,9 @@
                 <div class="row">
                     <div class="input flex-nowrap mb-2 input-group-sm d-none">
                         <input  v-model="frmEcr.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
+                    </div>
+                    <div class="input flex-nowrap mb-2 input-group-sm">
+                        <input  v-model="frmEcr.departmentGroup" type="text" :value="commonVar.rapidxUserDeptGroup" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                     </div>
                     <div class="col-sm-6">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -767,6 +770,7 @@
         onUserChange,
     } = useSettings();
     const {
+        rapidxUserDeptGroup,
         modal,
         commonVar,
         getCurrentApprover,
@@ -890,6 +894,24 @@
         {   data: 'get_status'} ,
     ];
     //constant object params
+    const otherDispoRequestedByParams = {
+        globalVar: ecrVar.requestedBy,
+        formModel: toRef(frmEcrOtherDispoRows.value[0],'requestedBy'),
+        rapidxUserDeptGroup: commonVar.rapidxUserDeptGroup,
+        selectedVal: '0',
+    };
+    const otherDispoTechnicalEvaluationParams = {
+        globalVar: ecrVar.technicalEvaluation,
+        formModel: toRef(frmEcrOtherDispoRows.value[0],'technicalEvaluation'),
+        rapidxUserDeptGroup: commonVar.rapidxUserDeptGroup,
+        selectedVal: '0',
+    };
+    const otherDispoReviewedByParams = {
+        globalVar: ecrVar.reviewedBy,
+        formModel: toRef(frmEcrOtherDispoRows.value[0],'reviewedBy'),
+        rapidxUserDeptGroup: commonVar.rapidxUserDeptGroup,
+        selectedVal: '0',
+    };
     const qadCheckedByParams = {
         globalVar: ecrVar.optQadCheckedBy,
         formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
@@ -898,21 +920,6 @@
     const qadApprovedByInternalParams = {
         globalVar: ecrVar.optQadApprovedByInternal,
         formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
-        selectedVal: '0',
-    };
-    const otherDispoRequestedByParams = {
-        globalVar: ecrVar.requestedBy,
-        formModel: toRef(frmEcrOtherDispoRows.value[0],'requestedBy'),
-        selectedVal: '0',
-    };
-    const otherDispoTechnicalEvaluationParams = {
-        globalVar: ecrVar.technicalEvaluation,
-        formModel: toRef(frmEcrOtherDispoRows.value[0],'technicalEvaluation'),
-        selectedVal: '0',
-    };
-    const otherDispoReviewedByParams = {
-        globalVar: ecrVar.reviewedBy,
-        formModel: toRef(frmEcrOtherDispoRows.value[0],'reviewedBy'),
         selectedVal: '0',
     };
     const pmiApproverPreparedByParams = {
@@ -981,12 +988,11 @@
                 approvedBy: '0',
             });
         });
+        const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
-        await getAdminAccessOpt();
-        const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         $('#collapse1').addClass('show');
-
+        await getAdminAccessOpt();
     })
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
@@ -996,7 +1002,8 @@
     const btnEcr = async () => {
         modalEcr.SaveEcr.show();
         isSelectReadonly.value = false;
-        generateControlNumber();
+        await generateControlNumber();
+        console.log('rapidxUserDeptGroup',frmEcr.departmentGroup)
         await getRapidxUserByIdOpt(otherDispoRequestedByParams);
     }
     const generateControlNumber = async () => {

@@ -5,6 +5,9 @@ export default function useCommon(){
     const { axiosFetchData } = useFetch(); // Call  the useFetch function
     const  { axiosSaveData } = useForm();
     const modal ={}
+
+    //Ref State
+    const rapidxUserDeptGroup = ref([]);
     //Reactive State
     const commonVar = reactive({
         isSessionApprover : false,
@@ -12,6 +15,7 @@ export default function useCommon(){
         optUserMaster:[],
         optAdminAccess : [],
         rapidxUserDeptGroup : '',
+        rapidxUserDeptId: '',
         isActiveTab : '',
         optYesNo : [
             {"value":"","label":"-Select an option-"},
@@ -102,10 +106,12 @@ export default function useCommon(){
         let apiParams = {};
         axiosFetchData(apiParams,'api/get_admin_access_opt',function(response){
             let data = response.data;
-            let rapidxUserDeptGroup = data.departmentGroup;
-            commonVar.rapidxUserDeptGroup = rapidxUserDeptGroup;
+            let userDeptGroup = data.departmentGroup;
+            commonVar.rapidxUserDeptId = data.department_id;
+            commonVar.rapidxUserDeptGroup = userDeptGroup;
+            rapidxUserDeptGroup.value = userDeptGroup;
             // departmentGroup
-            if(rapidxUserDeptGroup === "ISS" ||  rapidxUserDeptGroup === "QAD"){
+            if(userDeptGroup === "ISS" ||  userDeptGroup === "QAD"){
                 commonVar.optAdminAccess = [
                     {"value":"all","label":"Show All"},
                     {"value":"created","label":"Show my request"},
@@ -191,6 +197,7 @@ export default function useCommon(){
     }
 
     return {
+        rapidxUserDeptGroup,
         modal,
         commonVar,
         externalDisposition,

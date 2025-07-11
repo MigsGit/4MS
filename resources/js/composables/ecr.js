@@ -148,7 +148,13 @@ export default function useEcr(){
         });
     }
     const getRapidxUserByIdOpt = async (params) => {
-        let apiParams = {}
+        console.log(apiParams);
+        alert('dasdasdsadas')
+        return;
+        let apiParams = {
+            rapidxUserDeptGroup : 'params.rapidxUserDeptGroup' ?? '',
+        }
+
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
         await axiosFetchData(apiParams, `api/get_rapidx_user_by_id_opt`, (response) => { //url
             let data = response.data;
@@ -156,7 +162,7 @@ export default function useEcr(){
             let rapidxUserById = data.rapidxUserById;
             params.globalVar.splice(0, params.globalVar.length,
                 { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
-                { value: 0, label: 'N/A' }, // Push "N/A" option at the start
+                // { value: 0, label: 'N/A' }, // Push "N/A" option at the start
                 // { value: null, label: 'N/A' }, // Push "N/A" option at the start
                     ...rapidxUserById.map((value) => {
                     return {

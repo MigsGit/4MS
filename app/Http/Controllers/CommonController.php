@@ -150,22 +150,34 @@ class CommonController extends Controller
     public function getRapidxUserByIdOpt(Request $request){
         try {
             // $rapidxUserById = RapidxUser::where('department_id',22)->where('logdel',0)->get(); //22 QAD
-            $data = [];
-            $relations = [];
-            $conditions = [
-                'department_id' => 1,
-                'user_stat' => 1,
-            ];
-            // $query->where('deleted_at',NULL);
+            // $data = [];
+            // $relations = [];
+            // $conditions = [
+            //     'department_id' => 1,
+            //     'user_stat' => 1,
+            // ];
+            // // $query->where('deleted_at',NULL);
 
-            $rapidxUserById = $this->resourceInterface->readWithRelationsConditions(RapidxUser::class,$data,$relations,$conditions);
-            $rapidxUserById = $rapidxUserById;
-            // $arr_merge_group = array_merge(...array_map(function($item) {
-            //     return (array) $item;
-            // }, $arr_group_by1));
-            return response()->json(['is_success' => 'true','rapidxUserById'=>$rapidxUserById]);
+            // $rapidxUserById = $this->resourceInterface->readWithRelationsConditions(RapidxUser::class,$data,$relations,$conditions);
+            // $rapidxUserById = $rapidxUserById;
+
+            $rapidxUserById = DB::connection('mysql_rapidx')->select('SELECT users.*,user_accesses.
+                module_id,departments.department_name,departments.department_group
+                FROM  users
+                LEFT JOIN user_accesses user_accesses ON user_accesses.user_id = users.id
+                LEFT JOIN departments departments ON departments.department_id = users.department_id
+                WHERE 1=1
+                -- AND departments.department_group = "'.$request->rapidxUserDeptGroup.'"
+                AND departments.department_group = "ISS"
+                AND users.user_stat = 1
+                AND user_accesses.module_id = 46'
+            );
+            if(count ($rapidxUserById) > 0){
+                return response()->json(['isSuccess' => 'true','rapidxUserById'=>$rapidxUserById]);
+            }
+            return response()->json(['isSuccess' => 'false','rapidxUserById'=>[],'msg' => 'No User Found !',],500);
         } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+            return response()->json(['isSuccess' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
     public function getCurrentApproverSession(Request $request){
