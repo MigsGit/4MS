@@ -20,7 +20,25 @@ class SettingsController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
+    public function validateUserAccess(Request $request){
+        try {
+            $validUserAccess = DB::connection('mysql_rapidx')->select(
+                'SELECT users.*,user_accesses.module_id,departments.department_name
+                FROM  users
+                LEFT JOIN user_accesses user_accesses ON user_accesses.user_id = users.id
+                LEFT JOIN departments departments ON departments.department_id = users.department_id
+                WHERE 1=1
+                AND users.id = '.session('rapidx_user_id').'
+                AND users.user_stat = 1
+                AND user_accesses.module_id = 46
+                '
+            );
+            return count($validUserAccess);
 
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function getUserMaster(Request $request){
         try {
             // DB::table('user')-

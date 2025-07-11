@@ -473,6 +473,33 @@
                 </table>
                 <table class="table">
                     <thead>
+
+                        <tr>
+                            <th scope="col">
+                                Internal Material
+                            </th>
+                            <th scope="col">
+                                External Material
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a href="#" class="link-success" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
+                                    Download Internal Machine
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" class="link-warning" @click="btnLinkDownloadExternalMachine(selectedEcrsId)">
+                                    Download External Machine
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <thead>
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">
@@ -596,8 +623,6 @@
     const aViewMaterialRefAfter = ref(null);
     const currentStatus = ref(null);
     const arrOriginalFilenameExternalDispositions = ref(null);
-
-
     const tblPmiInternalApproverSummary = ref(null);
 
     const tblEcrByStatusColumns = [
@@ -789,8 +814,6 @@
     };
 
     onMounted( async ()=>{
-
-
         modal.SaveMachine = new Modal(modalSaveMachine.value.modalRef,{ keyboard: false });
         modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
@@ -845,6 +868,13 @@
     }
     const btnLinkViewMachineRefAfter = async (selectedMachinesIdEncrypted,index) => { //TODO: View Image
         window.open(`api/view_machine_ref?machinesId=${selectedMachinesIdEncrypted} && index=${index} && imageType=after`, '_blank');
+    }
+    const btnLinkDownloadInternalMachine = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId
+        }
+        var queryString = $.param(params);
+        window.location.href="api/download_internal_machine?" + queryString;
     }
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;

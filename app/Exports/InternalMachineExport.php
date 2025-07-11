@@ -2,17 +2,35 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
+// use Illuminate\Support\Collection;
+use App\Exports\Sheets\InternalMachineSheet;
+use Carbon\Carbon;
+// use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class InternalMachineExport implements FromCollection
+class InternalMachineExport implements WithMultipleSheets
 {
     /**
     * @return \Illuminate\Support\Collection
     */
+    protected $test;
+
+    public function __construct($test)
+    {
+        $this->test = $test;
+    }
+
+    public function sheets(): array{
+        $sheets = [];
+        $sheets['Machine'] = new InternalMachineSheet($this->test);
+        return $sheets;
+    }
     public function collection()
     {
-        return [
-            'test'
-        ];
+        // Wrap string in a Collection
+        return new Collection([
+            ['Value'], // column headers
+            [$this->test], // data
+        ]);
     }
 }

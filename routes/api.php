@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function(){
         Route::get('load_dropdown_master_details', 'loadDropdownMasterDetails')->name('load_dropdown_master_details');
         Route::get('get_dropdown_master', 'getDropdownMaster')->name('get_dropdown_master');
         Route::get('get_dropdown_master_details_id', 'getDropdownMasterDetailsId')->name('get_dropdown_master_details_id');
+        Route::get('validate_user_access', 'validateUserAccess')->name('validate_user_access');
     });
 
     Route::controller(ManController::class)->group(function () {
@@ -112,6 +113,7 @@ Route::middleware('auth')->group(function(){
         Route::get('load_machine_approver_summary_material_id', 'loadMachineApproverSummaryMaterialId')->name('load_machine_approver_summary_material_id');
         Route::get('get_machine_ref_by_id', 'getMachineRefById')->name('get_machine_ref_by_id');
         Route::get('view_machine_ref', 'viewMachineRef')->name('view_machine_ref');
+        Route::get('download_internal_machine', 'downloadInternalMachine')->name('download_internal_machine');
     });
 
     Route::controller(MethodController::class)->group(function () {

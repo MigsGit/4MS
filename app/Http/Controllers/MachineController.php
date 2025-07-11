@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Models\ExternalDisposition;
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
+use App\Exports\InternalMachineExport;
 use App\Http\Requests\MachineFileRequest;
 
 class MachineController extends Controller
@@ -161,8 +163,7 @@ class MachineController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewMachineRef"><i class="fa-solid fa-file-pdf"></i> </a>';
-
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })
@@ -408,6 +409,21 @@ class MachineController extends Controller
             throw $e;
         }
     }
+    public function downloadInternalMachine(Request $request){
+        try {
+            
+            $iqc_dropdown_category_section = 'TS';
+            $test = 'test';
+
+            return Excel::download(
+                new InternalMachineExport($test),
+                $iqc_dropdown_category_section . "4M.xlsx"
+            );
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    //Common Function
     public function getStatus($status){
 
         try {

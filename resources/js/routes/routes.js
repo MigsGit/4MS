@@ -14,7 +14,7 @@ const { axiosFetchData } = useFetch(); // Call  the useFetch function
 
 function checkIfSessionExist(to, from, next) {
     let apiParams;
-    axiosFetchData(apiParams,'api/check_session',function(response){
+    axiosFetchData(apiParams,'api/validate_user_access',function(response){
         if(response.data === 1){
             next();
         }else{
@@ -30,7 +30,7 @@ export default [
     {
         path: '/4M',
         component: '4M',
-        beforeEnter: checkIfSessionExist,
+        // beforeEnter: checkIfSessionExist,
         components: {
             default: IndexComponent,
             dashboard: Dashboard,
@@ -39,14 +39,14 @@ export default [
             {
                 path: 'dashboard',
                 name: 'dashboard',
-                beforeEnter: checkIfSessionExist,
+                // beforeEnter: checkIfSessionExist,
                 component: Dashboard,
 
             },
             {
                 path: 'ecr',
                 name: 'Ecr',
-                beforeEnter: checkIfSessionExist,
+                // beforeEnter: checkIfSessionExist,
                 component: Ecr,
             },
             {

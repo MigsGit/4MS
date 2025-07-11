@@ -1159,14 +1159,6 @@
     const btnLinkViewExternalDisposition = async (selectedEcrsId,index) => {
         window.open(`api/view_external_disposition?ecrsId=${selectedEcrsId} && index=${index} && imageType=after`, '_blank');
     }
-    const btnLinkDownloadInternalMaterial = async (selectedEcrsId) => {
-        let params = {
-            ecrsId : selectedEcrsId
-        }
-        var queryString = $.param(params);
-        window.location.href="api/download_internal_material?" + queryString;
-    }
-    btnLinkDownloadInternalMaterial
 
     const getMaterialEcrById = async (ecrId) => {
         let apiParams = {
