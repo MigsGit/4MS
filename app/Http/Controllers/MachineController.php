@@ -167,10 +167,21 @@ class MachineController extends Controller
                 $result .= '</center>';
                 return $result;
             })
+            ->addColumn('get_details',function ($row) use($request){
+                $result = '';
+                $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
+                $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
+                $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
+                $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
+                $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
+                $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                return $result;
+            })
             ->rawColumns([
                 'get_actions',
                 'get_status',
                 'get_attachment',
+                'get_details',
             ])
             ->make(true);
         } catch (Exception $e) {
@@ -411,7 +422,7 @@ class MachineController extends Controller
     }
     public function downloadInternalMachine(Request $request){
         try {
-            
+
             $iqc_dropdown_category_section = 'TS';
             $test = 'test';
 

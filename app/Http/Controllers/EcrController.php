@@ -102,8 +102,21 @@ class EcrController extends Controller
                 $result .= '</center>';
                 $result .= '</br>';
                 return $result;
+            })->addColumn('get_details',function ($row) use($request) {
+                $result = '';
+                $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
+                $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
+                $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
+                $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
+                $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
+                $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                return $result;
             })
-            ->rawColumns(['get_actions','get_status'])
+            ->rawColumns([
+                'get_actions',
+                'get_status',
+                'get_details'
+            ])
             ->make(true);
         } catch (Exception $e) {
             throw $e;

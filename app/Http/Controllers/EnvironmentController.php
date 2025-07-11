@@ -41,7 +41,6 @@ class EnvironmentController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-
                 if($row->approval_status === "PB" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadEnvironmentRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
@@ -67,6 +66,16 @@ class EnvironmentController extends Controller
                 $result .= '</br>';
                 return $result;
             })
+            ->addColumn('get_details',function ($row) use($request){
+                $result = '';
+                $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
+                $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
+                $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
+                $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
+                $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
+                $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                return $result;
+            })
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
@@ -80,6 +89,7 @@ class EnvironmentController extends Controller
                 'get_actions',
                 'get_status',
                 'get_attachment',
+                'get_details',
             ])
             ->make(true);
         } catch (Exception $e) {

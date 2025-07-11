@@ -23,20 +23,14 @@
                         >
                             <thead>
                                 <tr>
-                                    <th>Action</th>
-                                    <th>Status</th>
-                                    <th>Attachment</th>
-                                    <th>ECR Ctrl No.</th>
-                                    <th>Category</th>
-                                    <th>Internal or External</th>
-                                    <th>Customer Name</th>
-                                    <th>Part Number</th>
-                                    <th>Part Name</th>
-                                    <th>Device Name</th>
-                                    <th>Product Line</th>
-                                    <th>Section</th>
-                                    <th>Customer Ec. No</th>
-                                    <th>Date Of Request</th>
+                                    <th style=""width="5%">Action</th>
+                                    <th style=""width="10%">Status</th>
+                                    <th style=""width="10%">Attachment</th>
+                                    <th style=""width="20%">ECR Ctrl No.</th>
+                                    <th style=""width="25%">Details</th>
+                                    <th style=""width="10%">Category</th>
+                                    <th style=""width="10%">Section</th>
+                                    <th style=""width="10%">Customer EC No</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -882,16 +876,10 @@
             }
         } ,
         {   data: 'ecr_no'} ,
+        {   data: 'get_details'} ,
         {   data: 'category'} ,
-        {   data: 'internal_external'} ,
-        {   data: 'customer_name'} ,
-        {   data: 'part_no'} ,
-        {   data: 'part_name'} ,
-        {   data: 'device_name'} ,
-        {   data: 'product_line'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
-        {   data: 'date_of_request'} ,
     ];
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
