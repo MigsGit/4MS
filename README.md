@@ -1,4 +1,4 @@
-# Docu App in Laravel Vue
+# 4M Change Control Management System in Laravel Vue
 
 Laravel 8, Vue 3, Vue Router 4, Pinia, Webpack Mix
 
