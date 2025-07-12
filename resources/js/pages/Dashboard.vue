@@ -7,46 +7,113 @@
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Dashboard</li>
                         </ol>
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card bg-dark text-white mb-4">
-                                <div class="card-body">
-                                    <h4><font-awesome-icon class="nav-icon" icon="fa-user" />&nbsp;User Master</h4>
-                                </div>
-                                <div class="card-footer d-flex align-items-center justify-content-end">
-                                    <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
-                                        View Details
-                                    </router-link> -->
-                                    <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="row">
-                            <!-- <div class="col-xl-3 col-md-6">
+                            <div class="col-xl-3 col-md-6">
                                 <div class="card bg-dark text-white mb-4">
                                     <div class="card-body">
-                                        <h4><font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Man</h4>
+                                        <h4><font-awesome-icon class="nav-icon" icon="users" />&nbsp;User Master</h4>
                                     </div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <router-link class="small text-white stretched-link" :to="{ name: 'Man' }">
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
+                                        <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
                                             View Details
-                                        </router-link>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                        </router-link> -->
+                                        <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-xl-3 col-md-6">
                                 <div class="card bg-dark text-white mb-4">
                                     <div class="card-body">
-                                        <h4><font-awesome-icon class="nav-icon" icon="fa-cog" />&nbsp;Settings</h4>
+                                        <h4><font-awesome-icon class="nav-icon" icon="square-caret-down" />&nbsp;Dropdown Master</h4>
                                     </div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <router-link class="small text-white stretched-link" :to="{ name: 'Settings' }">
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
+                                        <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
                                             View Details
-                                        </router-link>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                                        </router-link> -->
+                                        <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-body">
+                                        <h4><font-awesome-icon class="nav-icon" icon="file-pen" />&nbsp;ECR</h4>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
+                                        <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
+                                            View Details
+                                        </router-link> -->
+                                        <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-body">
+                                        <h4><font-awesome-icon class="nav-icon" icon="user" />&nbsp;Man</h4>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
+                                        <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
+                                            View Details
+                                        </router-link> -->
+                                        <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-body">
+                                        <h4><font-awesome-icon class="nav-icon" icon="truck-fast" />&nbsp;Material</h4>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
+                                        <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
+                                            View Details
+                                        </router-link> -->
+                                        <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-body">
+                                        <h4><font-awesome-icon class="nav-icon" icon="microscope" />&nbsp;Machine</h4>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
+                                        <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
+                                            View Details
+                                        </router-link> -->
+                                        <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-body">
+                                        <h4><font-awesome-icon class="nav-icon" icon="clipboard-list" />&nbsp;Method</h4>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
+                                        <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
+                                            View Details
+                                        </router-link> -->
+                                        <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-body">
+                                        <h4><font-awesome-icon class="nav-icon" icon="tree" />&nbsp;Environment</h4>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
+                                        <!-- <router-link class="small text-white stretched-link" :to="{ name: 'user_master' }">
+                                            View Details
+                                        </router-link> -->
+                                        <div class="small text-white">more info &nbsp;<i class="fas fa-angle-right"></i></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
             </div>

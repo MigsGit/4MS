@@ -15,26 +15,26 @@ const useAuth = useAuthStore();
                     <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Ecr
                 </router-link>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Man' }">
-                    <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Man
+                    <font-awesome-icon class="nav-icon" icon="user" />&nbsp; Man
                 </router-link>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Material' }">
-                    <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Material
+                    <font-awesome-icon class="nav-icon" icon="truck-fast" />&nbsp; Material
                 </router-link>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Machine' }">
-                    <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Machine
+                    <font-awesome-icon class="nav-icon" icon="microscope" />&nbsp; Machine
                 </router-link>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Method' }">
-                    <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Method
+                    <font-awesome-icon class="nav-icon" icon="clipboard-list" />&nbsp; Method
                 </router-link>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Environment' }">
-                    <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Environment
+                    <font-awesome-icon class="nav-icon" icon="tree" />&nbsp; Environment
                 </router-link>
                 <div class="sb-sidenav-menu-heading">Admin</div>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }">
-                    <i class="fas fa-user"></i>&nbsp; User Master
+                    <font-awesome-icon class="nav-icon" icon="users" />&nbsp; User Master
                 </router-link>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'DropdownMaster' }">
-                    <font-awesome-icon class="nav-icon" icon="ticket-alt" />&nbsp; Dropdown Master
+                    <font-awesome-icon class="nav-icon" icon="square-caret-down" />&nbsp; Dropdown Master
                 </router-link>
                 <!--  <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Settings' }">
                     <i class="fas fa-tasks"></i>&nbsp; Settings
