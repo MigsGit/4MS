@@ -5,7 +5,8 @@ Laravel 8, Vue 3, Vue Router 4, Pinia, Webpack Mix
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-![](https://github.com/MigsGit/DocuApp/blob/v1/resources/content/images/4M.png)
+![](https://github.com/MigsGit/4MS/blob/version1/resources/content/images/4M.png)
+
 
 ## Built With
 
