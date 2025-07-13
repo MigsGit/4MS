@@ -73,12 +73,26 @@ class SettingsController extends Controller
             return DataTables::of($user)
             ->addColumn('get_action',function($row){
                 // return $row->id;
-                return $btn = '<button data-id = "'.$row->id.'"  class="btn btn-outline-info btn-sm" data-toggle="modal" id="btnEdocs" type="button" title="Edit"><i class="fas fa-edit"></i></button>';
+                return $btn = '<button data-id = "'.$row->id.'"  class="btn btn-outline-info btn-sm" data-toggle="modal" id="btnUserMasterDetails" type="button" title="Edit"><i class="fas fa-edit"></i></button>';
                 // return $btn = '<button data-id = "'.$row->id.'" id="editResProcedure" type="button" class="btn btn-info btn-sm" title="Edit"></i>Edit</button>';
             })
-            ->addColumn('get_status',function($row){
+            ->addColumn('get_roles',function($row){
+                $user = User::where('rapidx_user_id',$row->id)->first();
+                $isRoles = $user->roles ?? "";
+                switch ($isRoles) {
+                    case 'APP':
+                        $roles = 'Approver';
+                        break;
+
+                    default:
+                        $roles = 'User';
+                        break;
+                }
+
                 $result = '';
-                $result .= '<span class="badge rounded-pill bg-primary"> Active </span>';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$roles.' </span>';
+                $result .= '</center>';
                 return $result;
             })
             ->addColumn('get_departments',function($row){
@@ -88,7 +102,7 @@ class SettingsController extends Controller
             })
             ->rawColumns([
                 'get_action',
-                'get_status',
+                'get_roles',
                 'get_departments',
             ])
             ->make(true);
@@ -97,7 +111,6 @@ class SettingsController extends Controller
             throw $e;
         }
     }
-
     public function getDropdownMaster(Request $request){
         try {
             $dropdownMaster =  $this->resourceInterface->readWithRelationsConditions(DropdownMaster::class,[],[],[]);
@@ -127,13 +140,15 @@ class SettingsController extends Controller
                 $result .= '<span class="badge rounded-pill bg-success"> Active </span>';
                 return $result;
             })
-            ->rawColumns(['get_action','get_status'])
+            ->rawColumns([
+                'get_action',
+                'get_status'
+            ])
             ->make(true);
         } catch (Exception $e) {
             throw $e;
         }
     }
-
     public function getDropdownMasterDetailsId(Request $request){
         try {
             $conditions = [
@@ -166,6 +181,21 @@ class SettingsController extends Controller
 
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function saveUserApprover(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $user = User::insert([
+                'rapidx_user_id' => $request->userId,
+                'roles' => 'APP',
+            ]);
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
             throw $e;
         }
     }

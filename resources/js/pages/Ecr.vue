@@ -730,7 +730,6 @@
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
-
 </template>
 
 <script setup>

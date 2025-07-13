@@ -23,7 +23,10 @@
                         <thead>
                             <tr>
                                 <!-- <th>Action</th> -->
-                                <th>Status</th>
+                                <th>
+                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                </th>
+                                <th>Roles</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Roles</th>
@@ -41,19 +44,54 @@
         onMounted,
         ref,
     } from 'vue'
+    import Swal from 'sweetalert2';
     import ModalComponent from '../components/ModalComponent.vue';
     import useSettings from '../composables/settings.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
+
     DataTable.use(DataTablesCore);
+    const { axiosSaveData } = useForm(); // Call the useFetch function
     const ecrUserMasterColumns = [
-        // { data: 'get_action',  orderable: false, searchable: false },
-        { data: 'get_status'},
+        { data: 'get_action',
+        orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnUserMasterDetails = cell.querySelector('#btnUserMasterDetails');
+                if(btnUserMasterDetails !=null){
+                    btnUserMasterDetails.addEventListener('click',function(){
+                        let dataId = this.getAttribute('data-id');
+                        Swal.fire({
+                            title: 'Confirmation',
+                            text: 'Are you sure you want this user to be approver?',
+                            icon: 'warning',
+                            allowOutsideClick: false,
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                saveUserApprover(dataId);
+                            }
+                        })
+                    });
+                }
+            }
+         },
+        { data: 'get_roles'},
         { data: 'name'},
         { data: 'email'},
         { data: 'get_departments'}
     ];
+    const saveUserApprover = async (userId) => {
+        let formData = new FormData();
+        formData.append('userId',userId)
+        axiosSaveData(formData,'api/save_user_approver', (response) =>{
+            console.log(response);
+        });
+    }
 </script>
 <style lang="scss" scoped>
 
