@@ -148,9 +148,6 @@ export default function useEcr(){
         });
     }
     const getRapidxUserByIdOpt = async (params) => {
-        console.log(apiParams);
-        alert('dasdasdsadas')
-        return;
         let apiParams = {
             rapidxUserDeptGroup : 'params.rapidxUserDeptGroup' ?? '',
         }

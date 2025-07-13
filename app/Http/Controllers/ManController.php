@@ -76,19 +76,21 @@ class ManController extends Controller
             $result .= '</br>';
             return $result;
         })
-        ->addColumn('get_attachment',function ($row) use ($request){
+        ->addColumn('get_details',function ($row) use($request) {
             $result = '';
-            $result .= '<center>';
-            if($request->category  === 'Environment'){
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'> View Attachment</a>";
-            }
-            $result .= '</center>';
+            $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
+            $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
+            $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
+            $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
+            $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
+            $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+            $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
             return $result;
         })
         ->rawColumns([
             'get_actions',
             'get_status',
-            'get_attachment',
+            'get_details'
         ])
         ->make(true);
         try {
