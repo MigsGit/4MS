@@ -204,6 +204,8 @@ export default function useEcr(){
             let pmiApprovalCollection = data.pmiApprovalCollection;
             let pmiExternalApprovalCollection = data.pmiExternalApprovalCollection;
             let ecrDetails = ecr.ecr_details;
+
+
             setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
                 //Reasons
                 if (ecrDetails.length != 0){
@@ -244,7 +246,6 @@ export default function useEcr(){
                         frmEcrQadRows.value.qadCheckedBy =  qaCheckedBy[0].rapidx_user_id ?? 0;
                         frmEcrQadRows.value.qadApprovedByInternal = qaInternal[0].rapidx_user_id ?? 0;
                     }
-
                 }
                 //PMI Approval
                 if (pmiApprovalCollection.length != 0){

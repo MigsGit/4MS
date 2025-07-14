@@ -366,7 +366,7 @@
                 <!-- External PMI Approvers -->
                 <div class="card mb-2" v-show="isSelectReadonly === false && frmEcr.internalExternal ==='External'">
                         <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiExternal" aria-expanded="true" aria-controls="collapsePmiExternal">
+                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiExternal" aria-expanded="true" aria-controls="collapsePmiExternal">
                                 PMI External Approvers
                             </button>
                         </h5>
@@ -374,8 +374,7 @@
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
-                                    <!-- @click="btnAddEcrPmiApproverRows" -->
-                                    <button type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI Approvers</button>
+                                    <button @click="btnAddEcrPmiExternalApproverRows"  type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add PMI External Approvers</button>
                                 </div>
                                 <div class="col-12">
                                     <table class="table table-responsive">
@@ -422,8 +421,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <!-- @click="btnRemoveEcrPmiApproverRows(index)" -->
-                                                    <button  class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                    <button @click="btnRemoveEcrPmiExternalApproverRows" class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
                                                 </td>
@@ -797,6 +795,7 @@
     const btnEcrDisapproved = ref(null);
     const isApproved = ref(null);
     const currentEcrsId = ref(null);
+    const selectedAdminAccess = ref(null);
 
     //Table Column
     const tblEcrColumns = [
@@ -1015,6 +1014,7 @@
     const onChangeAdminAccess = async (selectedParams)=>{
         tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS"+"&& adminAccess="+selectedParams).draw();
         tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA"+"&& adminAccess="+selectedParams).draw();
+        selectedAdminAccess.value = selectedParams;
     }
     const ecrReqDecisionChange = async (ecrReqDecisionParams)=>{
         let apiParams = {
@@ -1053,6 +1053,16 @@
     }
     const btnRemoveEcrPmiApproverRows = async (index) => {
         frmEcrPmiApproverRows.value.splice(index,1);
+    }
+    const btnAddEcrPmiExternalApproverRows = async () => {
+        frmEcrPmiExternalApproverRows.value.push({
+                preparedBy: '0',
+                checkedBy: '0',
+                approvedBy: '0',
+            });
+    }
+    const btnRemoveEcrPmiExternalApproverRows = async (index) => {
+        frmEcrPmiExternalApproverRows.value.splice(index,1);
     }
     const btnEcrApproval = async (isEcrApproved) => {
         modal.EcrApproval.show();
@@ -1158,8 +1168,8 @@
         }
         //TODO: Save Successfully
         axiosSaveData(formData,'api/save_ecr', (response) =>{
-            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
-            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
+            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS && adminAccess="+selectedAdminAccess.value).load();
+            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA && adminAccess="+selectedAdminAccess.value).load();
             modalEcr.SaveEcr.hide();
         });
     }
