@@ -15,6 +15,7 @@ use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\ManApproval;
 use App\Models\PmiApproval;
+use App\Models\RapidMailer;
 use Illuminate\Http\Request;
 use App\Models\MethodApproval;
 use App\Models\MachineApproval;
@@ -544,4 +545,32 @@ class CommonController extends Controller
             $this->commonInterface->viewPdfFile($pdfPath);
         }
     }
+    public function testEmail(Request $request){
+        try {
+            $userId = 530;
+            return $this->commonInterface->getEmailByRapidxUserId($userId);
+            $data = [
+                "to" =>"mclegaspi@pricon.ph",
+                "cc" =>"",
+                "bcc" =>"cdcasuyon@pricon.ph",
+                "from" =>"mrronquez@pricon.ph",
+                "from_name" =>"4M Change Control Management System",
+                "subject" =>"Tist Message",
+                "message" =>  "Tist Message",
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => "2025-07-14 12:54:34",
+                "date_time_sent" => "2025-07-14 12:55:14",
+                "date_created" => "2025-07-14 12:54:34",
+                "created_by" => "mclegaspi",
+                "system_name" => "rapidx_4M",
+
+            ];
+            $this->commonInterface->sendEmail($data);
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
 }

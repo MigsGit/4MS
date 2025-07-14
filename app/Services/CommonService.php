@@ -1,7 +1,11 @@
 <?php
 namespace App\Services;
 use setasign\Fpdi\Fpdi;
+use App\Models\RapidxUser;
+use App\Models\RapidMailer;
+use App\Models\RapidAutoMailer;
 use App\Interfaces\FileInterface;
+use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,7 +18,22 @@ class CommonService implements CommonInterface
         $this->fileInterface = $fileInterface;
         $this->fpdi = $fpdi;
     }
-
+    public function getEmailByRapidxUserId($userId){
+        try {
+            $user = RapidxUser::find($userId);
+            if (!$user) {
+                throw new \Exception('User not found');
+            }
+            if (!$user->email) {
+                throw new \Exception('User Email not found');
+            }
+            return [
+                'userEmail' => $user->email,
+            ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function uploadFile($txtDocuReference,$id,$path) // $request->txt_docu_reference
     {
         try {
@@ -163,6 +182,41 @@ class CommonService implements CommonInterface
              return [
                  'approvalStatus' => $approvalStatus,
              ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function sendEmail($data){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            return RapidMailer::insert($data);
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function sendEmailWithAttachment($data){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            return RapidMailer::insert($data);
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function sendEmailWithSchedule($data){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            return RapidAutoMailer::insert($data);
+            DB::commit();
+
+            return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;
         }

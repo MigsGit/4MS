@@ -989,8 +989,13 @@
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
-        $('#collapse1').addClass('show');
         await getAdminAccessOpt();
+        $('#collapse1').addClass('show');
+
+        axiosFetchData({},'api/test_email',function(response){
+            console.log(response);
+        });
+
     })
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
