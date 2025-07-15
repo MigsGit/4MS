@@ -88,8 +88,8 @@ class EcrController extends Controller
             ->addColumn('get_status',function ($row): string{
                 $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
 
-                $getStatus = $this->getStatus($row->status);
-                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $getStatus = $this->commonInterface->getEcrStatus($row->status);
+                $getApprovalStatus = $this->commonInterface->getEcrApprovalStatus($row->approval_status);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
@@ -152,7 +152,7 @@ class EcrController extends Controller
                 return $result;
             })
             ->addColumn('get_role',function ($row){
-                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $getApprovalStatus = $this->commonInterface->getEcrApprovalStatus($row->approval_status);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].' </span>';
@@ -703,7 +703,8 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    //Common Function
+    //Common Function getEcrStatus
+    // getEcrApprovalStatus
    public function getStatus($status){
 
        try {

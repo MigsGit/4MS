@@ -170,5 +170,66 @@ class CommonService implements CommonInterface
             throw $e;
         }
     }
+    public function getEcrStatus($status){
+
+        try {
+             switch ($status) {
+                 case 'IA':
+                     $status = 'Internal Approval';
+                     $bgStatus = 'badge rounded-pill bg-primary';
+                     break;
+                 case 'QA':
+                     $status = 'QA Approval';
+                     $bgStatus = 'badge rounded-pill bg-warning';
+                     break;
+                 case 'DIS':
+                     $status = 'DISAPPROVED';
+                     $bgStatus = 'badge rounded-pill bg-danger';
+                     break;
+                 default:
+                     $status = '';
+                     $bgStatus = '';
+                     break;
+             }
+             return [
+                 'status' => $status,
+                 'bgStatus' => $bgStatus,
+             ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getEcrApprovalStatus($approvalStatus){
+        try {
+             switch ($approvalStatus) {
+                 case 'OTRB':
+                     $approvalStatus = 'Requested by:';
+                     break;
+                 case 'OTTE':
+                     $approvalStatus = 'Technical Engg:';
+                     break;
+                 case 'OTRVB':
+                     $approvalStatus = 'Reviewed By:';
+                     break;
+                 case 'QACB':
+                     $approvalStatus = 'QA Engineer';
+                     break;
+                 case 'QAIN':
+                     $approvalStatus = 'QA Manager';
+                     break;
+                 case 'QAEX':
+                     $approvalStatus = 'QMS Head';
+                     break;
+                 default:
+                     $approvalStatus = '';
+                     break;
+             }
+             return [
+                 'approvalStatus' => $approvalStatus,
+             ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 
 }

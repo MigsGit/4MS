@@ -7,11 +7,16 @@ use App\Models\RapidAutoMailer;
 use App\Interfaces\FileInterface;
 use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
+use App\Interfaces\CommonInterface;
 
 
 class EmailService implements EmailInterface
 {
 
+    protected $commonInterface;
+    public function __construct(CommonInterface $commonInterface) {
+        $this->commonInterface = $commonInterface;
+    }
     public function getEmailByRapidxUserId($userId){
         try {
             $user = RapidxUser::find($userId);
@@ -64,7 +69,9 @@ class EmailService implements EmailInterface
         }
     }
     public function ecrEmailMsg($ecrsId){
-        $ecr = Ecr::find($ecrsId);
+        $ecr = Ecr::with('rapidx_user_created_by')->find($ecrsId);
+        $approvalStatus = $this->commonInterface->getEcrApprovalStatus($ecr->approval_status);
+        $createdBy = $ecr->rapidx_user_created_by->name;
         return $msg = '<!DOCTYPE html>
             <html>
                 <head>
@@ -90,27 +97,26 @@ class EmailService implements EmailInterface
                                         <div class="row">
                                             <div class="col-sm-12">
                                                 <label style="font-size: 18px;">Good day!</label><br>
-                                                <label style="font-size: 18px;">Please the ECR for your approval.</label>
+                                                <label style="font-size: 18px;">Please see the ECR for your approval.</label>
                                                 <br><br>
                                                 <hr>
                                             </div>
 
                                             <div class="col-sm-12">
                                                 <div class="form-group row">
-                                                    <label class="col-sm-12 col-form-label"><b>Approval Status: </b> '. $ecr->approval_status.' </label>
+                                                    <label class="col-sm-12 col-form-label"><b>Ecr Control No. : </b><span class="text-black"> '. $ecr->ecr_no.' </span></label>
                                                 </div>
                                             </div>
                                             <br>
                                             <div class="col-sm-12">
-                                                <div class="form-group row">
-                                                    <label class="col-sm-12 col-form-label"><b>Ecr Control No. : </b><span class="text-black"> '. $ecr->control_no.' </span></label>
+                                                <div   div class="form-group row">
+                                                    <label class="col-sm-12 col-form-label"><b>Approval Status: </b> '. $approvalStatus['approvalStatus'].' </label>
                                                 </div>
-
                                                 <div class="form-group row">
                                                     <label class="col-sm-12 col-form-label"><b>Category : </b><span class="text-black"> '.$ecr->category.'</span></label>
                                                 </div>
                                                 <div class="form-group row">
-                                                    <label class="col-sm-12 col-form-label"><b>Customer Name: </b><span class="text-black"> '.$ecr->customer.' </span></label>
+                                                    <label class="col-sm-12 col-form-label"><b>Customer Name: </b><span class="text-black"> '.$ecr->customer_name.' </span></label>
                                                 </div>
 
                                                 <div class="form-group row">
@@ -138,7 +144,7 @@ class EmailService implements EmailInterface
                                                     <label class="col-sm-12 col-form-label"><b> Date Of Request: </b><span class="text-black"> '.$ecr->date_of_request.' </span></label>
                                                 </div>
                                                 <div class="form-group row">
-                                                    <label class="col-sm-12 col-form-label"><b> Requested By: </b><span class="text-black"> '.$ecr->created_by.'</span></label>
+                                                    <label class="col-sm-12 col-form-label"><b> Requested By: </b><span class="text-black"> '.$createdBy.'</span></label>
                                                 </div>
                                             </div>
                                             <br>

@@ -556,10 +556,24 @@ class CommonController extends Controller
         try {
             $userId = 530;
             $requestedBy = $this->emailInterface->getEmailByRapidxUserId($userId);
-
             $msg = $this->emailInterface->ecrEmailMsg(1);
-
-            $data = [
+            return $data = [
+                "to" =>"mclegaspi@pricon.ph",
+                "cc" =>"",
+                "bcc" =>"mclegaspi@pricon.ph",
+                "from" =>session('rapidx_name'),
+                "from_name" =>"4M Change Control Management System",
+                "subject" =>"FOR APPROVAL: Engineering Change Request (ECR)",
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_name'),
+                "system_name" => "rapidx_4M",
+            ];
+            return $test = [
                 "to" =>"mclegaspi@pricon.ph",
                 "cc" =>"",
                 "bcc" =>"cdcasuyon@pricon.ph",
@@ -569,17 +583,16 @@ class CommonController extends Controller
                 "message" =>  $msg,
                 "attachment_filename" => "",
                 "attachment" => "",
-                "send_date_time" => "2025-07-14 12:54:34",
-                "date_time_sent" => "2025-07-14 12:55:14",
-                "date_created" => "2025-07-14 12:54:34",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
                 "created_by" => "mclegaspi",
                 "system_name" => "rapidx_4M",
-
             ];
 
-            // $this->commonInterface->getSendEmailMsg($data);
-            $this->emailInterface->sendEmail($data);
-            return response()->json(['is_success' => 'true']);
+
+           $this->emailInterface->sendEmail($data);
+           return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;
         }
