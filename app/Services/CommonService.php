@@ -186,6 +186,10 @@ class CommonService implements CommonInterface
                      $status = 'DISAPPROVED';
                      $bgStatus = 'badge rounded-pill bg-danger';
                      break;
+                case 'OK':
+                    $status = 'APPROVED';
+                    $bgStatus = 'badge rounded-pill bg-green';
+                    break;
                  default:
                      $status = '';
                      $bgStatus = '';
@@ -220,6 +224,7 @@ class CommonService implements CommonInterface
                  case 'QAEX':
                      $approvalStatus = 'QMS Head';
                      break;
+
                  default:
                      $approvalStatus = '';
                      break;

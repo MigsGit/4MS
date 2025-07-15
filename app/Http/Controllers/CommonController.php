@@ -556,24 +556,8 @@ class CommonController extends Controller
         try {
             $userId = 530;
             $requestedBy = $this->emailInterface->getEmailByRapidxUserId($userId);
-            $msg = $this->emailInterface->ecrEmailMsg(1);
-            return $data = [
-                "to" =>"mclegaspi@pricon.ph",
-                "cc" =>"",
-                "bcc" =>"mclegaspi@pricon.ph",
-                "from" =>session('rapidx_name'),
-                "from_name" =>"4M Change Control Management System",
-                "subject" =>"FOR APPROVAL: Engineering Change Request (ECR)",
-                "message" =>  $msg,
-                "attachment_filename" => "",
-                "attachment" => "",
-                "send_date_time" => now(),
-                "date_time_sent" => "",
-                "date_created" => now(),
-                "created_by" => session('rapidx_name'),
-                "system_name" => "rapidx_4M",
-            ];
-            return $test = [
+            return $msg = $this->emailInterface->ecrEmailMsg(1);
+            $test = [
                 "to" =>"mclegaspi@pricon.ph",
                 "cc" =>"",
                 "bcc" =>"cdcasuyon@pricon.ph",
@@ -589,8 +573,6 @@ class CommonController extends Controller
                 "created_by" => "mclegaspi",
                 "system_name" => "rapidx_4M",
             ];
-
-
            $this->emailInterface->sendEmail($data);
            return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

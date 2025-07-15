@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use App\Models\DropdownMaster;
 use App\Models\EcrRequirement;
 use App\Http\Requests\EcrRequest;
+use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
@@ -30,9 +31,15 @@ class EcrController extends Controller
 {
     protected $resourceInterface;
     protected $commonInterface;
-    public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
+    protected $emailInterface;
+    public function __construct(
+        ResourceInterface $resourceInterface,
+        CommonInterface $commonInterface,
+        EmailInterface $emailInterface
+    ) {
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
+        $this->emailInterface = $emailInterface;
     }
     public function loadEcr(Request $request){
         try {
@@ -517,7 +524,7 @@ class EcrController extends Controller
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
             //Get Current Status
-            $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category',]);
+            $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category','created_by']);
             //Verify if the ECR Requirement is Completed.
             $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
             //TODO:QA Requirements
@@ -537,8 +544,13 @@ class EcrController extends Controller
             ->whereNotNull('rapidx_user_id')
             ->where('status','-')
             ->limit(1)
-            ->get(['id','approval_status']);
+            ->get(['id','approval_status','rapidx_user_id']);
 
+            //Initialize the Email Address of the User
+            $requestedBy = $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by);
+            $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($ecrApproval[0]->rapidx_user_id);
+
+            //If the ECR is Approved, Save the ECR Details by Category
             if ( count($ecrApproval) === 0){
                 $EcrConditions = [
                     'id' => $request->ecrs_id,
@@ -549,6 +561,11 @@ class EcrController extends Controller
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
                 // If approved, Save Man, Method, Machine, Material, Environment
                 $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
+                //Send Approval Email
+                //Send Approved Email to the Requestor
+                $to = $requestedBy;
+                $from = 'issinfoservice@pricon.ph';
+                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
             }
             if ( count($ecrApproval) != 0 ){
                 $ecrApprovalValidated = [
@@ -558,6 +575,7 @@ class EcrController extends Controller
                     'id' => $ecrApproval[0]->id,
                 ];
                 $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
+
                 //Update the ECR Approval Status
                 $EcrConditions = [
                     'id' => $request->ecrs_id,
@@ -573,6 +591,12 @@ class EcrController extends Controller
                     ];
                 }
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+                //Send Approval Email
+                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+                //Send For Approval Email to Next Approver
+                $to = $ecrCurrentApproval;
+                $from = $requestedBy;
+                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
             }
             if ( $request->status === "DIS" ){
                 //DISAPPROVED ECR
@@ -583,8 +607,31 @@ class EcrController extends Controller
                     'status' => 'DIS',
                 ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+                //Send Disapproved Email to Requestor
+                $to = $requestedBy;
+                $from = $ecrCurrentApproval;
+                $subject = "DISAPPROVED: Engineering Change Request (ECR)";
+
             }
             DB::commit();
+            $emailData = [
+                "to" =>$to,
+                "cc" =>"",
+                "bcc" =>"mclegaspi@pricon.ph",
+                "from" => $from,
+                "from_name" =>"4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
