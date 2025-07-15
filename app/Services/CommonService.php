@@ -27,9 +27,7 @@ class CommonService implements CommonInterface
             if (!$user->email) {
                 throw new \Exception('User Email not found');
             }
-            return [
-                'userEmail' => $user->email,
-            ];
+           return $user->email;
         } catch (Exception $e) {
             throw $e;
         }
