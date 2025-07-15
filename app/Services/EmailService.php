@@ -26,7 +26,10 @@ class EmailService implements EmailInterface
             if (!$user->email) {
                 throw new \Exception('User Email not found');
             }
-           return $user->email;
+           return [
+            'fullName' => $user->name,
+            'email' => $user->email,
+        ];
         } catch (Exception $e) {
             throw $e;
         }

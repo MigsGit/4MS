@@ -563,9 +563,11 @@ class EcrController extends Controller
                 $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
                 //Send Approval Email
                 //Send Approved Email to the Requestor
-                $to = $requestedBy;
+                $to = $requestedBy['email'] ?? '';;
                 $from = 'issinfoservice@pricon.ph';
                 $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
+                $from_name = "4M Change Control Management System";
+
             }
             if ( count($ecrApproval) != 0 ){
                 $ecrApprovalValidated = [
@@ -594,9 +596,10 @@ class EcrController extends Controller
                 //Send Approval Email
                 $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
                 //Send For Approval Email to Next Approver
-                $to = $ecrCurrentApproval;
-                $from = $requestedBy;
+                $to = $ecrCurrentApproval['email'] ?? '';
+                $from = $requestedBy['email'] ?? '';
                 $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
+                $from_name = "4M Change Control Management System";
             }
             if ( $request->status === "DIS" ){
                 //DISAPPROVED ECR
@@ -609,8 +612,10 @@ class EcrController extends Controller
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
                 $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
                 //Send Disapproved Email to Requestor
-                $to = $requestedBy;
-                $from = $ecrCurrentApproval;
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from =$currentSession['email'] ?? '';
+                $from_name = $currentSession['fullName'];
                 $subject = "DISAPPROVED: Engineering Change Request (ECR)";
 
             }
@@ -620,7 +625,7 @@ class EcrController extends Controller
                 "cc" =>"",
                 "bcc" =>"mclegaspi@pricon.ph",
                 "from" => $from,
-                "from_name" =>"4M Change Control Management System",
+                "from_name" =>$from_name ?? "4M Change Control Management System",
                 "subject" =>$subject,
                 "message" =>  $msg,
                 "attachment_filename" => "",
