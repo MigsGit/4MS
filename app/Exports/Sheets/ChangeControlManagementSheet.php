@@ -33,13 +33,23 @@ WithEvents
         return [
             AfterSheet::class => function (AfterSheet $event) use($ecrsCategoryDetailsCollection) {
                 $sheet = $event->sheet->getDelegate();
-
+                // $ecrsCategoryDetailsCollection->ecr_no": "1",
+                // $ecrsCategoryDetailsCollection->category": "Method",
+                // $ecrsCategoryDetailsCollection->internal_external": "External",
+                // $ecrsCategoryDetailsCollection->customer_name": "test",
+                // $ecrsCategoryDetailsCollection->part_no": "test",
+                // $ecrsCategoryDetailsCollection->part_name": "test",
+                // $ecrsCategoryDetailsCollection->device_name": "test",
+                // $ecrsCategoryDetailsCollection->product_line": "test",
+                // $ecrsCategoryDetailsCollection->section": "test",
+                // $ecrsCategoryDetailsCollection->customer_ec_no": "test",
                 // === HEADER
                 $sheet->mergeCells('A1:F1')->setCellValue('A1', 'PRICON MICROELECTRONICS, INC.');
                 $sheet->mergeCells('A2:F2')->setCellValue('A2', 'OPERATIONS DIVISION');
                 $sheet->mergeCells('C3:I4')->setCellValue('C3', 'CHANGE CONTROL APPLICATION REPORT');
                 $sheet->mergeCells('K1:L1')->setCellValue('K1', 'PPS-101-018');
                 $sheet->mergeCells('J4:L4')->setCellValue('J4', 'Control Number');
+                $sheet->setCellValue('J5', $ecrsCategoryDetailsCollection['ecrDetails']->ecr_no);
                 // === SECTION INFO
                 $sheet->setCellValue('A6', 'SECTION NAME');
                 $sheet->setCellValue('A7', 'PRODUCT LINE');
@@ -48,16 +58,33 @@ WithEvents
                 $sheet->setCellValue('A10', 'PART CODE');
                 $sheet->setCellValue('A11', 'CUSTOMER');
                 $sheet->setCellValue('A12', 'DATE OF APPLICATION');
+                $sectionCol = "C";
+                $startSectionRow = "6";
+                // === SECTION DATA
+                $section = [
+                    $ecrsCategoryDetailsCollection['ecrDetails']->section,
+                    $ecrsCategoryDetailsCollection['ecrDetails']->product_line,
+                    $ecrsCategoryDetailsCollection['ecrDetails']->device_name,
+                    $ecrsCategoryDetailsCollection['ecrDetails']->part_name,
+                    $ecrsCategoryDetailsCollection['ecrDetails']->part_no,
+                    $ecrsCategoryDetailsCollection['ecrDetails']->customer_name,
+                    $ecrsCategoryDetailsCollection['ecrDetails']->date_of_request,
+                ];
+                foreach ($section as $index => $label) {
+                    $sheet->setCellValue($sectionCol . ($startSectionRow + $index), $label);
+                }
                 // === 4M CHANGE & DOCUMENTS
                 $sheet->setCellValue('A14', '4M Change / 1E');
                 $categoryCol = "B";
                 $categoryRow = "14";
+                // === SECTION DATA
+                $isCategory = $ecrsCategoryDetailsCollection['ecrDetails']->category ?? "";
                 $category = [
-                    '☐ Man',
-                    '☐ Machine/Tools',
-                    '☐ Material',
-                    '☐ Method',
-                    '☐ Environment'
+                    $isCategory === "Man" ? '☑ Man' :'☐ Man',
+                    $isCategory === "Machine" ? '☑ Machine/Tools' :'☐ Machine/Tools',
+                    $isCategory === "Material" ? '☑ Material' :'☐ Material',
+                    $isCategory === "Method" ? '☑ Method' :'☐ Method',
+                    $isCategory === "Environment" ? '☑ Environment' :'☐ Environment',
                 ];
                 for ($i=0; $i < count($category); $i++) {
                     $sheet->setCellValue($categoryCol. $categoryRow, $category[$i]); $categoryCol++;
@@ -75,7 +102,6 @@ WithEvents
                 $docTypesRow = 8;
                 $sheet->setCellValue($docTypesCol.$docTypesRow, '☐ Others (pls. specify)');
                 foreach ($docTypes as $index => $label) {
-                //    $sheet->mergeCells('G'.$index.':'.'L'.$index)->setCellValue($docTypesCol . ($docTypesRow + $index), $label);
                    $sheet->setCellValue($docTypesCol . ($docTypesRow + $index), $label);
                 }
 

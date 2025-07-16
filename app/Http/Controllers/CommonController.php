@@ -486,7 +486,7 @@ class CommonController extends Controller
                 # code...
                 break;
         }
-        return $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
+        $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
             return [
                 'ecrDetails'=> $ecrDetailsRow,
                 'detailsByCategory'=> $detailsByCategory

@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use App\Exports\Sheets\ChangeControlManagementSheet;
 
 class ChangeControlManagementExport implements
-WithMultipleSheets,
+WithMultipleSheets
 {
     /**
     * @return \Illuminate\Support\Collection
