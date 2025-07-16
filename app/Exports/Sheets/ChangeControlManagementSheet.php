@@ -2,11 +2,14 @@
 
 namespace App\Exports\Sheets;
 use Carbon\Carbon;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 
 class ChangeControlManagementSheet implements
@@ -90,6 +93,40 @@ WithEvents
                     $sheet->setCellValue($categoryCol. $categoryRow, $category[$i]); $categoryCol++;
                 }
                 $sheet->mergeCells('G6:L6')->setCellValue('G6', 'Document Affected');
+
+                // === Insert Before and After Image
+
+                // === Insert Before and After Image
+
+                // Retrieve the image path
+                $imagePath = Storage::path('public/machine/1/after/0_selected_photo.jpg');
+
+                // Resize the image (optional, requires Intervention Image package)
+                $image = Image::make($imagePath)->resize(300, 300); // Resize  to 300x300 pixels //composer require intervention/image
+                $tempPath = storage_path('app/temp_resized_image.jpg');
+                $image->save($tempPath);
+
+                // Insert the resized image into the Excel sheet
+                $drawing = new Drawing();
+                // $drawing->setName('Selected Photo');
+                // $drawing->setDescription('Selected Photo');
+                $drawing->setPath($tempPath); // Path to the resized image
+                $drawing->setCoordinates('A23'); // Place the image starting at column 23 (W)
+                $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
+                // Dynamically adjust column widths based on image dimensions
+                $imageWidth = $image->width(); // Get image width in pixels
+                $imageHeight = $image->height(); // Get image height in pixels
+
+                // Convert pixels to Excel column width (approximation: 7.5 pixels = 1 column width)
+                $columnWidth = $imageWidth / 7.5;
+                $sheet->getColumnDimension('W')->setWidth($columnWidth); // Column 23
+                $sheet->getColumnDimension('X')->setWidth($columnWidth); // Column 24
+
+                // Optionally, adjust row height for better visibility
+                $rowHeight = $imageHeight / 1.3; // Approximation: 1.3 pixels = 1 row height
+                $sheet->getRowDimension(1)->setRowHeight($rowHeight); // Row 1
+
                 // === Document Type
                 $docTypes = [
                     '☐ QC Process Flow Chart',

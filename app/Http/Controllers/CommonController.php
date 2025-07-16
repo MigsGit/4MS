@@ -16,6 +16,7 @@ use App\Models\Environment;
 use App\Models\ManApproval;
 use App\Models\PmiApproval;
 use App\Models\RapidMailer;
+use App\Exports\ExternalCcm;
 use Illuminate\Http\Request;
 use App\Models\MethodApproval;
 use App\Models\MachineApproval;
@@ -486,7 +487,7 @@ class CommonController extends Controller
                 # code...
                 break;
         }
-        $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
+       $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
             return [
                 'ecrDetails'=> $ecrDetailsRow,
                 'detailsByCategory'=> $detailsByCategory
@@ -495,7 +496,7 @@ class CommonController extends Controller
 
 
         return Excel::download(
-            new ChangeControlManagementExport($ecrsCategoryDetailsCollection),
+            new ExternalCcm($ecrsCategoryDetailsCollection),
             $iqc_dropdown_category_section . "_4M.xlsx"
         );
     }

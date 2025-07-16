@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use App\Exports\Sheets\ChangeControlManagementSheet;
 
-class ChangeControlManagementExport implements
+class ExternalCcm implements
 WithMultipleSheets
 {
     /**
