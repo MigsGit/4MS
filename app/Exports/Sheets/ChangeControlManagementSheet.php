@@ -40,7 +40,7 @@ WithEvents
  * @param array $mergeCells Optional array to merge cells (e.g., ['A29:L29']).
  * @param array $cellValues Optional array to set cell values (e.g., ['J26' => 'Checked by:']).
  */
-function insertImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet)
+function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet)
 {
     // Get the full storage path of the image
     $imageStoragePath = Storage::path($imagePath);
@@ -63,10 +63,14 @@ function insertImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet)
     public function registerEvents(): array
     {
         $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
+        $pmiApprovalCollection = collect($ecrsDetails->pmi_approvals)->groupBy('approval_status')->toArray();
+
         $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
 
         return [
-            AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails) {
+            AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
+                dd($pmiApprovalCollection);
+                exit();
                 $sheet = $event->sheet->getDelegate();
                  // =========================================== //
 
@@ -266,20 +270,24 @@ function insertImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet)
                 $sheet->setCellValue('K19', 'Qty: ______ pcs.');
                 $sheet->setCellValue('J20', '☐ No');
 
-                // // === BEFORE/AFTER
+                // === BEFORE/AFTER
                 $sheet->mergeCells('A21:C21')->setCellValue('A21', 'BEFORE');
                 $sheet->mergeCells('D21:F21')->setCellValue('D21', 'AFTER');
                 $sheet->mergeCells('G21:L21')->setCellValue('G21', 'REASON FOR APPLICATION');
-
                 $sheet->setCellValue('G26', 'Prepared by:');
-                // Insert thre E-Signature
-                $this->insertImageIntoSheet(
-                    "public/e_signatures/R152.png",
+
+                $imageEsigPath = 'public/e_signatures/';
+                // === Insert thre E-Signature Prepared By
+                $this->insertEsignatureImageIntoSheet(
+                    $imageEsigPath.$ecrsDetails->rapidx_user_created_by->employee_number.".png",
                     "H26",
                     50,
                     50,
                     $sheet,
                 );
+                $sheet->setCellValue('H27', $ecrsDetails->rapidx_user_created_by->name);
+
+                // exit();
                 $sheet->setCellValue('J26', 'Checked by:');
                 $sheet->mergeCells('A29:L29')->setCellValue('A29', '4M / 1E CHANGE ASSESSMENT');
                 // === 4M Assessment

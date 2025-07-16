@@ -468,6 +468,7 @@ class CommonController extends Controller
                 'rapidx_user_created_by',
                 'method',
                 'pmi_approvals',
+                'pmi_approvals.rapidx_user',
                 'machine',
             ],
             [
@@ -485,7 +486,7 @@ class CommonController extends Controller
                 # code...
                 break;
         }
-       $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
+        $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
             return [
                 'ecrDetails'=> $ecrDetailsRow,
                 'detailsByCategory'=> $detailsByCategory
