@@ -138,20 +138,28 @@ WithEvents
                 }
                 foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
                         // Resize the image (optional, requires Intervention Image package)
-                        $image = Image::make($imagePathBeforeValue)->resize(100, 100); // Resize to 300x300 pixels
+                        $image = Image::make($imagePathBeforeValue)->resize(150, 150); // Resize to 300x300 pixels
                         $tempPath = storage_path("app/temp_resized_image_$key.jpg");
                         $image->save($tempPath);
 
                         // Calculate the cell coordinates dynamically
-                        $currentRow = $startBeforeImageRow + ($key*3); // Move down 5 rows for each image
+                        $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
 
-                        //Dynamically adjust column widths and row heights
+                        // Merge cells to accommodate the image
+                        $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+                        // $sheet->mergeCells("$startBeforeImageCol$currentRow:$endColumn" . ($currentRow + 1));
+
+                        // Dynamically adjust column widths and row heights
                         $imageWidth = $image->width();
                         $imageHeight = $image->height();
 
-                        $columnWidth = $imageWidth / 22.5; // Approximation for column width
+                        $columnWidth = $imageWidth / 10.5; // Approximation for column width
+                        $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
+                        $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
+                        $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
-                        $rowHeight = $imageHeight / 2; // Approximation for row height
+                        $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                        $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
                         $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
 
                         // Insert the image into the merged cells
