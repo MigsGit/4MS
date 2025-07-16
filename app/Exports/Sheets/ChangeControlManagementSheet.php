@@ -126,48 +126,48 @@ WithEvents
                 // === Insert Before and After Image
 
                 // Retrieve the image path
-                // $filteredDocumentNameBefore = explode(' | ',$categoryDetails->filtered_document_name_before);
-                // $storageImageDirBefore = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/before/';
-                // $startBeforeImageCol = "A";
-                // $startBeforeImageRow = "22";
+                $filteredDocumentNameBefore = explode(' | ',$categoryDetails->filtered_document_name_before);
+                $storageImageDirBefore = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/before/';
+                $startBeforeImageCol = "A";
+                $startBeforeImageRow = "22";
 
-                // foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
-                //     $imagePathBefore[]= Storage::path($storageImageDirBefore.$valueBefore);
-                // }
-                // foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
-                //         // Resize the image (optional, requires Intervention Image package)
-                //         $image = Image::make($imagePathBeforeValue)->resize(150, 150); // Resize to 300x300 pixels
-                //         $tempPath = storage_path("app/temp_resized_image_$key.jpg");
-                //         $image->save($tempPath);
+                foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
+                    $imagePathBefore[]= Storage::path($storageImageDirBefore.$valueBefore);
+                }
+                foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
+                        // Resize the image (optional, requires Intervention Image package)
+                        $image = Image::make($imagePathBeforeValue)->resize(150, 150); // Resize to 300x300 pixels
+                        $tempPath = storage_path("app/temp_resized_image_$key.jpg");
+                        $image->save($tempPath);
 
-                //         // Calculate the cell coordinates dynamically
-                //         $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
+                        // Calculate the cell coordinates dynamically
+                        $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
 
-                //         // Merge cells to accommodate the image
-                //         $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                //         // $sheet->mergeCells("$startBeforeImageCol$currentRow:$endColumn" . ($currentRow + 1));
+                        // Merge cells to accommodate the image
+                        $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+                        // $sheet->mergeCells("$startBeforeImageCol$currentRow:$endColumn" . ($currentRow + 1));
 
-                //         // Dynamically adjust column widths and row heights
-                //         $imageWidth = $image->width();
-                //         $imageHeight = $image->height();
+                        // Dynamically adjust column widths and row heights
+                        $imageWidth = $image->width();
+                        $imageHeight = $image->height();
 
-                //         $columnWidth = $imageWidth / 10.5; // Approximation for column width
-                //         $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
-                //         $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
-                //         $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
+                        $columnWidth = $imageWidth / 9.5; // Approximation for column width
+                        $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
+                        $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
+                        $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
-                //         $rowHeight = $imageHeight / 1.5; // Approximation for row height
-                //         $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
-                //         $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+                        $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                        $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                        $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
 
-                //         // Insert the image into the merged cells
-                //         $drawing = new Drawing();
-                //         $drawing->setName("Image $key");
-                //         $drawing->setDescription("Image $key");
-                //         $drawing->setPath($tempPath); // Path to the resized image
-                //         $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
-                //         $drawing->setWorksheet($sheet); // Attach the image to the worksheet
-                // }
+                        // Insert the image into the merged cells
+                        $drawing = new Drawing();
+                        $drawing->setName("Image $key");
+                        $drawing->setDescription("Image $key");
+                        $drawing->setPath($tempPath); // Path to the resized image
+                        $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                        $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                }
                 $filteredDocumentNameAfter = explode(' | ',$categoryDetails->filtered_document_name_after);
                 $storageImageDirAfter = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/after/';
                 $startAfterImageCol = "D";
@@ -181,7 +181,7 @@ WithEvents
                 foreach ($imagePathAfter as $index => $imagePathAfterValue) {
                         // Resize the image (optional, requires Intervention Image package)
                         $image = Image::make($imagePathAfterValue)->resize(150, 150); // Resize to 300x300 pixels
-                        $tempPath = storage_path("app/temp_resized_image_$index.jpg");
+                        $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
                         $image->save($tempPath);
 
                         // Calculate the cell coordinates dynamically
