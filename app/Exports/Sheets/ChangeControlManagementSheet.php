@@ -32,27 +32,56 @@ WithEvents
     public function registerEvents(): array
     {
         $ecrsCategoryDetailsCollection = $this->ecrsCategoryDetailsCollection;
+        $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
+        $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
 
         return [
-            AfterSheet::class => function (AfterSheet $event) use($ecrsCategoryDetailsCollection) {
+            AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails) {
                 $sheet = $event->sheet->getDelegate();
-                // $ecrsCategoryDetailsCollection->ecr_no": "1",
-                // $ecrsCategoryDetailsCollection->category": "Method",
-                // $ecrsCategoryDetailsCollection->internal_external": "External",
-                // $ecrsCategoryDetailsCollection->customer_name": "test",
-                // $ecrsCategoryDetailsCollection->part_no": "test",
-                // $ecrsCategoryDetailsCollection->part_name": "test",
-                // $ecrsCategoryDetailsCollection->device_name": "test",
-                // $ecrsCategoryDetailsCollection->product_line": "test",
-                // $ecrsCategoryDetailsCollection->section": "test",
-                // $ecrsCategoryDetailsCollection->customer_ec_no": "test",
+                 // =========================================== //
+
+                // === Column Widths
+                foreach (range('A', 'L') as $col) {
+                    $sheet->getColumnDimension($col)->setWidth(9.45);
+                }
+
+                // === Apply Styles to all cells used
+                $sheet->getStyle('A59:G59')->applyFromArray([
+                    'alignment' => [
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                        'horizontal' => Alignment::HORIZONTAL_LEFT,
+                        'wrapText' => true,
+                    ],
+                ]);
+                // === Apply Styles to all cells used
+                // $sheet->getStyle('A1:G40')->applyFromArray([
+                //     'borders' => [
+                //         'allBorders' => ['borderStyle' => Border::BORDER_THIN],
+                //     ],
+                //     'alignment' => [
+                //         'vertical' => Alignment::VERTICAL_CENTER,
+                //         'horizontal' => Alignment::HORIZONTAL_LEFT,
+                //         'wrapText' => true,
+                //     ],
+                // ]);
+
+                // === Bold for header
+                $sheet->getStyle('A1:A3')->getFont()->setBold(true);
+
+                // Optional Row Heights
+                for ($i = 1; $i <= 70; $i++) {
+                    $sheet->getRowDimension($i)->setRowHeight(16.50);
+                }
+                for ($j = 59; $j <= 59; $j++) {
+                    $sheet->getRowDimension($j)->setRowHeight( 33.5);
+                }
                 // === HEADER
                 $sheet->mergeCells('A1:F1')->setCellValue('A1', 'PRICON MICROELECTRONICS, INC.');
                 $sheet->mergeCells('A2:F2')->setCellValue('A2', 'OPERATIONS DIVISION');
                 $sheet->mergeCells('C3:I4')->setCellValue('C3', 'CHANGE CONTROL APPLICATION REPORT');
                 $sheet->mergeCells('K1:L1')->setCellValue('K1', 'PPS-101-018');
                 $sheet->mergeCells('J4:L4')->setCellValue('J4', 'Control Number');
-                $sheet->setCellValue('J5', $ecrsCategoryDetailsCollection['ecrDetails']->ecr_no);
+                $sheet->setCellValue('J5', $ecrsDetails->ecr_no);
                 // === SECTION INFO
                 $sheet->setCellValue('A6', 'SECTION NAME');
                 $sheet->setCellValue('A7', 'PRODUCT LINE');
@@ -65,13 +94,13 @@ WithEvents
                 $startSectionRow = "6";
                 // === SECTION DATA
                 $section = [
-                    $ecrsCategoryDetailsCollection['ecrDetails']->section,
-                    $ecrsCategoryDetailsCollection['ecrDetails']->product_line,
-                    $ecrsCategoryDetailsCollection['ecrDetails']->device_name,
-                    $ecrsCategoryDetailsCollection['ecrDetails']->part_name,
-                    $ecrsCategoryDetailsCollection['ecrDetails']->part_no,
-                    $ecrsCategoryDetailsCollection['ecrDetails']->customer_name,
-                    $ecrsCategoryDetailsCollection['ecrDetails']->date_of_request,
+                    $ecrsDetails->section,
+                    $ecrsDetails->product_line,
+                    $ecrsDetails->device_name,
+                    $ecrsDetails->part_name,
+                    $ecrsDetails->part_no,
+                    $ecrsDetails->customer_name,
+                    $ecrsDetails->date_of_request,
                 ];
                 foreach ($section as $index => $label) {
                     $sheet->setCellValue($sectionCol . ($startSectionRow + $index), $label);
@@ -81,7 +110,7 @@ WithEvents
                 $categoryCol = "B";
                 $categoryRow = "14";
                 // === SECTION DATA
-                $isCategory = $ecrsCategoryDetailsCollection['ecrDetails']->category ?? "";
+                $isCategory = $ecrsDetails->category ?? "";
                 $category = [
                     $isCategory === "Man" ? '☑ Man' :'☐ Man',
                     $isCategory === "Machine" ? '☑ Machine/Tools' :'☐ Machine/Tools',
@@ -97,65 +126,46 @@ WithEvents
                 // === Insert Before and After Image
 
                 // Retrieve the image path
-                $imagePath = Storage::path('public/machine/1/after/0_selected_photo.jpg');
+                $filteredDocumentNameBefore = explode(' | ',$categoryDetails->filtered_document_name_before);
+                $filteredDocumentNameAfter = explode(' | ',$categoryDetails->filtered_document_name_after);
+                $storageImageDirBefore = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/before/';
+                $storageImageDirAfter = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/after/';
+                $startBeforeImageCol = "A";
+                $startBeforeImageRow = "22";
 
-                // Resize the image (requires Intervention Image package)
-                $image = Image::make($imagePath)->resize(100, 100); // Resize to 300x300 pixels
-                $tempPath = storage_path('app/temp_resized_image.jpg');
-                $image->save($tempPath);
+                foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
+                    $imagePathBefore[]= Storage::path($storageImageDirBefore.$valueBefore);
+                }
+                foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
+                        // Resize the image (optional, requires Intervention Image package)
+                        $image = Image::make($imagePathBeforeValue)->resize(100, 100); // Resize to 300x300 pixels
+                        $tempPath = storage_path("app/temp_resized_image_$key.jpg");
+                        $image->save($tempPath);
 
-                // Merge cells A23:C24 to accommodate the image
-                $sheet->mergeCells('A23:C24');
+                        // Calculate the cell coordinates dynamically
+                        $currentRow = $startBeforeImageRow + ($key*3); // Move down 5 rows for each image
 
-                // Dynamically adjust column widths and row height based on image dimensions
-                $imageWidth = $image->width(); // Get image width in pixels
-                $imageHeight = $image->height(); // Get image height in pixels
+                        //Dynamically adjust column widths and row heights
+                        $imageWidth = $image->width();
+                        $imageHeight = $image->height();
 
-                // Convert pixels to Excel column width (approximation: 7.5 pixels = 1 column width)
-                $columnWidth = $imageWidth / 22.5; // Divide by 3 columns (A, B, C)
-                $sheet->getColumnDimension('A')->setWidth($columnWidth);
-                $sheet->getColumnDimension('B')->setWidth($columnWidth);
-                $sheet->getColumnDimension('C')->setWidth($columnWidth);
+                        $columnWidth = $imageWidth / 22.5; // Approximation for column width
 
-                // Convert pixels to Excel row height (approximation: 1.3 pixels = 1 row height)
-                $rowHeight = $imageHeight / 2; // Divide by 2 rows (23, 24)
-                $sheet->getRowDimension(23)->setRowHeight($rowHeight);
-                $sheet->getRowDimension(24)->setRowHeight($rowHeight);
+                        $rowHeight = $imageHeight / 2; // Approximation for row height
+                        $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
 
-                // Insert the resized image into the merged cells
-                $drawing = new Drawing();
-                $drawing->setName('Selected Photo');
-                $drawing->setDescription('Selected Photo');
-                $drawing->setPath($tempPath); // Path to the resized image
-                $drawing->setCoordinates('A23'); // Place the image at the top-left of the merged cells
-                $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                        // Insert the image into the merged cells
+                        $drawing = new Drawing();
+                        $drawing->setName("Image $key");
+                        $drawing->setDescription("Image $key");
+                        $drawing->setPath($tempPath); // Path to the resized image
+                        $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                        $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                }
 
-                // // Resize the image (optional, requires Intervention Image package)
-                // $image = Image::make($imagePath)->resize(300, 300); // Resize  to 300x300 pixels //composer require intervention/image
-                // $tempPath = storage_path('app/temp_resized_image.jpg');
-                // $image->save($tempPath);
-
-                // // Insert the resized image into the Excel sheet
-                // $drawing = new Drawing();
-                // // $drawing->setName('Selected Photo');
-                // // $drawing->setDescription('Selected Photo');
-                // $drawing->setPath($tempPath); // Path to the resized image
-                // $drawing->setCoordinates('A23'); // Place the image starting at column 23 (W)
-                // $drawing->setWorksheet($sheet); // Attach the image to the worksheet
-
-                // // Dynamically adjust column widths based on image dimensions
-                // $imageWidth = $image->width(); // Get image width in pixels
-                // $imageHeight = $image->height(); // Get image height in pixels
-
-                // // Convert pixels to Excel column width (approximation: 7.5 pixels = 1 column width)
-                // $columnWidth = $imageWidth / 7.5;
-                // $sheet->getColumnDimension('A')->setWidth($columnWidth); // Column 23
-                // $sheet->getColumnDimension('C')->setWidth($columnWidth); // Column 24
-
-                // // Optionally, adjust row height for better visibility
-                // $rowHeight = $imageHeight / 1.3; // Approximation: 1.3 pixels = 1 row height
-                // $sheet->getRowDimension(23)->setRowHeight($rowHeight); // Row 3
-
+                // foreach ($filteredDocumentNameAfter as $key => $valueAfter) {
+                //     $imagePathBefore = Storage::path($storageImageDirAfter.$valueAfter);
+                // }
                 // === Document Type
                 $docTypes = [
                     '☐ QC Process Flow Chart',
@@ -277,43 +287,7 @@ WithEvents
                 $sheet->mergeCells('G63:H64')->setCellValue('G63', 'Result');
                 $sheet->setCellValue('I68', 'QAD SIGNATURE');
 
-                // =========================================== //
 
-                // === Column Widths
-                foreach (range('A', 'L') as $col) {
-                    $sheet->getColumnDimension($col)->setWidth(9.45);
-                }
-
-                // === Apply Styles to all cells used
-                $sheet->getStyle('A59:G59')->applyFromArray([
-                    'alignment' => [
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                        'horizontal' => Alignment::HORIZONTAL_LEFT,
-                        'wrapText' => true,
-                    ],
-                ]);
-                // === Apply Styles to all cells used
-                // $sheet->getStyle('A1:G40')->applyFromArray([
-                //     'borders' => [
-                //         'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                //     ],
-                //     'alignment' => [
-                //         'vertical' => Alignment::VERTICAL_CENTER,
-                //         'horizontal' => Alignment::HORIZONTAL_LEFT,
-                //         'wrapText' => true,
-                //     ],
-                // ]);
-
-                // === Bold for header
-                $sheet->getStyle('A1:A3')->getFont()->setBold(true);
-
-                // Optional Row Heights
-                for ($i = 1; $i <= 70; $i++) {
-                    $sheet->getRowDimension($i)->setRowHeight(16.50);
-                }
-                for ($j = 59; $j <= 59; $j++) {
-                    $sheet->getRowDimension($j)->setRowHeight( 33.5);
-                }
             }
         ];
     }
