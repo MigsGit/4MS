@@ -458,13 +458,45 @@ class CommonController extends Controller
             throw $e;
         }
     }
-    public function downloadExcelById(Request $request){
+    public function downloadExcelByEcrsId(Request $request){
         $iqc_dropdown_category_section = 'TS';
-        $test = 'test';
+        $ecrsId = $request->selectedId;
+
+       $getEcrById = $this->resourceInterface->readWithRelationsConditions(
+            Ecr::class,
+            [],
+            [
+                'rapidx_user_created_by',
+                'method',
+                'pmi_approvals',
+                'machine',
+            ],
+            [
+                'id' => $ecrsId
+            ]
+        );
+        switch ($getEcrById[0]->category) {
+            case 'Method':
+                $detailsByCategory = $getEcrById[0]->method;
+                break;
+            case 'Machine':
+                $detailsByCategory = $getEcrById[0]->machine;
+                break;
+            default:
+                # code...
+                break;
+        }
+        return $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
+            return [
+                'ecrDetails'=> $ecrDetailsRow,
+                'detailsByCategory'=> $detailsByCategory
+            ];
+        });
+
 
         return Excel::download(
-            new ChangeControlManagementExport($test),
-            $iqc_dropdown_category_section . "4M.xlsx"
+            new ChangeControlManagementExport($ecrsCategoryDetailsCollection),
+            $iqc_dropdown_category_section . "_4M.xlsx"
         );
     }
     public function saveExternalDisposition(Request $request){

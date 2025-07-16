@@ -661,12 +661,12 @@
                 let btnDownloadExcel = cell.querySelector('#btnDownloadExcel');
                 if(btnDownloadExcel != null){
                     btnDownloadExcel.addEventListener('click',function(){
-                        let methodsId = this.getAttribute('methods-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
                         let params = {
-                            selectedId : methodsId,
+                            selectedId : ecrsId,
                         };
                         var queryString = $.param(params);
-                        window.location.href="api/download_excel_by_id?" + queryString;
+                        window.location.href="api/download_excel_by_ecrs_id?" + queryString;
                     });
                 }
 

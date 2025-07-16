@@ -22,48 +22,48 @@ class Ecr extends Model
     }
     public function ecr_details()
     {
-        return $this->hasMany(EcrDetail::class, 'ecrs_id', 'id');
+        return $this->hasMany(EcrDetail::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function ecr_approvals()
     {
-        return $this->hasMany(EcrApproval::class, 'ecrs_id', 'id');
+        return $this->hasMany(EcrApproval::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function ecr_approval()
     {
-        return $this->hasOne(EcrApproval::class, 'ecrs_id', 'id');
+        return $this->hasOne(EcrApproval::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function ecr_approval_pending()
     {
-        return $this->hasOne(EcrApproval::class, 'ecrs_id', 'id')->where('status','PEN');
+        return $this->hasOne(EcrApproval::class, 'ecrs_id', 'id')->where('status','PEN')->whereNull('deleted_at');
     }
     public function pmi_approvals()
     {
-        return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id');
+        return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function pmi_approvals_pending()
     {
-        return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id')->where('status','PEN');
+        return $this->hasMany(PmiApproval::class, 'ecrs_id', 'id')->where('status','PEN')->whereNull('deleted_at');
     }
 
     public function man_detail()
     {
-        return $this->hasOne(ManDetail::class, 'ecrs_id', 'id');
+        return $this->hasOne(ManDetail::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function environment()
     {
-        return $this->hasOne(Environment::class, 'ecrs_id', 'id');
+        return $this->hasOne(Environment::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function material()
     {
-        return $this->hasOne(Material::class, 'ecrs_id', 'id');
+        return $this->hasOne(Material::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function machine()
     {
-        return $this->hasOne(Machine::class, 'ecrs_id', 'id');
+        return $this->hasOne(Machine::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function method()
     {
-        return $this->hasOne(Method::class, 'ecrs_id', 'id');
+        return $this->hasOne(Method::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
 
 }

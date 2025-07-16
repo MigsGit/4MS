@@ -2,18 +2,13 @@
 
 namespace App\Exports;
 
-// use Illuminate\Support\Collection;
 use App\Exports\Sheets\InternalMachineSheet;
 use Carbon\Carbon;
-// use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class InternalMachineExport implements WithMultipleSheets
 {
-    /**
-    * @return \Illuminate\Support\Collection
-    */
-    protected $test;
+   protected $test;
 
     public function __construct($test)
     {
