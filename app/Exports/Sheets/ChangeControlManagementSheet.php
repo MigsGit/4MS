@@ -29,9 +29,39 @@ WithEvents
         return [[]];
     }
 
+    /**
+ * Inserts an image into the Excel sheet.
+ *
+ * @param string $imagePath Path to the image in storage.
+ * @param string $coordinates Cell coordinates where the image will be placed.
+ * @param int $width Width to resize the image.
+ * @param int $height Height to resize the image.
+ * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet Worksheet object.
+ * @param array $mergeCells Optional array to merge cells (e.g., ['A29:L29']).
+ * @param array $cellValues Optional array to set cell values (e.g., ['J26' => 'Checked by:']).
+ */
+function insertImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet)
+{
+    // Get the full storage path of the image
+    $imageStoragePath = Storage::path($imagePath);
+
+    // Resize the image
+    $image = Image::make($imageStoragePath)->resize($width, $height);
+    $tempPath = storage_path("app/temp_resized_image.png");
+    $image->save($tempPath);
+
+    // Insert the image into the worksheet
+    $drawing = new Drawing();
+    $drawing->setName("Inserted Image");
+    $drawing->setDescription("Inserted Image");
+    $drawing->setPath($tempPath); // Path to the resized image
+    $drawing->setCoordinates($coordinates); // Cell coordinates
+    $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+}
+
+
     public function registerEvents(): array
     {
-        $ecrsCategoryDetailsCollection = $this->ecrsCategoryDetailsCollection;
         $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
         $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
 
@@ -123,8 +153,7 @@ WithEvents
                 }
                 $sheet->mergeCells('G6:L6')->setCellValue('G6', 'Document Affected');
 
-                // === Insert Before and After Image
-
+                // ======= Insert Before and After Image ========
                 // Retrieve the image path
                 $filteredDocumentNameBefore = explode(' | ',$categoryDetails->filtered_document_name_before);
                 $storageImageDirBefore = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/before/';
@@ -174,9 +203,7 @@ WithEvents
                 $startAfterImageRow = "22";
                 foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
                     $imagePathAfter[]= Storage::path($storageImageDirAfter.$valueAfter);
-                    // var_dump($imagePathAfter);
                 }
-                // exit();
 
                 foreach ($imagePathAfter as $index => $imagePathAfterValue) {
                         // Resize the image (optional, requires Intervention Image package)
@@ -213,7 +240,6 @@ WithEvents
                         $drawing->setWorksheet($sheet); // Attach the image to the worksheet
                 }
 
-
                 // === Document Type
                 $docTypes = [
                     '☐ QC Process Flow Chart',
@@ -229,8 +255,7 @@ WithEvents
                    $sheet->setCellValue($docTypesCol . ($docTypesRow + $index), $label);
                 }
 
-
-                // // === Target Date and Attachment
+                // === Target Date and Attachment
                 $sheet->setCellValue('G14', 'Target date of implementation:');
                 $sheet->setCellValue('G15', 'With attachment:');
                 $sheet->setCellValue('J15', '☐ Yes');
@@ -247,10 +272,16 @@ WithEvents
                 $sheet->mergeCells('G21:L21')->setCellValue('G21', 'REASON FOR APPLICATION');
 
                 $sheet->setCellValue('G26', 'Prepared by:');
+                // Insert thre E-Signature
+                $this->insertImageIntoSheet(
+                    "public/e_signatures/R152.png",
+                    "H26",
+                    50,
+                    50,
+                    $sheet,
+                );
                 $sheet->setCellValue('J26', 'Checked by:');
                 $sheet->mergeCells('A29:L29')->setCellValue('A29', '4M / 1E CHANGE ASSESSMENT');
-
-
                 // === 4M Assessment
                 $rowsEffects = [
                     'Effect on Man (By Production)',
@@ -311,7 +342,7 @@ WithEvents
                 $sheet->setCellValue('A50', 'PMI Approval');
                 $sheet->setCellValue('B52', 'QC Head');
                 $sheet->setCellValue('E52', 'Operations Head');
-                $sheet->setCellValue('H27', 'QAD Head');
+                $sheet->setCellValue('H52', 'QAD Head');
 
                 $sheet->setCellValue('A56', 'YEC Approval?');
                 $sheet->setCellValue('C56', '☐ Need');
