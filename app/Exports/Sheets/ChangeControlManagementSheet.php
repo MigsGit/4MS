@@ -96,36 +96,65 @@ WithEvents
 
                 // === Insert Before and After Image
 
-                // === Insert Before and After Image
-
                 // Retrieve the image path
                 $imagePath = Storage::path('public/machine/1/after/0_selected_photo.jpg');
 
-                // Resize the image (optional, requires Intervention Image package)
-                $image = Image::make($imagePath)->resize(300, 300); // Resize  to 300x300 pixels //composer require intervention/image
+                // Resize the image (requires Intervention Image package)
+                $image = Image::make($imagePath)->resize(100, 100); // Resize to 300x300 pixels
                 $tempPath = storage_path('app/temp_resized_image.jpg');
                 $image->save($tempPath);
 
-                // Insert the resized image into the Excel sheet
-                $drawing = new Drawing();
-                // $drawing->setName('Selected Photo');
-                // $drawing->setDescription('Selected Photo');
-                $drawing->setPath($tempPath); // Path to the resized image
-                $drawing->setCoordinates('A23'); // Place the image starting at column 23 (W)
-                $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                // Merge cells A23:C24 to accommodate the image
+                $sheet->mergeCells('A23:C24');
 
-                // Dynamically adjust column widths based on image dimensions
+                // Dynamically adjust column widths and row height based on image dimensions
                 $imageWidth = $image->width(); // Get image width in pixels
                 $imageHeight = $image->height(); // Get image height in pixels
 
                 // Convert pixels to Excel column width (approximation: 7.5 pixels = 1 column width)
-                $columnWidth = $imageWidth / 7.5;
-                $sheet->getColumnDimension('W')->setWidth($columnWidth); // Column 23
-                $sheet->getColumnDimension('X')->setWidth($columnWidth); // Column 24
+                $columnWidth = $imageWidth / 22.5; // Divide by 3 columns (A, B, C)
+                $sheet->getColumnDimension('A')->setWidth($columnWidth);
+                $sheet->getColumnDimension('B')->setWidth($columnWidth);
+                $sheet->getColumnDimension('C')->setWidth($columnWidth);
 
-                // Optionally, adjust row height for better visibility
-                $rowHeight = $imageHeight / 1.3; // Approximation: 1.3 pixels = 1 row height
-                $sheet->getRowDimension(1)->setRowHeight($rowHeight); // Row 1
+                // Convert pixels to Excel row height (approximation: 1.3 pixels = 1 row height)
+                $rowHeight = $imageHeight / 2; // Divide by 2 rows (23, 24)
+                $sheet->getRowDimension(23)->setRowHeight($rowHeight);
+                $sheet->getRowDimension(24)->setRowHeight($rowHeight);
+
+                // Insert the resized image into the merged cells
+                $drawing = new Drawing();
+                $drawing->setName('Selected Photo');
+                $drawing->setDescription('Selected Photo');
+                $drawing->setPath($tempPath); // Path to the resized image
+                $drawing->setCoordinates('A23'); // Place the image at the top-left of the merged cells
+                $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
+                // // Resize the image (optional, requires Intervention Image package)
+                // $image = Image::make($imagePath)->resize(300, 300); // Resize  to 300x300 pixels //composer require intervention/image
+                // $tempPath = storage_path('app/temp_resized_image.jpg');
+                // $image->save($tempPath);
+
+                // // Insert the resized image into the Excel sheet
+                // $drawing = new Drawing();
+                // // $drawing->setName('Selected Photo');
+                // // $drawing->setDescription('Selected Photo');
+                // $drawing->setPath($tempPath); // Path to the resized image
+                // $drawing->setCoordinates('A23'); // Place the image starting at column 23 (W)
+                // $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
+                // // Dynamically adjust column widths based on image dimensions
+                // $imageWidth = $image->width(); // Get image width in pixels
+                // $imageHeight = $image->height(); // Get image height in pixels
+
+                // // Convert pixels to Excel column width (approximation: 7.5 pixels = 1 column width)
+                // $columnWidth = $imageWidth / 7.5;
+                // $sheet->getColumnDimension('A')->setWidth($columnWidth); // Column 23
+                // $sheet->getColumnDimension('C')->setWidth($columnWidth); // Column 24
+
+                // // Optionally, adjust row height for better visibility
+                // $rowHeight = $imageHeight / 1.3; // Approximation: 1.3 pixels = 1 row height
+                // $sheet->getRowDimension(23)->setRowHeight($rowHeight); // Row 3
 
                 // === Document Type
                 $docTypes = [

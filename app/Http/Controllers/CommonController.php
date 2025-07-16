@@ -10,25 +10,23 @@ use App\Models\Method;
 use App\Models\Machine;
 use App\Models\Material;
 use App\Models\RapidxUser;
-use App\Exports\TestExport;
 use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\ManApproval;
 use App\Models\PmiApproval;
 use App\Models\RapidMailer;
-use App\Exports\ExternalCcm;
 use Illuminate\Http\Request;
 use App\Models\MethodApproval;
 use App\Models\MachineApproval;
 use App\Models\MaterialApproval;
 use App\Models\SpecialInspection;
+use App\Exports\ExternalCcmExport;
 use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Models\ExternalDisposition;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
-use App\Exports\ChangeControlManagementExport;
 use App\Http\Requests\SpecialInspectionRequest;
 
 
@@ -496,7 +494,7 @@ class CommonController extends Controller
 
 
         return Excel::download(
-            new ExternalCcm($ecrsCategoryDetailsCollection),
+            new ExternalCcmExport($ecrsCategoryDetailsCollection),
             $iqc_dropdown_category_section . "_4M.xlsx"
         );
     }
