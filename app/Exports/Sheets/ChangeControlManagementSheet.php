@@ -40,45 +40,44 @@ WithEvents
  * @param array $mergeCells Optional array to merge cells (e.g., ['A29:L29']).
  * @param array $cellValues Optional array to set cell values (e.g., ['J26' => 'Checked by:']).
  */
-function insertEsignatureImageIntoSheet($arrImagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
-{
-    // foreach ($arrImagePath as $key => $imagePathValue) {
-        // Get the full storage path of the image
-        $imageStoragePath = Storage::path($imagePathValue.'.png');
-
-        // Resize the image
-        $image = Image::make($imageStoragePath)->resize($width, $height);
-        $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
-        $image->save($tempPath);
-
-        // Insert the image into the worksheet
-        $drawing = new Drawing();
-        $drawing->setName("Inserted Image");
-        $drawing->setDescription("Inserted Image");
-        $drawing->setPath($tempPath); // Path to the resized image
-        $drawing->setCoordinates($coordinates); // Cell coordinates
-        $drawing->setWorksheet($sheet); // Attach the image to the worksheet
-    // }
-
-}
-// function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
+// function insertEsignatureImageIntoSheet($arrImagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
 // {
-//     // Get the full storage path of the image
-//     $imageStoragePath = Storage::path($imagePath.'.png');
+//     // foreach ($arrImagePath as $key => $imagePathValue) {
+//         // Get the full storage path of the image
+//         $imageStoragePath = Storage::path($imagePathValue.'.png');
 
-//     // Resize the image
-//     $image = Image::make($imageStoragePath)->resize($width, $height);
-//     $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
-//     $image->save($tempPath);
+//         // Resize the image
+//         $image = Image::make($imageStoragePath)->resize($width, $height);
+//         $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
+//         $image->save($tempPath);
 
-//     // Insert the image into the worksheet
-//     $drawing = new Drawing();
-//     $drawing->setName("Inserted Image");
-//     $drawing->setDescription("Inserted Image");
-//     $drawing->setPath($tempPath); // Path to the resized image
-//     $drawing->setCoordinates($coordinates); // Cell coordinates
-//     $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+//         // Insert the image into the worksheet
+//         $drawing = new Drawing();
+//         $drawing->setName("Inserted Image");
+//         $drawing->setDescription("Inserted Image");
+//         $drawing->setPath($tempPath); // Path to the resized image
+//         $drawing->setCoordinates($coordinates); // Cell coordinates
+//         $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
 // }
+function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
+{
+    // Get the full storage path of the image
+    $imageStoragePath = Storage::path($imagePath.'.png');
+
+    // Resize the image
+    $image = Image::make($imageStoragePath)->resize($width, $height);
+    $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
+    $image->save($tempPath);
+
+    // Insert the image into the worksheet
+    $drawing = new Drawing();
+    $drawing->setName("Inserted Image");
+    $drawing->setDescription("Inserted Image");
+    $drawing->setPath($tempPath); // Path to the resized image
+    $drawing->setCoordinates($coordinates); // Cell coordinates
+    $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+}
 
 
     public function registerEvents(): array
@@ -332,7 +331,6 @@ function insertEsignatureImageIntoSheet($arrImagePath, $coordinates, $width, $he
                     'Assessed by',
                     'Assessed by',
                     'Assessed by',
-                    'Assessed by',
                 ];
                 $startRowsAssessedby= 30;
                 foreach ($rowsAssessedby as $i => $label) {
@@ -340,7 +338,6 @@ function insertEsignatureImageIntoSheet($arrImagePath, $coordinates, $width, $he
                     $startRowsAssessedby+=4;
                 }
                 $rowsCheckedby = [
-                    'Checked by',
                     'Checked by',
                     'Checked by',
                     'Checked by',
@@ -358,7 +355,6 @@ function insertEsignatureImageIntoSheet($arrImagePath, $coordinates, $width, $he
                     'Section Head',
                     'Section Head',
                     'Section Head',
-                    'Section Head',
                 ];
                 $startRowsSectionHead= 33;
                 foreach ($rowsSectionHead as $i => $label) {
@@ -368,20 +364,22 @@ function insertEsignatureImageIntoSheet($arrImagePath, $coordinates, $width, $he
 
                 // === Approval Section
                 $sheet->setCellValue('A50', 'PMI Approval');
-                $sheet->setCellValue('B52', 'QC Head');
-                $sheet->setCellValue('E52', 'Operations Head');
-                $sheet->setCellValue('H52', 'QAD Head');
-
+                $sheet->setCellValue('B53', 'QC Head');
+                $sheet->setCellValue('E53', 'Operations Head');
+                $sheet->setCellValue('H53', 'QAD Head');
+                // === Approval Data
+                $startExtQcCol = "B";
                 foreach ($pmiApprovalCollection['EXQC'] as $key => $extenalQcValue) {
-                    // dd($imageEsigPath.$extenalQcValue['rapidx_user']['employee_number']);
                     $this->insertEsignatureImageIntoSheet(
                         $imageEsigPath.$extenalQcValue['rapidx_user']['employee_number'],
-                        "B51",
+                        $startExtQcCol."51",
                         50,
                         50,
                         $sheet,
-                        'qc_head'
+                        'qc_head'.$key
                     );
+                    $sheet->setCellValue($startExtQcCol.'52', $extenalQcValue['rapidx_user']['name']);
+                    $startExtQcCol++; //Adjust the Column
                 }
 
 
