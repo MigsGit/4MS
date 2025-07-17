@@ -40,37 +40,56 @@ WithEvents
  * @param array $mergeCells Optional array to merge cells (e.g., ['A29:L29']).
  * @param array $cellValues Optional array to set cell values (e.g., ['J26' => 'Checked by:']).
  */
-function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet)
+function insertEsignatureImageIntoSheet($arrImagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
 {
-    // Get the full storage path of the image
-    $imageStoragePath = Storage::path($imagePath);
+    // foreach ($arrImagePath as $key => $imagePathValue) {
+        // Get the full storage path of the image
+        $imageStoragePath = Storage::path($imagePathValue.'.png');
 
-    // Resize the image
-    $image = Image::make($imageStoragePath)->resize($width, $height);
-    $tempPath = storage_path("app/temp_resized_image.png");
-    $image->save($tempPath);
+        // Resize the image
+        $image = Image::make($imageStoragePath)->resize($width, $height);
+        $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
+        $image->save($tempPath);
 
-    // Insert the image into the worksheet
-    $drawing = new Drawing();
-    $drawing->setName("Inserted Image");
-    $drawing->setDescription("Inserted Image");
-    $drawing->setPath($tempPath); // Path to the resized image
-    $drawing->setCoordinates($coordinates); // Cell coordinates
-    $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+        // Insert the image into the worksheet
+        $drawing = new Drawing();
+        $drawing->setName("Inserted Image");
+        $drawing->setDescription("Inserted Image");
+        $drawing->setPath($tempPath); // Path to the resized image
+        $drawing->setCoordinates($coordinates); // Cell coordinates
+        $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+    // }
+
 }
+// function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
+// {
+//     // Get the full storage path of the image
+//     $imageStoragePath = Storage::path($imagePath.'.png');
+
+//     // Resize the image
+//     $image = Image::make($imageStoragePath)->resize($width, $height);
+//     $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
+//     $image->save($tempPath);
+
+//     // Insert the image into the worksheet
+//     $drawing = new Drawing();
+//     $drawing->setName("Inserted Image");
+//     $drawing->setDescription("Inserted Image");
+//     $drawing->setPath($tempPath); // Path to the resized image
+//     $drawing->setCoordinates($coordinates); // Cell coordinates
+//     $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+// }
 
 
     public function registerEvents(): array
     {
         $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
         $pmiApprovalCollection = collect($ecrsDetails->pmi_approvals)->groupBy('approval_status')->toArray();
-
         $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
 
         return [
             AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
-                dd($pmiApprovalCollection);
-                exit();
+
                 $sheet = $event->sheet->getDelegate();
                  // =========================================== //
 
@@ -279,11 +298,12 @@ function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $heigh
                 $imageEsigPath = 'public/e_signatures/';
                 // === Insert thre E-Signature Prepared By
                 $this->insertEsignatureImageIntoSheet(
-                    $imageEsigPath.$ecrsDetails->rapidx_user_created_by->employee_number.".png",
+                    $imageEsigPath.$ecrsDetails->rapidx_user_created_by->employee_number,
                     "H26",
                     50,
                     50,
                     $sheet,
+                    'prepared_by'
                 );
                 $sheet->setCellValue('H27', $ecrsDetails->rapidx_user_created_by->name);
 
@@ -351,6 +371,20 @@ function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $heigh
                 $sheet->setCellValue('B52', 'QC Head');
                 $sheet->setCellValue('E52', 'Operations Head');
                 $sheet->setCellValue('H52', 'QAD Head');
+
+                foreach ($pmiApprovalCollection['EXQC'] as $key => $extenalQcValue) {
+                    // dd($imageEsigPath.$extenalQcValue['rapidx_user']['employee_number']);
+                    $this->insertEsignatureImageIntoSheet(
+                        $imageEsigPath.$extenalQcValue['rapidx_user']['employee_number'],
+                        "B51",
+                        50,
+                        50,
+                        $sheet,
+                        'qc_head'
+                    );
+                }
+
+
 
                 $sheet->setCellValue('A56', 'YEC Approval?');
                 $sheet->setCellValue('C56', '☐ Need');
