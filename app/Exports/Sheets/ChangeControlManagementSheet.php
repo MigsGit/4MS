@@ -29,7 +29,7 @@ WithEvents
         return [[]];
     }
 
-    /**
+/**
  * Inserts an image into the Excel sheet.
  *
  * @param string $imagePath Path to the image in storage.
@@ -37,30 +37,9 @@ WithEvents
  * @param int $width Width to resize the image.
  * @param int $height Height to resize the image.
  * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet Worksheet object.
- * @param array $mergeCells Optional array to merge cells (e.g., ['A29:L29']).
- * @param array $cellValues Optional array to set cell values (e.g., ['J26' => 'Checked by:']).
  */
-// function insertEsignatureImageIntoSheet($arrImagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
-// {
-//     // foreach ($arrImagePath as $key => $imagePathValue) {
-//         // Get the full storage path of the image
-//         $imageStoragePath = Storage::path($imagePathValue.'.png');
 
-//         // Resize the image
-//         $image = Image::make($imageStoragePath)->resize($width, $height);
-//         $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
-//         $image->save($tempPath);
-
-//         // Insert the image into the worksheet
-//         $drawing = new Drawing();
-//         $drawing->setName("Inserted Image");
-//         $drawing->setDescription("Inserted Image");
-//         $drawing->setPath($tempPath); // Path to the resized image
-//         $drawing->setCoordinates($coordinates); // Cell coordinates
-//         $drawing->setWorksheet($sheet); // Attach the image to the worksheet
-
-// }
-function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
+public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
 {
     // Get the full storage path of the image
     $imageStoragePath = Storage::path($imagePath.'.png');
@@ -381,9 +360,7 @@ function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $heigh
                     $sheet->setCellValue($startExtQcCol.'52', $extenalQcValue['rapidx_user']['name']);
                     $startExtQcCol++; //Adjust the Column
                 }
-
-
-
+                // === YEC Approval Section
                 $sheet->setCellValue('A56', 'YEC Approval?');
                 $sheet->setCellValue('C56', '☐ Need');
                 $sheet->setCellValue('C58', '☐ No Need');
