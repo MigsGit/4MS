@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\DropdownMasterDetail;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Material extends Model
 {
@@ -20,6 +21,19 @@ class Material extends Model
         return $this->hasOne(Ecr::class, 'id', 'ecrs_id')->whereNull('deleted_at');
     }
 
+    public function dropdown_master_detail($column)
+    {
+        return $this->hasOne(DropdownMasterDetail::class, 'id', $column);
+    }
+
+    public function dropdown_detail_material_sample()
+    {
+        return $this->hasOne(DropdownMasterDetail::class, 'id', 'material_sample')->whereNull('deleted_at');
+    }
+    public function dropdown_detail_material_supplier()
+    {
+        return $this->hasOne(DropdownMasterDetail::class, 'id', 'material_supplier')->whereNull('deleted_at');
+    }
     /**
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
