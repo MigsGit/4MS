@@ -208,6 +208,8 @@ class EcrController extends Controller
                 'dropdown_master_detail_description_of_change',
                 'dropdown_master_detail_reason_of_change',
                 'dropdown_master_detail_type_of_part',
+                'ecr',
+
             ];
             $conditions = [
                 'ecrs_id' => $request->ecr_id
@@ -215,11 +217,13 @@ class EcrController extends Controller
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
-                $result = '';
-                $result .= '<center>';
-                $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-details-id='".$row->id."' id='btnGetEcrDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
-                $result .= '</center>';
-                return $result;
+                if($row->ecr->created_by != session('rapidx_user_id')){
+                    $result = '';
+                    $result .= '<center>';
+                    $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-details-id='".$row->id."' id='btnGetEcrDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                    $result .= '</center>';
+                    return $result;
+                }
             })
             ->addColumn('reason_of_change',function ($row){
                 $result = '';

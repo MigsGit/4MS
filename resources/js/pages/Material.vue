@@ -76,19 +76,22 @@
             <div class="row mt-3">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row d-none">
                             <div class="input-group flex-nowrap mb-2 input-group-sm">
                                 <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-                            <input v-model="frmMaterial.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                            <input :disabled="isModalView" v-model="frmMaterial.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
                             </div>
                             <div class="input-group flex-nowrap mb-2 input-group-sm">
                                 <span class="input-group-text" id="addon-wrapping">Material Id:</span>
-                                <input  v-model="frmMaterial.materialId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                                <input :disabled="isModalView" v-model="frmMaterial.materialId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-sm-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Parts/Direct Material:</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.pdMaterial"
                                         :options="commonVar.optCheck"
                                         placeholder="Select an option"
@@ -99,6 +102,7 @@
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">MSDS:</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.msds"
                                         :options="commonVar.optYesNo"
                                         placeholder="Select an option"
@@ -109,6 +113,7 @@
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">ICP:</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.icp"
                                         :options="commonVar.optYesNo"
                                         placeholder="Select an option"
@@ -118,11 +123,12 @@
                                 </div>
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">GP:</span>
-                                    <input v-model="frmMaterial.gp" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                                    <input :disabled="isModalView" v-model="frmMaterial.gp" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                                 </div>
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Qoutation</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.qoutation"
                                         :options="commonVar.optCheck"
                                         placeholder="Select an option"
@@ -135,6 +141,7 @@
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Supplier:</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.materialSupplier"
                                         :options="materialVar.materialSupplier"
                                         placeholder="Select an option"
@@ -145,6 +152,7 @@
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Product Color:</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.materialColor"
                                         :options="materialVar.materialColor"
                                         placeholder="Select an option"
@@ -155,6 +163,7 @@
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">ROHS:</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.rohs"
                                         :options="commonVar.optResult"
                                         placeholder="Select an option"
@@ -165,6 +174,7 @@
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Material Sample:</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.materialSample"
                                         :options="commonVar.optCheck"
                                         placeholder="Select an option"
@@ -175,6 +185,7 @@
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">COC:</span>
                                     <Multiselect
+                                        :disabled="isModalView"
                                         v-model="frmMaterial.coc"
                                         :options="commonVar.optCheck"
                                         placeholder="Select an option"
@@ -212,6 +223,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.prdnPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -220,6 +232,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.prdnCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -228,6 +241,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.prdnApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -242,6 +256,7 @@
                                                         <td>
 
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.prPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -250,6 +265,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.prCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -258,6 +274,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.prApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -271,6 +288,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.ppcPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -279,6 +297,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.ppcCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -287,6 +306,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.ppcApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -300,6 +320,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.emsPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -308,6 +329,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.emsCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -316,6 +338,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.emsApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -329,6 +352,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.qcPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -337,6 +361,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.qcCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -345,6 +370,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.qcApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -358,6 +384,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.proEnggPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -366,6 +393,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.proEnggCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -374,6 +402,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.proEnggApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -387,6 +416,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.mainEnggPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -395,6 +425,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.mainEnggCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -403,6 +434,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.mainEnggApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -416,6 +448,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.enggPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -424,6 +457,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.enggCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -432,6 +466,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.enggApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -445,6 +480,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.qaPreparedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -453,6 +489,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.qaCheckedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -461,6 +498,7 @@
                                                         </td>
                                                         <td>
                                                             <Multiselect
+                                                                :disabled="isModalView"
                                                                 v-model="frmMaterial.qaApprovedBy"
                                                                 :close-on-select="true"
                                                                 :searchable="true"
@@ -572,14 +610,15 @@
              <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
             <div class="row">
-                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                <div class="input-group flex-nowrap mb-2 input-group-sm d-none">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
-                    <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    <input :disabled="isModalView" v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
                         <Multiselect
+                                                                :disabled="isModalView"
                             v-model="frmEcrDetails.typeOfPart"
                             :options="ecrVar.optTypeOfPart"
                             placeholder="Select an option"
@@ -589,21 +628,21 @@
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
-                        <input v-model="frmEcrDetails.changeImpDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input :disabled="isModalView" v-model="frmEcrDetails.changeImpDate" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Docs To Be Submitted</span>
-                        <input v-model="frmEcrDetails.docToBeSub" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input :disabled="isModalView" v-model="frmEcrDetails.docToBeSub" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                  </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Docs Submission Date:</span>
-                        <input v-model="frmEcrDetails.docSubDate"  type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input :disabled="isModalView" v-model="frmEcrDetails.docSubDate"  type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Remarks:</span>
-                        <input v-model="frmEcrDetails.remarks"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input :disabled="isModalView" v-model="frmEcrDetails.remarks"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                 </div>
             </div>
@@ -759,6 +798,7 @@
     const modalViewMaterialRef = ref(null);
 
     const isModalMaterial = ref(null);
+    const isModalView = ref(true);
     const selectedEcrsId = ref(null);
     const currentStatus = ref(null);
     const selectedEcrsIdEncrypted = ref(null);
@@ -769,8 +809,6 @@
     const tblEcrByCategoryStatus = ref(null);
     const tblMaterialApproval = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
-
-
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);
     const selectedMaterialsId = ref(null);
@@ -790,6 +828,7 @@
                         let ecrsId = this.getAttribute('ecrs-id');
                         frmMaterial.value.ecrsId = ecrsId;
                         isModalMaterial.value = 'Edit';
+                        isModalView.value = false;
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         getMaterialEcrById(ecrsId);
                         getRapidxUserByIdOpt(prdnPreparedByParams);
@@ -846,6 +885,7 @@
                         selectedMaterialsId.value = materialsId;
                         currentStatus.value = materialStatus;
                         isModalMaterial.value = 'View';
+                        isModalView.value = true;
                         getMaterialEcrById(ecrsId);
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         if( materialStatus === 'FORAPP'){
@@ -1088,6 +1128,13 @@
 
 
     })
+    // Override default classes for small size and readonly styles
+    const multiselectSm =ref ({
+        container: 'text-sm rounded border-gray-300 bg-gray-100 opacity-70 cursor-not-allowed',
+        input: 'text-sm',
+        singleLabel: 'text-sm',
+        search: 'hidden', // Hide input if readonly
+    });
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
@@ -1319,4 +1366,3 @@
     }
 
 </script>
-

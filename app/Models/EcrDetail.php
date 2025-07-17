@@ -13,6 +13,10 @@ class EcrDetail extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
+    public function ecr()
+    {
+        return $this->hasOne(Ecr::class, 'id', 'ecrs_id');
+    }
     public function dropdown_master_detail($column)
     {
         return $this->hasOne(DropdownMasterDetail::class, 'id', $column);
