@@ -166,7 +166,7 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                 }
                 foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
                         // Resize the image (optional, requires Intervention Image package)
-                        $image = Image::make($imagePathBeforeValue)->resize(150, 150); // Resize to 300x300 pixels
+                        $image = Image::make($imagePathBeforeValue)->resize(150, 300); // Resize to 300x300 pixels
                         $tempPath = storage_path("app/temp_resized_image_$key.jpg");
                         $image->save($tempPath);
 
@@ -182,9 +182,9 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                         $imageHeight = $image->height();
 
                         $columnWidth = $imageWidth / 9.5; // Approximation for column width
-                        $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
-                        $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
-                        $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
+                        // $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
+                        // $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
+                        // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
                         $rowHeight = $imageHeight / 1.5; // Approximation for row height
                         $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
@@ -208,7 +208,7 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
 
                 foreach ($imagePathAfter as $index => $imagePathAfterValue) {
                         // Resize the image (optional, requires Intervention Image package)
-                        $image = Image::make($imagePathAfterValue)->resize(150, 150); // Resize to 300x300 pixels
+                        $image = Image::make($imagePathAfterValue)->resize(150, 300); // Resize to 300x300 pixels
                         $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
                         $image->save($tempPath);
 
@@ -224,9 +224,9 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                         $imageHeight = $image->height();
 
                         $columnWidth = $imageWidth / 10.5; // Approximation for column width
-                        $sheet->getColumnDimension($startAfterImageCol)->setWidth($columnWidth);
-                        $sheet->getColumnDimension(chr(ord($startAfterImageCol) + 1))->setWidth($columnWidth);
-                        $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
+                        // $sheet->getColumnDimension($startAfterImageCol)->setWidth($columnWidth);
+                        // $sheet->getColumnDimension(chr(ord($startAfterImageCol) + 1))->setWidth($columnWidth);
+                        // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
                         $rowHeight = $imageHeight / 1.5; // Approximation for row height
                         $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);

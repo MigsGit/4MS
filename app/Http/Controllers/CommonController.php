@@ -459,7 +459,7 @@ class CommonController extends Controller
     }
     public function downloadExcelByEcrsId(Request $request){
         $iqc_dropdown_category_section = 'TS';
-        $ecrsId = $request->selectedId;
+        $ecrsId = decrypt($request->selectedId);
 
        $getEcrById = $this->resourceInterface->readWithRelationsConditions(
             Ecr::class,

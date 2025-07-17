@@ -480,12 +480,12 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a href="#" class="link-success" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
                                     Download Internal Machine
                                 </a>
                             </td>
                             <td>
-                                <a href="#" class="link-warning" @click="btnLinkDownloadExternalMachine(selectedEcrsId)">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternalMachine(selectedEcrsId)">
                                     Download External Machine
                                 </a>
                             </td>
@@ -700,7 +700,6 @@
                         let machinesId = this.getAttribute('machine-id');
                         let ecrsId = this.getAttribute('ecrs-id');
                         selectedEcrsId.value = ecrsId;
-
                         getMachineRefById(machinesId);
                     });
                 }

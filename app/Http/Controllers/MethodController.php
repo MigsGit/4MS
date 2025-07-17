@@ -157,11 +157,18 @@ class MethodController extends Controller
                 $result .= '</br>';
                 return $result;
             })
+            // ->addColumn('get_attachment',function ($row) use ($request){
+            //     $result = '';
+            //     $result .= '<a class="btn btn-outline-success btn-sm mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnDownloadExcel"><i class="fa-solid fa-file-excel"></i> </a>';
+            //     $result .= '</br>';
+            //     $result .= '<a class="btn btn-outline-danger btn-sm mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodRef"><i class="fa-solid fa-image"></i> </a>';
+            //     $result .= '</center>';
+            //     return $result;
+            // })
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
-                $result .= '<a class="btn btn-outline-success btn-sm mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnDownloadExcel"><i class="fa-solid fa-file-excel"></i> </a>';
-                $result .= '</br>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodRef"><i class="fa-solid fa-image"></i> </a>';
+                $result .= '<center>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })

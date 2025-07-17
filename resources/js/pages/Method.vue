@@ -442,6 +442,33 @@
                 </table>
                 <table class="table">
                     <thead>
+
+                        <tr>
+                            <!-- <th scope="col">
+                                Internal Material
+                            </th> -->
+                            <th scope="col">
+                                External Material
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <!-- <td>
+                                <a href="#" class="link-primary" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
+                                    Download Internal Machine
+                                </a>
+                            </td> -->
+                            <td>
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsId)">
+                                    Download External Machine
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <thead>
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">
@@ -658,18 +685,6 @@
                         getMethodRefByEcrsId(methodsId);
                     });
                 }
-                let btnDownloadExcel = cell.querySelector('#btnDownloadExcel');
-                if(btnDownloadExcel != null){
-                    btnDownloadExcel.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecrs-id');
-                        let params = {
-                            selectedId : ecrsId,
-                        };
-                        var queryString = $.param(params);
-                        window.location.href="api/download_excel_by_ecrs_id?" + queryString;
-                    });
-                }
-
             }
         } ,
         {   data: 'ecr_no'} ,
@@ -787,11 +802,20 @@
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
     })
+
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
         }
     };
+    const btnLinkDownloadExternal = async () => {
+        let params = {
+            selectedId : selectedEcrsId.value,
+        };
+        var queryString = $.param(params);
+        window.location.href="api/download_excel_by_ecrs_id?" + queryString;
+    }
+
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
         modal.Approval.show();
