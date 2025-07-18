@@ -649,7 +649,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
+            <button type="submit" v-show="isModalMaterial === 'Edit'" class="btn btn-success btn-sm"><li class="fas fa-save"></li> Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Material Reference" ref="modalUploadMaterialRef" @add-event="frmUploadMaterialRef()">
@@ -695,7 +695,7 @@
                     <thead>
 
                         <tr>
-                            <th scope="col">
+                            <th class="d-none"  scope="col">
                                 Internal Material
                             </th>
                             <th scope="col">
@@ -705,13 +705,13 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>
-                                <a href="#" class="link-success" @click="btnLinkDownloadInternalMaterial(selectedEcrsId)">
+                            <td  class="d-none">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadInternalMaterial(selectedEcrsId)">
                                     Download Internal Material
                                 </a>
                             </td>
                             <td>
-                                <a href="#" class="link-warning" @click="btnLinkDownloadExternalMaterial(selectedEcrsId)">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternalMaterial(selectedEcrsId)">
                                     Download External Material
                                 </a>
                             </td>

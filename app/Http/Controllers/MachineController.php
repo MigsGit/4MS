@@ -23,7 +23,7 @@ class MachineController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-    public function loadMachineApproverSummaryMaterialId (Request $request){
+    public function loadMachineApproverSummaryId (Request $request){
         try {
             $machinesId = $request->machinesId ?? "";
             $data = [];

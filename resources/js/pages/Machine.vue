@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-5">Material</h4>
+        <h4 class="mt-5">Machine</h4>
         <div class="card"  style="width: 100%;">
             <div class="card-body overflow-auto">
                 <div class="container-fluid px-4">
@@ -69,7 +69,7 @@
                         </thead>
                         </DataTable>
                     </div>
-                    <!-- Material Approval -->
+                    <!-- Machine Approval -->
                     <div class="card mb-2" v-show="isModal === 'Edit'">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="true" aria-controls="collapse2">
@@ -237,7 +237,7 @@
                                                 class="table mt-2"
                                                 ref="tblMachineApproverSummary"
                                                 :columns="tblMachineApproverSummaryColumns"
-                                                ajax="api/load_machine_approver_summary_material_id"
+                                                ajax="api/load_machine_approver_summary_id"
                                                 :options="{
                                                     paging:false,
                                                     serverSide: true, //Serverside true will load the network
@@ -470,10 +470,10 @@
 
                         <tr>
                             <th scope="col">
-                                Internal Material
+                                Internal Machine
                             </th>
                             <th scope="col">
-                                External Material
+                                External Machine
                             </th>
                         </tr>
                     </thead>
@@ -671,7 +671,7 @@
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         if( machineStatus === 'FORAPP'){
                             getCurrentApprover(machineApproverParams);
-                            tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_material_id?machinesId="+machinesId).draw();
+                            tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_id?machinesId="+machinesId).draw();
                         }
                         if( machineStatus === 'PMIAPP'){
                             getCurrentApprover(pmiApproverParams);
