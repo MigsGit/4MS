@@ -594,7 +594,7 @@ class CommonController extends Controller
             $this->commonInterface->viewPdfFile($pdfPath);
         }
     }
-    public function testEmail(Request $request){
+    public function testEmail(Request $request){ //test
         try {
             $userId = 530;
             $requestedBy = $this->emailInterface->getEmailByRapidxUserId($userId);
@@ -617,6 +617,51 @@ class CommonController extends Controller
             ];
            $this->emailInterface->sendEmail($data);
            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getApprovalCountByRapidxUserId(Request $request){
+        try {
+            $rapidxUserId = session('rapidx_user_id');
+            $ecrApproval = EcrApproval::where('rapidx_user_id',$rapidxUserId)
+            ->where('status','PEN')
+            ->count();
+            $manApproval = ManApproval::where('rapidx_user_id',$rapidxUserId)
+            ->where('status','PEN')
+            ->count();
+            $materialApproval = MaterialApproval::where('rapidx_user_id',$rapidxUserId)->where('status','PEN')->count();
+            $machineApproval = MachineApproval::where('rapidx_user_id',$rapidxUserId)->where('status','PEN')->count();
+            $methodApproval = MethodApproval::where('rapidx_user_id',$rapidxUserId)
+            ->where('status','PEN')->count();
+
+           $pmiApproval = PmiApproval::with(
+                'man_detail',
+                'material',
+                'machine',
+                'method',
+                'environment',
+            )->where('rapidx_user_id',$rapidxUserId)->where('status','PEN')->get();
+
+            //Count PENDING PMI Approval with Relationship
+            $relations = ['man_detail', 'material', 'machine', 'method', 'environment'];
+
+            $relationshipCounts = [];
+
+            foreach ($relations as $relation) {
+                $relationshipCounts[$relation] = $pmiApproval->filter(function ($item) use ($relation) {
+                    return !is_null($item->$relation);
+                })->count();
+            }
+            return response()->json([
+                'isSuccess' => 'true',
+                'ecrApproval' => $ecrApproval,
+                'manApproval' => $manApproval,
+                'materialApproval' => $materialApproval,
+                'machineApproval' => $machineApproval,
+                'methodApproval' => $methodApproval,
+                'pmiApproval' => $relationshipCounts,
+            ]);
         } catch (Exception $e) {
             throw $e;
         }

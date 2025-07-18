@@ -53,11 +53,11 @@ Route::middleware('auth')->group(function(){
     });
 
     Route::controller(CommonController::class)->group(function (): void {
-        // Route::post('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::get('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::post('save_special_inspection', 'saveSpecialInspection')->name('save_special_inspection');
         Route::post('save_external_disposition', 'saveExternalDisposition')->name('save_external_disposition');
 
+        Route::get('test_email', 'testEmail')->name('test_email'); //test function
         Route::get('get_special_inspection_by_id', 'getSpecialInspectionById')->name('get_special_inspection_by_id');
         Route::get('get_rapidx_user_by_id_opt', 'getRapidxUserByIdOpt')->name('get_rapidx_user_by_id_opt');
         Route::get('get_current_approver_session', 'getCurrentApproverSession')->name('get_current_approver_session');
@@ -66,7 +66,8 @@ Route::middleware('auth')->group(function(){
         Route::get('load_special_inspection_by_ecr_id', 'loadSpecialInspectionByEcrId')->name('load_special_inspection_by_ecr_id');
         Route::get('download_excel_by_ecrs_id', 'downloadExcelByEcrsId')->name('download.common_excel');
         Route::get('view_external_disposition', 'viewExternalDisposition')->name('view_external_disposition');
-        Route::get('test_email', 'testEmail')->name('test_email');
+
+        Route::get('get_approval_count_by_rapidx_user_id', 'getApprovalCountByRapidxUserId')->name('get_approval_count_by_rapidx_user_id');
     });
 
     Route::controller(SettingsController::class)->group(function () {

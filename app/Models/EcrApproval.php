@@ -16,4 +16,8 @@ class EcrApproval extends Model
     {
         return $this->hasOne(RapidxUser::class, 'id', 'rapidx_user_id');
     }
+    public function pmi_approval()
+    {
+        return $this->hasOne(PmiApproval::class, 'ecrs_id', 'ecrs_id');
+    }
 }
