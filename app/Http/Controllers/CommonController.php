@@ -318,7 +318,7 @@ class CommonController extends Controller
             $isCategory = Ecr::where('id',$ecrsId)
             ->whereNull('deleted_at')
             ->limit(1)
-            ->get(['category']);
+            ->get(['category','internal_external']);
             $isCategory = $isCategory[0]->category;
             switch ($isCategory) {
                 case 'Man':
@@ -357,6 +357,25 @@ class CommonController extends Controller
            ->where('status','-')
            ->limit(1)
            ->get(['id','approval_status']);
+            if ( count($pmiInternalApproval) === 0){
+                $enviromentConditions = [
+                    'ecrs_id' => $ecrsId,
+                ];
+                if($isCategory[0]->internal_external === "External"){
+                    $enviromentValidated = [
+                        'status' => 'EXDISPO',
+                        'approval_status' => 'EXDISPO',
+                    ];
+                }
+                if($isCategory[0]->internal_external === "Internal"){
+                    $enviromentValidated = [
+                        'status' => 'OK',
+                        'approval_status' => 'OK',
+                    ];
+                }
+                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
+            }
+            //Update next approval
             if ( count($pmiInternalApproval) != 0){
                 $pmiInternalApprovalValidated = [
                     'status' => 'PEN',
@@ -373,18 +392,9 @@ class CommonController extends Controller
                     'approval_status' => $pmiInternalApproval[0]->approval_status,
                 ];
                 $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
-            }else{
-                $enviromentConditions = [
-                    'ecrs_id' => $ecrsId,
-                ];
-                $enviromentValidated = [
-                    'status' => 'EXDISPO',
-                    'approval_status' => 'EXDISPO',
-                ];
-                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }
-             //DISAPPROVED ECR
-             if($request->status === "DIS"){
+            //DISAPPROVED ECR
+            if($request->status === "DIS"){
                 $enviromentConditions = [
                     'ecrs_id' => $ecrsId,
                 ];
