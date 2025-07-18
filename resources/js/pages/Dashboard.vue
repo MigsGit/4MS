@@ -66,7 +66,7 @@
                             <div class="col-xl-3 col-md-6">
                                 <div class="card text-white mb-4" :class="materialApproval != 0 || pmiApprovalMaterial != 0 ? 'bg-danger' : 'bg-dark'" >
                                     <div class="card-body">
-                                        <h4><font-awesome-icon class="nav-icon" icon="user" />&nbsp;Material ({{ materialApproval }})</h4>
+                                        <h4><font-awesome-icon class="nav-icon" icon="truck-fast" />&nbsp;Material ({{ materialApproval }})</h4>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
                                         PMI Approval ( {{pmiApprovalMaterial}} )
@@ -80,7 +80,7 @@
                             <div class="col-xl-3 col-md-6">
                                 <div class="card text-white mb-4" :class="machineApproval != 0 || pmiApprovalMachine != 0 ? 'bg-danger' : 'bg-dark'" >
                                     <div class="card-body">
-                                        <h4><font-awesome-icon class="nav-icon" icon="user" />&nbsp;Machine ({{ machineApproval }})</h4>
+                                        <h4><font-awesome-icon class="nav-icon" icon="microscope" />&nbsp;Machine ({{ machineApproval }})</h4>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
                                         PMI Approval ( {{pmiApprovalMachine}} )
@@ -94,7 +94,7 @@
                             <div class="col-xl-3 col-md-6">
                                 <div class="card text-white mb-4" :class="methodApproval != 0  || pmiApprovalMethod != 0  ? 'bg-danger' : 'bg-dark'" >
                                     <div class="card-body">
-                                        <h4><font-awesome-icon class="nav-icon" icon="user" />&nbsp;Method ({{ methodApproval }})</h4>
+                                        <h4><font-awesome-icon class="nav-icon" icon="clipboard-list" />&nbsp;Method ({{ methodApproval }})</h4>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
                                         PMI Approval ( {{pmiApprovalMethod}} )
@@ -108,7 +108,7 @@
                             <div class="col-xl-3 col-md-6">
                                 <div class="card text-white mb-4" :class="pmiApprovalEnvironment != 0  ? 'bg-danger' : 'bg-dark'" >
                                     <div class="card-body">
-                                        <h4><font-awesome-icon class="nav-icon" icon="user" />&nbsp;Environment </h4>
+                                        <h4><font-awesome-icon class="nav-icon" icon="tree" />&nbsp;Environment </h4>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
                                         PMI Approval ( {{pmiApprovalEnvironment}} )

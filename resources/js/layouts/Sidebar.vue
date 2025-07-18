@@ -42,7 +42,24 @@ const useAuth = useAuthStore();
             </div>
         </div>
         <div class="sb-sidenav-footer">
+
             <div class="small">Logged in as: </div>
         </div>
     </nav>
 </template>
+<script>
+    import {ref , onMounted,reactive, toRef} from 'vue';
+    import useEcr from '../../js/composables/ecr.js';
+
+    const {
+        axiosFetchData
+    } = useEcr();
+
+    onMounted(() => {
+
+        axiosFetchData({},fetchApi,function(response){
+            console.log(response);
+        });
+    })
+
+</script>
