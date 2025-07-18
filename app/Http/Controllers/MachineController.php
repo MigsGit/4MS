@@ -97,7 +97,6 @@ class MachineController extends Controller
     }
     public function loadEcrMachineByStatus(Request $request){
         try {
-
             $data = [];
             $relations = [
                 'pmi_approvals_pending.rapidx_user',
@@ -124,7 +123,7 @@ class MachineController extends Controller
                 $result .= '<ul class="dropdown-menu">';
                 if($row->machine->status === "EXDISPO" || $row->machine->status === "OK"){
                     //Upload External Disposition
-                    return $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
+                    return $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
                 }
                 if($row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$row->machine->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';

@@ -113,7 +113,7 @@ Route::middleware('auth')->group(function(){
         Route::get('save_machine_approval', 'saveMachineApproval')->name('save_machine_approval');
         Route::get('load_ecr_machine_by_status', 'loadEcrMachineByStatus')->name('load_ecr_machine_by_status');
         Route::get('load_machine_approver_summary', 'loadMachineApproverSummary')->name('load_machine_approver_summary');
-        Route::get('load_machine_approver_summary_id', 'loadMachineApproverSummaryMaterialId')->name('load_machine_approver_summary_id');
+        Route::get('load_machine_approver_summary_id', 'loadMachineApproverSummaryId')->name('load_machine_approver_summary_id');
         Route::get('get_machine_ref_by_id', 'getMachineRefById')->name('get_machine_ref_by_id');
         Route::get('view_machine_ref', 'viewMachineRef')->name('view_machine_ref');
         Route::get('download_internal_machine', 'downloadInternalMachine')->name('download_internal_machine');

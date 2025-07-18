@@ -238,7 +238,7 @@
                                         class="table mt-2"
                                         ref="tblMethodApproverSummary"
                                         :columns="tblMethodApproverSummaryColumns"
-                                        ajax="api/load_machine_approver_summary_material_id"
+                                        ajax="api/load_machine_approver_summary_id"
                                         :options="{
                                             paging:false,
                                             serverSide: true, //Serverside true will load the network

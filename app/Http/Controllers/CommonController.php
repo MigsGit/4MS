@@ -378,8 +378,8 @@ class CommonController extends Controller
                     'ecrs_id' => $ecrsId,
                 ];
                 $enviromentValidated = [
-                    'status' => 'OK',
-                    'approval_status' => 'OK',
+                    'status' => 'EXDISPO',
+                    'approval_status' => 'EXDISPO',
                 ];
                 $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }

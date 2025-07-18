@@ -22,6 +22,158 @@ class MethodController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
+    public function saveMethod(Request $request, MethodFileRequest $methodFileRequest){
+        try {
+            DB::beginTransaction();
+            $methodRequestValidated = [];
+            $ecrsId = $methodFileRequest->ecrsId;
+            $methodsId = $methodFileRequest->methodsId;
+
+            if($methodFileRequest->hasfile('methodRefBefore') && $methodFileRequest->hasfile('methodRefAfter')){
+               $arrUploadFile = $this->commonInterface->uploadFileImg($methodFileRequest->methodRefBefore,$methodFileRequest->methodRefAfter,$methodsId,'method');
+                $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
+                $impFilteredDocumentNameBefore = implode(' | ',$arrUploadFile['arr_filtered_document_name_before']);
+                $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
+                $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
+
+                $methodRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
+                $methodRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
+                $methodRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
+                $methodRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
+
+            }
+            $conditions = [
+                'id' =>  $methodsId
+            ];
+            $this->resourceInterface->updateConditions(Method::class,$conditions,$methodRequestValidated);
+            $arrMachineApprovalRequest = [
+                'PRDNAB'  => $request->prdnAssessedBy,
+                'PRDNCB'  => $request->prdnCheckedBy,
+                'PPCAB'   => $request->ppcAssessedBy,
+                'PPCCB'   => $request->ppcCheckedBy,
+                'MENGAB'  => $request->proEnggAssessedBy,
+                'MENGCB'  => $request->proEnggCheckedBy,
+                'PENGAB'  => $request->mainEnggAssessedBy,
+                'PENGCB'  => $request->mainEnggCheckedBy,
+                'LQCAB'   => $request->qcAssessedBy,
+                'LQCCB'   => $request->qcCheckedBy,
+            ];
+
+           $methodApprovalValidated = collect($arrMachineApprovalRequest)->flatMap(function ($users,$approvalStatus) use ($request,$ecrsId){
+                return collect($users)->map(function ($userId) use ($request,$approvalStatus,&$ecrsId){
+                    return [
+                        'ecrs_id' => $ecrsId,
+                        'methods_id' => $request->methodsId,
+                        'rapidx_user_id' => $userId == 0 ? NULL : $userId,
+                        'approval_status' => $approvalStatus,
+                        'created_at' => now(),
+                    ];
+                });
+
+            })->toArray();
+            MethodApproval::where('methods_id',$methodsId)->delete();
+            MethodApproval::insert($methodApprovalValidated);
+            $methodApproval =  MethodApproval::whereNotNull('rapidx_user_id')
+            ->where('methods_id', $methodsId)->first();
+            if ($methodApproval) {
+                $methodApproval->update(['status' => 'PEN']);
+                Method::where('id', $methodsId)->first()
+                ->update([
+                    'approval_status' => $methodApproval->approval_status,
+                    'status' => 'FORAPP', //FOR APPROVAL
+                ]);
+            }
+            //Reset the PMI Approval
+            /*
+                PmiApproval::whereNotNull('rapidx_user_id')
+                ->where('ecrs_id', $currentEcrsId)
+                ->update([
+                    'status' => '-',
+                    'remarks' => '',
+                ]);
+                //Update Pending PMI Approval
+                $firstPmiApproval =  PmiApproval::whereNotNull('rapidx_user_id')
+                ->where('ecrs_id', $currentEcrsId)
+                ->first();
+                if ($firstPmiApproval) {
+                    $firstPmiApproval->update(['status' => 'PEN']);
+                }
+            */
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveMethodApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $selectedId = $request->selectedId;
+            //Get Current Ecr Approval is equal to Current Session
+            $methodApprovalCurrent = MethodApproval::where('methods_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            if($methodApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+            //Update the machine Approval Status
+            $methodApprovalCurrent->update([
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ]);
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+           $methodApproval = MethodApproval::where('methods_id',$selectedId)
+           ->whereNotNull('rapidx_user_id')
+           ->where('status','-')
+           ->limit(1)
+           ->get(['id','approval_status']);
+            if ( count($methodApproval) != 0){
+                $methodApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $methodApprovalConditions = [
+                    'id' => $methodApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(MethodApproval::class,$methodApprovalConditions,$methodApprovalValidated);
+                //Update the ECR Approval Status
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'approval_status' => $methodApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
+            }else{
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'PMIAPP',
+                    'approval_status' => 'PB',
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
+            }
+             //DISAPPROVED ECR
+             if($request->status === "DIS"){
+                $conditions = [
+                    'id' => $selectedId,
+                ];
+                $requestValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$conditions,$requestValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
     public function loadMachineApproverSummaryMaterialId (Request $request){
         try {
             $methodsId = $request->methodsId ?? "";
@@ -122,14 +274,12 @@ class MethodController extends Controller
                 $result .= '<ul class="dropdown-menu">';
                 if($row->method->status === "EXDISPO" || $row->method->status === "OK"){
                     //Upload External Disposition
-                    $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'"id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'"id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
                 }
                 if($row->method->status === "RUP" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
                 $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                // if($row->method->status === "EXDISPO" && $row->created_by === session('rapidx_user_id')){
-
 
                 $result .= '</ul>';
                 $result .= '</div>';
@@ -157,14 +307,6 @@ class MethodController extends Controller
                 $result .= '</br>';
                 return $result;
             })
-            // ->addColumn('get_attachment',function ($row) use ($request){
-            //     $result = '';
-            //     $result .= '<a class="btn btn-outline-success btn-sm mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnDownloadExcel"><i class="fa-solid fa-file-excel"></i> </a>';
-            //     $result .= '</br>';
-            //     $result .= '<a class="btn btn-outline-danger btn-sm mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodRef"><i class="fa-solid fa-image"></i> </a>';
-            //     $result .= '</center>';
-            //     return $result;
-            // })
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
@@ -262,90 +404,6 @@ class MethodController extends Controller
             ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
             ->make(true);
         } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function saveMethod(Request $request, MethodFileRequest $methodFileRequest){
-        try {
-            DB::beginTransaction();
-            $methodRequestValidated = [];
-            $ecrsId = $methodFileRequest->ecrsId;
-            $methodsId = $methodFileRequest->methodsId;
-
-            if($methodFileRequest->hasfile('methodRefBefore') && $methodFileRequest->hasfile('methodRefAfter')){
-               $arrUploadFile = $this->commonInterface->uploadFileImg($methodFileRequest->methodRefBefore,$methodFileRequest->methodRefAfter,$methodsId,'method');
-                $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
-                $impFilteredDocumentNameBefore = implode(' | ',$arrUploadFile['arr_filtered_document_name_before']);
-                $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
-                $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
-
-                $methodRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
-                $methodRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
-                $methodRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
-                $methodRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
-
-            }
-            $conditions = [
-                'id' =>  $methodsId
-            ];
-            $this->resourceInterface->updateConditions(Method::class,$conditions,$methodRequestValidated);
-            $arrMachineApprovalRequest = [
-                'PRDNAB'  => $request->prdnAssessedBy,
-                'PRDNCB'  => $request->prdnCheckedBy,
-                'PPCAB'   => $request->ppcAssessedBy,
-                'PPCCB'   => $request->ppcCheckedBy,
-                'MENGAB'  => $request->proEnggAssessedBy,
-                'MENGCB'  => $request->proEnggCheckedBy,
-                'PENGAB'  => $request->mainEnggAssessedBy,
-                'PENGCB'  => $request->mainEnggCheckedBy,
-                'LQCAB'   => $request->qcAssessedBy,
-                'LQCCB'   => $request->qcCheckedBy,
-            ];
-
-           $methodApprovalValidated = collect($arrMachineApprovalRequest)->flatMap(function ($users,$approvalStatus) use ($request,$ecrsId){
-                return collect($users)->map(function ($userId) use ($request,$approvalStatus,&$ecrsId){
-                    return [
-                        'ecrs_id' => $ecrsId,
-                        'methods_id' => $request->methodsId,
-                        'rapidx_user_id' => $userId == 0 ? NULL : $userId,
-                        'approval_status' => $approvalStatus,
-                        'created_at' => now(),
-                    ];
-                });
-
-            })->toArray();
-            MethodApproval::where('methods_id',$methodsId)->delete();
-            MethodApproval::insert($methodApprovalValidated);
-            $methodApproval =  MethodApproval::whereNotNull('rapidx_user_id')
-            ->where('methods_id', $methodsId)->first();
-            if ($methodApproval) {
-                $methodApproval->update(['status' => 'PEN']);
-                Method::where('id', $methodsId)->first()
-                ->update([
-                    'approval_status' => $methodApproval->approval_status,
-                    'status' => 'FORAPP', //FOR APPROVAL
-                ]);
-            }
-            //Reset the PMI Approval
-            /*
-                PmiApproval::whereNotNull('rapidx_user_id')
-                ->where('ecrs_id', $currentEcrsId)
-                ->update([
-                    'status' => '-',
-                    'remarks' => '',
-                ]);
-                //Update Pending PMI Approval
-                $firstPmiApproval =  PmiApproval::whereNotNull('rapidx_user_id')
-                ->where('ecrs_id', $currentEcrsId)
-                ->first();
-                if ($firstPmiApproval) {
-                    $firstPmiApproval->update(['status' => 'PEN']);
-                }
-            */
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
             throw $e;
         }
     }
@@ -516,72 +574,5 @@ class MethodController extends Controller
             throw $e;
         }
     }
-    public function saveMethodApproval(Request $request){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-            $selectedId = $request->selectedId;
-            //Get Current Ecr Approval is equal to Current Session
-            $methodApprovalCurrent = MethodApproval::where('methods_id',$selectedId)
-            ->whereNotNull('rapidx_user_id')
-            ->where('status','PEN')
-            ->first();
-            if($methodApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
-                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
-            }
-            //Update the machine Approval Status
-            $methodApprovalCurrent->update([
-                'status' => $request->status,
-                'remarks' => $request->remarks,
-            ]);
-            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-           $methodApproval = MethodApproval::where('methods_id',$selectedId)
-           ->whereNotNull('rapidx_user_id')
-           ->where('status','-')
-           ->limit(1)
-           ->get(['id','approval_status']);
-            if ( count($methodApproval) != 0){
-                $methodApprovalValidated = [
-                    'status' => 'PEN',
-                ];
-                $methodApprovalConditions = [
-                    'id' => $methodApproval[0]->id,
-                ];
-                $this->resourceInterface->updateConditions(MethodApproval::class,$methodApprovalConditions,$methodApprovalValidated);
-                //Update the ECR Approval Status
-                $enviromentConditions = [
-                    'id' => $selectedId,
-                ];
-                $enviromentValidated = [
-                    'approval_status' => $methodApproval[0]->approval_status,
-                ];
-                $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
-            }else{
-                $enviromentConditions = [
-                    'id' => $selectedId,
-                ];
-                $enviromentValidated = [
-                    'status' => 'PMIAPP',
-                    'approval_status' => 'PB',
-                ];
-                $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
-            }
-             //DISAPPROVED ECR
-             if($request->status === "DIS"){
-                $conditions = [
-                    'id' => $selectedId,
-                ];
-                $requestValidated = [
-                    'status' => 'DIS',
-                    'approval_status' => 'DIS', //Repeat the status
-                ];
-                $this->resourceInterface->updateConditions(Method::class,$conditions,$requestValidated);
-            }
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
+
 }
