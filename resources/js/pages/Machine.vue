@@ -1,10 +1,24 @@
 <template>
     <div class="container-fluid px-4">
         <h4 class="mt-5">Machine</h4>
-        <div class="card"  style="width: 100%;">
+        <div class="row">
+            <div class="col-md-3 offset-md-4">
+                <Multiselect
+                    placeholder="-Select an Option-"
+                    :close-on-select="true"
+                    :searchable="true"
+                    :options="commonVar.optCategoryAdminAccess"
+                    @change="onChangeAdminAccess($event)"
+                />
+            </div>
+        </div>
+        <div class="card mt-3"  style="width: 100%;">
             <div class="card-body overflow-auto">
                 <div class="container-fluid px-4">
                     <div class="table-responsive">
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Machine Table</li>
+                        </ol>
                         <!-- :ajax="api/load_ecr_by_status?status=AP" -->
                         <DataTable
                             width="100%" cellspacing="0"
@@ -589,12 +603,13 @@
         modalSaveSpecialInspection,
         modalExternalDisposition,
         specialInsQcInspectorParams,
+        frmSpecialInspection,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         changeExternalDisposition,
         btnLinkViewExternalDisposition,
-        frmSpecialInspection,
+        getCategoryAdminAccessOpt,
     } = useCommon();
     const modalSaveMachine = ref(null);
     const modalSaveEcrDetail = ref(null);
@@ -608,6 +623,7 @@
     const selectedEcrsId = ref(null);
     const selectedMachinesIdEncrypted = ref(null);
     const selectedMachinesId = ref(null);
+    const selectedAdminAccess = ref(null);
     const tblEcrByStatus = ref(null);
     const tblMachineApproverSummary = ref(null);
     const isApprovedDisappproved = ref(null);
@@ -812,6 +828,8 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+        await getCategoryAdminAccessOpt();
+
 
         modalSaveMachine.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMachine.value);
@@ -823,6 +841,12 @@
             resetEcrForm(frmSpecialInspection.value);
         });
     })
+
+    // === Functions
+    const onChangeAdminAccess = async (selectedParams)=>{
+        tblEcrByStatus.value.dt.ajax.url("api/load_ecr_machine_by_status?category=Machine"+"&& adminAccess="+selectedParams).draw();
+        selectedAdminAccess.value = selectedParams;
+    }
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
@@ -924,8 +948,7 @@
             remarks : remarks,
         }
         axiosFetchData(apiParams,'api/save_machine_approval',function(response){
-            console.log(response);
-            tblEcrByStatus.value.dt.draw();
+            tblEcrByStatus.value.dt.ajax.url("api/load_ecr_machine_by_status?category=Machine"+"&& adminAccess="+selectedAdminAccess.value).draw();
             modal.Approval.hide();
             modal.SaveMachine.hide();
         });
@@ -941,7 +964,7 @@
         formData.append("ecrsId", selectedEcrsId.value);
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
             modal.ExternalDisposition.hide();
-            tblEcrByStatus.value.dt.draw();
+            tblEcrByStatus.value.dt.ajax.url("api/load_ecr_machine_by_status?category=Machine"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }
 </script>

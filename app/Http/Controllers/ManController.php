@@ -39,7 +39,6 @@ class ManController extends Controller
         if( $adminAccess === 'null' || blank($adminAccess) ){
             $ecr->whereHas('man_detail.man_approvals_pending',function($query){
                  // if is adminAccess exist deactivate the session condition
-                 $query->where('status','PEN');
                  $query->where('rapidx_user_id',session('rapidx_user_id'));
              })->get();
         }

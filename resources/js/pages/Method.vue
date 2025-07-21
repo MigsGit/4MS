@@ -1,11 +1,24 @@
 <template>
     <div class="container-fluid px-4">
         <h4 class="mt-5">Methods</h4>
-        <div class="card"  style="width: 100%;">
+        <div class="row">
+            <div class="col-md-3 offset-md-4">
+                <Multiselect
+                    placeholder="-Select an Option-"
+                    :close-on-select="true"
+                    :searchable="true"
+                    :options="commonVar.optCategoryAdminAccess"
+                    @change="onChangeAdminAccess($event)"
+                />
+            </div>
+        </div>
+        <div class="card mt-5"  style="width: 100%;">
             <div class="card-body overflow-auto">
                 <div class="container-fluid px-4">
                     <div class="table-responsive">
-                        <!-- :ajax="api/load_ecr_by_status?status=AP" -->
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Method Table</li>
+                        </ol>
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
@@ -569,12 +582,13 @@
         modalSaveSpecialInspection,
         modalExternalDisposition,
         specialInsQcInspectorParams,
+        frmSpecialInspection,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         changeExternalDisposition,
         btnLinkViewExternalDisposition,
-        frmSpecialInspection,
+        getCategoryAdminAccessOpt,
     } = useCommon();
 
     const modalSaveMethod = ref(null);
@@ -596,10 +610,9 @@
     const arrOriginalFilenamesAfter = ref(null);
     const arrOriginalFilenameExternalDispositions = ref(null);
     const selectedMethodsId = ref(null);
+    const selectedAdminAccess = ref(null);
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
-
-
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -801,8 +814,13 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+        await getCategoryAdminAccessOpt();
     })
-
+    // === Functions
+    const onChangeAdminAccess = async (selectedParams)=>{
+        tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedParams).draw();
+        selectedAdminAccess.value = selectedParams;
+    }
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
@@ -898,9 +916,9 @@
                 remarks : remarks,
             }
             axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
+                tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
                 modal.Approval.hide();
                 modal.SaveMethod.hide();
-                tblEcrByStatus.value.dt.draw();
             });
             return;
         }
@@ -911,7 +929,7 @@
         }
         axiosFetchData(apiParams,'api/save_method_approval',function(response){
             console.log(response);
-            tblEcrByStatus.value.dt.draw();
+            tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
             modal.Approval.hide();
             modal.SaveMethod.hide();
         });
@@ -925,7 +943,7 @@
 
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
             modal.ExternalDisposition.hide();
-            tblEcrByStatus.value.dt.draw();
+            tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }
 </script>

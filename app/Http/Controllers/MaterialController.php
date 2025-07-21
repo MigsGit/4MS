@@ -270,7 +270,6 @@ class MaterialController extends Controller
             if( $adminAccess === 'null' || blank($adminAccess) ){
                 $ecr->whereHas('material.material_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
-                    $query->where('status','PEN');
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
                 })->get();
             }
@@ -301,7 +300,7 @@ class MaterialController extends Controller
             }
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
-
+                $materialStatus = $row->material->status ?? "";
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -309,16 +308,16 @@ class MaterialController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->material->status === "EXDISPO" || $row->material->status === "OK"){
+                if($materialStatus === "EXDISPO" || $materialStatus === "OK"){
                     //Upload External Disposition
                     return $result = '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
                 }
-                if($row->material->status === "FORAPP" || $row->material->status === "PMIAPP"){
-                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                if($materialStatus === "FORAPP" || $materialStatus === "PMIAPP"){
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
-                if($row->material->status === "RUP" && $row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$row->material->status.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
+                if($materialStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
 
                 $result .= '</ul>';
@@ -328,8 +327,9 @@ class MaterialController extends Controller
             })
             ->addColumn('get_status',function ($row) use($request){
                 //TODO: Read Approval Status, Tab Based on Department
+                $materialStatus = $row->material->status ?? "";
                 $currentApprover = $row->material->material_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $getStatus = $this->getStatus($row->material->status);
+                $getStatus = $this->getStatus($materialStatus);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
@@ -337,7 +337,7 @@ class MaterialController extends Controller
                 if( $currentApprover != ''){
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
                 }
-                if( $row->material->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
+                if( $materialStatus === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                     $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                     $approvalStatus = $row->material->approval_status;
                     $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);

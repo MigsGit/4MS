@@ -248,23 +248,54 @@ class MethodController extends Controller
     }
     public function loadMethodEcrByStatus(Request $request){
         try {
-
+            $adminAccess = $request->adminAccess;
             $data = [];
             $relations = [
-                'pmi_approvals_pending.rapidx_user',
-                'method.method_approvals_pending.rapidx_user',
+                'method.method_approvals_pending',
                 'method',
             ];
             $conditions = [
                 'status' => 'OK',
                 'category' => $request->category
             ];
-            $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+
+            if( $adminAccess === 'null' || blank($adminAccess) ){
+                return $ecr->whereHas('method.method_approvals_pending',function($query){
+                    // if is adminAccess exist deactivate the session condition
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                })->get();
+            }
+
+            if( $adminAccess === 'created'){
+                $ecr->where('created_by' , session('rapidx_user_id'))
+                ->get();
+            }
+            if( $adminAccess === 'all') {
+                $ecr->get();
+            }
+            if ( $adminAccess === 'pmi') {
+                $data = [];
+                $relations = [
+                    'pmi_approvals_pending',
+                    'method',
+                ];
+                $conditions = [
+                    'status' => 'OK',
+                    'category' => $request->category
+                ];
+                $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+                // Check PMI approvals instead
+                $ecr->whereHas('pmi_approvals_pending', function ($query) {
+                    $query->where('status', 'PEN')
+                    ->where('rapidx_user_id',session('rapidx_user_id'));
+                });
+            }
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
+                $methodStatus = $row->method->status ?? "";
                 $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";
-
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -272,14 +303,14 @@ class MethodController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->method->status === "EXDISPO" || $row->method->status === "OK"){
+                if($methodStatus === "EXDISPO" || $methodStatus === "OK"){
                     //Upload External Disposition
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'"id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
                 }
-                if($row->method->status === "RUP" && $row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
+                    $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
-                $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
 
                 $result .= '</ul>';
                 $result .= '</div>';
@@ -287,8 +318,9 @@ class MethodController extends Controller
                 return $result;
             })
             ->addColumn('get_status',function ($row) use($request){
-               $currentApprover = $row->method->method_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $getStatus = $this->getStatus($row->method->status);
+                $methodStatus = $row->method->status ?? "";
+                $currentApprover = $row->method->method_approvals_pending[0]['rapidx_user']['name'] ?? '';
+                $getStatus = $this->getStatus($methodStatus);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
@@ -297,7 +329,7 @@ class MethodController extends Controller
                 if($row->status != 'DIS' && $currentApprover != ''){
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
-                if( $row->method->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
+                if( $methodStatus === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                     $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                     $approvalStatus = $row->method->approval_status;
                     $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
@@ -308,9 +340,10 @@ class MethodController extends Controller
                 return $result;
             })
             ->addColumn('get_attachment',function ($row) use ($request){
+                $methodStatus = $row->method->status ?? "";
                 $result = '';
                 $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$row->method->status.'" id="btnViewMethodRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })
@@ -322,6 +355,7 @@ class MethodController extends Controller
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })
             ->rawColumns([
