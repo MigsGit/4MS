@@ -19,4 +19,8 @@ class MachineApproval extends Model
     {
         return $this->hasOne(RapidxUser::class, 'id', 'rapidx_user_id');
     }
+    public function machine()
+    {
+        return $this->hasOne(Machine::class, 'ecrs_id', 'ecrs_id');
+    }
 }

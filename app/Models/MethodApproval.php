@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Method;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MethodApproval extends Model
 {
@@ -18,5 +19,9 @@ class MethodApproval extends Model
     public function rapidx_user()
     {
         return $this->hasOne(RapidxUser::class, 'id', 'rapidx_user_id');
+    }
+    public function method()
+    {
+        return $this->hasOne(Method::class, 'ecrs_id', 'ecrs_id');
     }
 }

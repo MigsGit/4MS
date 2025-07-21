@@ -624,16 +624,45 @@ class CommonController extends Controller
     public function getApprovalCountByRapidxUserId(Request $request){
         try {
             $rapidxUserId = session('rapidx_user_id');
-            $ecrApproval = EcrApproval::where('rapidx_user_id',$rapidxUserId)
+            $ecrApproval = EcrApproval::
+            with('ecr')
+            ->whereHas('ecr', function ($query) {
+                $query->where('status','!=', 'DIS');
+            })
+            ->where('rapidx_user_id',$rapidxUserId)
             ->where('status','PEN')
             ->count();
-            $manApproval = ManApproval::where('rapidx_user_id',$rapidxUserId)
+            $manApproval = ManApproval::
+            with('man_detail')
+            ->whereHas('man_detail', function ($query) {
+                $query->where('status','!=', 'DIS');
+            })
+            ->where('rapidx_user_id',$rapidxUserId)
             ->where('status','PEN')
             ->count();
-            $materialApproval = MaterialApproval::where('rapidx_user_id',$rapidxUserId)->where('status','PEN')->count();
-            $machineApproval = MachineApproval::where('rapidx_user_id',$rapidxUserId)->where('status','PEN')->count();
-            $methodApproval = MethodApproval::where('rapidx_user_id',$rapidxUserId)
+            $materialApproval = MaterialApproval::
+            with('material')
+            ->whereHas('material', function ($query) {
+                $query->where('status','!=', 'DIS');
+            })
+            ->where('rapidx_user_id',$rapidxUserId)
             ->where('status','PEN')->count();
+            $machineApproval = MachineApproval::
+            with('machine')
+            ->whereHas('machine', function ($query) {
+                $query->where('status','!=', 'DIS');
+            })
+            ->where('rapidx_user_id',$rapidxUserId)
+            ->where('status','PEN')
+            ->count();
+            $methodApproval = MethodApproval::
+            with('method')
+            ->whereHas('method', function ($query) {
+                $query->where('status','!=', 'DIS');
+            })
+            ->where('rapidx_user_id',$rapidxUserId)
+            ->where('status','PEN'
+            )->count();
 
            $pmiApproval = PmiApproval::with(
                 'man_detail',
@@ -641,7 +670,23 @@ class CommonController extends Controller
                 'machine',
                 'method',
                 'environment',
-            )->where('rapidx_user_id',$rapidxUserId)->where('status','PEN')->get();
+            )
+            // ->whereHas('ecr', function ($query) {
+            //     $query->where('status','!=', 'DIS');
+            // })
+            // ->whereHas('man_detail', function ($query) {
+            //     $query->where('status','!=', 'DIS');
+            // })
+            // ->whereHas('material', function ($query) {
+            //     $query->where('status','!=', 'DIS');
+            // })
+            // ->whereHas('machine', function ($query) {
+            //     $query->where('status','!=', 'DIS');
+            // })
+            // ->whereHas('method', function ($query) {
+            //     $query->where('status','!=', 'DIS');
+            // })
+            ->where('rapidx_user_id',$rapidxUserId)->where('status','PEN')->get();
 
             //Count PENDING PMI Approval with Relationship
             $relations = ['man_detail', 'material', 'machine', 'method', 'environment'];

@@ -15,4 +15,8 @@ class ManApproval extends Model
     {
         return $this->hasOne(RapidxUser::class, 'id', 'rapidx_user_id');
     }
+    public function man_detail()
+    {
+        return $this->hasOne(ManDetail::class, 'ecrs_id', 'ecrs_id');
+    }
 }
