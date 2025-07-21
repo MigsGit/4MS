@@ -21,17 +21,30 @@ class EnvironmentController extends Controller
     }
     public function loadEcrEnvironmentByStatus(Request $request){
         try {
-
+            $adminAccess = $request->adminAccess;
             $data = [];
             $relations = [
-                'pmi_approvals_pending.rapidx_user',
+                'pmi_approvals_pending',
                 'environment',
             ];
             $conditions = [
                 'status' => 'OK',
                 'category' => $request->category
             ];
-            $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+
+            if( $adminAccess === 'null' || blank($adminAccess) || $adminAccess === 'pmi' ){
+                $ecr->whereHas('pmi_approvals_pending', function ($query) {
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                });
+            }
+            if( $adminAccess === 'created'){
+                $ecr->where('created_by' , session('rapidx_user_id'))
+                ->get();
+            }
+            if( $adminAccess === 'all') {
+                $ecr->get();
+            }
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 $result = "";
@@ -74,6 +87,7 @@ class EnvironmentController extends Controller
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })
             ->addColumn('get_attachment',function ($row) use ($request){

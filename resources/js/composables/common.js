@@ -166,7 +166,7 @@ export default function useCommon(){
         }
         axiosFetchData(apiParams,'api/get_current_pmi_internal_approver',function(response){
             let data = response.data;
-            commonVar.value.isSessionPmiInternalApprover = data.isSessionPmiInternalApprover;
+            commonVar.isSessionPmiInternalApprover = data.isSessionPmiInternalApprover;
         });
     }
     const saveSpecialInspection = async () => {

@@ -1,12 +1,24 @@
 <template>
     <div class="container-fluid px-4">
+        <h4 class="mt-4">Environment</h4>
+        <div class="row">
+            <div class="col-md-3 offset-md-4">
+                <Multiselect
+                    placeholder="-Select an Option-"
+                    :close-on-select="true"
+                    :searchable="true"
+                    :options="commonVar.optCategoryAdminAccess"
+                    @change="onChangeAdminAccess($event)"
+                />
+            </div>
+        </div>
         <div class="card-body overflow-auto">
             <div class="container-fluid px-4">
                 <div class="card mt-5"  style="width: 100%;">
                     <div class="card-body overflow-auto">
                         <div class="container-fluid px-4">
                             <ol class="breadcrumb mb-4">
-                                <li class="breadcrumb-item active">Environment</li>
+                                <li class="breadcrumb-item active">Environment Table</li>
                             </ol>
                             <div class="table-responsive">
                                 <!-- :ajax="api/load_ecr_by_status?status=AP" -->
@@ -283,8 +295,8 @@
         commonVar,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+        getCategoryAdminAccessOpt,
     } = useCommon();
-    // console.log(commonVar.isSessionPmiInternalApprover);
 
     // const frmEnvironment = ref({
     //     environmentRef: null,
@@ -297,10 +309,11 @@
     const modalViewEnvironmentRef = ref(null);
     const aViewEnvironmentRef = ref(null);
     const selectedEcrsIdEncrypted = ref(null);
+    const selectedAdminAccess = ref(null);
     const arrOriginalFilenames = ref([]);
-
     const modalPmiInternalApproval = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
+    const tblEcrByStatus = ref(null);
     const approvalRemarks = ref(null);
     const selectedEcrsId = ref(null);
     const isPmiInternalApproved = ref(null);
@@ -409,10 +422,16 @@
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
+        await getCategoryAdminAccessOpt();
         modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcrDetails.value);
         });
     })
+    // === Functions
+    const onChangeAdminAccess = async (selectedParams)=>{
+        tblEcrByStatus.value.dt.ajax.url("api/load_ecr_environment_by_status?category=Environment"+"&& adminAccess="+selectedParams).draw();
+        selectedAdminAccess.value = selectedParams;
+    }
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
@@ -452,7 +471,8 @@
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_pmi_internal_approval', (response) =>{
-            tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecr_id="+selectedEcrsId.value).draw()
+            // tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecr_id="+selectedEcrsId.value).draw()
+            tblEcrByStatus.value.dt.ajax.url("api/load_ecr_environment_by_status?category=Environment"+"&& adminAccess="+selectedAdminAccess.value).draw();
             modal.PmiInternalApproval.hide();
             modal.SaveEnvironment.hide();
         });
