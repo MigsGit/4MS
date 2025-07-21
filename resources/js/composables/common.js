@@ -14,6 +14,7 @@ export default function useCommon(){
         isSessionPmiInternalApprover : false,
         optUserMaster:[],
         optAdminAccess : [],
+        optCategoryAdminAccess : [],
         rapidxUserDeptGroup : '',
         rapidxUserDeptId: '',
         isActiveTab : '',
@@ -124,6 +125,30 @@ export default function useCommon(){
 
         });
     }
+    const getCategoryAdminAccessOpt = async () => {
+        let apiParams = {};
+        axiosFetchData(apiParams,'api/get_admin_access_opt',function(response){
+            let data = response.data;
+            let userDeptGroup = data.departmentGroup;
+            commonVar.rapidxUserDeptId = data.department_id;
+            commonVar.rapidxUserDeptGroup = userDeptGroup;
+            rapidxUserDeptGroup.value = userDeptGroup;
+            // departmentGroup
+            if(userDeptGroup === "ISS" ||  userDeptGroup === "QAD"){
+                commonVar.optCategoryAdminAccess = [
+                    {"value":"all","label":"Show All"},
+                    {"value":"created","label":"Show my request"},
+                    {"value":"pmi","label":"Pending PMI Approval"},
+                ];
+            }else{
+                commonVar.optCategoryAdminAccess = [
+                    {"value":"created","label":"Show my request"},
+                    {"value":"pmi","label":"Pending PMI Approval"},
+                ];
+            }
+
+        });
+    }
     const getCurrentApprover = async (params) => {
         let apiParams = {
             selectedId : params.selectedId,
@@ -212,6 +237,7 @@ export default function useCommon(){
         changeExternalDisposition,
         btnLinkViewExternalDisposition,
         getAdminAccessOpt,
+        getCategoryAdminAccessOpt,
         frmSpecialInspection,
     }
 

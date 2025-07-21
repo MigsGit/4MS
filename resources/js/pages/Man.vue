@@ -8,7 +8,7 @@
                     placeholder="-Select an Option-"
                     :close-on-select="true"
                     :searchable="true"
-                    :options="commonVar.optAdminAccess"
+                    :options="commonVar.optCategoryAdminAccess"
                     @change="onChangeAdminAccess($event)"
                 />
             </div>
@@ -552,7 +552,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(selectedManId,frmMan.ecrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(currentManDetailsId,frmMan.ecrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
 </template>
@@ -602,7 +602,7 @@
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         frmSpecialInspection,
-        getAdminAccessOpt,
+        getCategoryAdminAccessOpt,
     } = useCommon();
 
     //ref state
@@ -636,7 +636,9 @@
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
+                        let manDetailsId = this.getAttribute('man-details-id');
                         frmMan.value.ecrsId = ecrsId;
+                        currentManDetailsId.value = manDetailsId;
                         frmSpecialInspection.value.ecrsId = ecrsId;
                         isModal.value = 'Edit';
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
@@ -650,6 +652,8 @@
                         btnViewManById.addEventListener('click',function(){
                             let ecrsId = this.getAttribute('ecrs-id');
                             let manStatus = this.getAttribute('man-status');
+                            let manDetailsId = this.getAttribute('man-details-id');
+
                             let manApproverParams = {
                                 selectedId : ecrsId,
                                 approvalType : 'manApproval'
@@ -659,6 +663,7 @@
                                 approvalType : 'pmiApproval'
                             }
                             frmMan.value.ecrsId = ecrsId;
+                            currentManDetailsId.value = manDetailsId;
                             frmSpecialInspection.value.ecrsId = ecrsId;
                             currentStatus.value = manStatus;
                             isModal.value = 'View';
@@ -814,7 +819,7 @@
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(qcInspectorOperatorParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
-        await getAdminAccessOpt();
+        await getCategoryAdminAccessOpt();
     })
 
     const onChangeAdminAccess = async (selectedParams)=>{
@@ -897,7 +902,7 @@
         });
     }
     const saveApproval = async (selectedId=null,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
-        if(approvalType === 'PMIAPP'){
+        if(approvalType === 'PMIAPP'){ //Based on Ecr Id
             let apiParams = {
                 ecrsId : selectedEcrsId,
                 status : isApprovedDisappproved,
@@ -910,7 +915,7 @@
             });
             return;
         }
-        let apiParams = {
+        let apiParams = { //Based on Ecr Id because the APPROVED ECR save the man approval by ECR id
             selectedId : selectedEcrsId,
             status : isApprovedDisappproved,
             remarks : remarks,

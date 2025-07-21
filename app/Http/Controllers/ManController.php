@@ -27,8 +27,7 @@ class ManController extends Controller
         $adminAccess = $request->adminAccess;
         $data = [];
         $relations = [
-            'pmi_approvals_pending.rapidx_user',
-            'man_detail.man_approvals',
+            'man_detail.man_approvals_pending',
             'man_detail',
         ];
         $conditions = [
@@ -36,13 +35,16 @@ class ManController extends Controller
             'category' => $request->category
         ];
         $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+
         if( $adminAccess === 'null' || blank($adminAccess) ){
-            $ecr->whereHas('man_detail.man_approvals',function($query) use ($request){
-                // if is adminAccess exist deactivate the session condition
-                $query->where('status','PEN');
-                $query->where('rapidx_user_id',session('rapidx_user_id'));
-            })->get();
+            $ecr->whereHas('man_detail.man_approvals_pending',function($query){
+                 // if is adminAccess exist deactivate the session condition
+                 $query->where('status','PEN');
+                 $query->where('rapidx_user_id',session('rapidx_user_id'));
+             })->get();
         }
+
+
         if( $adminAccess === 'created'){
             $ecr->where('created_by' , session('rapidx_user_id'))
             ->get();
@@ -50,6 +52,24 @@ class ManController extends Controller
         if( $adminAccess === 'all') {
             $ecr->get();
         }
+        if ( $adminAccess === 'pmi') {
+            $data = [];
+            $relations = [
+                'pmi_approvals_pending',
+                'man_detail',
+            ];
+            $conditions = [
+                'status' => 'OK',
+                'category' => $request->category
+            ];
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+            // Check PMI approvals instead
+            $ecr->whereHas('pmi_approvals_pending', function ($query) {
+                $query->where('status', 'PEN')
+                ->where('rapidx_user_id',session('rapidx_user_id'));
+            });
+        }
+
         return DataTables($ecr)
         ->addColumn('get_actions',function ($row) use ($request){
             $result = "";
@@ -60,7 +80,7 @@ class ManController extends Controller
             $result .= '</button>';
             $result .= '<ul class="dropdown-menu">';
             if($row->man_detail->status === "RUP" || $row->man_detail->status === "PMIAPP"){
-                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" materials-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
             }
             // if($row->man_detail->status === "RUP" && $row->created_by === session('rapidx_user_id')){
             if($row->man_detail->status === "RUP"){
@@ -415,7 +435,7 @@ class ManController extends Controller
             ->get(['id','approval_status']);
             if ( count($manApproval) === 0){
                     $manConditions = [
-                        'id' => $selectedId,
+                        'ecrs_id' => $selectedId,
                     ];
                     $manValidated = [
                         'status' => 'PMIAPP',
@@ -428,7 +448,7 @@ class ManController extends Controller
                     'status' => 'PEN',
                 ];
                 $manApprovalConditions = [
-                    'id' => $manApproval[0]->id,
+                    'ecrs_id' => $selectedId,
                 ];
                 $this->resourceInterface->updateConditions(ManApproval::class,$manApprovalConditions,$manApprovalValidated);
                 //Update the ECR Approval Status
