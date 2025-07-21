@@ -43,7 +43,6 @@ class EcrController extends Controller
     }
     public function loadEcr(Request $request){
         try {
-            // return  $request->adminAccess;
             $status = explode(',',$request->status) ?? "";
             $adminAccess = $request->adminAccess;
             $data = [];
@@ -532,11 +531,11 @@ class EcrController extends Controller
             //Verify if the ECR Requirement is Completed.
             $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
             //TODO:QA Requirements
-            // if($ecrApproval[0]->status === 'QA'){
-            //     if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
-            //         return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
-            //     }
-            // }
+            if($ecrApprovalCurrent[0]->status === 'QA'){
+                if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
+                    return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
+                }
+            }
             //Update the ECR Approval Status
             $ecrApprovalCurrent->update([
                 'status' => $request->status,
@@ -614,13 +613,13 @@ class EcrController extends Controller
                     'status' => 'DIS',
                 ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
-                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
-                //Send Disapproved Email to Requestor
+                //Send DISAPPROVED Email to Requestor
                 $to = $requestedBy['email'] ?? '';
                 $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
                 $from =$currentSession['email'] ?? '';
                 $from_name = $currentSession['fullName'];
                 $subject = "DISAPPROVED: Engineering Change Request (ECR)";
+                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
 
             }
             DB::commit();

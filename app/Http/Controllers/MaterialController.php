@@ -177,6 +177,16 @@ class MaterialController extends Controller
             //Initialize the Email Address of the User
             $requestedBy = $this->emailInterface->getEmailByRapidxUserId($material->ecr->created_by);
             $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($materialApproval[0]->rapidx_user_id);
+            if ( count($materialApproval) === 0){
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'PMIAPP',
+                    'approval_status' => 'CB',
+                ];
+                $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
+            }
             if ( count($materialApproval) != 0){
                 $materialApprovalValidated = [
                     'status' => 'PEN',
@@ -193,22 +203,12 @@ class MaterialController extends Controller
                     'approval_status' => $materialApproval[0]->approval_status,
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,   $enviromentValidated);
-                //Send Approval Email
-                $msg = $this->emailInterface->materialEmailMsg($selectedId);
                 //Send For Approval Email to Next Approver
+                $msg = $this->emailInterface->materialEmailMsg($selectedId);
                 $to = $ecrCurrentApproval['email'] ?? '';
                 $from = $requestedBy['email'] ?? '';
-                $subject = "TEST EMAIL 4MCMS - FOR APPROVAL: Material";
+                $subject = "FOR APPROVAL: Material (4M CMS)";
                 $from_name = "4M Change Control Management System";
-            }else{
-                $enviromentConditions = [
-                    'id' => $selectedId,
-                ];
-                $enviromentValidated = [
-                    'status' => 'PMIAPP',
-                    'approval_status' => 'CB',
-                ];
-                $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
             }
              //DISAPPROVED ECR
              if($request->status === "DIS"){
@@ -220,7 +220,15 @@ class MaterialController extends Controller
                     'approval_status' => 'DIS', //Repeat the status
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
+                //Send DISAPPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from =$currentSession['email'] ?? '';
+                $from_name = $currentSession['fullName'];
+                $subject = "DISAPPROVED: Material (4M CMS)";
+                $msg = $this->emailInterface->materialEmailMsg($selectedId);
             }
+            //Array Send Email
             $emailData = [
                 "to" =>$to,
                 "cc" =>"",
@@ -237,7 +245,7 @@ class MaterialController extends Controller
                 "created_by" => session('rapidx_username'),
                 "system_name" => "rapidx_4M",
             ];
-            DB::commit();
+            // DB::commit();
             $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

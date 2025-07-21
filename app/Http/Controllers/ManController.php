@@ -24,19 +24,34 @@ class ManController extends Controller
         $this->commonInterface = $commonInterface;
     }
     public function loadEcrManByStatus(Request $request){
+        $adminAccess = $request->adminAccess;
         $data = [];
         $relations = [
             'pmi_approvals_pending.rapidx_user',
-            'man_detail.man_approvals_pending.rapidx_user',
+            'man_detail.man_approvals',
             'man_detail',
         ];
         $conditions = [
             'status' => 'OK',
             'category' => $request->category
         ];
-        $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+        $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+        if( $adminAccess === 'null' || blank($adminAccess) ){
+            $ecr->whereHas('man_detail.man_approvals',function($query) use ($request){
+                // if is adminAccess exist deactivate the session condition
+                $query->where('status','PEN');
+                $query->where('rapidx_user_id',session('rapidx_user_id'));
+            })->get();
+        }
+        if( $adminAccess === 'created'){
+            $ecr->where('created_by' , session('rapidx_user_id'))
+            ->get();
+        }
+        if( $adminAccess === 'all') {
+            $ecr->get();
+        }
         return DataTables($ecr)
-    ->addColumn('get_actions',function ($row) use ($request){
+        ->addColumn('get_actions',function ($row) use ($request){
             $result = "";
             $result .= '<center>';
             $result .= '<div class="btn-group dropstart mt-4">';

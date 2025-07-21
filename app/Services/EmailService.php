@@ -195,7 +195,7 @@ class EmailService implements EmailInterface
             </html>';
     }
     public function materialEmailMsg($selectedId){
-      $material = Material::with(
+        $material = Material::with(
             'ecr',
             'dropdown_detail_material_sample',
             'dropdown_detail_material_supplier',
@@ -207,13 +207,15 @@ class EmailService implements EmailInterface
         $createdBy = $ecr->rapidx_user_created_by->name;
         $getMaterialStatus = $material->status;
         if($getMaterialStatus == 'DIS'){
-            $header = "Your ECR has been disapproved";
+            $header = "Your request has been disapproved";
         }else if($getMaterialStatus == 'OK'){
-            $header = "Your ECR has been approved";
+            $header = "Your request has been approved";
         }else{
-            $header = "Please see the ECR for your approval.";
+            $header = "Please see the request for your approval.";
         }
 
+        $materialSample = filled($material->dropdown_detail_material_sample) ?$material->dropdown_detail_material_sample->dropdown_masters_details : "N/A";
+        $materialSupplier =filled($material->dropdown_detail_material_supplier) ? $material->dropdown_detail_material_supplier->dropdown_masters_details : "N/A";
         return $msg = '<!DOCTYPE html>
             <html>
                 <head>
@@ -272,16 +274,10 @@ class EmailService implements EmailInterface
                                                     <label class="col-sm-12 col-form-label"><b>Qoutation: </b><span class="text-black"> '.$material->qoutation.' </span></label>
                                                 </div>
                                                 <div class="form-group row">
-                                                    <label class="col-sm-12 col-form-label"><b>Qoutation: </b><span class="text-black"> '.$material->qoutation.' </span></label>
+                                                    <label class="col-sm-12 col-form-label"><b>Material Sample: </b><span class="text-black"> '.$materialSample.' </span></label>
                                                 </div>
                                                 <div class="form-group row">
-                                                    <label class="col-sm-12 col-form-label"><b>Qoutation: </b><span class="text-black"> '.$material->qoutation.' </span></label>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <label class="col-sm-12 col-form-label"><b>Material Sample: </b><span class="text-black"> '.$material->dropdown_detail_material_sample == null ? $material->dropdown_detail_material_sample->dropdown_masters_details : "N/A".' </span></label>
-                                                </div>
-                                                <div class="form-group row">
-                                                    <label class="col-sm-12 col-form-label"><b>Material Supplier: </b><span class="text-black"> '.$material->dropdown_detail_material_supplier->dropdown_masters_details??"N/A".' </span></label>
+                                                    <label class="col-sm-12 col-form-label"><b>Material Supplier: </b><span class="text-black"> '.$materialSupplier.' </span></label>
                                                 </div>
 
                                                 <div class="form-group row">

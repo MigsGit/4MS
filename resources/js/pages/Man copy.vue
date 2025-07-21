@@ -1,7 +1,7 @@
 <template>
     <div class="container-fluid px-4">
         <h4 class="mt-4">Man</h4>
-        {{ commonVar.rapidxUserDeptGroup }}
+        <!-- {{ commonVar.rapidxUserDeptGroup }}
         <div class="row">
             <div class="col-md-3 offset-md-4">
                 <Multiselect
@@ -12,7 +12,7 @@
                     @change="onChangeAdminAccess($event)"
                 />
             </div>
-        </div>
+        </div> -->
         <div class="card mt-5"  style="width: 100%;">
             <div class="card-body overflow-auto">
                 <div class="container-fluid px-4">
@@ -20,7 +20,6 @@
                         <li class="breadcrumb-item active">Man Table</li>
                     </ol>
                     <div class="table-responsive">
-                        <!-- :ajax="api/load_ecr_by_status?status=AP" -->
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
@@ -602,7 +601,6 @@
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         frmSpecialInspection,
-        getAdminAccessOpt,
     } = useCommon();
 
     //ref state
@@ -802,7 +800,7 @@
         selectedVal: '',
     };
 
-    onMounted( async ()=>{
+    onMounted( async () => {
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveManDetails = new Modal(modalSaveManDetails.value.modalRef,{ keyboard: false });
@@ -814,13 +812,13 @@
         await getDropdownMasterByOpt(typeOfPartParams);
         await getRapidxUserByIdOpt(qcInspectorOperatorParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
-        await getAdminAccessOpt();
+
     })
 
-    const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedParams).draw();
-        selectedAdminAccess.value = selectedParams;
-    }
+    // const onChangeAdminAccess = async (selectedParams)=>{
+    //     tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedParams).draw();
+    //     selectedAdminAccess.value = selectedParams;
+    // }
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
         modal.Approval.show();
@@ -916,7 +914,7 @@
             remarks : remarks,
         }
         axiosFetchData(apiParams,'api/save_man_approval',function(response){
-            tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedAdminAccess.value).draw();
+            tblEcrByStatus.value.dt.draw();
             modal.Approval.hide();
             modal.SaveMan.hide();
         });
