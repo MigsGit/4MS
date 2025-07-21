@@ -1,11 +1,22 @@
 <template>
     <div class="container-fluid px-4">
         <h4 class="mt-4">Material</h4>
+        <div class="row">
+            <div class="col-md-3 offset-md-4">
+                <Multiselect
+                    placeholder="-Select an Option-"
+                    :close-on-select="true"
+                    :searchable="true"
+                    :options="commonVar.optCategoryAdminAccess"
+                    @change="onChangeAdminAccess($event)"
+                />
+            </div>
+        </div>
         <div class="card mt-5"  style="width: 100%;">
             <div class="card-body overflow-auto">
                 <div class="container-fluid px-4">
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Man</li>
+                        <li class="breadcrumb-item active">Material Table</li>
                     </ol>
                     <div class="table-responsive">
                         <DataTable
@@ -13,7 +24,7 @@
                             class="table mt-2"
                             ref="tblEcrByCategoryStatus"
                             :columns="tblEcrByCategoryStatusColumns"
-                            ajax="api/load_ecr_material_by_status?category=Material&&status=AP"
+                            ajax="api/load_ecr_material_by_status?category=Material"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -790,18 +801,20 @@
         commonVar,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+        getCategoryAdminAccessOpt,
     } = useCommon();
 
     const modalSaveEcrDetail = ref(null);
     const modalSaveMaterial = ref(null);
     const modalUploadMaterialRef = ref(null);
     const modalViewMaterialRef = ref(null);
-
+    const modalApproval = ref(null);
     const isModalMaterial = ref(null);
     const isModalView = ref(true);
     const selectedEcrsId = ref(null);
     const currentStatus = ref(null);
     const selectedEcrsIdEncrypted = ref(null);
+    const selectedAdminAccess = ref(null);
     const arrOriginalFilenames = ref(null);
     const materialRef = ref(null);
     const isInternalExternal = ref(null);
@@ -812,7 +825,6 @@
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);
     const selectedMaterialsId = ref(null);
-    const modalApproval = ref(null);
 
     //Columns
      const tblEcrByCategoryStatusColumns = [
@@ -1125,8 +1137,7 @@
         await getDropdownMasterByOpt(typeOfPartParams);
         await getDropdownMasterByOpt(materialSupplierParams);
         await getDropdownMasterByOpt(materialColorParams);
-
-
+        await getCategoryAdminAccessOpt();
     })
     // Override default classes for small size and readonly styles
     const multiselectSm =ref ({
@@ -1135,12 +1146,17 @@
         singleLabel: 'text-sm',
         search: 'hidden', // Hide input if readonly
     });
+
+    //Functions
+    const onChangeAdminAccess = async (selectedParams)=>{
+        tblEcrByCategoryStatus.value.dt.ajax.url("api/load_ecr_material_by_status?category=Material"+"&& adminAccess="+selectedParams).draw();
+        selectedAdminAccess.value = selectedParams;
+    }
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
         }
     };
-    //Functions
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
         modal.Approval.show();
@@ -1160,13 +1176,13 @@
             axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
                 modal.Approval.hide();
                 modal.SaveMaterial.hide();
-                tblEcrByCategoryStatus.value.dt.draw();
+                tblEcrByCategoryStatus.value.dt.ajax.url("api/load_ecr_material_by_status?category=Material"+"&& adminAccess="+selectedAdminAccess.value).draw();
             });
             return;
         }
 
         axiosFetchData(apiParams,'api/save_material_approval',function(response){
-            tblEcrByCategoryStatus.value.dt.draw();
+            tblEcrByCategoryStatus.value.dt.ajax.url("api/load_ecr_material_by_status?category=Material"+"&& adminAccess="+selectedAdminAccess.value).draw();
             modal.Approval.hide();
             modal.SaveMaterial.hide();
         });
@@ -1349,8 +1365,9 @@
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_material', (response) =>{
+            tblEcrByCategoryStatus.value.dt.ajax.url("api/load_ecr_material_by_status?category=Material"+"&& adminAccess="+selectedAdminAccess.value).draw();
             modal.SaveMaterial.hide();
-            tblEcrByCategoryStatus.value.dt.draw();
+
         });
     }
     const frmUploadMaterialRef = async () => {

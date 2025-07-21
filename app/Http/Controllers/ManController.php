@@ -44,7 +44,6 @@ class ManController extends Controller
              })->get();
         }
 
-
         if( $adminAccess === 'created'){
             $ecr->where('created_by' , session('rapidx_user_id'))
             ->get();

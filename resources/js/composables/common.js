@@ -15,6 +15,7 @@ export default function useCommon(){
         optUserMaster:[],
         optAdminAccess : [],
         optCategoryAdminAccess : [],
+        arrOptCategoryAdminAccess : [],
         rapidxUserDeptGroup : '',
         rapidxUserDeptId: '',
         isActiveTab : '',
@@ -103,7 +104,7 @@ export default function useCommon(){
     ];
     //Functions
 
-    const getAdminAccessOpt = async () => {
+    const getAdminAccessOpt = async (category=null) => {
         let apiParams = {};
         axiosFetchData(apiParams,'api/get_admin_access_opt',function(response){
             let data = response.data;
@@ -125,7 +126,7 @@ export default function useCommon(){
 
         });
     }
-    const getCategoryAdminAccessOpt = async () => {
+    const getCategoryAdminAccessOpt = async (category=null) => {
         let apiParams = {};
         axiosFetchData(apiParams,'api/get_admin_access_opt',function(response){
             let data = response.data;
@@ -133,12 +134,12 @@ export default function useCommon(){
             commonVar.rapidxUserDeptId = data.department_id;
             commonVar.rapidxUserDeptGroup = userDeptGroup;
             rapidxUserDeptGroup.value = userDeptGroup;
-            // departmentGroup
             if(userDeptGroup === "ISS" ||  userDeptGroup === "QAD"){
                 commonVar.optCategoryAdminAccess = [
                     {"value":"all","label":"Show All"},
                     {"value":"created","label":"Show my request"},
                     {"value":"pmi","label":"Pending PMI Approval"},
+
                 ];
             }else{
                 commonVar.optCategoryAdminAccess = [
@@ -146,7 +147,6 @@ export default function useCommon(){
                     {"value":"pmi","label":"Pending PMI Approval"},
                 ];
             }
-
         });
     }
     const getCurrentApprover = async (params) => {

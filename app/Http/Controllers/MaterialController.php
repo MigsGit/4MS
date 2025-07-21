@@ -255,18 +255,50 @@ class MaterialController extends Controller
     }
     public function loadEcrMaterialByStatus(Request $request){
         try {
-
+            $adminAccess = $request->adminAccess;
             $data = [];
             $relations = [
-                'pmi_approvals_pending.rapidx_user',
-                'material.material_approvals_pending.rapidx_user',
+                'material.material_approvals_pending',
                 'material',
             ];
             $conditions = [
                 'status' => 'OK',
                 'category' => $request->category
             ];
-            $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+
+            if( $adminAccess === 'null' || blank($adminAccess) ){
+                $ecr->whereHas('material.material_approvals_pending',function($query){
+                    // if is adminAccess exist deactivate the session condition
+                    $query->where('status','PEN');
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                })->get();
+            }
+
+            if( $adminAccess === 'created'){
+                $ecr->where('created_by' , session('rapidx_user_id'))
+                ->get();
+            }
+            if( $adminAccess === 'all') {
+                $ecr->get();
+            }
+            if ( $adminAccess === 'pmi') {
+                $data = [];
+                $relations = [
+                    'pmi_approvals_pending',
+                    'material',
+                ];
+                $conditions = [
+                    'status' => 'OK',
+                    'category' => $request->category
+                ];
+                $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+                // Check PMI approvals instead
+                $ecr->whereHas('pmi_approvals_pending', function ($query) {
+                    $query->where('status', 'PEN')
+                    ->where('rapidx_user_id',session('rapidx_user_id'));
+                });
+            }
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
 
@@ -330,6 +362,8 @@ class MaterialController extends Controller
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
+
                 return $result;
             })
             ->rawColumns([
