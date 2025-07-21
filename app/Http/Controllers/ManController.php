@@ -395,52 +395,53 @@ class ManController extends Controller
             DB::beginTransaction();
             $selectedId = $request->selectedId;
             //Get Current Ecr Approval is equal to Current Session
-            $methodApprovalCurrent = ManApproval::where('ecrs_id',$selectedId)
+            $manApprovalCurrent = ManApproval::where('ecrs_id',$selectedId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
-            if($methodApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+            if($manApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
             //Update the machine Approval Status
-            $methodApprovalCurrent->update([
+            $manApprovalCurrent->update([
                 'status' => $request->status,
                 'remarks' => $request->remarks,
             ]);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-           $methodApproval = ManApproval::where('ecrs_id',$selectedId)
-           ->whereNotNull('rapidx_user_id')
-           ->where('status','-')
-           ->limit(1)
-           ->get(['id','approval_status']);
-            if ( count($methodApproval) != 0){
-                $methodApprovalValidated = [
+            $manApproval = ManApproval::where('ecrs_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','-')
+            ->limit(1)
+            ->get(['id','approval_status']);
+            if ( count($manApproval) === 0){
+                    $manConditions = [
+                        'id' => $selectedId,
+                    ];
+                    $manValidated = [
+                        'status' => 'PMIAPP',
+                        'approval_status' => 'PB',
+                    ];
+                    $this->resourceInterface->updateConditions(ManDetail::class,$manConditions,$manValidated);
+            }
+            if ( count($manApproval) != 0){
+                $manApprovalValidated = [
                     'status' => 'PEN',
                 ];
-                $methodApprovalConditions = [
-                    'id' => $methodApproval[0]->id,
+                $manApprovalConditions = [
+                    'id' => $manApproval[0]->id,
                 ];
-                $this->resourceInterface->updateConditions(ManApproval::class,$methodApprovalConditions,$methodApprovalValidated);
+                $this->resourceInterface->updateConditions(ManApproval::class,$manApprovalConditions,$manApprovalValidated);
                 //Update the ECR Approval Status
-                $enviromentConditions = [
+                $manConditions = [
                     'id' => $selectedId,
                 ];
-                $enviromentValidated = [
-                    'approval_status' => $methodApproval[0]->approval_status,
+                $manValidated = [
+                    'approval_status' => $manApproval[0]->approval_status,
                 ];
-                $this->resourceInterface->updateConditions(ManDetail::class,$enviromentConditions,$enviromentValidated);
-            }else{
-                $enviromentConditions = [
-                    'id' => $selectedId,
-                ];
-                $enviromentValidated = [
-                    'status' => 'PMIAPP',
-                    'approval_status' => 'PB',
-                ];
-                $this->resourceInterface->updateConditions(ManDetail::class,$enviromentConditions,$enviromentValidated);
+                $this->resourceInterface->updateConditions(ManDetail::class,$manConditions,$manValidated);
             }
-             //DISAPPROVED ECR
-             if($request->status === "DIS"){
+                //DISAPPROVED ECR
+            if($request->status === "DIS"){
                 $conditions = [
                     'id' => $selectedId,
                 ];
@@ -451,7 +452,7 @@ class ManController extends Controller
                 $this->resourceInterface->updateConditions(ManDetail::class,$conditions,$requestValidated);
             }
             DB::commit();
-            return response()->json(['is_success' => 'true']);
+            return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
             throw $e;
