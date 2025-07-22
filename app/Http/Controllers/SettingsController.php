@@ -82,16 +82,21 @@ class SettingsController extends Controller
                 switch ($isRoles) {
                     case 'APP':
                         $roles = 'Approver';
+                        $badgeBg = 'badge rounded-pill bg-warning';
                         break;
-
+                    case 'USER':
+                        $roles = 'User';
+                        $badgeBg = 'badge rounded-pill bg-primary';
+                        break;
                     default:
                         $roles = 'User';
+                        $badgeBg = 'badge rounded-pill bg-primary';
                         break;
                 }
 
                 $result = '';
                 $result .= '<center>';
-                $result .= '<span class="badge rounded-pill bg-primary"> '.$roles.' </span>';
+                $result .= '<span class="'.$badgeBg.'"> '.$roles.' </span>';
                 $result .= '</center>';
                 return $result;
             })
@@ -188,6 +193,23 @@ class SettingsController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
+
+            $getUser = User::where( 'rapidx_user_id' , $request->userId)->first();
+            if( filled( $getUser) ){
+                if($getUser->roles === "APP"){
+                    User::where( 'rapidx_user_id' , $request->userId)->update([
+                        'roles' => "USER",
+                    ]);
+                }
+                if($getUser->roles != "APP"){
+                    User::where( 'rapidx_user_id' , $request->userId)->update([
+                        'roles' => "APP",
+                    ]);
+                }
+                DB::commit();
+                return response()->json(['isSuccess' => 'true']);
+            }
+
             $user = User::insert([
                 'rapidx_user_id' => $request->userId,
                 'roles' => 'APP',

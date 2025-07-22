@@ -671,21 +671,6 @@ class CommonController extends Controller
                 'method',
                 'environment',
             )
-            // ->whereHas('ecr', function ($query) {
-            //     $query->where('status','!=', 'DIS');
-            // })
-            // ->whereHas('man_detail', function ($query) {
-            //     $query->where('status','!=', 'DIS');
-            // })
-            // ->whereHas('material', function ($query) {
-            //     $query->where('status','!=', 'DIS');
-            // })
-            // ->whereHas('machine', function ($query) {
-            //     $query->where('status','!=', 'DIS');
-            // })
-            // ->whereHas('method', function ($query) {
-            //     $query->where('status','!=', 'DIS');
-            // })
             ->where('rapidx_user_id',$rapidxUserId)->where('status','PEN')->get();
 
             //Count PENDING PMI Approval with Relationship

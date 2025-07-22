@@ -30,7 +30,7 @@ export default [
     {
         path: '/4M',
         component: '4M',
-        // beforeEnter: checkIfSessionExist,
+        beforeEnter: checkIfSessionExist,
         components: {
             default: IndexComponent,
             dashboard: Dashboard,
@@ -39,62 +39,62 @@ export default [
             {
                 path: 'dashboard',
                 name: 'dashboard',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: Dashboard,
 
             },
             {
                 path: 'ecr',
                 name: 'Ecr',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: Ecr,
             },
             {
                 path: 'man',
                 name: 'Man',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: Man,
             },
             {
                 path: 'material',
                 name: 'Material',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: Material,
             },
             {
                 path: 'machine',
                 name: 'Machine',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: Machine,
             },
             {
                 path: 'machine',
                 name: 'Machine',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: Machine,
             },
             {
                 path: 'method',
                 name: 'Method',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: Method,
             },
             {
                 path: 'environment',
                 name: 'Environment',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: Environment,
             },
             {
                 path: 'user_master',
                 name: 'UserMaster',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: UserMaster,
             },
             {
                 path: 'dropdown_master',
                 name: 'DropdownMaster',
-                // beforeEnter: checkIfSessionExist,
+                beforeEnter: checkIfSessionExist,
                 component: DropdownMaster,
             },
         ]

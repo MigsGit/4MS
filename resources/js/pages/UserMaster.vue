@@ -11,7 +11,7 @@
                         width="100%" cellspacing="0"
                         class="table mt-2"
                         ref="tblUserMaster"
-                        :columns="ecrUserMasterColumns"
+                        :columns="userMasterColumns"
                         ajax="api/get_user_master"
                         :options="{
                             serverSide: true, //Serverside true will load the network
@@ -22,7 +22,6 @@
                     >
                         <thead>
                             <tr>
-                                <!-- <th>Action</th> -->
                                 <th>
                                     <font-awesome-icon class="nav-icon" icon="fa-cogs" />
                                 </th>
@@ -53,7 +52,9 @@
 
     DataTable.use(DataTablesCore);
     const { axiosSaveData } = useForm(); // Call the useFetch function
-    const ecrUserMasterColumns = [
+
+    const tblUserMaster = ref(null);
+    const userMasterColumns = [
         { data: 'get_action',
         orderable: false,
             searchable: false,
@@ -64,7 +65,7 @@
                         let dataId = this.getAttribute('data-id');
                         Swal.fire({
                             title: 'Confirmation',
-                            text: 'Are you sure you want this user to be approver?',
+                            text: 'Are you sure you want this user to change role?',
                             icon: 'warning',
                             allowOutsideClick: false,
                             showCancelButton: true,
@@ -89,7 +90,7 @@
         let formData = new FormData();
         formData.append('userId',userId)
         axiosSaveData(formData,'api/save_user_approver', (response) =>{
-            console.log(response);
+            tblUserMaster.value.dt.draw();
         });
     }
 </script>
