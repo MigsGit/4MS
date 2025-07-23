@@ -148,8 +148,10 @@ export default function useEcr(){
         });
     }
     const getRapidxUserByIdOpt = async (params) => {
+        console.log(params.rapidxUserDeptGroup);
+
         let apiParams = {
-            rapidxUserDeptGroup : 'params.rapidxUserDeptGroup' ?? '',
+            rapidxUserDeptGroup : params.rapidxUserDeptGroup ?? '',
         }
 
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log

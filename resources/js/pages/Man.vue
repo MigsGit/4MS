@@ -1,7 +1,6 @@
 <template>
     <div class="container-fluid px-4">
         <h4 class="mt-4">Man</h4>
-        {{ commonVar.rapidxUserDeptGroup }}
         <div class="row">
             <div class="col-md-3 offset-md-4">
                 <Multiselect
@@ -647,40 +646,41 @@
                         modal.SaveMan.show();
 
                     });
-                    let btnViewManById = cell.querySelector('#btnViewManById');
-                    if(btnViewManById != null){
-                        btnViewManById.addEventListener('click',function(){
-                            let ecrsId = this.getAttribute('ecrs-id');
-                            let manStatus = this.getAttribute('man-status');
-                            let manDetailsId = this.getAttribute('man-details-id');
 
-                            let manApproverParams = {
-                                selectedId : ecrsId,
-                                approvalType : 'manApproval'
-                            }
-                            let pmiApproverParams = {
-                                selectedId : ecrsId,
-                                approvalType : 'pmiApproval'
-                            }
-                            frmMan.value.ecrsId = ecrsId;
-                            currentManDetailsId.value = manDetailsId;
-                            frmSpecialInspection.value.ecrsId = ecrsId;
-                            currentStatus.value = manStatus;
-                            isModal.value = 'View';
-                            tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                            tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrsId).draw();
-                            tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw()
-                            if( manStatus === 'RUP'){
-                                getCurrentApprover(manApproverParams);
-                                tblManApproverSummary.value.dt.ajax.url("api/load_man_approver_summary_ecrs_id?ecrsId="+ecrsId).draw();
-                            }
-                            if( manStatus === 'PMIAPP'){
-                                getCurrentApprover(pmiApproverParams);
-                                tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
-                            }
-                            modal.SaveMan.show();
-                        });
-                    }
+                }
+                let btnViewManById = cell.querySelector('#btnViewManById');
+                if(btnViewManById != null){
+                    btnViewManById.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let manStatus = this.getAttribute('man-status');
+                        let manDetailsId = this.getAttribute('man-details-id');
+
+                        let manApproverParams = {
+                            selectedId : ecrsId,
+                            approvalType : 'manApproval'
+                        }
+                        let pmiApproverParams = {
+                            selectedId : ecrsId,
+                            approvalType : 'pmiApproval'
+                        }
+                        frmMan.value.ecrsId = ecrsId;
+                        currentManDetailsId.value = manDetailsId;
+                        frmSpecialInspection.value.ecrsId = ecrsId;
+                        currentStatus.value = manStatus;
+                        isModal.value = 'View';
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrsId).draw();
+                        tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw()
+                        if( manStatus === 'RUP'){
+                            getCurrentApprover(manApproverParams);
+                            tblManApproverSummary.value.dt.ajax.url("api/load_man_approver_summary_ecrs_id?ecrsId="+ecrsId).draw();
+                        }
+                        if( manStatus === 'PMIAPP'){
+                            getCurrentApprover(pmiApproverParams);
+                            tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
+                        }
+                        modal.SaveMan.show();
+                    });
                 }
             }
         } ,

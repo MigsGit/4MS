@@ -42,8 +42,8 @@ const useAuth = useAuthStore();
             </div>
         </div>
         <div class="sb-sidenav-footer">
-
-            <div class="small">Logged in as: </div>
+            <!-- {{ userFullName }} -->
+            <div class="small">Logged in as: {{ userFullName }}</div>
         </div>
     </nav>
 </template>
@@ -55,11 +55,15 @@ const useAuth = useAuthStore();
         axiosFetchData
     } = useEcr();
 
-    onMounted(() => {
+    const userFullName = ref("");
 
-        axiosFetchData({},fetchApi,function(response){
-            console.log(response);
+    const getUserFullName = async () => {
+        axiosFetchData({},'api/get_admin_access_opt',function(response){
+            userFullName.value = response.data.activeUserFullName;
         });
-    })
+    }
+    onMounted( async () => {
+        // await getUserFullName();
+    });
 
 </script>

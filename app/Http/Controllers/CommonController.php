@@ -167,7 +167,9 @@ class CommonController extends Controller
 
             // $rapidxUserById = $this->resourceInterface->readWithRelationsConditions(RapidxUser::class,$data,$relations,$conditions);
             // $rapidxUserById = $rapidxUserById;
-
+            // $rapidxUserDeptGroup = 'N/A';
+            $rapidxUserDeptGroup = $request->rapidxUserDeptGroup ?? "N/A";
+            $rapidxUserDeptGroupQuery = $rapidxUserDeptGroup === "N/A" ? '': 'AND departments.department_group = "'.$rapidxUserDeptGroup.'"';
             $rapidxUserById = DB::connection('mysql_rapidx')->select('SELECT users.*,user_accesses.
                 module_id,departments.department_name,departments.department_group
                 FROM  users
@@ -175,14 +177,14 @@ class CommonController extends Controller
                 LEFT JOIN departments departments ON departments.department_id = users.department_id
                 WHERE 1=1
                 -- AND departments.department_group = "'.$request->rapidxUserDeptGroup.'"
-                AND departments.department_group = "ISS"
+                '.$rapidxUserDeptGroupQuery.'
                 AND users.user_stat = 1
                 AND user_accesses.module_id = 46'
             );
             if(count ($rapidxUserById) > 0){
                 return response()->json(['isSuccess' => 'true','rapidxUserById'=>$rapidxUserById]);
             }
-            return response()->json(['isSuccess' => 'false','rapidxUserById'=>[],'msg' => 'No User Found !',],500);
+            return response()->json(['isSuccess' => 'false','rapidxUserById'=>[],'msg' => 'User Not Found !',],500);
         } catch (Exception $e) {
             return response()->json(['isSuccess' => 'false', 'exceptionError' => $e->getMessage()]);
         }

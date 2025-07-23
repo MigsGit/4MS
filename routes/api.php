@@ -78,8 +78,8 @@ Route::middleware('auth')->group(function(){
         Route::get('load_dropdown_master_details', 'loadDropdownMasterDetails')->name('load_dropdown_master_details');
         Route::get('get_dropdown_master', 'getDropdownMaster')->name('get_dropdown_master');
         Route::get('get_dropdown_master_details_id', 'getDropdownMasterDetailsId')->name('get_dropdown_master_details_id');
-        Route::get('validate_user_access', 'validateUserAccess')->name('validate_user_access');
         Route::get('get_admin_access_opt', 'getAdminAccessOpt')->name('get_admin_access_opt');
+        Route::get('get_dropdown_master_category', 'getDropdownMasterCategory')->name('get_dropdown_master_category');
     });
 
     Route::controller(ManController::class)->group(function () {

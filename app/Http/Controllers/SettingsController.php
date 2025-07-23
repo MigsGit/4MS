@@ -20,26 +20,7 @@ class SettingsController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-    public function validateUserAccess(Request $request){
-        try {
-            $validUserAccess = DB::connection('mysql_rapidx')->select(
-                'SELECT users.*,user_accesses.module_id,departments.department_name
-                FROM  users
-                LEFT JOIN user_accesses user_accesses ON user_accesses.user_id = users.id
-                LEFT JOIN departments departments ON departments.department_id = users.department_id
-                WHERE 1=1
-                AND users.id = '.session('rapidx_user_id').'
-                AND users.user_stat = 1
-                AND user_accesses.module_id = 46
-                '
-            );
-            return count($validUserAccess);
-
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function getAdminAccessOpt(Request $request){
+    public function getAdminAccessOpt(Request $request){ //get_admin_access_opt
         try {
             $validUserAccess = DB::connection('mysql_rapidx')->select(
                 'SELECT users.*,user_accesses.module_id,departments.department_name,departments.department_group
@@ -52,7 +33,11 @@ class SettingsController extends Controller
                 AND user_accesses.module_id = 46
                 '
             );
-            return response()->json(['departmentGroup'  => $validUserAccess[0]->department_group]);
+            return response()->json([
+                'departmentGroup'  => $validUserAccess[0]->department_group,
+                'activeUserFullName'  => session('rapidx_name'),
+                'validUserAccessCount'  => count($validUserAccess),
+            ]);
         } catch (Exception $e) {
             throw $e;
         }
@@ -118,7 +103,22 @@ class SettingsController extends Controller
     }
     public function getDropdownMaster(Request $request){
         try {
-            $dropdownMaster =  $this->resourceInterface->readWithRelationsConditions(DropdownMaster::class,[],[],[]);
+            $conditions = [
+              'category' => $request->category
+            ];
+            $dropdownMaster =  $this->resourceInterface->readWithRelationsConditions(DropdownMaster::class,[],[],$conditions);
+            return response()->json([
+                'is_success' => 'true',
+                'dropdownMaster' => $dropdownMaster
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
+    public function getDropdownMasterCategory(Request $request){
+        try {
+            $dropdownMaster =  $this->resourceInterface->readCustomEloquent(DropdownMaster::class,['category'],[],[]);
+           $dropdownMaster= $dropdownMaster->groupBy('category')->get();
             return response()->json([
                 'is_success' => 'true',
                 'dropdownMaster' => $dropdownMaster
@@ -129,11 +129,14 @@ class SettingsController extends Controller
     }
     public function loadDropdownMasterDetails(Request $request){
         try {
+            $relations = [
+                'dropdown_master'
+            ];
             $conditions = [
                 'dropdown_masters_id' => $request->dropDownMastersId ?? ""
             ];
 
-            $dropdownMaster =  $this->resourceInterface->readCustomEloquent(DropdownMasterDetail::class,[],[],$conditions);
+            $dropdownMaster =  $this->resourceInterface->readCustomEloquent(DropdownMasterDetail::class,[],$relations,$conditions);
 
             $dropdownMaster->orderBy('dropdown_masters_details');
             return DataTables::of($dropdownMaster)

@@ -731,7 +731,7 @@
 </template>
 
 <script setup>
-    import {ref , onMounted,reactive, toRef,watch} from 'vue';
+    import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useCommon from '../../js/composables/common.js';
@@ -881,6 +881,7 @@
         {   data: 'get_status'} ,
     ];
 
+
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js class
@@ -921,86 +922,82 @@
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getAdminAccessOpt();
         $('#collapse1').addClass('show');
+
+        // Read User RapidUser by Dept Group
+        //constant object params
+        const otherDispoRequestedByParams = {
+            globalVar: ecrVar.requestedBy,
+            formModel: toRef(frmEcrOtherDispoRows.value[0],'requestedBy'),
+            rapidxUserDeptGroup: commonVar.rapidxUserDeptGroup,
+            selectedVal: '0',
+        };
+        const otherDispoTechnicalEvaluationParams = {
+            globalVar: ecrVar.technicalEvaluation,
+            formModel: toRef(frmEcrOtherDispoRows.value[0],'technicalEvaluation'),
+            rapidxUserDeptGroup: commonVar.rapidxUserDeptGroup,
+            selectedVal: '0',
+        };
+        const otherDispoReviewedByParams = {
+            globalVar: ecrVar.reviewedBy,
+            formModel: toRef(frmEcrOtherDispoRows.value[0],'reviewedBy'),
+            rapidxUserDeptGroup: commonVar.rapidxUserDeptGroup,
+            selectedVal: '0',
+        };
+        const qadCheckedByParams = {
+            globalVar: ecrVar.optQadCheckedBy,
+            formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
+            selectedVal: '0',
+        };
+        const qadApprovedByInternalParams = {
+            globalVar: ecrVar.optQadApprovedByInternal,
+            formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
+            selectedVal: '0',
+        };
+        const pmiApproverPreparedByParams = {
+            globalVar: ecrVar.preparedBy,
+            formModel: toRef(frmEcrPmiApproverRows.value[0],'preparedBy'),
+            selectedVal: '0',
+        };
+        const pmiApproverCheckedByParams = {
+            globalVar: ecrVar.checkedBy,
+            formModel: toRef(frmEcrPmiApproverRows.value[0],'checkedBy'),
+            selectedVal: '0',
+        };
+        const pmiApproverApprovedByParams = {
+            globalVar: ecrVar.approvedBy,
+            formModel: toRef(frmEcrPmiApproverRows.value[0],'approvedBy'),
+            selectedVal: '0',
+        };
+        const pmiExternalApproverPreparedByParams = {
+            globalVar: ecrVar.preparedBy,
+            formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'preparedBy'),
+            selectedVal: '0',
+        };
+        const pmiExternalApproverCheckedByParams = {
+            globalVar: ecrVar.checkedBy,
+            formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'checkedBy'),
+            selectedVal: '0',
+        };
+        const pmiExternalApproverApprovedByParams = {
+            globalVar: ecrVar.approvedBy,
+            formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'approvedBy'),
+            selectedVal: '0',
+        };
+       await getRapidxUserByIdOpt(otherDispoRequestedByParams)
+        // await Promise.all([
+            // getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams),
+            // getRapidxUserByIdOpt(otherDispoReviewedByParams),
+            // getRapidxUserByIdOpt(qadCheckedByParams),
+            // getRapidxUserByIdOpt(qadApprovedByInternalParams),
+            // getRapidxUserByIdOpt(pmiApproverPreparedByParams),
+            // getRapidxUserByIdOpt(pmiApproverCheckedByParams),
+            // getRapidxUserByIdOpt(pmiApproverApprovedByParams),
+            // getRapidxUserByIdOpt(pmiExternalApproverPreparedByParams),
+            // getRapidxUserByIdOpt(pmiExternalApproverCheckedByParams),
+            // getRapidxUserByIdOpt(pmiExternalApproverApprovedByParams)
+            // More as needed
+        // ]);
     })
-    watch(
-        () => commonVar.rapidxUserDeptGroup,
-        async (newVal) => {
-            if (!newVal) return;
-            //constant object params
-            const otherDispoRequestedByParams = {
-                globalVar: ecrVar.requestedBy,
-                formModel: toRef(frmEcrOtherDispoRows.value[0], 'requestedBy'),
-                // rapidxUserDeptGroup: newVal,
-                selectedVal: '0',
-            };
-            const otherDispoTechnicalEvaluationParams = {
-                globalVar: ecrVar.technicalEvaluation,
-                formModel: toRef(frmEcrOtherDispoRows.value[0],'technicalEvaluation'),
-                // rapidxUserDeptGroup: newVal,
-                selectedVal: '0',
-            };
-            const otherDispoReviewedByParams = {
-                globalVar: ecrVar.reviewedBy,
-                formModel: toRef(frmEcrOtherDispoRows.value[0],'reviewedBy'),
-                // rapidxUserDeptGroup: newVal,
-                selectedVal: '0',
-            };
-            const qadCheckedByParams = {
-                globalVar: ecrVar.optQadCheckedBy,
-                formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
-                selectedVal: '0',
-            };
-            const qadApprovedByInternalParams = {
-                globalVar: ecrVar.optQadApprovedByInternal,
-                formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
-                selectedVal: '0',
-            };
-            const pmiApproverPreparedByParams = {
-                globalVar: ecrVar.preparedBy,
-                formModel: toRef(frmEcrPmiApproverRows.value[0],'preparedBy'),
-                selectedVal: '0',
-            };
-            const pmiApproverCheckedByParams = {
-                globalVar: ecrVar.checkedBy,
-                formModel: toRef(frmEcrPmiApproverRows.value[0],'checkedBy'),
-                selectedVal: '0',
-            };
-            const pmiApproverApprovedByParams = {
-                globalVar: ecrVar.approvedBy,
-                formModel: toRef(frmEcrPmiApproverRows.value[0],'approvedBy'),
-                selectedVal: '0',
-            };
-            const pmiExternalApproverPreparedByParams = {
-                globalVar: ecrVar.preparedBy,
-                formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'preparedBy'),
-                selectedVal: '0',
-            };
-            const pmiExternalApproverCheckedByParams = {
-                globalVar: ecrVar.checkedBy,
-                formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'checkedBy'),
-                selectedVal: '0',
-            };
-            const pmiExternalApproverApprovedByParams = {
-                globalVar: ecrVar.approvedBy,
-                formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'approvedBy'),
-                selectedVal: '0',
-            };
-            await Promise.all([
-                getRapidxUserByIdOpt(otherDispoRequestedByParams),
-                getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams),
-                getRapidxUserByIdOpt(otherDispoReviewedByParams),
-                getRapidxUserByIdOpt(qadCheckedByParams),
-                getRapidxUserByIdOpt(qadApprovedByInternalParams),
-                getRapidxUserByIdOpt(pmiApproverPreparedByParams),
-                getRapidxUserByIdOpt(pmiApproverCheckedByParams),
-                getRapidxUserByIdOpt(pmiApproverApprovedByParams),
-                getRapidxUserByIdOpt(pmiExternalApproverPreparedByParams),
-                getRapidxUserByIdOpt(pmiExternalApproverCheckedByParams),
-                getRapidxUserByIdOpt(pmiExternalApproverApprovedByParams),
-            ]);
-        },
-        { immediate: true }
-    );
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
@@ -1010,8 +1007,6 @@
     const btnEcr = async () => {
         modalEcr.SaveEcr.show();
         isSelectReadonly.value = false;
-        await generateControlNumber();
-
     }
 
     const generateControlNumber = async () => {

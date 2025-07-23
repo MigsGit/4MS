@@ -3,7 +3,7 @@
      <div class="card mb-2">
         <h5 class="mb-0">
             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
-                Description of Change / Reason for Change
+                Change Details / Reason for Change
             </button>
         </h5>
         <div id="collapse1" class="collapse show" data-bs-parent="#accordionMain">
@@ -17,7 +17,7 @@
                             <thead>
                                 <tr>
                                 <th scope="col">#</th>
-                                <th scope="col" style="width: 60%;">Description of Change</th>
+                                <th scope="col" style="width: 60%;">Change Details</th>
                                 <th scope="col" style="width: 60%;">Reason of Change</th>
                                 <th scope="col" v-show="isSelectReadonly === false">Action</th>
                                 </tr>

@@ -79,7 +79,7 @@ class EcrController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
+                if($row->status === "RUP" || $row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
                 }
                 // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){

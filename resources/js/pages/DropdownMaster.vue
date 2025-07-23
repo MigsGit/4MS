@@ -1,8 +1,17 @@
 <template>
     <div class="container-fluid px-4">
         <h4 class="mt-4">Dropdown Master</h4>
-        <div class="row">
-            <div class="col-md-3 offset-md-4">
+        <div class="row justify-content-between">
+            <div class="col-md-3">
+                <Multiselect
+                    v-model="slctDropdownMasterByCategory"
+                    :close-on-select="true"
+                    :searchable="true"
+                    :options="optDropdownMasterByCategory"
+                    @change="onDropdownMasterByCategory($event)"
+                />
+            </div>
+            <div class="col-md-3">
                 <Multiselect
                     v-model="slctDropdownMaster"
                     :close-on-select="true"
@@ -12,6 +21,7 @@
                 />
             </div>
         </div>
+
         <div class="card mt-3"  style="width: 100%;">
             <div class="row justify-content-end">
                 <div class="col-md-2 mt-3">
@@ -90,7 +100,9 @@
     //Ref State
     const modalSaveDropdownMasterDetails = ref(null);
     const optDropdownMaster = ref([]);
+    const optDropdownMasterByCategory = ref([]);
     const slctDropdownMaster = ref(null);
+    const slctDropdownMasterByCategory = ref(null);
     const btnDropdownMasterDetails = ref(null);
     const tblDropdownMasterDetails = ref(null);
 
@@ -102,6 +114,7 @@
         getDropdownMasterByOpt
     } = useSettings();
     const { axiosSaveData } = useForm(); // Call the useFetch function
+    const selectedCategory = ref(null);
     const tblDropdownMasterDetailsColumns = [
     {   data: 'get_action',
             createdCell(cell){
@@ -119,19 +132,23 @@
         {   data: 'remarks'} ,
     ];
 
-    const dropDownMasterParams = {
-        globalVar: optDropdownMaster,
-        formModel: slctDropdownMaster,
+    const dropDropdownMasterByCategoryParams = {
+        globalVar: optDropdownMasterByCategory,
+        formModel: slctDropdownMasterByCategory,
         selectedVal: '',
     };
 
+
+    // optDropdownMasterByCategory
     onMounted(async () => {
         modal.modalSaveDropdownMasterDetails = new Modal(modalSaveDropdownMasterDetails.value.modalRef,{ keyboard: false });
-        await getDropdownMaster(dropDownMasterParams);
+        await getDropdownMasterCategory(dropDropdownMasterByCategoryParams);
     })
     //Functions
     const getDropdownMaster = async (params) =>{
-        let apiParams = {}
+        let apiParams = {
+            category : params.category
+        }
         axiosFetchData(apiParams,'api/get_dropdown_master',function(response){
             let data = response.data;
             let dropdownMaster = data.dropdownMaster;
@@ -147,11 +164,36 @@
             params.formModel.value = params.selectedVal; //selectedValue after the reading data
         });
     }
-
+    const getDropdownMasterCategory = async (params) =>{
+        let apiParams = {}
+        axiosFetchData(apiParams,'api/get_dropdown_master_category',function(response){
+            let data = response.data;
+            let dropdownMaster = data.dropdownMaster;
+            params.globalVar.value.splice(0, params.globalVar.value.length,
+                { value: '', label: '-Select Category-', disabled:true }, // Push "" option at the start
+                    ...dropdownMaster.map((value) => {
+                    return {
+                        value: value.category,
+                        label: value.category
+                    }
+                }),
+            );
+            params.formModel.value = params.selectedVal; //selectedValue after the reading data
+        });
+    }
+    const onDropdownMasterByCategory = async (category) => {
+        const dropDownMasterParams = {
+            globalVar: optDropdownMaster,
+            formModel: slctDropdownMaster,
+            category: category,
+            selectedVal: '',
+        };
+        await getDropdownMaster(dropDownMasterParams);
+    }
     const onDropdownMasterChange = async (dropDownMastersId) => {
+        // selectedCategory
         tblDropdownMasterDetails.value.dt.ajax.url('api/load_dropdown_master_details?dropDownMastersId='+dropDownMastersId).draw();
         frmDropdownMasterDetails.value.dropdownMastersId = dropDownMastersId;
-        // console.log(btnDropdownMasterDetails.value.classList);
     }
 
     const btnAddDropdownMasterDetails = async () => {
