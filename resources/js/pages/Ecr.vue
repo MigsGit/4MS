@@ -880,7 +880,7 @@
         {   data: 'remarks'},
         {   data: 'get_status'} ,
     ];
-
+    // === Vue hooks
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js class
@@ -922,6 +922,7 @@
         await getAdminAccessOpt();
         $('#collapse1').addClass('show');
     })
+
     watch(
         () => commonVar.rapidxUserDeptGroup,
         async (newVal) => {
@@ -1001,19 +1002,19 @@
         },
         { immediate: true }
     );
+
+    //Functions
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
         }
     };
-
     const btnEcr = async () => {
         modalEcr.SaveEcr.show();
         isSelectReadonly.value = false;
         await generateControlNumber();
 
     }
-
     const generateControlNumber = async () => {
         let apiParams = {};
         axiosFetchData(apiParams,'api/generate_control_number',function(response){
@@ -1043,7 +1044,6 @@
             tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
         });
     }
-    //Functions
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({
             requestedBy: '0',

@@ -1,7 +1,3 @@
-<script setup>
-import { useAuthStore } from '../stores';
-const useAuth = useAuthStore();
-</script>
 <template>
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
         <div class="sb-sidenav-menu">
@@ -43,14 +39,16 @@ const useAuth = useAuthStore();
         </div>
         <div class="sb-sidenav-footer">
             <!-- {{ userFullName }} -->
-            <div class="small">Logged in as: {{ userFullName }}</div>
+            <div class="small">Logged in: {{ userFullName }}</div>
         </div>
     </nav>
 </template>
-<script>
+<script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
     import useEcr from '../../js/composables/ecr.js';
 
+    import { useAuthStore } from '../stores';
+    const useAuth = useAuthStore();
     const {
         axiosFetchData
     } = useEcr();
@@ -63,7 +61,7 @@ const useAuth = useAuthStore();
         });
     }
     onMounted( async () => {
-        // await getUserFullName();
+        await getUserFullName();
     });
 
 </script>
