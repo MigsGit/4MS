@@ -220,6 +220,11 @@ export default function useCommon(){
     const btnLinkViewExternalDisposition = async (selectedEcrsId,index) => {
         window.open(`api/view_external_disposition?ecrsId=${selectedEcrsId} && index=${index} && imageType=after`, '_blank');
     }
+    const resetEcrForm = async (frmElement) => {
+        for (const key in frmElement) {
+            frmElement[key] = '';
+        }
+    };
 
     return {
         rapidxUserDeptGroup,
@@ -238,6 +243,7 @@ export default function useCommon(){
         btnLinkViewExternalDisposition,
         getAdminAccessOpt,
         getCategoryAdminAccessOpt,
+        resetEcrForm,
         frmSpecialInspection,
     }
 

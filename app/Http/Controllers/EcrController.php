@@ -530,12 +530,14 @@ class EcrController extends Controller
             $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category','created_by']);
             //Verify if the ECR Requirement is Completed.
             $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
-            //TODO:QA Requirements
-            if($ecrApprovalCurrent[0]->status === 'QA'){
-                if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
-                    return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
-                }
+
+            // === TODO:QA Requirements
+            // if($ecrApprovalCurrent->approval_status === 'QACB' || $ecrApprovalCurrent->approval_status === 'QAIN'){
+            if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
+                return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
             }
+            // }
+
             //Update the ECR Approval Status
             $ecrApprovalCurrent->update([
                 'status' => $request->status,
@@ -551,10 +553,9 @@ class EcrController extends Controller
 
             //Initialize the Email Address of the User
             $requestedBy = $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by);
-            $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($ecrApproval[0]->rapidx_user_id);
-
             //If the ECR is Approved, Save the ECR Details by Category
             if ( count($ecrApproval) === 0){
+
                 $EcrConditions = [
                     'id' => $request->ecrs_id,
                 ];
@@ -566,13 +567,18 @@ class EcrController extends Controller
                 $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
                 //Send Approval Email
                 //Send Approved Email to the Requestor
-                $to = $requestedBy['email'] ?? '';;
+                $to = $requestedBy['email'] ?? '';
+                // $to =  'mclegaspi@pricon.ph';
                 $from = 'issinfoservice@pricon.ph';
+                $msg='test';
                 $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
                 $from_name = "4M Change Control Management System";
 
             }
+
             if ( count($ecrApproval) != 0 ){
+                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($ecrApproval[0]->rapidx_user_id);
+
                 $ecrApprovalValidated = [
                     'status' => 'PEN',
                 ];

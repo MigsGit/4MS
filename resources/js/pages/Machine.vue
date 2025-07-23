@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-5">Machine</h4>
+        <h4 class="mt-4">Machine</h4>
         <div class="row">
             <div class="col-md-3 offset-md-4">
                 <Multiselect
@@ -565,11 +565,13 @@
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import ModalSpecialInspectionComponent from '../components/ModalSpecialInspectionComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
+    import useSettings from '../../js/composables/settings.js'
     import useMachine from '../../js/composables/machine.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
+
     DataTable.use(DataTablesCore);
     // aobeguico CN ENGG
     // aatamolang TS ENGG
@@ -585,7 +587,6 @@
         reasonOfChangeParams,
         typeOfPartParams,
         getDropdownMasterByOpt,
-        getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrDetailsId,
         saveEcrDetails,
@@ -611,6 +612,9 @@
         btnLinkViewExternalDisposition,
         getCategoryAdminAccessOpt,
     } = useCommon();
+    const {
+        getRapidxUserByIdOpt,
+    } = useSettings();
     const modalSaveMachine = ref(null);
     const modalSaveEcrDetail = ref(null);
     const modalApproval = ref(null);

@@ -944,6 +944,7 @@
                 globalVar: ecrVar.reviewedBy,
                 formModel: toRef(frmEcrOtherDispoRows.value[0],'reviewedBy'),
                 // rapidxUserDeptGroup: newVal,
+                isApprover: true,
                 selectedVal: '0',
             };
             const qadCheckedByParams = {

@@ -92,6 +92,7 @@
     } from 'vue'
     import ModalComponent from '../components/ModalComponent.vue';
     import useSettings from '../composables/settings.js';
+    import useCommon from '../composables/common.js';
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
@@ -113,6 +114,9 @@
         axiosFetchData,
         getDropdownMasterByOpt
     } = useSettings();
+    const {
+        resetEcrForm,
+    } = useCommon();
     const { axiosSaveData } = useForm(); // Call the useFetch function
     const selectedCategory = ref(null);
     const tblDropdownMasterDetailsColumns = [
@@ -143,6 +147,11 @@
     onMounted(async () => {
         modal.modalSaveDropdownMasterDetails = new Modal(modalSaveDropdownMasterDetails.value.modalRef,{ keyboard: false });
         await getDropdownMasterCategory(dropDropdownMasterByCategoryParams);
+        modalSaveDropdownMasterDetails.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            frmDropdownMasterDetails.value.dropdownMasterDetailsId = '';
+            frmDropdownMasterDetails.value.dropdownMastersDetails = '';
+            frmDropdownMasterDetails.value.remarks = '';
+        });
     })
     //Functions
     const getDropdownMaster = async (params) =>{

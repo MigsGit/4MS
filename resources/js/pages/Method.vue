@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-5">Methods</h4>
+        <h4 class="mt-4">Methods</h4>
         <div class="row">
             <div class="col-md-3 offset-md-4">
                 <Multiselect
@@ -548,6 +548,7 @@
     import useEcr from '../../js/composables/ecr.js';
     import useMethod from '../../js/composables/method.js';
     import useForm from '../../js/composables/utils/useForm.js'
+    import useSettings from '../../js/composables/settings.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
@@ -564,7 +565,6 @@
         reasonOfChangeParams,
         typeOfPartParams,
         getDropdownMasterByOpt,
-        getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrDetailsId,
         saveEcrDetails,
@@ -590,6 +590,11 @@
         btnLinkViewExternalDisposition,
         getCategoryAdminAccessOpt,
     } = useCommon();
+    const {
+        getRapidxUserByIdOpt,
+    } = useSettings();
+
+
 
     const modalSaveMethod = ref(null);
     const modalSaveEcrDetail = ref(null);

@@ -2,8 +2,6 @@ import { ref, inject,reactive,nextTick,toRef } from 'vue'
 import useFetch from './utils/useFetch';
 import useForm from "./utils/useForm";
 
-
-
 export default function useSettings(){
     const { axiosFetchData } = useFetch(); // Call  the useFetch function
     const frmDropdownMasterDetails = ref({
@@ -46,6 +44,7 @@ export default function useSettings(){
     const getRapidxUserByIdOpt = async (params) => {
         let apiParams = {
             rapidxUserDeptGroup : params.rapidxUserDeptGroup ?? '',
+            isApprover : params.isApprover ?? '',
         }
         //Multiselect, needs to pass reactive state of ARRAY, import vueselect with default css, check the data to the component by using console.log
         await axiosFetchData(apiParams, `api/get_rapidx_user_by_id_opt`, (response) => { //url

@@ -46,6 +46,8 @@ export default function useFetch ()
                 });
             }
             // throw error; // Ensure errors are propagated
+            return window.location.href = '/RapidX';
+
         } finally {
             isModalLoadingComponent.value = false;
         }

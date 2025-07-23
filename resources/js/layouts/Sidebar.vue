@@ -2,6 +2,11 @@
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
         <div class="sb-sidenav-menu">
             <div class="nav">
+                <!-- <li class="nav-link"> -->
+                    <a href="/RapidX" class="nav-link">
+                        <font-awesome-icon class="nav-icon" icon="arrow-left" />&nbsp;Return to RapidX
+                    </a>
+                <!-- </li> -->
                 <router-link class="nav-link" :to="{ name: 'dashboard' }">
                     <font-awesome-icon class="nav-icon" icon="gauge-high" />&nbsp;Dashboard
                     <!-- <i class="fas fa-tachometer-alt" icon="fa-tachometer-alt"></i>&nbsp;Dashboard get_bulletin_pages_by_id-->

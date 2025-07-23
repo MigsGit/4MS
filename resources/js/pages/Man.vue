@@ -563,6 +563,7 @@
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useEcr from '../../js/composables/ecr.js';
     import useMan from '../../js/composables/man.js';
+    import useSettings from '../../js/composables/settings.js'
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
@@ -581,7 +582,6 @@
         reasonOfChangeParams,
         typeOfPartParams,
         getDropdownMasterByOpt,
-        getRapidxUserByIdOpt,
         axiosFetchData,
         getEcrDetailsId,
         saveEcrDetails,
@@ -603,6 +603,9 @@
         frmSpecialInspection,
         getCategoryAdminAccessOpt,
     } = useCommon();
+    const {
+        getRapidxUserByIdOpt,
+    } = useSettings();
 
     //ref state
     const tblEcrByStatus = ref(null);
