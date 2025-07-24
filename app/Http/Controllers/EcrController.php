@@ -216,7 +216,7 @@ class EcrController extends Controller
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
-                if($row->ecr->created_by != session('rapidx_user_id')){
+                if($row->ecr->created_by === session('rapidx_user_id')){
                     $result = '';
                     $result .= '<center>';
                     $result .= "<button class='btn btn-outline-info btn-sm mr-1 btn-get-ecr-id' ecr-details-id='".$row->id."' id='btnGetEcrDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
@@ -578,11 +578,11 @@ class EcrController extends Controller
                 ];
                 $ecrValidated = [
                     'status' => 'OK', //APPROVED ECR
+                    'approval_status' => 'OK',
                 ];
                 $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
                 // If approved, Save Man, Method, Machine, Material, Environment
                 $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
-                //Send Approval Email
                 //Send Approved Email to the Requestor
                 $to = $requestedBy['email'] ?? '';
                 // $to =  'mclegaspi@pricon.ph';
@@ -845,28 +845,44 @@ class EcrController extends Controller
            throw $e;
        }
    }
+   public function index(Request $request){
+       return 'true' ;
+       try {
+           date_default_timezone_set('Asia/Manila');
+           DB::beginTransaction();
+           DB::commit();
+           return response()->json(['is_success' => 'true']);
+       } catch (Exception $e) {
+           DB::rollback();
+           throw $e;
+       }
+   }
    public function saveDetailsByCategory($category,$ecrsId){
        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $ecr = Ecr::find($ecrsId);
             switch  ($category) {
                 case 'Man':
                     $currentModel = ManDetail::class;
-                    //TODO: Save Man Approval status RequestBy
-                    // $ecrApproval = EcrAppproval::whereNotNull('rapidx_user_id')
-                    // ->where('ecrs_id')
-                    // ->where('approval_status','OTRB')
-                    // ->get(['rapidx_user_id']);
-                    // ManApproval::where('ecrs_id', $ecrsId)->delete();
-                    // foreach ($ecrApproval as $key => $ecrApprovalValue) {
-                    //     ManApproval::insert([
-                    //         'ecrs_id' => $ecrsId,
-                    //         'approval_status' => 'RUP',
-                    //         'rapidx_user' => $ecrApprovalValue->rapidx_user_id,
-                    //         'created_at' => now(),
-                    //     ]);
-                    // }
-                    // ManApproval::where('counter', 0)
-                    // ->where('ecrs_id', $ecrsId)
-                    // ->update(['status'=>'PEN']);
+                    $manApproval = ManApproval::class;
+                    $requestValidated = [
+                        'ecrs_id' => $ecrsId,
+                        'approval_status' => 'RUP',
+                        'created_at' => now(),
+                    ];
+                    $approvalRequest = [
+                        'ecrs_id' => $ecrsId,
+                        'rapidx_user_id' => $ecr->created_by,
+                        'approval_status' => 'RUP',
+                        'created_at' => now(),
+                    ];
+                    $currentModel::where('ecrs_id', $ecrsId)->delete();
+                    $this->resourceInterface->create($currentModel,$requestValidated);
+                    $manApproval::where('ecrs_id', $ecrsId)->delete();
+                    $manApproval::insert($approvalRequest);
+                    $manApproval::where('ecrs_id', $ecrsId)
+                    ->update(['status'=>'PEN']);
                     break;
                 case 'Material':
                     $currentModel = Material::class;
@@ -884,13 +900,10 @@ class EcrController extends Controller
                     //TODO:Error Handling
                     break;
             }
-            $requestValidated = [
-                'ecrs_id' => $ecrsId,
-            ];
-            $this->resourceInterface->create($currentModel,$requestValidated);
-            return response()->json(['is_success' => 'true']);
+            DB::commit();
        } catch (Exception $e) {
            throw $e;
+           DB::rollback();
        }
    }
 

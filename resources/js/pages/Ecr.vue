@@ -475,12 +475,11 @@
                 </div>
                 <div class="row">
                     <div class="modal-footer justify-content-end">
-                        <button v-show="modalTitle === 'View' && currentStatus === 'QA'" @click="btnEcrRequirement(frmEcr.ecrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
+                        <button v-show="modalTitle === 'View'" @click="btnEcrRequirement(frmEcr.ecrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
                             <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp;QA ECR Requirements
                         </button>
                     </div>
                 </div>
-
             </template>
             <template #footer>
                 <button v-show="isSelectReadonly === false" type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -831,7 +830,6 @@
                         getEcrById(ecrsId);
                         getCurrentApprover(approverParams);
                         tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw();
-
                         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+currentEcrsId.value).draw();
                         tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+currentEcrsId.value).draw();
                         tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
@@ -1083,6 +1081,8 @@
         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
         tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
         tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
         modalEcr.EcrRequirements.show();
     }
     const frmSaveEcrApproval = async () => {

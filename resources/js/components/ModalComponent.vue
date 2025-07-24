@@ -1,5 +1,5 @@
 <template>
-    <div class="modal fade" ref="modalRef" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" data-bs-backdrop="static" ref="modalRef" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div :class="modalDialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
