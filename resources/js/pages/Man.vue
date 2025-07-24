@@ -275,9 +275,9 @@
              <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
             <div class="row">
-                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                <div class="input-group flex-nowrap mb-2 input-group-sm d-none">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
-                    <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    <input v-model="frmEcrDetails.ecrDetailsId"  type="hidden" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
                 </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -319,13 +319,13 @@
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Details" @add-event="saveManDetails()" ref="modalSaveManDetails">
         <template #body>
             <div class="row">
-                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                <div class="input-group flex-nowrap mb-2 input-group-sm  d-none">
                     <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-                    <input v-model="frmMan.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    <input v-model="frmMan.ecrsId" type="hidden" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
                 </div>
-                <div class="input-group flex-nowrap mb-2 input-group-sm">
+                <div class="input-group flex-nowrap mb-2 input-group-sm d-none">
                     <span class="input-group-text" id="addon-wrapping">Man Id:</span>
-                    <input  v-model="frmMan.manId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    <input  v-model="frmMan.manId"  type="hidden" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
                 </div>
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -597,11 +597,12 @@
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
         specialInsQcInspectorParams,
+        frmSpecialInspection,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        frmSpecialInspection,
         getCategoryAdminAccessOpt,
+        resetEcrForm,
     } = useCommon();
     const {
         getRapidxUserByIdOpt,
@@ -639,9 +640,8 @@
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
                         let manDetailsId = this.getAttribute('man-details-id');
-                        frmMan.value.ecrsId = ecrsId;
+                        selectedEcrsId.value = ecrsId;
                         currentManDetailsId.value = manDetailsId;
-                        frmSpecialInspection.value.ecrsId = ecrsId;
                         isModal.value = 'Edit';
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrsId).draw();
@@ -817,6 +817,16 @@
         modal.ManChecklist = new Modal(modalManChecklist.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
+
+        modalSaveManDetails.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmMan.value);
+        })
+        modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmSpecialInspection.value);
+        })
+        modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmEcrDetails.value);
+        });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -834,9 +844,11 @@
         modal.Approval.show();
     }
     const addManDetails = async () => {
+        frmMan.value.ecrsId = selectedEcrsId.value;
         modal.SaveManDetails.show();
     }
     const btnAddSpecialInspection = async () => {
+        frmSpecialInspection.value.ecrsId = selectedEcrsId.value;
         modal.SaveSpecialInspection.show();
     }
     const getManById = async (manId) =>
