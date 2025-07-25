@@ -55,9 +55,6 @@ class EcrApprovalRequest extends FormRequest
         ];
     }
     /*
-     external_prepared_by
-    external_checked_by
-    external_approved_by
 
      */
 }
