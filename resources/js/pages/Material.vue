@@ -1,15 +1,22 @@
 <template>
     <div class="container-fluid px-4">
         <h4 class="mt-4">Material</h4>
-        <div class="row">
-            <div class="col-md-3 offset-md-4">
-                <Multiselect
-                    placeholder="-Select an Option-"
-                    :close-on-select="true"
-                    :searchable="true"
-                    :options="commonVar.optCategoryAdminAccess"
-                    @change="onChangeAdminAccess($event)"
-                />
+        <div class="card">
+            <div class="card-header">
+                <h5>Filter</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 offset-md-4">
+                        <Multiselect
+                            placeholder="-Select an Option-"
+                            :close-on-select="true"
+                            :searchable="true"
+                            :options="commonVar.optCategoryAdminAccess"
+                            @change="onChangeAdminAccess($event)"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card mt-5"  style="width: 100%;">

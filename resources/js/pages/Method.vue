@@ -618,6 +618,7 @@
     const selectedAdminAccess = ref(null);
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
+    
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
             orderable: false,

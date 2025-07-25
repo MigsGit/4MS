@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ecr;
 use App\Models\Man;
+use App\Models\EcrDetail;
 use App\Models\ManDetail;
 use App\Models\ManApproval;
 use App\Models\ManChecklist;
@@ -420,17 +421,32 @@ class ManController extends Controller
             if($manApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
-            //Update the machine Approval Status
+            //Update the man Approval Status
             $manApprovalCurrent->update([
                 'status' => $request->status,
                 'remarks' => $request->remarks,
             ]);
+            $isManRequirementsComplete = $this->isManRequirementsComplete($selectedId);
+            if(  $isManRequirementsComplete['isSuccess'] === 'false' && $request->status === 'APP'){
+                return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
+            }
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
             $manApproval = ManApproval::where('ecrs_id',$selectedId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','-')
             ->limit(1)
             ->get(['id','approval_status']);
+            //DISAPPROVED ECR
+            if($request->status === "DIS"){
+                $conditions = [
+                    'id' => $selectedId,
+                ];
+                $requestValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
+                ];
+                $this->resourceInterface->updateConditions(ManDetail::class,$conditions,$requestValidated);
+            }
             if ( count($manApproval) === 0){
                     $manConditions = [
                         'ecrs_id' => $selectedId,
@@ -458,24 +474,48 @@ class ManController extends Controller
                 ];
                 $this->resourceInterface->updateConditions(ManDetail::class,$manConditions,$manValidated);
             }
-                //DISAPPROVED ECR
-            if($request->status === "DIS"){
-                $conditions = [
-                    'id' => $selectedId,
-                ];
-                $requestValidated = [
-                    'status' => 'DIS',
-                    'approval_status' => 'DIS', //Repeat the status
-                ];
-                $this->resourceInterface->updateConditions(ManDetail::class,$conditions,$requestValidated);
-            }
-            DB::commit();
+
+            // DB::commit();
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
             throw $e;
         }
     }
+    public function isManRequirementsComplete($ecrsId){ //Requirement
+        //ECR Details, Man Details
+        $ecrDetails = EcrDetail::where('ecrs_id',$ecrsId)->get();
+        $arrColumnEcrDetails = [
+            'type_of_part',
+            'change_imp_date',
+            'doc_sub_date',
+            'doc_to_be_sub',
+            'customer_approval',
+        ];
+        collect($arrColumnEcrDetails)->each(function ($arrColumnEcrDetailsRows) use ($ecrDetails) {
+            $ecrDetails->whereNotNull($arrColumnEcrDetailsRows);
+        });
+        $ecrDetailsCount = $ecrDetails->count();
+        if($ecrDetailsCount === 0){
+            return [
+                'isSuccess' => 'false',
+                'msg' => 'Please complete the ECR Details Above'
+            ];
+        }
+        $man = Man::where('ecrs_id',$ecrsId)->count();
+        if($man === 0){
+            return [
+                'isSuccess' => 'false',
+                'msg' => 'Please complete the Man Details Above'
+            ];
+        }
+
+        return [
+            'isSuccess' => 'true',
+            'msg' => 'Ecr Details & Man Details Completed'
+        ];
+    }
+    // , Special Inspection
     //Common Function
     public function getStatus($status){
 

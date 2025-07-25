@@ -650,11 +650,6 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function isCompletedEcrRequirementComplete($ecrsId){ //Requirement
-        $classificationRequirementCount =  ClassificationRequirement::whereIn('classifications_id',[1,2,3,4,5])->count();
-        $ecrRequirementCount = EcrRequirement::where('ecrs_id',$ecrsId)->count();
-        return $classificationRequirementCount === $ecrRequirementCount ? 'true' : 'false';
-    }
     public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
         date_default_timezone_set('Asia/Manila');
         try {
@@ -671,6 +666,12 @@ class EcrController extends Controller
              throw $e;
         }
     }
+    public function isCompletedEcrRequirementComplete($ecrsId){ //Requirement
+        $classificationRequirementCount =  ClassificationRequirement::whereIn('classifications_id',[1,2,3,4,5])->count();
+        $ecrRequirementCount = EcrRequirement::where('ecrs_id',$ecrsId)->count();
+        return $classificationRequirementCount === $ecrRequirementCount ? 'true' : 'false';
+    }
+
     public function getDropdownMasterByOpt(Request $request){
         try {
             $data = [];
