@@ -25,6 +25,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DropdownMasterDetail;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\EcrDetailRequest;
+use App\Http\Requests\EcrApprovalRequest;
 use App\Models\ClassificationRequirement;
 
 class EcrController extends Controller
@@ -40,6 +41,312 @@ class EcrController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
         $this->emailInterface = $emailInterface;
+    }
+    public function saveEcr(Request $request, EcrRequest $ecrRequest,EcrApprovalRequest $ecrApprovalRequest){
+        date_default_timezone_set('Asia/Manila');
+        try {
+            //TODO:  DELETE, InsertById, N/A in Dropdown
+            DB::beginTransaction();
+
+            $generatedControlNumber =  $this->generateControlNumber();
+            $ecrsId = $request->ecrs_id;
+            $ecrRequest = $ecrRequest->validated();
+            $ecrConditions = [
+                'id' => $ecrsId
+            ];
+
+            if( isset($ecrsId) ){ //Edit
+                //Validate Before Edit: On going approval cannot update
+                $ecrEcrApproval = EcrApproval::where('id',$ecrsId)
+                ->where('status','PEN')
+                ->where('approval_status','OTRB')
+                ->count();
+
+                if ( $ecrEcrApproval === 1 ){
+                    DB::rollback();
+                    return response()->json(['isSuccess' => 'false','msg' => "On going approval ! You cannot update this request "],500);
+                }
+                $ecr = Ecr::where('id',$ecrsId)
+                ->where('created_by',session('rapidx_user_id'))
+                ->count();
+                if ( $ecr === 0 ){
+                    DB::rollback();
+                    return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
+                }
+                $ecrRequest['status'] = 'IA';
+                $ecrRequest['approval_status'] = 'OTRB';
+                // $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
+                $this->resourceInterface->updateConditions(Ecr::class,$ecrConditions,$ecrRequest);
+                $currenErcId = $ecrsId;
+            }else{ //Add
+                $ecrRequest['created_at'] = now();
+                $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
+                $ecrRequest['created_by'] = session('rapidx_user_id');
+
+                $ecr =  $this->resourceInterface->create(Ecr::class,$ecrRequest);
+                $currenErcId = $ecr['data_id'];
+            }
+            $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request,$currenErcId){
+                return [
+                    'ecrs_id' =>  $currenErcId,
+                    'description_of_change' => $description_of_change,
+                    'reason_of_change' => $request->reason_of_change[$index],
+                    'created_at' => now(),
+                ];
+            });
+            EcrDetail::where('ecrs_id', $currenErcId)->delete();
+            foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
+               $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
+            }
+            //Requested by, Engg, Heads, QA Approval
+            $ecrApprovalTypes = [
+                'OTRB' => $request->requested_by,
+                'OTTE' => $request->technical_evaluation,
+                'OTRVB' => $request->reviewed_by,
+                'QACB' => $request->qad_checked_by,
+                'QAIN' => $request->qad_approved_by_internal,
+            ];
+            $ecrApprovalRequestCtr = 0; //assigned counter
+            $ecrApprovalRequest = collect($ecrApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$ecrApprovalRequestCtr,$currenErcId){
+                    return collect($users)->map(function ($userId) use ($request,$approval_status,&$ecrApprovalRequestCtr,$currenErcId){
+                        return [
+                            'ecrs_id' =>  $currenErcId,
+                            'rapidx_user_id' => $userId == 0 ? NULL : $userId,
+                            'approval_status' => $approval_status,
+                            'counter' => $ecrApprovalRequestCtr++,
+                            'remarks' => $request->remarks,
+                            'created_at' => now(),
+                        ];
+                    });
+
+            })->toArray();
+            //Delete previous ecr approval,save,update status to Pending
+            EcrApproval::where('ecrs_id', $currenErcId)->delete();
+            EcrApproval::insert($ecrApprovalRequest);
+            EcrApproval::where('counter', 0)
+            ->where('ecrs_id', $currenErcId)
+            ->update(['status'=>'PEN']);
+            //PMI Approvers
+            $approval_status = [
+                'PB' => $request->prepared_by,
+                'CB' => $request->checked_by,
+                'AB' => $request->approved_by,
+            ];
+            $pmiApprovalRequestCtr = 0;
+            $pmiApprovalRequest = collect($approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
+                //return array users id as array value
+                return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
+                    // $approval_status as a array name
+                    //return array users id, defined type by use keyword,
+                    return [
+                        'ecrs_id' => $currenErcId,
+                        'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
+                        'approval_status' => $approval_status,
+                        'counter' => $pmiApprovalRequestCtr++,
+                        'remarks' => $request->remarks,
+                        'created_at' => now(),
+                    ];
+                });
+            })->toArray();
+
+            //Save PMI Internal Approval
+            PmiApproval::where('ecrs_id', $currenErcId)->delete();
+            PmiApproval::insert($pmiApprovalRequest);
+            PmiApproval::where('counter', 0)
+            ->where('ecrs_id', $currenErcId)
+            ->update(['status'=>'PEN']);
+            if($request->internal_external === "External"){
+                $external_approval_status = [
+                    'EXQC' => $request->external_prepared_by,
+                    'EXOH' => $request->external_checked_by,
+                    'EXQA' => $request->external_approved_by,
+                ];
+
+               $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
+                    //return array users id as array value
+                    return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
+                        // $approval_status as a array name
+                        //return array users id, defined type by use keyword,
+                        return [
+                            'ecrs_id' => $currenErcId,
+                            'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
+                            'approval_status' => $approval_status,
+                            'counter' => $pmiApprovalRequestCtr++,
+                            'remarks' => $request->remarks,
+                            'created_at' => now(),
+                        ];
+                    });
+                })->toArray();
+                //Save PMI Internal Approval
+                PmiApproval::insert($pmiApprovalRequest);
+            }
+
+            // DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveEcrApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $ecrsId = $request->ecrs_id;
+
+            //Get Current Ecr Approval is equal to Current Session
+            $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$ecrsId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            if($ecrApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+            //Get Current Status
+            $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category','created_by']);
+            //Verify if the ECR Requirement is Completed.
+            $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
+
+            // === TODO:QA Requirements
+            // if($ecrApprovalCurrent->approval_status === 'QACB' || $ecrApprovalCurrent->approval_status === 'QAIN'){
+            if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
+                return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
+            }
+            // }
+
+            //Update the ECR Approval Status
+            $ecrApprovalCurrent->update([
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ]);
+
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+            $ecrApproval = EcrApproval::where('ecrs_id',$ecrsId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','-')
+            ->limit(1)
+            ->get(['id','approval_status','rapidx_user_id']);
+
+            //Initialize the Email Address of the User
+            $requestedBy = $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by);
+            //DISAPPROVED ECR
+            if ( $request->status === "DIS" ){
+                $EcrConditions = [
+                    'id' => $request->ecrs_id,
+                ];
+                $ecrValidated = [
+                    'status' => 'DIS',
+                ];
+                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+                //Send DISAPPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from =$currentSession['email'] ?? '';
+                $from_name = $currentSession['fullName'];
+                $subject = "DISAPPROVED: Engineering Change Request (ECR)";
+                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+
+                //Reset EcrRequirement
+                EcrRequirement::where('ecrs_id',$ecrsId)->delete();
+                DB::commit();
+                // $this->emailInterface->sendEmail($emailData);
+                return response()->json(['isSuccess' => 'true']);
+            }
+            //If the ECR is Approved, Save the ECR Details by Category
+            if ( count($ecrApproval) === 0){
+
+                $EcrConditions = [
+                    'id' => $request->ecrs_id,
+                ];
+                $ecrValidated = [
+                    'status' => 'OK', //APPROVED ECR
+                    'approval_status' => 'OK',
+                ];
+                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+                // If approved, Save Man, Method, Machine, Material, Environment
+                $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
+                //Send Approved Email to the Requestor
+                $to = $requestedBy['email'] ?? '';
+                // $to =  'mclegaspi@pricon.ph';
+                $from = 'issinfoservice@pricon.ph';
+                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
+                $from_name = "4M Change Control Management System";
+            }
+
+            if ( count($ecrApproval) != 0 ){
+                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($ecrApproval[0]->rapidx_user_id);
+
+                $ecrApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $ecrApprovalConditions = [
+                    'id' => $ecrApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
+
+                //Update the ECR Approval Status
+                $EcrConditions = [
+                    'id' => $request->ecrs_id,
+                ];
+                $ecrValidated = [
+                    'approval_status' => $ecrApproval[0]->approval_status,
+                ];
+                //Change QA Status
+                if (str_contains($ecrApproval[0]->approval_status, 'QA')) {
+                    $ecrValidated = [
+                        'approval_status' => $ecrApproval[0]->approval_status,
+                        'status' => 'QA',
+                    ];
+                }
+                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+                //Send Approval Email
+                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+                //Send For Approval Email to Next Approver
+                $to = $ecrCurrentApproval['email'] ?? '';
+                $from = $requestedBy['email'] ?? '';
+                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
+                $from_name = "4M Change Control Management System";
+            }
+            $emailData = [
+                "to" =>$to,
+                "cc" =>"",
+                "bcc" =>"mclegaspi@pricon.ph",
+                "from" => $from,
+                "from_name" =>$from_name ?? "4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
+            DB::commit();
+            // $this->emailInterface->sendEmail($emailData);
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
+        date_default_timezone_set('Asia/Manila');
+        try {
+             $ecrDetailRequestValidated = $ecrDetailRequest->validated();
+             $ecrDetailRequestValidated['customer_approval'] = $request->customer_approval ?? NULL;
+             $ecrDetailRequestValidated['remarks'] = $request->remarks;
+             $conditions = [
+                 'id' => $request->ecr_details_id
+             ];
+             // return $ecrDetailRequestValidated;
+             $this->resourceInterface->updateConditions(EcrDetail::class,$conditions,$ecrDetailRequestValidated);
+             return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+             throw $e;
+        }
     }
     public function loadEcr(Request $request){
         try {
@@ -384,315 +691,12 @@ class EcrController extends Controller
             'currentCtrlNo' => $currentCtrlNo
         ];
     }
-    public function saveEcr(Request $request, EcrRequest $ecrRequest){
-        date_default_timezone_set('Asia/Manila');
-        try {
-            //TODO:  DELETE, InsertById, N/A in Dropdown
-            DB::beginTransaction();
 
-            $generatedControlNumber =  $this->generateControlNumber();
-            $ecrsId = $request->ecrs_id;
-            $ecrRequest = $ecrRequest->validated();
-            $ecrConditions = [
-                'id' => $ecrsId
-            ];
-
-            if( isset($ecrsId) ){ //Edit
-                //OTRB count of Ecr Approval is 0
-                $ecrEcrApproval = EcrApproval::where('id',$ecrsId)
-                ->where('status','PEN')
-                ->where('approval_status','OTRB')
-                ->count();
-
-                if ( $ecrEcrApproval === 0 ){
-                    DB::rollback();
-                    return response()->json(['isSuccess' => 'false','msg' => "On going approval ! You cannot update this request "],500);
-                }
-                $ecr = Ecr::where('id',$ecrsId)
-                ->where('created_by',session('rapidx_user_id'))
-                ->count();
-                if ( $ecr === 0 ){
-                    DB::rollback();
-                    return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
-                }
-                $ecrRequest['status'] = 'IA';
-                $ecrRequest['approval_status'] = 'OTRB';
-                // $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
-                $this->resourceInterface->updateConditions(Ecr::class,$ecrConditions,$ecrRequest);
-                $currenErcId = $ecrsId;
-            }else{ //Add
-                $ecrRequest['created_at'] = now();
-                $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
-                $ecrRequest['created_by'] = session('rapidx_user_id');
-
-                $ecr =  $this->resourceInterface->create(Ecr::class,$ecrRequest);
-                $currenErcId = $ecr['data_id'];
-            }
-            $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request,$currenErcId){
-                return [
-                    'ecrs_id' =>  $currenErcId,
-                    'description_of_change' => $description_of_change,
-                    'reason_of_change' => $request->reason_of_change[$index],
-                    'created_at' => now(),
-                ];
-            });
-            EcrDetail::where('ecrs_id', $currenErcId)->delete();
-            foreach ($ecrDetailRequest as $ecrDetailRequestValue) {
-               $this->resourceInterface->create(EcrDetail::class, $ecrDetailRequestValue);
-            }
-            //Requested by, Engg, Heads, QA Approval
-            $ecrApprovalTypes = [
-                'OTRB' => $request->requested_by,
-                'OTTE' => $request->technical_evaluation,
-                'OTRVB' => $request->reviewed_by,
-                'QACB' => $request->qad_checked_by,
-                'QAIN' => $request->qad_approved_by_internal,
-            ];
-            $ecrApprovalRequestCtr = 0; //assigned counter
-            $ecrApprovalRequest = collect($ecrApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$ecrApprovalRequestCtr,$currenErcId){
-                    return collect($users)->map(function ($userId) use ($request,$approval_status,&$ecrApprovalRequestCtr,$currenErcId){
-                        return [
-                            'ecrs_id' =>  $currenErcId,
-                            'rapidx_user_id' => $userId == 0 ? NULL : $userId,
-                            'approval_status' => $approval_status,
-                            'counter' => $ecrApprovalRequestCtr++,
-                            'remarks' => $request->remarks,
-                            'created_at' => now(),
-                        ];
-                    });
-
-            })->toArray();
-            //Delete previous ecr approval,save,update status to Pending
-            EcrApproval::where('ecrs_id', $currenErcId)->delete();
-            EcrApproval::insert($ecrApprovalRequest);
-            EcrApproval::where('counter', 0)
-            ->where('ecrs_id', $currenErcId)
-            ->update(['status'=>'PEN']);
-            //PMI Approvers
-            $approval_status = [
-                'PB' => $request->prepared_by,
-                'CB' => $request->checked_by,
-                'AB' => $request->approved_by,
-            ];
-            $pmiApprovalRequestCtr = 0;
-            $pmiApprovalRequest = collect($approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
-                //return array users id as array value
-                return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
-                    // $approval_status as a array name
-                    //return array users id, defined type by use keyword,
-                    return [
-                        'ecrs_id' => $currenErcId,
-                        'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
-                        'approval_status' => $approval_status,
-                        'counter' => $pmiApprovalRequestCtr++,
-                        'remarks' => $request->remarks,
-                        'created_at' => now(),
-                    ];
-                });
-            })->toArray();
-            //Save PMI Internal Approval
-            PmiApproval::where('ecrs_id', $currenErcId)->delete();
-            PmiApproval::insert($pmiApprovalRequest);
-            PmiApproval::where('counter', 0)
-            ->where('ecrs_id', $currenErcId)
-            ->update(['status'=>'PEN']);
-            if($request->internal_external === "External"){
-                $external_approval_status = [
-                    'EXQC' => $request->external_prepared_by,
-                    'EXOH' => $request->external_checked_by,
-                    'EXQA' => $request->external_approved_by,
-                ];
-               $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
-                    //return array users id as array value
-                    return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
-                        // $approval_status as a array name
-                        //return array users id, defined type by use keyword,
-                        return [
-                            'ecrs_id' => $currenErcId,
-                            'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
-                            'approval_status' => $approval_status,
-                            'counter' => $pmiApprovalRequestCtr++,
-                            'remarks' => $request->remarks,
-                            'created_at' => now(),
-                        ];
-                    });
-                })->toArray();
-                //Save PMI Internal Approval
-                PmiApproval::insert($pmiApprovalRequest);
-            }
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
-    public function saveEcrApproval(Request $request){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-            $ecrsId = $request->ecrs_id;
-
-            //Get Current Ecr Approval is equal to Current Session
-            $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$ecrsId)
-            ->whereNotNull('rapidx_user_id')
-            ->where('status','PEN')
-            ->first();
-            if($ecrApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
-                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
-            }
-            //Get Current Status
-            $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category','created_by']);
-            //Verify if the ECR Requirement is Completed.
-            $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
-
-            // === TODO:QA Requirements
-            // if($ecrApprovalCurrent->approval_status === 'QACB' || $ecrApprovalCurrent->approval_status === 'QAIN'){
-            if(  $isCompletedEcrRequirementComplete === 'false' && $request->status === 'APP'){
-                return response()->json(['isSuccess' => 'false','msg' => 'Incomplete details, Please fill up the ECR Requirement!'],500);
-            }
-            // }
-
-            //Update the ECR Approval Status
-            $ecrApprovalCurrent->update([
-                'status' => $request->status,
-                'remarks' => $request->remarks,
-            ]);
-
-            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-            $ecrApproval = EcrApproval::where('ecrs_id',$ecrsId)
-            ->whereNotNull('rapidx_user_id')
-            ->where('status','-')
-            ->limit(1)
-            ->get(['id','approval_status','rapidx_user_id']);
-
-            //Initialize the Email Address of the User
-            $requestedBy = $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by);
-            //DISAPPROVED ECR
-            if ( $request->status === "DIS" ){
-                $EcrConditions = [
-                    'id' => $request->ecrs_id,
-                ];
-                $ecrValidated = [
-                    'status' => 'DIS',
-                ];
-                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
-                //Send DISAPPROVED Email to Requestor
-                $to = $requestedBy['email'] ?? '';
-                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
-                $from =$currentSession['email'] ?? '';
-                $from_name = $currentSession['fullName'];
-                $subject = "DISAPPROVED: Engineering Change Request (ECR)";
-                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
-
-                //Reset EcrRequirement
-                EcrRequirement::where('ecrs_id',$ecrsId)->delete();
-                DB::commit();
-                // $this->emailInterface->sendEmail($emailData);
-                return response()->json(['isSuccess' => 'true']);
-            }
-            //If the ECR is Approved, Save the ECR Details by Category
-            if ( count($ecrApproval) === 0){
-
-                $EcrConditions = [
-                    'id' => $request->ecrs_id,
-                ];
-                $ecrValidated = [
-                    'status' => 'OK', //APPROVED ECR
-                    'approval_status' => 'OK',
-                ];
-                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
-                // If approved, Save Man, Method, Machine, Material, Environment
-                $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
-                //Send Approved Email to the Requestor
-                $to = $requestedBy['email'] ?? '';
-                // $to =  'mclegaspi@pricon.ph';
-                $from = 'issinfoservice@pricon.ph';
-                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
-                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
-                $from_name = "4M Change Control Management System";
-            }
-
-            if ( count($ecrApproval) != 0 ){
-                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($ecrApproval[0]->rapidx_user_id);
-
-                $ecrApprovalValidated = [
-                    'status' => 'PEN',
-                ];
-                $ecrApprovalConditions = [
-                    'id' => $ecrApproval[0]->id,
-                ];
-                $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
-
-                //Update the ECR Approval Status
-                $EcrConditions = [
-                    'id' => $request->ecrs_id,
-                ];
-                $ecrValidated = [
-                    'approval_status' => $ecrApproval[0]->approval_status,
-                ];
-                //Change QA Status
-                if (str_contains($ecrApproval[0]->approval_status, 'QA')) {
-                    $ecrValidated = [
-                        'approval_status' => $ecrApproval[0]->approval_status,
-                        'status' => 'QA',
-                    ];
-                }
-                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
-                //Send Approval Email
-                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
-                //Send For Approval Email to Next Approver
-                $to = $ecrCurrentApproval['email'] ?? '';
-                $from = $requestedBy['email'] ?? '';
-                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
-                $from_name = "4M Change Control Management System";
-            }
-            $emailData = [
-                "to" =>$to,
-                "cc" =>"",
-                "bcc" =>"mclegaspi@pricon.ph",
-                "from" => $from,
-                "from_name" =>$from_name ?? "4M Change Control Management System",
-                "subject" =>$subject,
-                "message" =>  $msg,
-                "attachment_filename" => "",
-                "attachment" => "",
-                "send_date_time" => now(),
-                "date_time_sent" => "",
-                "date_created" => now(),
-                "created_by" => session('rapidx_username'),
-                "system_name" => "rapidx_4M",
-            ];
-            DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
-    public function saveEcrDetails(Request $request, EcrDetailRequest $ecrDetailRequest){
-        date_default_timezone_set('Asia/Manila');
-        try {
-             $ecrDetailRequestValidated = $ecrDetailRequest->validated();
-             $ecrDetailRequestValidated['customer_approval'] = $request->customer_approval ?? NULL;
-             $ecrDetailRequestValidated['remarks'] = $request->remarks;
-             $conditions = [
-                 'id' => $request->ecr_details_id
-             ];
-             // return $ecrDetailRequestValidated;
-             $this->resourceInterface->updateConditions(EcrDetail::class,$conditions,$ecrDetailRequestValidated);
-             return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-             throw $e;
-        }
-    }
     public function isCompletedEcrRequirementComplete($ecrsId){ //Requirement
         $classificationRequirementCount =  ClassificationRequirement::whereIn('classifications_id',[1,2,3,4,5])->count();
         $ecrRequirementCount = EcrRequirement::where('ecrs_id',$ecrsId)->count();
         return $classificationRequirementCount === $ecrRequirementCount ? 'true' : 'false';
     }
-
     public function getDropdownMasterByOpt(Request $request){
         try {
             $data = [];
@@ -785,7 +789,6 @@ class EcrController extends Controller
         }
     }
     //Common Function getEcrStatus
-    // getEcrApprovalStatus
    public function getStatus($status){
 
        try {

@@ -39,7 +39,23 @@ class MaterialController extends Controller
             $materialRequest = $materialRequest->validated();
             $ecr = Ecr::where('id',$currentEcrsId)->get('internal_external');
 
-            if ( isset($request->material_id)){
+            if ( isset($materialsId)){
+                //Validate Before Edit: FORAPP status -On going approval cannot update
+                $material = Material::where('id',$materialsId)
+                ->where('status','RUP')
+                ->count();
+                if ( $material === 0 ){
+                    DB::rollback();
+                    return response()->json(['isSuccess' => 'false','msg' => "On going approval ! You cannot update this request "],500);
+                }
+                $ecr = Ecr::where('id',$currentEcrsId)
+                ->where('created_by',session('rapidx_user_id'))
+                ->count();
+                if ( $ecr === 0 ){
+                    DB::rollback();
+                    return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
+                }
+                //Update Material
                 $conditions = [
                    'id' => $materialsId
                 ];
@@ -50,7 +66,8 @@ class MaterialController extends Controller
                 $insertMaterialById = $this->resourceInterface->create(Material::class,$materialRequest);
                 $currentMaterialId = $insertMaterialById['data_id'];
             }
-
+            // Save Material Approval with different approval status
+            // Check first if the Document is Internal or External
             if($ecr[0]->internal_external === "Internal") {
                 $enggMateriaApprovalInEx = [
                     'ENGPB' => $request->engg_prepared_by,
@@ -71,7 +88,7 @@ class MaterialController extends Controller
                 $prdnMateriaApprovalInEx = [
                     'PRDNPB' => $request->prdn_prepared_by,
                     'PRDNCB' => $request->prdn_checked_by,
-                    'PRDNAP' =>  $request->prdn_approved_by, //TODO; CHANGE CODE
+                    'PRDNAP' =>  $request->prdn_approved_by,
                 ];
             }
 
@@ -113,10 +130,17 @@ class MaterialController extends Controller
                 });
 
             })->toArray();
+
+            // === Delete Material Approval
+            // === Reset the Material FORAPP status
+            // === Reset the Material Approval
+            // === Reset the PMI Approval
+            // === Update the first approval to Pending
             MaterialApproval::where('materials_id',$currentMaterialId)->delete();
             MaterialApproval::insert($materialApprovalValidated);
             $materialApproval =  MaterialApproval::whereNotNull('rapidx_user_id')
             ->where('materials_id', $currentMaterialId)->first();
+            // Reset the Material FORAPP status
             if ($materialApproval) {
                 $materialApproval->update(['status' => 'PEN']);
                 Material::where('id', $currentMaterialId)->first()
@@ -125,7 +149,7 @@ class MaterialController extends Controller
                     'status' => 'FORAPP', //FOR APPROVAL
                 ]);
             }
-            //Reset the PMI Approval
+            // Reset the PMI Approval
             PmiApproval::whereNotNull('rapidx_user_id')
             ->where('ecrs_id', $currentEcrsId)
             ->update([

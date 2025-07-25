@@ -344,12 +344,10 @@ class ManController extends Controller
             $manModel = Man::class;
             $manRequestValidated = $manRequest->validated();
             if ( isset($request->man_id) ){ //Edit
-                $manRequestValidated['trainer'] = $request->trainer;
-                // $manRequestValidated['trainer_sample_size'] = $request->trainer_sample_size;
-                // $manRequestValidated['trainer_result'] = $request->trainer_result;
-                $manRequestValidated['lqc_supervisor'] = $request->lqc_supervisor;
-                // $manRequestValidated['lqc_sample_size'] = $request->lqc_sample_size;
-                // $manRequestValidated['lqc_result'] = $request->lqc_result;
+                $manRequestValidated['trainer_sample_size'] = $request->trainer_sample_size;
+                $manRequestValidated['trainer_result'] = $request->trainer_result;
+                $manRequestValidated['lqc_sample_size'] = $request->lqc_sample_size;
+                $manRequestValidated['lqc_result'] = $request->lqc_result;
                 $manRequestValidated['process_change_factor'] = $request->process_change_factor;
                 $conditions = [
                     'id' => $request->man_id
