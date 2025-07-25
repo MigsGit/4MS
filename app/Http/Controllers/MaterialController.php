@@ -176,8 +176,27 @@ class MaterialController extends Controller
            ->get(['id','approval_status','rapidx_user_id']);
             //Initialize the Email Address of the User
             $requestedBy = $this->emailInterface->getEmailByRapidxUserId($material->ecr->created_by);
-            $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($materialApproval[0]->rapidx_user_id);
+
+             //DISAPPROVED ECR
+            if($request->status === "DIS"){
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
+                ];
+                $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
+                //Send DISAPPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from =$currentSession['email'] ?? '';
+                $from_name = $currentSession['fullName'];
+                $subject = "DISAPPROVED: Material (4M CMS)";
+                $msg = $this->emailInterface->materialEmailMsg($selectedId);
+            }
             if ( count($materialApproval) === 0){
+
                 $enviromentConditions = [
                     'id' => $selectedId,
                 ];
@@ -188,6 +207,8 @@ class MaterialController extends Controller
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
             }
             if ( count($materialApproval) != 0){
+                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($materialApproval[0]->rapidx_user_id);
+
                 $materialApprovalValidated = [
                     'status' => 'PEN',
                 ];
@@ -210,24 +231,7 @@ class MaterialController extends Controller
                 $subject = "FOR APPROVAL: Material (4M CMS)";
                 $from_name = "4M Change Control Management System";
             }
-             //DISAPPROVED ECR
-             if($request->status === "DIS"){
-                $enviromentConditions = [
-                    'id' => $selectedId,
-                ];
-                $enviromentValidated = [
-                    'status' => 'DIS',
-                    'approval_status' => 'DIS', //Repeat the status
-                ];
-                $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
-                //Send DISAPPROVED Email to Requestor
-                $to = $requestedBy['email'] ?? '';
-                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
-                $from =$currentSession['email'] ?? '';
-                $from_name = $currentSession['fullName'];
-                $subject = "DISAPPROVED: Material (4M CMS)";
-                $msg = $this->emailInterface->materialEmailMsg($selectedId);
-            }
+
             //Array Send Email
             $emailData = [
                 "to" =>$to,
@@ -335,7 +339,9 @@ class MaterialController extends Controller
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
                 if( $currentApprover != ''){
-                    $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
+                    $getApprovalStatus = $this->getApprovalStatus($row->material->material_approvals_pending[0]->approval_status);
+                    // $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
                 if( $materialStatus === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                     $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
@@ -450,7 +456,6 @@ class MaterialController extends Controller
             throw $e;
         }
     }
-
     public function getMaterialEcrById(Request $request){
         try {
             // return 'dasads';
@@ -602,13 +607,13 @@ class MaterialController extends Controller
                 case 'RUP':
                     $approvalStatus = 'Requestor ECR Update:';
                     break;
-                case 'PRNDPB':
-                    $approvalStatus = 'Production Prepared by:';
+                case 'PRDNPB':
+                    $approvalStatus = 'Production Prepared by:'; //PRDNPB
                     break;
-                case 'PRNDCB':
+                case 'PRDNCB':
                     $approvalStatus = 'Production Checked by:';
                     break;
-                case 'PRNDAP':
+                case 'PRDNAP':
                     $approvalStatus = 'Production Approved by:';
                     break;
                 case 'PURPB':

@@ -70,6 +70,7 @@ class EcrController extends Controller
                 $ecr->whereIn('status',$status)
                 ->get();
             }
+            $ecr->orderBy('id','DESC');
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
                 $result = "";
@@ -79,7 +80,7 @@ class EcrController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->status === "RUP" || $row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
+                if($row->status === "IA" || $row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
                 }
                 // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
@@ -395,9 +396,23 @@ class EcrController extends Controller
             $ecrConditions = [
                 'id' => $ecrsId
             ];
+
             if( isset($ecrsId) ){ //Edit
-                $ecr = Ecr::where('id',$ecrsId)->get(['created_by']);
-                if ( $ecr[0]['created_by'] != session('rapidx_user_id') ){
+                //OTRB count of Ecr Approval is 0
+                $ecrEcrApproval = EcrApproval::where('id',$ecrsId)
+                ->where('status','PEN')
+                ->where('approval_status','OTRB')
+                ->count();
+
+                if ( $ecrEcrApproval === 0 ){
+                    DB::rollback();
+                    return response()->json(['isSuccess' => 'false','msg' => "On going approval ! You cannot update this request "],500);
+                }
+                $ecr = Ecr::where('id',$ecrsId)
+                ->where('created_by',session('rapidx_user_id'))
+                ->count();
+                if ( $ecr === 0 ){
+                    DB::rollback();
                     return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
                 }
                 $ecrRequest['status'] = 'IA';
@@ -569,6 +584,12 @@ class EcrController extends Controller
                 $from_name = $currentSession['fullName'];
                 $subject = "DISAPPROVED: Engineering Change Request (ECR)";
                 $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+
+                //Reset EcrRequirement
+                EcrRequirement::where('ecrs_id',$ecrsId)->delete();
+                DB::commit();
+                // $this->emailInterface->sendEmail($emailData);
+                return response()->json(['isSuccess' => 'true']);
             }
             //If the ECR is Approved, Save the ECR Details by Category
             if ( count($ecrApproval) === 0){

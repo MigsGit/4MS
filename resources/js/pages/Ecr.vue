@@ -1104,85 +1104,99 @@
         });
     }
     const frmSaveEcr = async () => {
-        let formData = new FormData();
-        //Append form data
-        [
-            ["ecrs_id", frmEcr.value.ecrsId],
-            ["ecr_no", frmEcr.value.ecrNo],
-            ["category", frmEcr.value.category],
-            ["customer_name", frmEcr.value.customerName],
-            ["part_name", frmEcr.value.partName],
-            ["product_line", frmEcr.value.productLine],
-            ["section", frmEcr.value.section],
-            ["internal_external", frmEcr.value.internalExternal],
-            ["part_no", frmEcr.value.partNumber],
-            ["device_name", frmEcr.value.deviceName],
-            ["customer_ec_no", frmEcr.value.customerEcNo],
-            ["date_of_request", frmEcr.value.dateOfRequest],
-        ].forEach(([key, value]) =>
-            formData.append(key, value)
-        );
+        Swal.fire({
+            title: 'Confirmation',
+            text: 'Please double check your details, the Approval will RESET !',
+            icon: 'warning',
+            allowOutsideClick: false,
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let formData = new FormData();
+                //Append form data
+                [
+                    ["ecrs_id", frmEcr.value.ecrsId],
+                    ["ecr_no", frmEcr.value.ecrNo],
+                    ["category", frmEcr.value.category],
+                    ["customer_name", frmEcr.value.customerName],
+                    ["part_name", frmEcr.value.partName],
+                    ["product_line", frmEcr.value.productLine],
+                    ["section", frmEcr.value.section],
+                    ["internal_external", frmEcr.value.internalExternal],
+                    ["part_no", frmEcr.value.partNumber],
+                    ["device_name", frmEcr.value.deviceName],
+                    ["customer_ec_no", frmEcr.value.customerEcNo],
+                    ["date_of_request", frmEcr.value.dateOfRequest],
+                ].forEach(([key, value]) =>
+                    formData.append(key, value)
+                );
 
-        for (let index = 0; index < frmEcrReasonRows.value.length; index++) {
-            const descriptionOfChange = frmEcrReasonRows.value[index].descriptionOfChange;
-            const reasonOfChange = frmEcrReasonRows.value[index].reasonOfChange;
-            [
-                ["description_of_change[]", descriptionOfChange],
-                ["reason_of_change[]", reasonOfChange],
-            ].forEach(([key, value]) =>
-                formData.append(key, value)
-            );
-        }
+                for (let index = 0; index < frmEcrReasonRows.value.length; index++) {
+                    const descriptionOfChange = frmEcrReasonRows.value[index].descriptionOfChange;
+                    const reasonOfChange = frmEcrReasonRows.value[index].reasonOfChange;
+                    [
+                        ["description_of_change[]", descriptionOfChange],
+                        ["reason_of_change[]", reasonOfChange],
+                    ].forEach(([key, value]) =>
+                        formData.append(key, value)
+                    );
+                }
 
-        [
-            ["qad_approved_by_internal", frmEcrQadRows.value.qadApprovedByInternal],
-            ["qad_checked_by", frmEcrQadRows.value.qadCheckedBy],
-        ].forEach(([key, value]) =>
-            formData.append(key, value)
-        );
+                [
+                    ["qad_approved_by_internal", frmEcrQadRows.value.qadApprovedByInternal],
+                    ["qad_checked_by", frmEcrQadRows.value.qadCheckedBy],
+                ].forEach(([key, value]) =>
+                    formData.append(key, value)
+                );
 
-        for (let index = 0; index < frmEcrOtherDispoRows.value.length; index++) {
-            const requestedBy = frmEcrOtherDispoRows.value[index].requestedBy;
-            const technicalEvaluation = frmEcrOtherDispoRows.value[index].technicalEvaluation;
-            const reviewedBy = frmEcrOtherDispoRows.value[index].reviewedBy;
-            [
-                ["requested_by[]", requestedBy],
-                ["technical_evaluation[]", technicalEvaluation],
-                ["reviewed_by[]", reviewedBy],
-            ].forEach(([key, value]) =>
-                formData.append(key, value)
-            );
-        }
-        for (let index = 0; index < frmEcrPmiApproverRows.value.length; index++) {
-            const preparedBy = frmEcrPmiApproverRows.value[index].preparedBy;
-            const checkedBy = frmEcrPmiApproverRows.value[index].checkedBy;
-            const approvedBy = frmEcrPmiApproverRows.value[index].approvedBy;
-            [
-                ["prepared_by[]", preparedBy],
-                ["checked_by[]", checkedBy],
-                ["approved_by[]", approvedBy],
-            ].forEach(([key, value]) =>
-                formData.append(key, value)
-            );
-        }
-        for (let index = 0; index < frmEcrPmiExternalApproverRows.value.length; index++) {
-            const externalPreparedBy = frmEcrPmiExternalApproverRows.value[index].preparedBy;
-            const externalPheckedBy = frmEcrPmiExternalApproverRows.value[index].checkedBy;
-            const externalPpprovedBy = frmEcrPmiExternalApproverRows.value[index].approvedBy;
-            [
-                ["external_prepared_by[]", externalPreparedBy],
-                ["external_checked_by[]", externalPheckedBy],
-                ["external_approved_by[]", externalPpprovedBy],
-            ].forEach(([key, value]) =>
-                formData.append(key, value)
-            );
-        }
-        //TODO: Save Successfully
-        axiosSaveData(formData,'api/save_ecr', (response) =>{
-            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS && adminAccess="+selectedAdminAccess.value).load();
-            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA && adminAccess="+selectedAdminAccess.value).load();
-            modalEcr.SaveEcr.hide();
-        });
+                for (let index = 0; index < frmEcrOtherDispoRows.value.length; index++) {
+                    const requestedBy = frmEcrOtherDispoRows.value[index].requestedBy;
+                    const technicalEvaluation = frmEcrOtherDispoRows.value[index].technicalEvaluation;
+                    const reviewedBy = frmEcrOtherDispoRows.value[index].reviewedBy;
+                    [
+                        ["requested_by[]", requestedBy],
+                        ["technical_evaluation[]", technicalEvaluation],
+                        ["reviewed_by[]", reviewedBy],
+                    ].forEach(([key, value]) =>
+                        formData.append(key, value)
+                    );
+                }
+                for (let index = 0; index < frmEcrPmiApproverRows.value.length; index++) {
+                    const preparedBy = frmEcrPmiApproverRows.value[index].preparedBy;
+                    const checkedBy = frmEcrPmiApproverRows.value[index].checkedBy;
+                    const approvedBy = frmEcrPmiApproverRows.value[index].approvedBy;
+                    [
+                        ["prepared_by[]", preparedBy],
+                        ["checked_by[]", checkedBy],
+                        ["approved_by[]", approvedBy],
+                    ].forEach(([key, value]) =>
+                        formData.append(key, value)
+                    );
+                }
+                for (let index = 0; index < frmEcrPmiExternalApproverRows.value.length; index++) {
+                    const externalPreparedBy = frmEcrPmiExternalApproverRows.value[index].preparedBy;
+                    const externalPheckedBy = frmEcrPmiExternalApproverRows.value[index].checkedBy;
+                    const externalPpprovedBy = frmEcrPmiExternalApproverRows.value[index].approvedBy;
+                    [
+                        ["external_prepared_by[]", externalPreparedBy],
+                        ["external_checked_by[]", externalPheckedBy],
+                        ["external_approved_by[]", externalPpprovedBy],
+                    ].forEach(([key, value]) =>
+                        formData.append(key, value)
+                    );
+                }
+                //TODO: Save Successfully
+                axiosSaveData(formData,'api/save_ecr', (response) =>{
+                    tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS && adminAccess="+selectedAdminAccess.value).load();
+                    tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA && adminAccess="+selectedAdminAccess.value).load();
+                    modalEcr.SaveEcr.hide();
+                });
+            }
+        })
+
     }
 
 </script>
