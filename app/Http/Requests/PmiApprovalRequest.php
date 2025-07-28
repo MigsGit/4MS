@@ -25,9 +25,8 @@ class PmiApprovalRequest extends FormRequest
     {
         return [
             'prepared_by.0' => ['required', 'integer', 'min:1'], // index 0 must be = 1
+            'checked_by.0' => ['required', 'integer', 'min:1'],
             'approved_by.0' => ['required', 'integer', 'min:1'],
-            'external_approved_by.0' => ['required', 'integer', 'min:1'],
-
         ];
     }
     public function messages()

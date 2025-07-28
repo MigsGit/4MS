@@ -26,7 +26,10 @@ use App\Models\DropdownMasterDetail;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\EcrDetailRequest;
 use App\Http\Requests\EcrApprovalRequest;
+use App\Http\Requests\PmiApprovalRequest;
 use App\Models\ClassificationRequirement;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\PmiExternalApprovalRequest;
 
 class EcrController extends Controller
 {
@@ -42,7 +45,7 @@ class EcrController extends Controller
         $this->commonInterface = $commonInterface;
         $this->emailInterface = $emailInterface;
     }
-    public function saveEcr(Request $request, EcrRequest $ecrRequest,EcrApprovalRequest $ecrApprovalRequest){
+    public function saveEcr(Request $request, EcrRequest $ecrRequest,EcrApprovalRequest $ecrApprovalRequest,PmiApprovalRequest $pmiApprovalRequest){
         date_default_timezone_set('Asia/Manila');
         try {
             //TODO:  DELETE, InsertById, N/A in Dropdown
@@ -156,6 +159,16 @@ class EcrController extends Controller
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
             if($request->internal_external === "External"){
+
+                $validator = Validator::make($request->all(), (new PmiExternalApprovalRequest)->rules());
+
+                if ($validator->fails()) {
+                    return response()->json([
+                        'isSuccess' => 'false',
+                        'errors' => $validator->errors(),
+                    ], 422);
+                }
+
                 $external_approval_status = [
                     'EXQC' => $request->external_prepared_by,
                     'EXOH' => $request->external_checked_by,
@@ -181,7 +194,7 @@ class EcrController extends Controller
                 PmiApproval::insert($pmiApprovalRequest);
             }
 
-            // DB::commit();
+            DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -387,7 +400,10 @@ class EcrController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->status === "IA" || $row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
+                if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
+                    $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
+                }
+                if($row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
                 }
                 // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
@@ -674,7 +690,7 @@ class EcrController extends Controller
         }
         // Check if the Created At & App No / Division / Material Category is exisiting
         // Example:TS-ADMIN-LOG-PCH-25-01-001
-        $ecr = Ecr::orderBy('id','desc')->whereDate('created_at',now())
+        $ecr = Ecr::orderBy('id','desc')->whereYear('created_at',now())
             ->whereNull('deleted_at')
             ->limit(1)->get(['ecr_no']);
         //If not exist reset the ecr to 1

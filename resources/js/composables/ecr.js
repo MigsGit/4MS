@@ -28,6 +28,10 @@ export default function useEcr(){
         approvedBy: [],
 
         optTypeOfPart: [],
+        documentAffectedExternal: [
+            {value: '1' , label:"QC Process Flow Chart"},
+            {value: '2' , label:"Packaging Specification"},
+        ],
     });
     //Ref State
     const frmEcr = ref({
@@ -211,8 +215,8 @@ export default function useEcr(){
 
                         frmEcrOtherDispoRows.value.push({
                             requestedBy: requestedBy[index].rapidx_user_id ?? 0,
-                            reviewedBy: technicalEvaluation[index].rapidx_user_id ?? 0,
-                            technicalEvaluation:reviewedBy[index].rapidx_user_id ?? 0,
+                            reviewedBy: reviewedBy[index].rapidx_user_id ?? 0,
+                            technicalEvaluation: technicalEvaluation[index].rapidx_user_id ?? 0,
                         });
                     });
                     //QA Approval

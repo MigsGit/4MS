@@ -163,6 +163,86 @@
                         </div>
                     </div>
                 </div>
+                  <!-- Others Disposition -->
+                  <div v-show="isSelectReadonly === false" class="card mb-2">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExternal" aria-expanded="true" aria-controls="collapseExternal">
+                                External Field
+                            </button>
+                        </h5>
+                    <div id="collapseExternal" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body shadow">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                        <span class="input-group-text" id="addon-wrapping">Document Affected:</span>
+                                        <Multiselect
+                                            v-model="frmEcr.documentAffectedExternal"
+                                            :close-on-select="true"
+                                            :searchable="true"
+                                            :options="ecrVar.documentAffectedExternal"
+                                            :disabled="isSelectReadonly"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                        <span class="input-group-text" id="addon-wrapping">Target of Implementation:</span>
+                                        <input type="date" class="form-control" aria-describedby="addon-wrapping">
+                                    </div>
+                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                        <span class="input-group-text" id="addon-wrapping">Actual Sample Attached:</span>
+                                        <input type="text" class="form-control" aria-describedby="addon-wrapping">
+                                        <input type="text" class="form-control" aria-describedby="addon-wrapping" placeholder="Qty(pcs.)">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                        <span class="input-group-text" id="addon-wrapping">With Attachment:</span>
+                                        <input type="date" class="form-control" aria-describedby="addon-wrapping">
+                                    </div>
+                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                        <span class="input-group-text" id="addon-wrapping">Title of Attachment:</span>
+                                        <input type="text" class="form-control" aria-describedby="addon-wrapping">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <!-- @click="btnAddEcrOtherDispoRows()"  -->
+                                    <button type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Document Affected</button>
+                                </div>
+                                <div class="col-12">
+                                    <table class="table table-responsive">
+                                        <thead>
+                                            <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col" style="width: 75%;"> Document Affected</th>
+                                            <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- <tr  v-for="(frmEcrOtherDispoRow, index) in frmEcrOtherDispoRows" :key="frmEcrOtherDispoRow.index"> -->
+                                            <tr>
+                                                <td>
+                                                   <!-- {{ index+1 }} -->
+                                                   1
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" aria-describedby="addon-wrapping">
+                                                </td>
+                                                <td>
+                                                    <!-- @click="btnRemoveEcrOtherDispoRows(index)" -->
+                                                    <button  class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                        <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <EcrChangeComponent :isSelectReadonly="isSelectReadonly" @remove-ecr-reason-rows-event="removeEcrReasonRows(index)" @add-ecr-reason-rows-event="addEcrReasonRows()":frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
                 </EcrChangeComponent>
                 <!-- Others Disposition -->
@@ -733,9 +813,9 @@
     import {ref , onMounted,reactive, toRef,watch} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
-    import useCommon from '../../js/composables/common.js';
-    import useEcr from '../../js/composables/ecr.js';
-    import useForm from '../../js/composables/utils/useForm.js'
+    import useCommon from '../composables/common.js';
+    import useEcr from '../composables/ecr.js';
+    import useForm from '../composables/utils/useForm.js'
     import useSettings from '../composables/settings.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';

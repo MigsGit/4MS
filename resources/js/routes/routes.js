@@ -2,6 +2,7 @@ import IndexComponent from '../../js/pages/IndexComponent.vue'
 import Unauthorized from '../../js/pages/Unauthorized.vue'
 import Dashboard from '../../js/pages/Dashboard.vue'
 import Ecr from '../../js/pages/Ecr.vue'
+import EcrTest from '../../js/pages/EcrTest.vue'
 import Man from '../../js/pages/Man.vue'
 import Material from '../../js/pages/Material.vue'
 import Machine from '../../js/pages/Machine.vue'
@@ -49,6 +50,12 @@ export default [
                 name: 'Ecr',
                 beforeEnter: checkIfSessionExist,
                 component: Ecr,
+            },
+            {
+                path: 'ecr_test',
+                name: 'EcrTest',
+                beforeEnter: checkIfSessionExist,
+                component: EcrTest,
             },
             {
                 path: 'man',

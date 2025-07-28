@@ -473,7 +473,7 @@ class ManController extends Controller
                 $this->resourceInterface->updateConditions(ManDetail::class,$manConditions,$manValidated);
             }
 
-            // DB::commit();
+            DB::commit();
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
