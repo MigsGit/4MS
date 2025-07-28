@@ -73,7 +73,7 @@ class ResourceService implements ResourceInterface
             $query = $model::query();
             if($data != null){
                 foreach ($data as $key => $value) {
-                    $query->select($value);
+                    $query->select($data);
                     // $query->select('column1','column2');
                 }
             }

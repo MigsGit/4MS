@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Classification;
 use App\Models\DropdownMaster;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Models\DropdownMasterDetail;
 use App\Interfaces\ResourceInterface;
+use App\Models\ClassificationRequirement;
 use App\Http\Requests\DropdownMasterDetailRequest;
 
 class SettingsController extends Controller
@@ -157,6 +159,37 @@ class SettingsController extends Controller
             throw $e;
         }
     }
+    public function loadClassificationRequirements(Request $request){
+        try {
+            $relations = [
+                'classification'
+            ];
+            $conditions = [
+                'classifications_id' => $request->dropDownMastersId ?? ""
+            ];
+
+            $dropdownMaster =  $this->resourceInterface->readCustomEloquent(ClassificationRequirement::class,[],$relations,$conditions);
+
+           $dropdownMaster->orderBy('id');
+            // ->get();
+            return DataTables::of($dropdownMaster)
+            ->addColumn('get_action',function($row){
+                return $btn = '<button dropdown-master-details-id = "'.$row->id.'"  class="btn btn-outline-info btn-sm" data-toggle="modal" id="btnDropdownMasterDetails" type="button" title="Edit"><i class="fas fa-edit"></i></button>';
+            })
+            ->addColumn('get_status',function($row){
+                $result = '';
+                $result .= '<span class="badge rounded-pill bg-success"> Active </span>';
+                return $result;
+            })
+            ->rawColumns([
+                'get_action',
+                'get_status'
+            ])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function getDropdownMasterDetailsId(Request $request){
         try {
             $conditions = [
@@ -222,6 +255,19 @@ class SettingsController extends Controller
         } catch (Exception $e) {
             DB::rollback();
             throw $e;
+        }
+    }
+    public function getEcrRequirementMasterCategory(Request $request){
+        try {
+            $dropdownMaster =  $this->resourceInterface->readCustomEloquent(Classification::class,['category','id'],[],[]);
+           $dropdownMaster= $dropdownMaster
+           ->get();
+            return response()->json([
+                'is_success' => 'true',
+                'dropdownMaster' => $dropdownMaster
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
 }

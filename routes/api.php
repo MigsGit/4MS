@@ -76,10 +76,12 @@ Route::middleware('auth')->group(function(){
 
         Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
         Route::get('load_dropdown_master_details', 'loadDropdownMasterDetails')->name('load_dropdown_master_details');
+        Route::get('load_classification_requirements', 'loadClassificationRequirements')->name('load_classification_requirements');
         Route::get('get_dropdown_master', 'getDropdownMaster')->name('get_dropdown_master');
         Route::get('get_dropdown_master_details_id', 'getDropdownMasterDetailsId')->name('get_dropdown_master_details_id');
         Route::get('get_admin_access_opt', 'getAdminAccessOpt')->name('get_admin_access_opt');
         Route::get('get_dropdown_master_category', 'getDropdownMasterCategory')->name('get_dropdown_master_category');
+        Route::get('get_ecr_requirement_master_category', 'getEcrRequirementMasterCategory')->name('get_ecr_requirement_master_category');
     });
 
     Route::controller(ManController::class)->group(function () {
