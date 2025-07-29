@@ -387,6 +387,8 @@ class EcrController extends Controller
                 ->get();
             }
             if( $adminAccess === 'all') {
+
+                $status =  array_merge($status,['OK']);
                 $ecr->whereIn('status',$status)
                 ->get();
             }
@@ -416,6 +418,7 @@ class EcrController extends Controller
                 return $result;
             })
             ->addColumn('get_status',function ($row): string{
+                // return $row->status;
                 $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
 
                 $getStatus = $this->commonInterface->getEcrStatus($row->status);
@@ -424,9 +427,13 @@ class EcrController extends Controller
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
+                if($row->status === 'OK'){
+                   return  $result .= '';
+                }
                 if($row->status != 'DIS'){
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
+
                 $result .= '</center>';
                 $result .= '</br>';
                 return $result;
@@ -608,10 +615,11 @@ class EcrController extends Controller
             $ecr_req_conditions = [
                 'ecrs_id' => $request->ecrsId ?? "",
             ];
+
             $classificationRequirement = $this->resourceInterface->readWithRelationsConditionsActive(ClassificationRequirement::class,$data,$relations,$conditions);
             $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,$ecr_req_data,$ecr_req_relations,$ecr_req_conditions);
             return DataTables($classificationRequirement)
-            ->addColumn('get_actions',function ($row) use($ecrRequirement) {
+            ->addColumn('get_actions',function ($row) use($ecrRequirement,$request) {
                 $ecrRequirementCollection = collect($ecrRequirement);
                 $ecrRequirementMatch = $ecrRequirementCollection->firstWhere('classification_requirements_id', $row->id);
                 $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
@@ -627,7 +635,14 @@ class EcrController extends Controller
                 }
                 $result = '';
                 $result .= '<center>';
-                $result .= "<select id='btnChangeEcrReqDecision' class='form-select btn-change-ecr-req-decision ".$isValid."' ref=btnChangeEcrReqDecision ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
+                $ecr = Ecr::where('id',$request->ecrsId)->first(['status']);
+                $ecrApprovalPendingCount = EcrApproval::where('ecrs_id',$request->ecrsId)
+                ->where('status','PEN')
+                ->where('rapidx_user_id',session('rapidx_user_id'))
+                ->count();
+                $enabledDisabledSelect = $ecr['status'] != 'DIS' || $ecrApprovalPendingCount === 1 ? '' : 'disabled';
+
+                $result .= "<select ".$enabledDisabledSelect." id='btnChangeEcrReqDecision' class='form-select btn-change-ecr-req-decision ".$isValid."' ref=btnChangeEcrReqDecision ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
                 $result .=  "<option value='' ".$emptySelected." disabled> --Select-- </option>";
                 $result .=  "<option value='N/A' ".$naSelected."> N/A </option>";
                 $result .=  "<option value='C' ".$cSelected."> √ </option>";
@@ -804,65 +819,6 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    //Common Function getEcrStatus
-   public function getStatus($status){
-
-       try {
-            switch ($status) {
-                case 'IA':
-                    $status = 'Internal Approval';
-                    $bgStatus = 'badge rounded-pill bg-primary';
-                    break;
-                case 'QA':
-                    $status = 'QA Approval';
-                    $bgStatus = 'badge rounded-pill bg-warning';
-                    break;
-                case 'DIS':
-                    $status = 'DISAPPROVED';
-                    $bgStatus = 'badge rounded-pill bg-danger';
-                    break;
-                default:
-                    $status = '';
-                    $bgStatus = '';
-                    break;
-            }
-            return [
-                'status' => $status,
-                'bgStatus' => $bgStatus,
-            ];
-       } catch (Exception $e) {
-           throw $e;
-       }
-   }
-   public function getApprovalStatus($approval_status){
-       try {
-            switch ($approval_status) {
-                case 'OTRB':
-                    $approvalStatus = 'Requested by:';
-                    break;
-                case 'OTTE':
-                    $approvalStatus = 'Technical Engg:';
-                    break;
-                case 'OTRVB':
-                    $approvalStatus = 'Reviewed By:';
-                    break;
-                case 'QACB':
-                    $approvalStatus = 'QA Engineer';
-                    break;
-                case 'QAIN':
-                    $approvalStatus = 'QA Manager';
-                    break;
-                default:
-                    $approvalStatus = '';
-                    break;
-            }
-            return [
-                'approvalStatus' => $approvalStatus,
-            ];
-       } catch (Exception $e) {
-           throw $e;
-       }
-   }
    public function getPmiApprovalStatus($approval_status){
        try {
             switch ($approval_status) {
@@ -927,15 +883,46 @@ class EcrController extends Controller
                     break;
                 case 'Material':
                     $currentModel = Material::class;
+                    $requestValidated = [
+                        'ecrs_id' => $ecrsId,
+                        'status' => 'RUP',
+                        'approval_status' => 'RUP',
+                        'created_at' => now(),
+                    ];
+                    $currentModel::where('ecrs_id', $ecrsId)->delete();
+                    $this->resourceInterface->create($currentModel,$requestValidated);
                     break;
                 case 'Machine':
                     $currentModel = Machine::class;
+                    $requestValidated = [
+                        'ecrs_id' => $ecrsId,
+                        'status' => 'RUP',
+                        'approval_status' => 'RUP',
+                        'created_at' => now(),
+                    ];
+                    $currentModel::where('ecrs_id', $ecrsId)->delete();
+                    $this->resourceInterface->create($currentModel,$requestValidated);
                     break;
                 case 'Method':
                     $currentModel = Method::class;
+                    $requestValidated = [
+                        'ecrs_id' => $ecrsId,
+                        'status' => 'RUP',
+                        'approval_status' => 'RUP',
+                        'created_at' => now(),
+                    ];
+                    $currentModel::where('ecrs_id', $ecrsId)->delete();
+                    $this->resourceInterface->create($currentModel,$requestValidated);
                     break;
                 case 'Environment':
                     $currentModel = Environment::class;
+                    $requestValidated = [
+                        'ecrs_id' => $ecrsId,
+                        'status' => 'RUP',
+                        'created_at' => now(),
+                    ];
+                    $currentModel::where('ecrs_id', $ecrsId)->delete();
+                    $this->resourceInterface->create($currentModel,$requestValidated);
                     break;
                 default:
                     //TODO:Error Handling

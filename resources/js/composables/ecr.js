@@ -158,7 +158,10 @@ export default function useEcr(){
         axiosFetchData(params,'api/get_ecr_by_id',function(response){
             let data = response.data;
             let ecr = data.ecr;
-            modalEcr.EcrRequirements.show();
+            if(ecr.status != 'DIS'){
+                modalEcr.EcrRequirements.show();
+            }
+
             frmEcr.value.ecrsId = ecr.id;
             frmEcr.value.ecrNo = ecr.ecr_no;;
             frmEcr.value.category = ecr.category;

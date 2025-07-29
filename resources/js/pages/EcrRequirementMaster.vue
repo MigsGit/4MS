@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-4">Dropdown Master</h4>
+        <h4 class="mt-4">Ecr Requirement Master</h4>
         <div class="row justify-content-between">
             <div class="col-md-3">
                 <Multiselect

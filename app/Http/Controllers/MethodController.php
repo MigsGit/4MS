@@ -441,14 +441,14 @@ class MethodController extends Controller
             throw $e;
         }
     }
-    public function viewMethodRef(Request $request){
+    public function viewMethodRef(Request $request){ //nmodify
         try {
             $methodsId = decrypt($request->methodsId);
             $conditions = [
                 'id' => $methodsId,
             ];
-            $data = $this->resourceInterface->readCustomEloquent(Method::class,[],[],$conditions);
-            $methodRefByEcrsId = $data
+           $data = $this->resourceInterface->readCustomEloquent(Method::class,[],[],$conditions);
+          $methodRefByEcrsId = $data
             ->get([
                 'filtered_document_name_before',
                 'filtered_document_name_after',
@@ -457,16 +457,16 @@ class MethodController extends Controller
 
             if( filled($methodRefByEcrsId) ){
                 if ($request->imageType === "before"){
-                    $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_before);
+                    return  $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_before);
                     $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
                     $filePathWithEcrsId = $methodRefByEcrsId[0]->file_path."/".$methodsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
                     $filePath = "app/public/".$filePathWithEcrsId."";
                 }
                 if ($request->imageType === "after"){
-                    $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_after);
+                   $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_after);
                     $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
                     $filePathWithEcrsId = $methodRefByEcrsId[0]->file_path."/".$methodsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
-                    $filePath = "app/public/".$filePathWithEcrsId."";
+                    return  $filePath = "app/public/".$filePathWithEcrsId."";
                 }
                 // $this->commonInterface->viewImageFile($filePath);
                 $path = storage_path($filePath);

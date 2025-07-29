@@ -48,10 +48,10 @@ class MaterialController extends Controller
                     DB::rollback();
                     return response()->json(['isSuccess' => 'false','msg' => "On going approval ! You cannot update this request "],500);
                 }
-                $ecr = Ecr::where('id',$currentEcrsId)
+                $ecrCount = Ecr::where('id',$currentEcrsId)
                 ->where('created_by',session('rapidx_user_id'))
                 ->count();
-                if ( $ecr === 0 ){
+                if ( $ecrCount === 0 ){
                     DB::rollback();
                     return response()->json(['isSuccess' => 'false','msg' => "Invalid User ! You cannot update this request "],500);
                 }
@@ -274,7 +274,7 @@ class MaterialController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            $this->emailInterface->sendEmail($emailData);
+            // $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

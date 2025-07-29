@@ -170,10 +170,10 @@ class CommonService implements CommonInterface
             throw $e;
         }
     }
-    public function getEcrStatus($status){
+    public function getEcrStatus($current_status){
 
         try {
-             switch ($status) {
+             switch ($current_status) {
                  case 'IA':
                      $status = 'Internal Approval';
                      $bgStatus = 'badge rounded-pill bg-primary';
@@ -188,7 +188,7 @@ class CommonService implements CommonInterface
                      break;
                 case 'OK':
                     $status = 'APPROVED';
-                    $bgStatus = 'badge rounded-pill bg-green';
+                    $bgStatus = 'badge rounded-pill bg-success';
                     break;
                  default:
                      $status = '';
@@ -198,6 +198,7 @@ class CommonService implements CommonInterface
              return [
                  'status' => $status,
                  'bgStatus' => $bgStatus,
+                 'current_status' => $current_status,
              ];
         } catch (Exception $e) {
             throw $e;
@@ -224,7 +225,6 @@ class CommonService implements CommonInterface
                  case 'QAEX':
                      $approvalStatus = 'QMS Head';
                      break;
-
                  default:
                      $approvalStatus = '';
                      break;

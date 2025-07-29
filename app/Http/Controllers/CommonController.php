@@ -631,7 +631,7 @@ class CommonController extends Controller
                 "created_by" => "mclegaspi",
                 "system_name" => "rapidx_4M",
             ];
-           $this->emailInterface->sendEmail($data);
+        //    $this->emailInterface->sendEmail($data);
            return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;

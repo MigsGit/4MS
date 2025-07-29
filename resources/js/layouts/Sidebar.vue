@@ -37,6 +37,9 @@
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'DropdownMaster' }">
                     <font-awesome-icon class="nav-icon" icon="square-caret-down" />&nbsp; Dropdown Master
                 </router-link>
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'EcrRequirementMaster' }">
+                    <font-awesome-icon class="nav-icon" icon="clipboard-list" />&nbsp; Ecr Requirement Master
+                </router-link>
                 <!--  <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Settings' }">
                     <i class="fas fa-tasks"></i>&nbsp; Settings
                 </router-link> -->
