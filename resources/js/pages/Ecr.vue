@@ -298,6 +298,9 @@
                             </button>
                         </h5>
                     <div id="collapse4" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-header">
+                            <p>NOTE: Please fill-up for the 4M Approval only !</p>
+                        </div>
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
@@ -371,6 +374,9 @@
                             </button>
                         </h5>
                     <div id="collapsePmiExternal" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-header">
+                            <p>NOTE: Please fill-up for the 4M Approval only !</p>
+                        </div>
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
