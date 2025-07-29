@@ -699,6 +699,16 @@ class CommonController extends Controller
                     return !is_null($item->$relation);
                 })->count();
             }
+            $pendingEcr = '';
+
+            $pendingEcr = Ecr::where('status','!=','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $approvedEcr = Ecr::where('status','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
             return response()->json([
                 'isSuccess' => 'true',
                 'ecrApproval' => $ecrApproval,
@@ -708,6 +718,8 @@ class CommonController extends Controller
                 'methodApproval' => $methodApproval,
                 'pmiApproval' => $relationshipCounts,
                 'pendingEcr' => $pendingEcr,
+                'approvedEcr' => $approvedEcr,
+                // 'approvedEcr' => session(''),
             ]);
         } catch (Exception $e) {
             throw $e;

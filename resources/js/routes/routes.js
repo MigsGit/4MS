@@ -1,6 +1,6 @@
 import IndexComponent from '../../js/pages/IndexComponent.vue'
 import Unauthorized from '../../js/pages/Unauthorized.vue'
-import Dashboard from '../../js/pages/Dashboard.vue'
+import Dashboard from '../pages/Dashboard.vue'
 import Ecr from '../../js/pages/Ecr.vue'
 import EcrTest from '../../js/pages/EcrTest.vue'
 import Man from '../../js/pages/Man.vue'
@@ -11,6 +11,7 @@ import Environment from '../../js/pages/Environment.vue'
 import UserMaster from '../../js/pages/UserMaster.vue'
 import DropdownMaster from '../../js/pages/DropdownMaster.vue'
 import EcrRequirementMaster from '../../js/pages/EcrRequirementMaster.vue'
+import DashboardTest from '../pages/DashboardTest.vue'
 import useFetch from '../../js/composables/utils/useFetch';
 const { axiosFetchData } = useFetch(); // Call  the useFetch function
 
@@ -111,6 +112,12 @@ export default [
                 name: 'EcrRequirementMaster',
                 beforeEnter: checkIfSessionExist,
                 component: EcrRequirementMaster,
+            },
+            {
+                path: 'dashboard_test',
+                name: 'DashboardTest',
+                beforeEnter: checkIfSessionExist,
+                component: DashboardTest,
             },
         ]
     }

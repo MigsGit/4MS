@@ -39,9 +39,7 @@
                                     <div class="card-body">
                                         <h4><font-awesome-icon class="nav-icon" icon="user" />&nbsp;ECR ({{ ecrApproval }})</h4>
                                     </div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        Pending ( {{pendingEcr}} )
-                                        Approved ( {{approvedEcr}} )
+                                    <div class="card-footer d-flex align-items-center justify-content-end">
                                         <router-link class="small text-white stretched-link" :to="{ name: 'Ecr' }">
                                             more info
                                             <font-awesome-icon class="nav-icon" icon="angle-right" />
@@ -176,8 +174,8 @@
            pmiApprovalMachine.value = pmiApproval.machine;
            pmiApprovalMethod.value = pmiApproval.method;
            pmiApprovalEnvironment.value = pmiApproval.environment;
-           approvedEcr.value = data.approvedEcr;
-           pendingEcr.value = data.pendingEcr;
+           approvedEcr.value = pmiApproval.pendingEcr;
+           pendingEcr.value = pmiApproval.pendingEcr;
         });
     })
 </script>
