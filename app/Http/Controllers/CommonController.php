@@ -707,6 +707,7 @@ class CommonController extends Controller
                 'machineApproval' => $machineApproval,
                 'methodApproval' => $methodApproval,
                 'pmiApproval' => $relationshipCounts,
+                'pendingEcr' => $pendingEcr,
             ]);
         } catch (Exception $e) {
             throw $e;

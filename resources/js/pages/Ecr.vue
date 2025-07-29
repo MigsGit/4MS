@@ -17,7 +17,7 @@
                 <li class="nav-item">
                     <a class="nav-link active .menuTab" id="Pending-tab" data-bs-toggle="tab" href="#menu1" role="tab" aria-controls="menu1" aria-selected="true">For Approval</a>
                 </li>
-                <li v-show="commonVar.rapidxUserDeptGroup ==='ISS' || commonVar.rapidxUserDeptGroup ==='QA'" class="nav-item">
+                <li v-show="commonVar.rapidxUserDeptGroup ==='ISS'" class="nav-item">
                     <a class="nav-link .menuTab" id="Completed-tab" data-bs-toggle="tab" href="#menu2" role="tab" aria-controls="menu2" aria-selected="false">QA Approval</a>
                 </li>
             </ul>
@@ -34,7 +34,7 @@
                             class="table mt-2"
                             ref="tblEcr"
                             :columns="tblEcrColumns"
-                            ajax="api/load_ecr?status=IA,DIS"
+                            ajax="api/load_ecr?status=IA,DIS,QA"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -1022,7 +1022,7 @@
         });
     }
     const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS"+"&& adminAccess="+selectedParams).draw();
+        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA"+"&& adminAccess="+selectedParams).draw();
         tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;
     }
@@ -1097,7 +1097,7 @@
         );
         axiosSaveData(formData,'api/save_ecr_approval', (response) =>{
             tblEcrApproverSummary.value.dt.draw();
-            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
+            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA").load();
             tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
             modal.EcrApproval.hide();
             modalEcr.SaveEcr.hide();
@@ -1190,7 +1190,7 @@
                 }
                 //TODO: Save Successfully
                 axiosSaveData(formData,'api/save_ecr', (response) =>{
-                    tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS && adminAccess="+selectedAdminAccess.value).load();
+                    tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA && adminAccess="+selectedAdminAccess.value).load();
                     tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA && adminAccess="+selectedAdminAccess.value).load();
                     modalEcr.SaveEcr.hide();
                 });
