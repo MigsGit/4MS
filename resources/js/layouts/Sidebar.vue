@@ -31,9 +31,11 @@
                     <font-awesome-icon class="nav-icon" icon="tree" />&nbsp; Environment
                 </router-link>
                 <div class="sb-sidenav-menu-heading">Admin</div>
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }">
+
+                <router-link v-show="departmentGroup === 'ISS' || departmentGroup === 'QAD'" class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }">
                     <font-awesome-icon class="nav-icon" icon="users" />&nbsp; User Master
                 </router-link>
+
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'DropdownMaster' }">
                     <font-awesome-icon class="nav-icon" icon="square-caret-down" />&nbsp; Dropdown Master
                 </router-link>
@@ -62,10 +64,12 @@
     } = useEcr();
 
     const userFullName = ref("");
+    const departmentGroup = ref("");
 
     const getUserFullName = async () => {
         axiosFetchData({},'api/get_admin_access_opt',function(response){
             userFullName.value = response.data.activeUserFullName;
+            departmentGroup.value = response.data.activedepartmentGroup;
         });
     }
     onMounted( async () => {

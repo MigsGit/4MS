@@ -31,6 +31,7 @@ class SettingsController extends Controller
                 LEFT JOIN departments departments ON departments.department_id = users.department_id
                 WHERE 1=1
                 AND users.id = '.session('rapidx_user_id').'
+                AND user_accesses.user_access_stat = 1
                 AND users.user_stat = 1
                 AND user_accesses.module_id = 46
                 '
@@ -53,6 +54,7 @@ class SettingsController extends Controller
                 LEFT JOIN user_accesses user_accesses ON user_accesses.user_id = users.id
                 LEFT JOIN departments departments ON departments.department_id = users.department_id
                 WHERE 1=1
+                AND user_accesses.user_access_stat = 1
                 AND users.user_stat = 1
                 AND user_accesses.module_id = 46
                 '

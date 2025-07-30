@@ -262,7 +262,23 @@ class EcrController extends Controller
                 //Reset EcrRequirement
                 EcrRequirement::where('ecrs_id',$ecrsId)->delete();
                 DB::commit();
-                // $this->emailInterface->sendEmail($emailData);
+                $emailData = [
+                    "to" =>$to,
+                    "cc" =>"",
+                    "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                    "from" => $from,
+                    "from_name" =>$from_name ?? "4M Change Control Management System",
+                    "subject" =>$subject,
+                    "message" =>  $msg,
+                    "attachment_filename" => "",
+                    "attachment" => "",
+                    "send_date_time" => now(),
+                    "date_time_sent" => "",
+                    "date_created" => now(),
+                    "created_by" => session('rapidx_username'),
+                    "system_name" => "rapidx_4M",
+                ];
+                $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
             //If the ECR is Approved, Save the ECR Details by Category
@@ -324,7 +340,7 @@ class EcrController extends Controller
             $emailData = [
                 "to" =>$to,
                 "cc" =>"",
-                "bcc" =>"mclegaspi@pricon.ph",
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
                 "from" => $from,
                 "from_name" =>$from_name ?? "4M Change Control Management System",
                 "subject" =>$subject,
@@ -338,7 +354,7 @@ class EcrController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

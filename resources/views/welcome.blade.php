@@ -16,6 +16,7 @@
         {{-- <route-view></route-view> --}}
         {{-- <index-component></index-component> --}}
     </div>
-    <script src="{{ asset('/public/js/app.js') }}"></script>
+    <script src="{{ asset('/public/js/app.js') }}?<?=time()?>"></script>
+
     <!-- Core plugin JavaScript-->
 </body>

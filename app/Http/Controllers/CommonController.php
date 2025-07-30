@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Method;
 use App\Models\Machine;
 use App\Models\Material;
+use App\Models\ManDetail;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\Environment;
@@ -700,11 +701,52 @@ class CommonController extends Controller
                 })->count();
             }
 
+
             $pendingEcr = Ecr::where('status','!=','OK')
             ->whereNull('deleted_at')
             ->count();
 
             $approvedEcr = Ecr::where('status','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $pendingMan = ManDetail::where('status','!=','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $approvedMan = ManDetail::where('status','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $pendingMaterial = Material::where('status','!=','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $approvedMaterial = Material::where('status','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $pendingMethod = Method::where('status','!=','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $approvedMethod = Method::where('status','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $pendingMachine = Machine::where('status','!=','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $approvedMachine = Machine::where('status','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $pendingEnvironment = Environment::where('approval_status','!=','OK')
+            ->whereNull('deleted_at')
+            ->count();
+
+            $approvedEnvironment = Environment::where('approval_status','OK')
             ->whereNull('deleted_at')
             ->count();
 
@@ -718,6 +760,16 @@ class CommonController extends Controller
                 'pmiApproval' => $relationshipCounts,
                 'pendingEcr' => $pendingEcr,
                 'approvedEcr' => $approvedEcr,
+                'pendingMan' => $pendingMan,
+                'approvedMan' => $approvedMan,
+                'pendingMaterial' => $pendingMaterial,
+                'approvedMaterial' => $approvedMaterial,
+                'pendingMethod' => $pendingMethod,
+                'approvedMethod' => $approvedMethod,
+                'pendingMachine' => $pendingMachine,
+                'approvedMachine' => $approvedMachine,
+                'pendingEnvironment' => $pendingEnvironment,
+                'approvedEnvironment' => $approvedEnvironment,
             ]);
         } catch (Exception $e) {
             throw $e;
