@@ -383,8 +383,19 @@
                     </div>
                  </div>
                 <div class="col-sm-6">
+                    <!-- Unnecessary value binding used alongside v-model. It will interfere with v-model's behavior. -->
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Trainer:</span>
+                        <span class="input-group-text" id="addon-wrapping">Update Approver?</span>
+                        <Multiselect
+                            v-model="frmMan.isUpdateManApprover"
+                            :options="commonVar.optYesNo"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Trainers:</span>
                         <Multiselect
                             v-model="frmMan.trainer"
                             :options="commonVar.optUserMaster"
@@ -895,6 +906,7 @@
         //Append form data
         [
             ["ecrs_id", frmMan.value.ecrsId],
+            ["is_update_man_approver", frmMan.value.isUpdateManApprover],
             ["first_assign", frmMan.value.firstAssign],
             ["long_interval", frmMan.value.longInterval],
             ["change", frmMan.value.change],
@@ -912,7 +924,7 @@
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_man', (response) =>{
-            modal.SaveManDetails.hide();
+            // modal.SaveManDetails.hide();
             tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw()
         });
     }

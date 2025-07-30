@@ -738,7 +738,6 @@ class EcrController extends Controller
             'currentCtrlNo' => $currentCtrlNo
         ];
     }
-
     public function isCompletedEcrRequirementComplete($ecrsId){ //Requirement
         $classificationRequirementCount =  ClassificationRequirement::whereIn('classifications_id',[1,2,3,4,5])->count();
         $ecrRequirementCount = EcrRequirement::where('ecrs_id',$ecrsId)->count();
@@ -877,7 +876,7 @@ class EcrController extends Controller
             $ecr = Ecr::find($ecrsId);
             switch  ($category) {
                 case 'Man':
-                    $currentModel = ManDetail::class;
+                    $currentModel = Man::class;
                     $manApproval = ManApproval::class;
                     $requestValidated = [
                         'ecrs_id' => $ecrsId,

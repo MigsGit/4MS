@@ -74,7 +74,9 @@ class MethodController extends Controller
             MethodApproval::where('methods_id',$methodsId)->delete();
             MethodApproval::insert($methodApprovalValidated);
             $methodApproval =  MethodApproval::whereNotNull('rapidx_user_id')
-            ->where('methods_id', $methodsId)->first();
+            ->whereNull('deleted_at')
+            ->where('methods_id', $methodsId)
+            ->first();
             if ($methodApproval) {
                 $methodApproval->update(['status' => 'PEN']);
                 Method::where('id', $methodsId)->first()

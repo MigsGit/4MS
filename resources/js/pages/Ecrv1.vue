@@ -17,7 +17,7 @@
                 <li class="nav-item">
                     <a class="nav-link active .menuTab" id="Pending-tab" data-bs-toggle="tab" href="#menu1" role="tab" aria-controls="menu1" aria-selected="true">For Approval</a>
                 </li>
-                <li v-show="commonVar.rapidxUserDeptGroup ==='ISS' || commonVar.rapidxUserDeptGroup ==='QA'" class="nav-item">
+                <li v-show="commonVar.rapidxUserDeptGroup ==='ISS'" class="nav-item">
                     <a class="nav-link .menuTab" id="Completed-tab" data-bs-toggle="tab" href="#menu2" role="tab" aria-controls="menu2" aria-selected="false">QA Approval</a>
                 </li>
             </ul>
@@ -34,7 +34,7 @@
                             class="table mt-2"
                             ref="tblEcr"
                             :columns="tblEcrColumns"
-                            ajax="api/load_ecr?status=IA,DIS"
+                            ajax="api/load_ecr?status=IA,DIS,QA"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -101,7 +101,7 @@
                         <input  v-model="frmEcr.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                     </div>
                     <div class="input flex-nowrap mb-2 input-group-sm">
-                        <input  v-model="frmEcr.departmentGroup" type="text" :value="commonVar.rapidxUserDeptGroup" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
+                        <input  v-model="frmEcr.departmentGroup" type="text" :value="commonVar.rapidxUserDeptGroup" class="form-control form-control d-none" aria-describedby="addon-wrapping" readonly>
                     </div>
                     <div class="col-sm-6">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
@@ -160,86 +160,6 @@
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Date of Request:</span>
                             <input v-model="frmEcr.dateOfRequest" type="date" class="form-control" aria-describedby="addon-wrapping">
-                        </div>
-                    </div>
-                </div>
-                  <!-- Others Disposition -->
-                  <div v-show="isSelectReadonly === false" class="card mb-2">
-                        <h5 class="mb-0">
-                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExternal" aria-expanded="true" aria-controls="collapseExternal">
-                                External Field
-                            </button>
-                        </h5>
-                    <div id="collapseExternal" class="collapse show" data-bs-parent="#accordionMain">
-                        <div class="card-body shadow">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                        <span class="input-group-text" id="addon-wrapping">Document Affected:</span>
-                                        <Multiselect
-                                            v-model="frmEcr.documentAffectedExternal"
-                                            :close-on-select="true"
-                                            :searchable="true"
-                                            :options="ecrVar.documentAffectedExternal"
-                                            :disabled="isSelectReadonly"
-                                        />
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                        <span class="input-group-text" id="addon-wrapping">Target of Implementation:</span>
-                                        <input type="date" class="form-control" aria-describedby="addon-wrapping">
-                                    </div>
-                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                        <span class="input-group-text" id="addon-wrapping">Actual Sample Attached:</span>
-                                        <input type="text" class="form-control" aria-describedby="addon-wrapping">
-                                        <input type="text" class="form-control" aria-describedby="addon-wrapping" placeholder="Qty(pcs.)">
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                        <span class="input-group-text" id="addon-wrapping">With Attachment:</span>
-                                        <input type="date" class="form-control" aria-describedby="addon-wrapping">
-                                    </div>
-                                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                        <span class="input-group-text" id="addon-wrapping">Title of Attachment:</span>
-                                        <input type="text" class="form-control" aria-describedby="addon-wrapping">
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <!-- @click="btnAddEcrOtherDispoRows()"  -->
-                                    <button type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Document Affected</button>
-                                </div>
-                                <div class="col-12">
-                                    <table class="table table-responsive">
-                                        <thead>
-                                            <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col" style="width: 75%;"> Document Affected</th>
-                                            <th scope="col">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- <tr  v-for="(frmEcrOtherDispoRow, index) in frmEcrOtherDispoRows" :key="frmEcrOtherDispoRow.index"> -->
-                                            <tr>
-                                                <td>
-                                                   <!-- {{ index+1 }} -->
-                                                   1
-                                                </td>
-                                                <td>
-                                                    <input type="text" class="form-control" aria-describedby="addon-wrapping">
-                                                </td>
-                                                <td>
-                                                    <!-- @click="btnRemoveEcrOtherDispoRows(index)" -->
-                                                    <button  class="btn btn-danger btn-sm" type="button" data-item-process="add">
-                                                        <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -378,6 +298,9 @@
                             </button>
                         </h5>
                     <div id="collapse4" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-header">
+                            <p>NOTE: Please fill-up for the 4M Approval only !</p>
+                        </div>
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
@@ -451,6 +374,9 @@
                             </button>
                         </h5>
                     <div id="collapsePmiExternal" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-header">
+                            <p>NOTE: Please fill-up for the 4M Approval only !</p>
+                        </div>
                         <div class="card-body shadow">
                             <div class="row">
                                 <div class="col-12">
@@ -575,6 +501,50 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
+            <div class="row mt-3">
+                <!-- Others -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMan" aria-expanded="true" aria-controls="collapseMan">
+                                OTHERS
+                            </button>
+                        </h5>
+                    <div id="collapseMan" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrManRequirements"
+                                        :columns="tblEcrManRequirementsColumns"
+                                        ajax="api/load_ecr_requirements?category=6"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {
+                                                    orderable:false,target:[3],
+
+                                                }
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row mt-3">
                 <!-- Man -->
                 <div class="card mb-2">
@@ -915,6 +885,7 @@
                         tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
                         tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
                         tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+currentEcrsId.value).draw();
                     });
                 }
             }
@@ -1097,12 +1068,11 @@
     const generateControlNumber = async () => {
         let apiParams = {};
         axiosFetchData(apiParams,'api/generate_control_number',function(response){
-             console.log(response);
              frmEcr.value.ecrNo = response.data.currentCtrlNo;
         });
     }
     const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS"+"&& adminAccess="+selectedParams).draw();
+        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA"+"&& adminAccess="+selectedParams).draw();
         tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;
     }
@@ -1121,6 +1091,7 @@
             tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
             tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
             tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
+            tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+currentEcrsId.value).draw();
         });
     }
     const btnAddEcrOtherDispoRows = async () => {
@@ -1163,7 +1134,8 @@
         tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
         tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
         tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-        modalEcr.EcrRequirements.show();
+        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+         modalEcr.EcrRequirements.show();
     }
     const frmSaveEcrApproval = async () => {
         let formData = new FormData();
@@ -1177,7 +1149,7 @@
         );
         axiosSaveData(formData,'api/save_ecr_approval', (response) =>{
             tblEcrApproverSummary.value.dt.draw();
-            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
+            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA").load();
             tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
             modal.EcrApproval.hide();
             modalEcr.SaveEcr.hide();
@@ -1270,7 +1242,7 @@
                 }
                 //TODO: Save Successfully
                 axiosSaveData(formData,'api/save_ecr', (response) =>{
-                    tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS && adminAccess="+selectedAdminAccess.value).load();
+                    tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA && adminAccess="+selectedAdminAccess.value).load();
                     tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA && adminAccess="+selectedAdminAccess.value).load();
                     modalEcr.SaveEcr.hide();
                 });

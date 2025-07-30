@@ -18,7 +18,7 @@ class PmiApproval extends Model
     }
     public function man_detail()
     {
-        return $this->hasOne(ManDetail::class, 'ecrs_id', 'ecrs_id')->where('status','PMIAPP')->whereNull('deleted_at');
+        return $this->hasOne(Man::class, 'ecrs_id', 'ecrs_id')->where('status','PMIAPP')->whereNull('deleted_at');
     }
     public function material()
     {

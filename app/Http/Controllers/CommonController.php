@@ -339,7 +339,7 @@ class CommonController extends Controller
             $isCategory = $isCategory[0]->category;
             switch ($isCategory) {
                 case 'Man':
-                    $currentModel = Man::class;
+                    $currentModel = ManDetail::class;
                     break;
                 case 'Material':
                     $currentModel = Material::class;
@@ -536,7 +536,7 @@ class CommonController extends Controller
                 switch ($ecr->category) {
                     case 'Man':
                         $path = 'external_disposition/man';
-                        $model = Man::class;
+                        $model = ManDetail::class;
                         break;
                     case 'Material':
                         $path = 'external_disposition/material';
@@ -710,11 +710,11 @@ class CommonController extends Controller
             ->whereNull('deleted_at')
             ->count();
 
-            $pendingMan = ManDetail::where('status','!=','OK')
+            $pendingMan = Man::where('status','!=','OK')
             ->whereNull('deleted_at')
             ->count();
 
-            $approvedMan = ManDetail::where('status','OK')
+            $approvedMan = Man::where('status','OK')
             ->whereNull('deleted_at')
             ->count();
 

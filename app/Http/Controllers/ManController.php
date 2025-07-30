@@ -144,7 +144,7 @@ class ManController extends Controller
             $conditions = [
                 'ecrs_id' => $request->ecrsId ?? ''
             ];
-            $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(Man::class,$data,$relations,$conditions);
+            $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(ManDetail::class,$data,$relations,$conditions);
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
                 $result = '';
@@ -341,7 +341,8 @@ class ManController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
-            $manModel = Man::class;
+            $manModel = ManDetail::class;
+            $ecrsId = $request->ecrs_id;
             $manRequestValidated = $manRequest->validated();
             if ( isset($request->man_id) ){ //Edit
                 $manRequestValidated['trainer_sample_size'] = $request->trainer_sample_size;
@@ -354,7 +355,46 @@ class ManController extends Controller
                 ];
                 $this->resourceInterface->updateConditions($manModel,$conditions,$manRequestValidated);
             }else{ //Add
-                $this->resourceInterface->create($manModel,$manRequestValidated);
+                $man =  $this->resourceInterface->create($manModel,$manRequestValidated);
+
+            }
+            $manApprovalTypes = [
+                'RUP' => session('rapidx_user_id'),
+                'TRNR' => $request->trainer,
+                'LQCSUP' => $request->qc_inspector_operator,
+            ];
+            $manApprovalRequestCtr = 0; //assigned counter
+            $manApprovalRequest = collect($manApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$manApprovalRequestCtr,$ecrsId){
+                    return collect($users)->map(function ($userId) use ($request,$approval_status,&$manApprovalRequestCtr,$ecrsId){
+                        return [
+                            'ecrs_id' =>  $ecrsId,
+                            'rapidx_user_id' => $userId == 0 ? NULL : $userId,
+                            'approval_status' => $approval_status,
+                            'remarks' => $request->remarks,
+                            'created_at' => now(),
+                        ];
+                    });
+
+            })->toArray();
+            $manDetailCount = ManDetail::where('ecrs_id', $ecrsId)
+            ->whereNull('deleted_at')
+            ->count();
+            if($request->is_update_man_approver === 'YES'){
+                ManApproval::where('ecrs_id',$ecrsId)
+                ->whereNull('deleted_at')
+                ->delete();
+                ManApproval::insert($manApprovalRequest);
+                $manApproval =  ManApproval::whereNotNull('rapidx_user_id')
+                ->where('ecrs_id', $ecrsId)
+                ->first();
+                if ($manApproval) {
+                    $manApproval->update(['status' => 'PEN']);
+                    Man::where('ecrs_id', $ecrsId)->first()
+                    ->update([
+                        'approval_status' => 'RUP',
+                        'status' => 'RUP',
+                    ]);
+                }
             }
             DB::commit();
             return response()->json(['is_success' => 'true']);
@@ -372,7 +412,7 @@ class ManController extends Controller
             $conditions = [
                 'id' => $request->manId
             ];
-            $man = $this->resourceInterface->readWithRelationsConditionsActive(Man::class,$data,$relations,$conditions);
+            $man = $this->resourceInterface->readWithRelationsConditionsActive(ManDetail::class,$data,$relations,$conditions);
             return response()->json(['is_success' => 'true','man'=>$man[0]]);
         } catch (Exception $e) {
             throw $e;
@@ -443,7 +483,7 @@ class ManController extends Controller
                     'status' => 'DIS',
                     'approval_status' => 'DIS', //Repeat the status
                 ];
-                $this->resourceInterface->updateConditions(ManDetail::class,$conditions,$requestValidated);
+                $this->resourceInterface->updateConditions(Man::class,$conditions,$requestValidated);
             }
             if ( count($manApproval) === 0){
                     $manConditions = [
@@ -453,7 +493,7 @@ class ManController extends Controller
                         'status' => 'PMIAPP',
                         'approval_status' => 'PB',
                     ];
-                    $this->resourceInterface->updateConditions(ManDetail::class,$manConditions,$manValidated);
+                    $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
             }
             if ( count($manApproval) != 0){
                 $manApprovalValidated = [
@@ -470,7 +510,7 @@ class ManController extends Controller
                 $manValidated = [
                     'approval_status' => $manApproval[0]->approval_status,
                 ];
-                $this->resourceInterface->updateConditions(ManDetail::class,$manConditions,$manValidated);
+                $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
             }
 
             DB::commit();
@@ -500,7 +540,7 @@ class ManController extends Controller
                 'msg' => 'Please complete the ECR Details Above'
             ];
         }
-        $man = Man::where('ecrs_id',$ecrsId)->count();
+        $man = ManDetail::where('ecrs_id',$ecrsId)->count();
         if($man === 0){
             return [
                 'isSuccess' => 'false',
@@ -556,79 +596,13 @@ class ManController extends Controller
         try {
              switch ($approval_status) {
                 case 'RUP':
-                    $approvalStatus = 'Requestor ECR Update:';
+                    $approvalStatus = 'For Requestor Update:';
                     break;
-                case 'PRNDPB':
-                    $approvalStatus = 'Production Prepared by:';
+                case 'TRNR':
+                    $approvalStatus = 'Trainer:';
                     break;
-                case 'PRNDCB':
-                    $approvalStatus = 'Production Checked by:';
-                    break;
-                case 'PRNDAP':
-                    $approvalStatus = 'Production Approved by:';
-                    break;
-                case 'PURPB':
-                    $approvalStatus = 'Purchasing Prepared by:';
-                    break;
-                case 'PURCB':
-                    $approvalStatus = 'Purchasing Checked by:';
-                    break;
-                case 'PURAB':
-                    $approvalStatus = 'Purchasing Approved by:';
-                    break;
-                case 'PPCPB':
-                    $approvalStatus = 'PPC Prepared by:';
-                    break;
-                case 'PPCCB':
-                    $approvalStatus = 'PPC Checked by:';
-                    break;
-                case 'PPCAB':
-                    $approvalStatus = 'PPC Approved by:';
-                    break;
-                case 'EMSPB':
-                    $approvalStatus = 'EMS Prepared by:';
-                    break;
-                case 'EMSCB':
-                    $approvalStatus = 'EMS Checked by:';
-                    break;
-                case 'EMSAB':
-                    $approvalStatus = 'EMS Approved by:';
-                    break;
-                case 'LQCPB':
-                    $approvalStatus = 'QC Prepared by';
-                    break;
-                case 'LQCCB':
-                    $approvalStatus = 'QC Checked by';
-                    break;
-                case 'LQCAB':
-                    $approvalStatus = 'QC Approved by';
-                    break;
-                case 'MENGPB':
-                    $approvalStatus = 'Maintenance Engg Prepared by';
-                    break;
-                case 'MENGCB':
-                    $approvalStatus = 'Maintenance Engg Checked by';
-                    break;
-                case 'MENGAB':
-                    $approvalStatus = 'Maintenance Engg Approved by';
-                    break;
-                case 'PENGPB':
-                    $approvalStatus = 'Process Engg Prepared by';
-                    break;
-                case 'PENGCB':
-                    $approvalStatus = 'Process Engg Checked by';
-                    break;
-                case 'PENGAB':
-                    $approvalStatus = 'Process Engg Approved by';
-                    break;
-                case 'QAPB':
-                    $approvalStatus = 'QA Prepared by';
-                    break;
-                case 'QACB':
-                    $approvalStatus = 'QA Checked by';
-                    break;
-                case 'QAAB':
-                    $approvalStatus = 'QA Approved by';
+                case 'LQCSUP':
+                    $approvalStatus = 'LQC Supervisor:';
                     break;
                  default:
                      $approvalStatus = '';

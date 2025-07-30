@@ -47,7 +47,7 @@ class Ecr extends Model
 
     public function man_detail()
     {
-        return $this->hasOne(ManDetail::class, 'ecrs_id', 'id')->whereNull('deleted_at');
+        return $this->hasOne(Man::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
     public function environment()
     {

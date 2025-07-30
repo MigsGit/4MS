@@ -7,24 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class ManDetail extends Model
 {
-    protected $fillable = [
-        'approval_status',
-        'status',
-    ];
-    /**
+      /**
+     * Get the DropdownDetail associated with the EcrDetail
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function ecr()
+    public function rapidx_user($column)
     {
-        return $this->hasOne(Ecr::class, 'id', 'ecrs_id')->whereNull('deleted_at');
+        return $this->hasOne(RapidxUser::class, 'id', $column);
     }
-    public function man_approvals()
+    public function rapidx_user_qc_inspector_operator()
     {
-        return $this->hasMany(ManApproval::class, 'ecrs_id', 'ecrs_id')->whereNull('deleted_at');
+       return $this->rapidx_user('qc_inspector_operator');
     }
-    public function man_approvals_pending()
+    public function rapidx_user_trainer()
     {
-        return $this->hasMany(ManApproval::class, 'ecrs_id', 'ecrs_id')->where('status','PEN')->whereNull('deleted_at');
+       return $this->rapidx_user('trainer');
+    }
+    public function rapidx_user_lqc_supervisor()
+    {
+       return $this->rapidx_user('lqc_supervisor');
     }
 }

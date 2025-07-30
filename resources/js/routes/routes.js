@@ -1,8 +1,7 @@
 import IndexComponent from '../../js/pages/IndexComponent.vue'
 import Unauthorized from '../../js/pages/Unauthorized.vue'
 import Dashboard from '../pages/Dashboard.vue'
-import Ecr from '../../js/pages/Ecr.vue'
-import EcrTest from '../../js/pages/EcrTest.vue'
+import Ecr from '../pages/Ecr.vue'
 import Man from '../../js/pages/Man.vue'
 import Material from '../../js/pages/Material.vue'
 import Machine from '../../js/pages/Machine.vue'
@@ -31,8 +30,7 @@ function checkIfSessionExist(to, from, next) {
 }
 export default [
     {
-        path: '/4M',
-        component: '4M',
+        path: '/4MS',
         beforeEnter: checkIfSessionExist,
         components: {
             default: IndexComponent,
@@ -51,12 +49,6 @@ export default [
                 name: 'Ecr',
                 beforeEnter: checkIfSessionExist,
                 component: Ecr,
-            },
-            {
-                path: 'ecr_test',
-                name: 'EcrTest',
-                beforeEnter: checkIfSessionExist,
-                component: EcrTest,
             },
             {
                 path: 'man',

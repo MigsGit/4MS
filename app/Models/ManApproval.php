@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class ManApproval extends Model
 {
     protected $fillable = [
+        'man_details_id',
+        'ecrs_id',
         'status',
-        'remarks',
+        'rapidx_user_id',
+        'approval_status',
     ];
     public function rapidx_user()
     {
@@ -17,6 +20,6 @@ class ManApproval extends Model
     }
     public function man_detail()
     {
-        return $this->hasOne(ManDetail::class, 'ecrs_id', 'ecrs_id');
+        return $this->hasOne(Man::class, 'ecrs_id', 'ecrs_id');
     }
 }
