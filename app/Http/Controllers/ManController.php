@@ -10,6 +10,7 @@ use App\Models\ManApproval;
 use App\Models\ManChecklist;
 use Illuminate\Http\Request;
 use App\Http\Requests\ManRequest;
+use App\Models\SpecialInspection;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
@@ -23,6 +24,175 @@ class ManController extends Controller
     public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
+    }
+    public function saveMan(Request $request,ManRequest $manRequest){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $manDetailModel = ManDetail::class;
+            $manModel = Man::class;
+            $ecrsId = $request->ecrs_id;
+            $manRequestValidated = $manRequest->validated();
+            if ( isset($request->man_id) ){ //Edit
+                $trnrCount = $manModel::where('approval_status','TRNR')->exists();
+                $lqcCount = $manModel::where('approval_status','LQCSUP')->exists();
+                if($trnrCount){
+                    $manRequestValidated['trainer_sample_size'] = $request->trainer_sample_size;
+                    $manRequestValidated['trainer_result'] = $request->trainer_result;
+                }
+                if($lqcCount){
+                    $manRequestValidated['lqc_sample_size'] = $request->lqc_sample_size;
+                    $manRequestValidated['lqc_result'] = $request->lqc_result;
+                }
+                $manRequestValidated['process_change_factor'] = $request->process_change_factor;
+                $conditions = [
+                    'id' => $request->man_id
+                ];
+                $this->resourceInterface->updateConditions($manDetailModel,$conditions,$manRequestValidated);
+            }else{ //Add
+                $man =  $this->resourceInterface->create($manDetailModel,$manRequestValidated);
+
+            }
+            $manApprovalTypes = [
+                'RUP' => session('rapidx_user_id'),
+                'TRNR' => $request->trainer,
+                'LQCSUP' => $request->qc_inspector_operator,
+                'CHCK' => session('rapidx_user_id'), //Checklist Update
+            ];
+            $manApprovalRequestCtr = 0; //assigned counter
+            $manApprovalRequest = collect($manApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$manApprovalRequestCtr,$ecrsId){
+                    return collect($users)->map(function ($userId) use ($request,$approval_status,&$manApprovalRequestCtr,$ecrsId){
+                        return [
+                            'ecrs_id' =>  $ecrsId,
+                            'rapidx_user_id' => $userId == 0 ? NULL : $userId,
+                            'approval_status' => $approval_status,
+                            'remarks' => $request->remarks,
+                            'created_at' => now(),
+                        ];
+                    });
+
+            })->toArray();
+            $manDetailCount = ManDetail::where('ecrs_id', $ecrsId)
+            ->whereNull('deleted_at')
+            ->count();
+            if($request->is_update_man_approver === 'YES'){
+                ManApproval::where('ecrs_id',$ecrsId)
+                ->whereNull('deleted_at')
+                ->delete();
+                ManApproval::insert($manApprovalRequest);
+                $manApproval =  ManApproval::whereNotNull('rapidx_user_id')
+                ->where('ecrs_id', $ecrsId)
+                ->first();
+                if ($manApproval) {
+                    $manApproval->update(['status' => 'PEN']);
+                    Man::where('ecrs_id', $ecrsId)->first()
+                    ->update([
+                        'approval_status' => 'RUP',
+                        'status' => 'RUP',
+                    ]);
+                }
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+
+        }
+    }
+    public function saveManApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $selectedId = $request->selectedId;
+            //Get Current Ecr Approval is equal to Current Session
+            $manApprovalCurrent = ManApproval::where('ecrs_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+
+            if($manApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+
+            //Update the man Approval Status
+            $manApprovalCurrent->update([
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ]);
+            if($request->status === 'APP'){
+                if($manApprovalCurrent->approval_status === 'RUP'){
+                    $isManRequirementsComplete = $this->isManRequirementsComplete($selectedId);
+                    if(  $isManRequirementsComplete['isSuccess'] === 'false'){
+                        return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
+                    }
+                }
+                if($manApprovalCurrent->approval_status === 'TRNR'){
+                    $isManRequirementsComplete = $this->isTrainerManRequirementsComplete($selectedId);
+                    if(  $isManRequirementsComplete['isSuccess'] === 'false'){
+                        return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
+                    }
+                }
+                if($manApprovalCurrent->approval_status === 'LQCSUP'){
+                    $isManRequirementsComplete = $this->isLqcManRequirementsComplete($selectedId);
+                    if(  $isManRequirementsComplete['isSuccess'] === 'false'){
+                        return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
+                    }
+                }
+            }
+
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+            $manApproval = ManApproval::where('ecrs_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','-')
+            ->limit(1)
+            ->get(['id','approval_status']);
+            //DISAPPROVED ECR
+            if($request->status === "DIS"){
+                $conditions = [
+                    'id' => $selectedId,
+                ];
+                $requestValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
+                ];
+                $this->resourceInterface->updateConditions(Man::class,$conditions,$requestValidated);
+            }
+            if ( count($manApproval) === 0){
+                    $manConditions = [
+                        'ecrs_id' => $selectedId,
+                    ];
+                    $manValidated = [
+                        'status' => 'PMIAPP',
+                        'approval_status' => 'PB',
+                    ];
+                    $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
+            }
+            if ( count($manApproval) != 0){
+                $manApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $manApprovalConditions = [
+                    'id' => $manApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(ManApproval::class,$manApprovalConditions,$manApprovalValidated);
+                //Update the ECR Approval Status
+                $manConditions = [
+                    'ecrs_id' => $selectedId,
+                ];
+                $manValidated = [
+                    'status' => 'FORAPP',
+                    'approval_status' => $manApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
+            }
+
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
     public function loadEcrManByStatus(Request $request){
         $adminAccess = $request->adminAccess;
@@ -78,13 +248,13 @@ class ManController extends Controller
             $result .= '    Action';
             $result .= '</button>';
             $result .= '<ul class="dropdown-menu">';
-            if($row->man_detail->status === "RUP" || $row->man_detail->status === "PMIAPP"){
+            // if($row->man_detail->status === "RUP" || $row->man_detail->status === "PMIAPP"){
                 $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-            }
-            // if($row->man_detail->status === "RUP" && $row->created_by === session('rapidx_user_id')){
-            if($row->man_detail->status === "RUP"){
+            // }
+            if($row->man_detail->status === "RUP" && $row->created_by === session('rapidx_user_id')){
                 $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
             }
+
             $result .= '</ul>';
             $result .= '</div>';
             $result .= '</center>';
@@ -140,6 +310,7 @@ class ManController extends Controller
                 'rapidx_user_qc_inspector_operator',
                 'rapidx_user_trainer',
                 'rapidx_user_lqc_supervisor',
+                'man_pending_approvals',
             ];
             $conditions = [
                 'ecrs_id' => $request->ecrsId ?? ''
@@ -148,10 +319,17 @@ class ManController extends Controller
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
                 $result = '';
-                $result .= "<button class='btn btn-outline-info btn-sm mr-1' man-details-id='".$row->id."' id='btnManDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
-                $result .= '</br> </br>';
-                $result .= "<button class='btn btn-outline-success btn-sm mr-1' man-details-id='".$row->id."' id='btnManChecklistId'> <i class='fa-solid fa-check'></i></button>";
-                $result .= '</center>';
+                if($row->man_pending_approvals->rapidx_user_id === session('rapidx_user_id')){
+                    if(($row->man_pending_approvals->status != 'PMIAPP' && $row->man_pending_approvals->approval_status != 'CHCK')){
+                        $result .= "<button class='btn btn-outline-info btn-sm mr-1 mb-3' ecrs-id = '".$row->ecrs_id."' man-details-id='".$row->id."' id='btnManDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
+                    }
+
+                }
+
+                if($row->man_pending_approvals->approval_status === 'CHCK' && $row->man_pending_approvals->rapidx_user_id === session('rapidx_user_id')){
+                    $result .= "<button class='btn btn-outline-success btn-sm mr-1' ecrs-id = '".$row->ecrs_id."' man-details-id='".$row->id."' id='btnManChecklistId'> <i class='fa-solid fa-check'></i></button>";
+                    $result .= '</center>';
+                }
                 return $result;
             })
             ->addColumn('qc_inspector_operator',function ($row){
@@ -337,73 +515,6 @@ class ManController extends Controller
             throw $e;
         }
     }
-    public function saveMan(Request $request,ManRequest $manRequest){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-            $manModel = ManDetail::class;
-            $ecrsId = $request->ecrs_id;
-            $manRequestValidated = $manRequest->validated();
-            if ( isset($request->man_id) ){ //Edit
-                $manRequestValidated['trainer_sample_size'] = $request->trainer_sample_size;
-                $manRequestValidated['trainer_result'] = $request->trainer_result;
-                $manRequestValidated['lqc_sample_size'] = $request->lqc_sample_size;
-                $manRequestValidated['lqc_result'] = $request->lqc_result;
-                $manRequestValidated['process_change_factor'] = $request->process_change_factor;
-                $conditions = [
-                    'id' => $request->man_id
-                ];
-                $this->resourceInterface->updateConditions($manModel,$conditions,$manRequestValidated);
-            }else{ //Add
-                $man =  $this->resourceInterface->create($manModel,$manRequestValidated);
-
-            }
-            $manApprovalTypes = [
-                'RUP' => session('rapidx_user_id'),
-                'TRNR' => $request->trainer,
-                'LQCSUP' => $request->qc_inspector_operator,
-            ];
-            $manApprovalRequestCtr = 0; //assigned counter
-            $manApprovalRequest = collect($manApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$manApprovalRequestCtr,$ecrsId){
-                    return collect($users)->map(function ($userId) use ($request,$approval_status,&$manApprovalRequestCtr,$ecrsId){
-                        return [
-                            'ecrs_id' =>  $ecrsId,
-                            'rapidx_user_id' => $userId == 0 ? NULL : $userId,
-                            'approval_status' => $approval_status,
-                            'remarks' => $request->remarks,
-                            'created_at' => now(),
-                        ];
-                    });
-
-            })->toArray();
-            $manDetailCount = ManDetail::where('ecrs_id', $ecrsId)
-            ->whereNull('deleted_at')
-            ->count();
-            if($request->is_update_man_approver === 'YES'){
-                ManApproval::where('ecrs_id',$ecrsId)
-                ->whereNull('deleted_at')
-                ->delete();
-                ManApproval::insert($manApprovalRequest);
-                $manApproval =  ManApproval::whereNotNull('rapidx_user_id')
-                ->where('ecrs_id', $ecrsId)
-                ->first();
-                if ($manApproval) {
-                    $manApproval->update(['status' => 'PEN']);
-                    Man::where('ecrs_id', $ecrsId)->first()
-                    ->update([
-                        'approval_status' => 'RUP',
-                        'status' => 'RUP',
-                    ]);
-                }
-            }
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-
-        }
-    }
     public function getManById(Request $request){
         try {
             $data = [];
@@ -446,83 +557,14 @@ class ManController extends Controller
             throw $e;
         }
     }
-    public function saveManApproval(Request $request){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-            $selectedId = $request->selectedId;
-            //Get Current Ecr Approval is equal to Current Session
-            $manApprovalCurrent = ManApproval::where('ecrs_id',$selectedId)
-            ->whereNotNull('rapidx_user_id')
-            ->where('status','PEN')
-            ->first();
-            if($manApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
-                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
-            }
-            //Update the man Approval Status
-            $manApprovalCurrent->update([
-                'status' => $request->status,
-                'remarks' => $request->remarks,
-            ]);
-            $isManRequirementsComplete = $this->isManRequirementsComplete($selectedId);
-            if(  $isManRequirementsComplete['isSuccess'] === 'false' && $request->status === 'APP'){
-                return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
-            }
-            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-            $manApproval = ManApproval::where('ecrs_id',$selectedId)
-            ->whereNotNull('rapidx_user_id')
-            ->where('status','-')
-            ->limit(1)
-            ->get(['id','approval_status']);
-            //DISAPPROVED ECR
-            if($request->status === "DIS"){
-                $conditions = [
-                    'id' => $selectedId,
-                ];
-                $requestValidated = [
-                    'status' => 'DIS',
-                    'approval_status' => 'DIS', //Repeat the status
-                ];
-                $this->resourceInterface->updateConditions(Man::class,$conditions,$requestValidated);
-            }
-            if ( count($manApproval) === 0){
-                    $manConditions = [
-                        'ecrs_id' => $selectedId,
-                    ];
-                    $manValidated = [
-                        'status' => 'PMIAPP',
-                        'approval_status' => 'PB',
-                    ];
-                    $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
-            }
-            if ( count($manApproval) != 0){
-                $manApprovalValidated = [
-                    'status' => 'PEN',
-                ];
-                $manApprovalConditions = [
-                    'ecrs_id' => $selectedId,
-                ];
-                $this->resourceInterface->updateConditions(ManApproval::class,$manApprovalConditions,$manApprovalValidated);
-                //Update the ECR Approval Status
-                $manConditions = [
-                    'id' => $selectedId,
-                ];
-                $manValidated = [
-                    'approval_status' => $manApproval[0]->approval_status,
-                ];
-                $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
-            }
-
-            DB::commit();
-            return response()->json(['isSuccess' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
     public function isManRequirementsComplete($ecrsId){ //Requirement
         //ECR Details, Man Details
-        $ecrDetails = EcrDetail::where('ecrs_id',$ecrsId)->get();
+        $isEcrDetailsActiveCount = EcrDetail::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at')
+        ->count();
+        $ecrDetails = EcrDetail::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at');
+        // ->get();
         $arrColumnEcrDetails = [
             'type_of_part',
             'change_imp_date',
@@ -531,26 +573,103 @@ class ManController extends Controller
             'customer_approval',
         ];
         collect($arrColumnEcrDetails)->each(function ($arrColumnEcrDetailsRows) use ($ecrDetails) {
-            $ecrDetails->whereNotNull($arrColumnEcrDetailsRows);
+        //    return  $ecrDetails;
+            $ecrDetails->whereNotNull($arrColumnEcrDetailsRows)->count();
         });
-        $ecrDetailsCount = $ecrDetails->count();
-        if($ecrDetailsCount === 0){
+
+        $ecrDetailsNotNullCount = $ecrDetails->count();
+        return $isEcrDetailsActiveCount;
+        //Ecr Details Should be Completed
+        if($ecrDetailsNotNullCount != $isEcrDetailsActiveCount){
             return [
                 'isSuccess' => 'false',
                 'msg' => 'Please complete the ECR Details Above'
             ];
         }
-        $man = ManDetail::where('ecrs_id',$ecrsId)->count();
+        //Man Details Should be Saved
+        $man = ManDetail::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at')
+        ->count();
         if($man === 0){
             return [
                 'isSuccess' => 'false',
                 'msg' => 'Please complete the Man Details Above'
             ];
         }
+        //Man Details Should be saved
+        $manApproval = ManApproval::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at')
+        ->count();
+        if($manApproval === 0){
+            return [
+                'isSuccess' => 'false',
+                'msg' => 'Please save the Man Approvers'
+            ];
+        }
 
         return [
             'isSuccess' => 'true',
             'msg' => 'Ecr Details & Man Details Completed'
+        ];
+    }
+    public function isTrainerManRequirementsComplete($ecrsId){ //Requirement
+        //Man Details Should be Saved
+        $isManDetailActiveCount = ManDetail::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at')
+        ->count();
+        $manDetail = ManDetail::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at');
+        // ->get();
+        $arrColumnManDetail = [
+            'trainer_sample_size',
+            'trainer_result',
+        ];
+        collect($arrColumnManDetail)->each(function ($arrColumnManDetailRows) use ($manDetail) {
+        //    return  $ManDetail;
+            $manDetail->whereNotNull($arrColumnManDetailRows)->count();
+        });
+
+        $ManDetailNotNullCount = $manDetail->count();
+        //Ecr Details Should be Completed
+        if($ManDetailNotNullCount != $isManDetailActiveCount){
+            return [
+                'isSuccess' => 'false',
+                'msg' => 'Please Trainer Result and Sample Size'
+            ];
+        }
+        return [
+            'isSuccess' => 'true',
+            'msg' => 'LQC Requirement Completed !'
+        ];
+    }
+    public function isLqcManRequirementsComplete($ecrsId){ //Requirement
+        //Man Details Should be Saved
+        $isManDetailActiveCount = ManDetail::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at')
+        ->count();
+        $manDetail = ManDetail::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at');
+        // ->get();
+        $arrColumnManDetail = [
+            'lqc_sample_size',
+            'lqc_result',
+        ];
+        collect($arrColumnManDetail)->each(function ($arrColumnManDetailRows) use ($manDetail) {
+        //    return  $ManDetail;
+            $manDetail->whereNotNull($arrColumnManDetailRows)->count();
+        });
+
+        $ManDetailNotNullCount = $manDetail->count();
+        //Ecr Details Should be Completed
+        if($ManDetailNotNullCount != $isManDetailActiveCount){
+            return [
+                'isSuccess' => 'false',
+                'msg' => 'Please Trainer Result and Sample Size'
+            ];
+        }
+        return [
+            'isSuccess' => 'true',
+            'msg' => 'LQC Requirement Completed !'
         ];
     }
     // , Special Inspection
@@ -603,6 +722,9 @@ class ManController extends Controller
                     break;
                 case 'LQCSUP':
                     $approvalStatus = 'LQC Supervisor:';
+                    break;
+                case 'CHCK':
+                    $approvalStatus = 'For Checklist Update:';
                     break;
                  default:
                      $approvalStatus = '';

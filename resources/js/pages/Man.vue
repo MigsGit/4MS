@@ -92,7 +92,7 @@
                 <div class="card">
                     <div class="row mt-2">
                         <div class="col-12">
-                            <button @click="addManDetails()" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
+                            <button v-if="currentStatus === 'RUP'" @click="addManDetails()" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
                         </div>
                     </div>
                     <div class="card-body overflow-auto">
@@ -319,14 +319,18 @@
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Details" @add-event="saveManDetails()" ref="modalSaveManDetails">
         <template #body>
             <div class="row">
-                <div class="input-group flex-nowrap mb-2 input-group-sm  d-none">
+
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-                    <input v-model="frmMan.ecrsId" type="hidden" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
+                    <input v-model="frmMan.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
                 </div>
-                <div class="input-group flex-nowrap mb-2 input-group-sm d-none">
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">Man Id:</span>
-                    <input  v-model="frmMan.manId"  type="hidden" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
+                    <input  v-model="frmMan.manId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
                 </div>
+            </div>
+            <div class="row">
+
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">F:</span>
@@ -384,8 +388,8 @@
                  </div>
                 <div class="col-sm-6">
                     <!-- Unnecessary value binding used alongside v-model. It will interfere with v-model's behavior. -->
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text" id="addon-wrapping">Update Approver?</span>
+                    <div v-if="currentStatus === 'RUP'"  class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text text-danger" id="addon-wrapping">Update Approver? {{ currentStatus }}</span>
                         <Multiselect
                             v-model="frmMan.isUpdateManApprover"
                             :options="commonVar.optYesNo"
@@ -562,7 +566,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(currentManDetailsId,frmMan.ecrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(currentManDetailsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
 </template>
@@ -579,6 +583,7 @@
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
+
     DataTable.use(DataTablesCore)
     const { axiosSaveData } = useForm(); // Call the useFetch function
 
@@ -653,6 +658,8 @@
                         let manDetailsId = this.getAttribute('man-details-id');
                         selectedEcrsId.value = ecrsId;
                         currentManDetailsId.value = manDetailsId;
+                        frmMan.value.ecrsId = ecrsId;
+
                         isModal.value = 'Edit';
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrsId).draw();
@@ -677,6 +684,7 @@
                             selectedId : ecrsId,
                             approvalType : 'pmiApproval'
                         }
+                        selectedEcrsId.value = ecrsId;
                         frmMan.value.ecrsId = ecrsId;
                         currentManDetailsId.value = manDetailsId;
                         frmSpecialInspection.value.ecrsId = ecrsId;
@@ -685,7 +693,7 @@
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+ecrsId).draw();
                         tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw()
-                        if( manStatus === 'RUP'){
+                        if( manStatus != 'PMIAPP'){
                             getCurrentApprover(manApproverParams);
                             tblManApproverSummary.value.dt.ajax.url("api/load_man_approver_summary_ecrs_id?ecrsId="+ecrsId).draw();
                         }
@@ -737,6 +745,9 @@
                 if(btnManDetailsId != null){
                     btnManDetailsId.addEventListener('click',function(){
                         let manDetailsId = this.getAttribute('man-details-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
+                        frmMan.value.ecrsId = ecrsId;
                         getManById(manDetailsId);
                         modal.SaveManDetails.show();
                     });
@@ -745,8 +756,10 @@
                 if(btnManChecklistId != null){
                     btnManChecklistId.addEventListener('click',function(){
                         let manDetailsId = this.getAttribute('man-details-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
+                        frmMan.value.ecrsId = ecrsId;
                         currentManDetailsId.value = manDetailsId;
-
                         tblManChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=7 && manDetailsId="+manDetailsId).draw();
                         tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=8 && manDetailsId="+manDetailsId).draw();
                         modal.ManChecklist.show();
@@ -856,6 +869,8 @@
     }
     const addManDetails = async () => {
         frmMan.value.ecrsId = selectedEcrsId.value;
+        alert(selectedEcrsId.value);
+
         modal.SaveManDetails.show();
     }
     const btnAddSpecialInspection = async () => {
@@ -902,10 +917,34 @@
         });
     }
     const saveManDetails = async () => {
+    //     alert(frmMan.value.isUpdateManApprover);
+    //         return;
+        if(frmMan.value.isUpdateManApprover === 'YES'){
+            Swal.fire({
+                title: 'Confirmation',
+                text: 'Please double check your details, the Approval will RESET !',
+                icon: 'warning',
+                allowOutsideClick: false,
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    saveManDetailsWithConfirmation();
+                    tblManApproverSummary.value.dt.ajax.url("api/load_man_approver_summary_ecrs_id?ecrsId="+selectedEcrsId.value).draw();
+                }
+            })
+            return;
+        }
+        await saveManDetailsWithConfirmation();
+    }
+    const saveManDetailsWithConfirmation = async () => {
         let formData = new FormData();
         //Append form data
         [
             ["ecrs_id", frmMan.value.ecrsId],
+            ["man_id", frmMan.value.manId],
             ["is_update_man_approver", frmMan.value.isUpdateManApprover],
             ["first_assign", frmMan.value.firstAssign],
             ["long_interval", frmMan.value.longInterval],
@@ -924,11 +963,13 @@
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_man', (response) =>{
-            // modal.SaveManDetails.hide();
-            tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw()
+            modal.SaveManDetails.hide();
+            tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw();
         });
+
     }
     const saveApproval = async (selectedId=null,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
+
         if(approvalType === 'PMIAPP'){ //Based on Ecr Id
             let apiParams = {
                 ecrsId : selectedEcrsId,

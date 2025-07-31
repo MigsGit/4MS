@@ -709,14 +709,13 @@ class EcrController extends Controller
         if(count($hris_data) > 0 && count($rapidx_user)> 0){
             $vwEmployeeinfo =  $hris_data;
             $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
-
-            $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS") ? "ADMIN" :
+            $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN") ? "ADMIN" :
             $rapidx_user[0]->department_group);
         }
         if(count($subcon_data) > 0 && count($rapidx_user) > 0){
             $vwEmployeeinfo =  $subcon_data;
             $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
-            $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS") ? "ADMIN" :
+            $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN")  ? "ADMIN" :
             $rapidx_user[0]->department_group);
         }
         // Check if the Created At & App No / Division / Material Category is exisiting
