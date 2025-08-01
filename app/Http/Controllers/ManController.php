@@ -211,7 +211,7 @@ class ManController extends Controller
             'category' => $request->category
         ];
         $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-
+        //  ||
         if( $adminAccess === 'null' || blank($adminAccess) ){
             $ecr->whereHas('man_detail.man_approvals_pending',function($query){
                  // if is adminAccess exist deactivate the session condition
@@ -226,7 +226,9 @@ class ManController extends Controller
         if( $adminAccess === 'all') {
             $ecr->get();
         }
-        if ( $adminAccess === 'pmi') {
+        // return $man = Man::where('ecrs_id',$ecr[0]->id)->first(['status','approval_status']);
+
+        if ( $adminAccess === 'pmi' || $ecr->count() === 0) {
             $data = [];
             $relations = [
                 'pmi_approvals_pending',

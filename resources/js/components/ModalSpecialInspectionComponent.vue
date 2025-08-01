@@ -1,13 +1,16 @@
 <template>
-   <div class="row">
-        <div class="input-group flex-nowrap mb-2 input-group-sm d-none">
+    <div class="row">
+        <div class="input-group flex-nowrap mb-2 input-group-sm">
             <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
-            <input v-model="frmSpecialInspection.ecrsId" type="hidden" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
+            <input v-model="frmSpecialInspection.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
         </div>
         <div class="input-group flex-nowrap mb-2 input-group-sm">
             <span class="input-group-text" id="addon-wrapping">Special Inspection Id:</span>
             <input  v-model="frmSpecialInspection.specialInspectionsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
         </div>
+    </div>
+   <div class="row">
+
         <div class="col-sm-6">
             <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Product Detail:</span>
@@ -45,11 +48,11 @@
             </div>
             <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Samples:</span>
-                <input v-model="frmSpecialInspection.samples" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                <input v-model="frmSpecialInspection.samples" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
             </div>
             <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Mod Qty:</span>
-                <input v-model="frmSpecialInspection.modQty" type="int" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                <input v-model="frmSpecialInspection.modQty" type="number" class="form-control form-control-lg" aria-describedby="addon-wrapping">
             </div>
             <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Judgement:</span>
