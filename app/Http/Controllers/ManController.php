@@ -139,8 +139,13 @@ class ManController extends Controller
                         return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
                     }
                 }
+                if($manApprovalCurrent->approval_status === 'CHCK'){
+                    $isManRequirementsComplete = $this->isChecklistManRequirementsComplete($selectedId);
+                    if(  $isManRequirementsComplete['isSuccess'] === 'false'){
+                        return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
+                    }
+                }
             }
-
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
             $manApproval = ManApproval::where('ecrs_id',$selectedId)
             ->whereNotNull('rapidx_user_id')
@@ -318,15 +323,18 @@ class ManController extends Controller
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(ManDetail::class,$data,$relations,$conditions);
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
-                $result = '';
-                if($row->man_pending_approvals->rapidx_user_id === session('rapidx_user_id')){
-                    if(($row->man_pending_approvals->status != 'PMIAPP' && $row->man_pending_approvals->approval_status != 'CHCK')){
+                $currentAppprover = $row->man_pending_approvals->rapidx_user_id ?? "";
+                $status = $row->man_pending_approvals->status ?? "";
+                $approvalStatus = $row->man_pending_approvals->approval_status ?? "";
+                $result = '';//rapidx_user_id
+                if($currentAppprover === session('rapidx_user_id')){
+                    if(($status != 'PMIAPP' && $approvalStatus != 'CHCK')){
                         $result .= "<button class='btn btn-outline-info btn-sm mr-1 mb-3' ecrs-id = '".$row->ecrs_id."' man-details-id='".$row->id."' id='btnManDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
                     }
 
                 }
 
-                if($row->man_pending_approvals->approval_status === 'CHCK' && $row->man_pending_approvals->rapidx_user_id === session('rapidx_user_id')){
+                if($approvalStatus === 'CHCK' && $currentAppprover === session('rapidx_user_id')){
                     $result .= "<button class='btn btn-outline-success btn-sm mr-1' ecrs-id = '".$row->ecrs_id."' man-details-id='".$row->id."' id='btnManChecklistId'> <i class='fa-solid fa-check'></i></button>";
                     $result .= '</center>';
                 }
@@ -672,7 +680,33 @@ class ManController extends Controller
             'msg' => 'LQC Requirement Completed !'
         ];
     }
-    // , Special Inspection
+    public function isChecklistManRequirementsComplete($ecrsId){ //Requirement
+        //Man Details Should be Saved
+        $man = ManDetail::where('ecrs_id',$ecrsId)
+        ->whereNull('deleted_at')
+        ->get(['id']);
+        //Read if the All Man Details have Man Checklist
+        $arrMan = collect($man)->map(function($arrMan){
+           return $isManChecklistActiveCount = ManChecklist::where('man_id',$arrMan->id)
+           ->whereNull('deleted_at')
+           ->count();
+        })->toArray();
+        //Count All Empty Checklist / Zero = Empty Checklist
+        $isManChecklistComplete = collect($arrMan)->filter(function($value) {
+            return $value === 0;
+        })->count();
+
+        if($isManChecklistComplete > 0){
+            return [
+                'isSuccess' => 'false',
+                'msg' => 'Please Complete the Man Checklist !'
+            ];
+        }
+        return [
+            'isSuccess' => 'true',
+            'msg' => ' Man Checklist Requirement is Completed !'
+        ];
+    }
     //Common Function
     public function getStatus($status){
 
