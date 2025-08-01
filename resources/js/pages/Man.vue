@@ -475,6 +475,7 @@
                                         :columns="tblManChecklistColumns"
                                         ajax="api/load_man_checklist?dropdown_masters_id=7"
                                         :options="{
+                                            searching:false,
                                             paging:false,
                                             serverSide: true, //Serverside true will load the network
                                             columnDefs:[
@@ -505,7 +506,7 @@
                                 Material
                             </button>
                         </h5>
-                    <div id="collapseMat" class="collapse" data-bs-parent="#accordionMain">
+                    <div id="collapseMat" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-12">
@@ -516,6 +517,121 @@
                                         :columns="tblManChecklistColumns"
                                         ajax="api/load_man_checklist?dropdown_masters_id=8"
                                         :options="{
+                                            searching:false,
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering:false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th style="width:80%">Requirement</th>
+                                                <th style="width:20%">
+                                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Method -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMethod" aria-expanded="true" aria-controls="collapseMethod">
+                                Method
+                            </button>
+                        </h5>
+                    <div id="collapseMethod" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblMatChecklist"
+                                        :columns="tblManChecklistColumns"
+                                        ajax="api/load_man_checklist?dropdown_masters_id=9"
+                                        :options="{
+                                            searching:false,
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering:false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th style="width:80%">Requirement</th>
+                                                <th style="width:20%">
+                                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Machine -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMachine" aria-expanded="true" aria-controls="collapseMachine">
+                                Machine
+                            </button>
+                        </h5>
+                    <div id="collapseMachine" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblMatChecklist"
+                                        :columns="tblManChecklistColumns"
+                                        ajax="api/load_man_checklist?dropdown_masters_id=10"
+                                        :options="{
+                                            searching:false,
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            ordering:false,
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th style="width:80%">Requirement</th>
+                                                <th style="width:20%">
+                                                    <font-awesome-icon class="nav-icon" icon="fa-cogs" />
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Quality -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuality" aria-expanded="true" aria-controls="collapseQuality">
+                                Quality of the Product
+                            </button>
+                        </h5>
+                    <div id="collapseQuality" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblMatChecklist"
+                                        :columns="tblManChecklistColumns"
+                                        ajax="api/load_man_checklist?dropdown_masters_id=11"
+                                        :options="{
+                                            searching:false,
                                             paging:false,
                                             serverSide: true, //Serverside true will load the network
                                             ordering:false,
@@ -762,6 +878,9 @@
                         currentManDetailsId.value = manDetailsId;
                         tblManChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=7 && manDetailsId="+manDetailsId).draw();
                         tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=8 && manDetailsId="+manDetailsId).draw();
+                        tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=9 && manDetailsId="+manDetailsId).draw();
+                        tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=10 && manDetailsId="+manDetailsId).draw();
+                        tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=11 && manDetailsId="+manDetailsId).draw();
                         modal.ManChecklist.show();
                     });
                 }
@@ -978,7 +1097,7 @@
             }
             axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
                 modal.Approval.hide();
-                modal.SaveMethod.hide();
+                modal.SaveMachine.hide();
                 tblEcrByStatus.value.dt.draw();
             });
             return;

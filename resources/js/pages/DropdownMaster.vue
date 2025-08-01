@@ -66,7 +66,8 @@
                     <div class="col-sm-12">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Details:</span>
-                            <input  v-model="frmDropdownMasterDetails.dropdownMastersDetails" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                            <textarea v-model="frmDropdownMasterDetails.dropdownMastersDetails"class="form-control form-control" aria-describedby="addon-wrapping">
+                            </textarea>
                         </div>
                     </div>
                     <div class="col-sm-12">

@@ -656,7 +656,13 @@ class EcrController extends Controller
                 ->where('status','PEN')
                 ->where('rapidx_user_id',session('rapidx_user_id'))
                 ->count();
-                $enabledDisabledSelect = $ecr['status'] != 'DIS' || $ecrApprovalPendingCount === 1 ? '' : 'disabled';
+                $enabledDisabledSelect ='';
+                if($ecr['status'] === 'DIS' || $ecr['status'] === 'OK'){
+                    $enabledDisabledSelect = 'disabled';
+                }
+                if($ecrApprovalPendingCount === 1){
+                    $enabledDisabledSelect = 'disabled';
+                }
 
                 $result .= "<select ".$enabledDisabledSelect." id='btnChangeEcrReqDecision' class='form-select btn-change-ecr-req-decision ".$isValid."' ref=btnChangeEcrReqDecision ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."'>";
                 $result .=  "<option value='' ".$emptySelected." disabled> --Select-- </option>";
