@@ -621,19 +621,39 @@ class EcrController extends Controller
     }
     public function loadEcrRequirements(Request $request){
         try {
+            $ecrsId = $request->ecrsId;
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],[],[
+               'id' =>  $ecrsId,
+               'status' =>  'OK'
+            ]);
+            $ecrApprovedCount = $ecr->count();
+
             $data = [];
-            $relations = [];
+            $relations = [
+                'ecr_requirement',
+            ];
             $conditions = [
                 'classifications_id' => $request->category
             ];
-            $ecr_req_data = [];
-            $ecr_req_relations = [];
-            $ecr_req_conditions = [
-                'ecrs_id' => $request->ecrsId ?? "",
-            ];
 
-            $classificationRequirement = $this->resourceInterface->readWithRelationsConditionsActive(ClassificationRequirement::class,$data,$relations,$conditions);
-            $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,$ecr_req_data,$ecr_req_relations,$ecr_req_conditions);
+            $classificationRequirement = $this->resourceInterface->readCustomEloquent(ClassificationRequirement::class,$data,$relations,$conditions);
+            //If ECR Approved, show the CHECK decision only per Category
+            if( $ecrApprovedCount === 1){
+                $classificationRequirement = $classificationRequirement->whereHas('ecr_requirement', function ($query) use ($ecrsId) {
+                    $query->where('decision', 'C');
+                    $query->where('ecrs_id', $ecrsId);
+                })
+                ->get();
+           }else{
+                $classificationRequirement = $classificationRequirement
+                ->get();
+           }
+
+            $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,[],[],
+                [
+                    'ecrs_id' => $request->ecrsId ?? ""
+                ]
+            );
             return DataTables($classificationRequirement)
             ->addColumn('get_actions',function ($row) use($ecrRequirement,$request) {
                 $ecrRequirementCollection = collect($ecrRequirement);
