@@ -591,7 +591,7 @@
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
                                         ref="tblEcrManRequirements"
-                                        :columns="tblEcrManRequirementsColumns"
+                                        :columns="tblEcrRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=1"
                                         :options="{
                                             paging:false,
@@ -636,7 +636,7 @@
                                         class="table mt-2"
                                         ref="tblEcrMatRequirements"
 
-                                        :columns="tblEcrManRequirementsColumns"
+                                        :columns="tblEcrRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=2"
                                         :options="{
                                             paging:false,
@@ -677,7 +677,7 @@
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
                                         ref="tblEcrMachineRequirements"
-                                        :columns="tblEcrManRequirementsColumns"
+                                        :columns="tblEcrRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=3"
                                         :options="{
                                             paging:false,
@@ -718,7 +718,7 @@
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
                                         ref="tblEcrMethodRequirements"
-                                        :columns="tblEcrManRequirementsColumns"
+                                        :columns="tblEcrRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=4"
                                         :options="{
                                             paging:false,
@@ -759,7 +759,7 @@
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
                                         ref="tblEcrEnvironmentRequirements"
-                                        :columns="tblEcrManRequirementsColumns"
+                                        :columns="tblEcrRequirementsColumns"
                                         ajax="api/load_ecr_requirements?category=5"
                                         :options="{
                                             paging:false,
@@ -926,7 +926,7 @@
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
     ];
-    const tblEcrManRequirementsColumns = [
+    const tblEcrRequirementsColumns = [
         {   data: 'requirement'} ,
         {   data: 'details'} ,
         {   data: 'evidence'} ,

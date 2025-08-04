@@ -758,6 +758,229 @@
             <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,'Material')" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Requirements" ref="modalEcrRequirements">
+        <template #body>
+            <div class="row mt-3">
+                <!-- Man -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMan" aria-expanded="true" aria-controls="collapseMan">
+                                Man
+                            </button>
+                        </h5>
+                    <div id="collapseMan" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrManRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        ajax="api/load_ecr_requirements?category=1"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {
+                                                    orderable:false,target:[3],
+
+                                                }
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                                <th>Upload</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <!-- Material -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapMat" aria-expanded="true" aria-controls="collapMat">
+                                Material
+                            </button>
+                        </h5>
+                    <div id="collapMat" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrMatRequirements"
+
+                                        :columns="tblEcrRequirementsColumns"
+                                        ajax="api/load_ecr_requirements?category=2"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {orderable:false,target:[3]}
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                                <th>Upload</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <!-- Machine -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMac" aria-expanded="true" aria-controls="collapseMac">
+                                Machine
+                            </button>
+                        </h5>
+                    <div id="collapseMac" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrMachineRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        ajax="api/load_ecr_requirements?category=3"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {orderable:false,target:[3]}
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                                <th>Upload</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <!-- Method -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMethod" aria-expanded="true" aria-controls="collapseMethod">
+                                Method
+                            </button>
+                        </h5>
+                    <div id="collapseMethod" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrMethodRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        ajax="api/load_ecr_requirements?category=4"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {orderable:false,target:[3]}
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                                <th>Upload</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <!-- Method -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnvironment" aria-expanded="true" aria-controls="collapseEnvironment">
+                                Environment
+                            </button>
+                        </h5>
+                    <div id="collapseEnvironment" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrEnvironmentRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        ajax="api/load_ecr_requirements?category=5"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true, //Serverside true will load the network
+                                            columnDefs:[
+                                                {orderable:false,target:[3]}
+                                            ]
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                                <th>Upload</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <!-- <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button> -->
+        </template>
+    </ModalComponent>
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
@@ -816,6 +1039,9 @@
     const modalUploadMaterialRef = ref(null);
     const modalViewMaterialRef = ref(null);
     const modalApproval = ref(null);
+
+    const modalEcrRequirements = ref(null);
+
     const isModalMaterial = ref(null);
     const isModalView = ref(true);
     const selectedEcrsId = ref(null);
@@ -829,6 +1055,9 @@
     const tblEcrByCategoryStatus = ref(null);
     const tblMaterialApproval = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
+
+    const tblEcrManRequirements = ref(null);
+
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);
     const selectedMaterialsId = ref(null);
@@ -977,6 +1206,85 @@
         {   data: 'remarks'},
         {   data: 'get_status'} ,
     ];
+    const tblEcrRequirementsColumns = [
+        {   data: 'requirement'} ,
+        {   data: 'details'} ,
+        {   data: 'evidence'} ,
+        {   data: 'get_actions',
+            createdCell(cell){
+                let btnChangeEcrReqDecision = cell.querySelector('#btnChangeEcrReqDecision');
+                if(btnChangeEcrReqDecision != null){
+                    btnChangeEcrReqDecision.addEventListener('change',function(){
+                        let ecrReqId = this.getAttribute('ecr-requirements-id');
+                        let ecrReqValue = this.value;
+                        let classificationRequirementId = this.getAttribute('classification-requirement-id');
+                        let ecrReqDecisionParams = {
+                            ecrReqId : ecrReqId,
+                            ecrReqValue : ecrReqValue,
+                            classificationRequirementId : classificationRequirementId,
+                            btnChangeEcrReqDecisionClass: this.classList,
+                        }
+
+                        ecrReqDecisionChange(ecrReqDecisionParams);
+                    });
+                }
+            }
+        },
+         // Other columns...
+        {
+            data: null, // No specific data field, as this is for custom rendering
+            orderable: false,
+            searchable: false,
+            render: () => '', // Leave empty initially
+            createdCell(cell, cellData, rowData) {
+                // Create the file input element dynamically
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group flex-nowrap mb-2 input-group-sm';
+
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.multiple = true;
+                fileInput.accept = '.pdf';
+                fileInput.className = 'form-control form-control-lg';
+                fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement_id); // Assuming `ecr_requirement_id` exists in rowData
+                fileInput.setAttribute('classification-requirement-id', rowData.id); // Assuming `id` exists in rowData
+
+                // Add an event listener for file change
+                fileInput.addEventListener('change', (event) => {
+                    const files = Array.from(event.target.files);
+                    uploadFiles(rowData.id, rowData.ecr_requirement_id, files);
+                });
+
+                inputGroup.appendChild(fileInput);
+                cell.appendChild(inputGroup);
+            },
+        },
+    ];
+    // Function to handle file upload
+    const uploadFiles = async (classificationRequirementId, ecrRequirementId, files) => {
+        const formData = new FormData();
+        console.log('classificationRequirementId',classificationRequirementId);
+        console.log('ecrRequirementId',ecrRequirementId);
+        console.log('files',files);
+        //Swal Question here
+        return;
+        files.forEach((file) => {
+            formData.append('files[]', file);
+        });
+        formData.append('classification_requirement_id', classificationRequirementId);
+        formData.append('ecr_requirement_id', ecrRequirementId);
+
+        try {
+            const response = await axios.post('api/upload_files', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            console.log('Files uploaded successfully:', response.data);
+        } catch (error) {
+            console.error('Error uploading files:', error);
+        }
+    };
     //Params
     const materialSupplierParams = {
         tblReference : 'material_supplier',
@@ -1133,6 +1441,9 @@
         modal.UploadMaterialRef = new Modal(modalUploadMaterialRef.value.modalRef,{ keyboard: false });
         modal.ViewMaterialRef = new Modal(modalViewMaterialRef.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
+
+        modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modal.EcrRequirements.show();
         modalSaveMaterial.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMaterial.value);
         });
