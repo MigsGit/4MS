@@ -621,6 +621,7 @@ class EcrController extends Controller
     }
     public function loadEcrRequirements(Request $request){
         try {
+            $category4M = $request->category4M ?? NULL;
             $ecrsId = $request->ecrsId;
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],[],[
                'id' =>  $ecrsId,
@@ -692,6 +693,20 @@ class EcrController extends Controller
                 $result .=  "</select>";
                 $result .= '</center>';
                 return $result;
+            })
+            ->addColumn('get_upload',function ($row) use($ecrRequirement,$request) {
+                $ecrRequirementCollection = collect($ecrRequirement);
+                $ecrRequirementMatch = $ecrRequirementCollection->firstWhere('classification_requirements_id', $row->id);
+                $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
+                $result = "";
+                $result .=
+                `   <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <input ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."' id="ecrRequirementRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
+                    </div>
+                `;
+                return $result ;
+
+
             })
             ->rawColumns([
                 'get_actions',
