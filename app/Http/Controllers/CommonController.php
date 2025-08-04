@@ -320,7 +320,7 @@ class CommonController extends Controller
             throw $e;
         }
     }
-    public function savePmiInternalApproval(Request $request){
+    public function savePmiInternalApproval(Request $request){ //internal_external
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
@@ -341,7 +341,7 @@ class CommonController extends Controller
             $isCategory = $isCategory[0]->category;
             switch ($isCategory) {
                 case 'Man':
-                    $currentModel = ManDetail::class;
+                    $currentModel = Man::class;
                     break;
                 case 'Material':
                     $currentModel = Material::class;
@@ -364,6 +364,19 @@ class CommonController extends Controller
                 default:
                     return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
                     break;
+            }
+            //DISAPPROVED ECR
+            if($request->status === "DIS"){
+                $enviromentConditions = [
+                    'ecrs_id' => $ecrsId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'PB',
+                ];
+                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
+                DB::commit();
+                return response()->json(['is_success' => 'true']);
             }
             //Get Current Status
             $pmiInternalApprovalCurrent->update([
@@ -412,17 +425,7 @@ class CommonController extends Controller
                 ];
                 $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
             }
-            //DISAPPROVED ECR
-            if($request->status === "DIS"){
-                $enviromentConditions = [
-                    'ecrs_id' => $ecrsId,
-                ];
-                $enviromentValidated = [
-                    'status' => 'DIS',
-                    'approval_status' => 'PB',
-                ];
-                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
-            }
+
             DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

@@ -92,7 +92,8 @@
                 <div class="card">
                     <div class="row mt-2">
                         <div class="col-12">
-                            <button v-if="currentStatus === 'RUP'" @click="addManDetails()" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
+                            <!-- v-if="currentStatus === 'RUP'"          -->
+                            <button @click="addManDetails()" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Man Details</button>
                         </div>
                     </div>
                     <div class="card-body overflow-auto">
@@ -387,8 +388,8 @@
                     </div>
                  </div>
                 <div class="col-sm-6">
-                    <!-- Unnecessary value binding used alongside v-model. It will interfere with v-model's behavior. -->
-                    <div v-if="currentStatus === 'RUP'"  class="input-group flex-nowrap mb-2 input-group-sm">
+                    <!-- Unnecessary value binding used alongside v-model. It will interfere with v-model's behavior.  v-if="currentStatus === 'RUP'"-->
+                    <div  class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text text-danger" id="addon-wrapping">Update Approver? {{ currentStatus }}</span>
                         <Multiselect
                             v-model="frmMan.isUpdateManApprover"

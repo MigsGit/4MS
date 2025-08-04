@@ -343,10 +343,10 @@ class MaterialController extends Controller
                 if($materialStatus === "FORAPP" || $materialStatus === "PMIAPP"){
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
-                if($materialStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
+                // if($materialStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
-                }
+                // }
 
                 $result .= '</ul>';
                 $result .= '</div>';
@@ -392,6 +392,7 @@ class MaterialController extends Controller
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Internal/External:</strong> ' . $row->internal_external . '</p>';
                 $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
 
                 return $result;

@@ -297,6 +297,8 @@ class MethodController extends Controller
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
                 $methodStatus = $row->method->status ?? "";
+                $currentApprover = $row->method->method_approvals_pending[0]['rapidx_user']['id'] ?? '';
+
                 $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";
                 $result = "";
                 $result .= '<center>';
@@ -312,7 +314,11 @@ class MethodController extends Controller
                 if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
-                $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')){
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                }
+
+
 
                 $result .= '</ul>';
                 $result .= '</div>';

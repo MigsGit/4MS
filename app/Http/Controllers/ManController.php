@@ -51,7 +51,6 @@ class ManController extends Controller
                 $this->resourceInterface->updateConditions($manDetailModel,$conditions,$manRequestValidated);
             }else{ //Add
                 $man =  $this->resourceInterface->create($manDetailModel,$manRequestValidated);
-
             }
             $manApprovalTypes = [
                 'RUP' => session('rapidx_user_id'),
@@ -226,8 +225,7 @@ class ManController extends Controller
         if( $adminAccess === 'all') {
             $ecr->get();
         }
-        // return $man = Man::where('ecrs_id',$ecr[0]->id)->first(['status','approval_status']);
-
+        //If the Man Approval is OK / Zero, PMI Approvals Pending displayed
         if ( $adminAccess === 'pmi' || $ecr->count() === 0) {
             $data = [];
             $relations = [
@@ -588,7 +586,6 @@ class ManController extends Controller
         });
 
         $ecrDetailsNotNullCount = $ecrDetails->count();
-        return $isEcrDetailsActiveCount;
         //Ecr Details Should be Completed
         if($ecrDetailsNotNullCount != $isEcrDetailsActiveCount){
             return [
@@ -674,7 +671,7 @@ class ManController extends Controller
         if($ManDetailNotNullCount != $isManDetailActiveCount){
             return [
                 'isSuccess' => 'false',
-                'msg' => 'Please Trainer Result and Sample Size'
+                'msg' => 'Please LQC Result and Sample Size'
             ];
         }
         return [

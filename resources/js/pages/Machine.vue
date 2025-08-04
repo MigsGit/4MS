@@ -483,9 +483,9 @@
                     <thead>
 
                         <tr>
-                            <th scope="col">
+                            <!-- <th scope="col">
                                 Internal Machine
-                            </th>
+                            </th> -->
                             <th scope="col">
                                 External Machine
                             </th>
@@ -493,11 +493,11 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>
+                            <!-- <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
                                     Download Internal Machine
                                 </a>
-                            </td>
+                            </td> -->
                             <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternalMachine(selectedEcrsId)">
                                     Download External Machine
