@@ -194,6 +194,41 @@ class EmailService implements EmailInterface
                 </body>
             </html>';
     }
+    public function ecrEmailMsgEcrRequirement($ecrsId){
+        $data = [];
+        $relations = [
+            'ecr_requirement',
+        ];
+        $conditions = [];
+        $arrCategory = [1,2,3,4,5,6,7,8];
+        $classificationRequirement = $this->resourceInterface->readCustomEloquent(ClassificationRequirement::class,$data,$relations,$conditions);
+        //If ECR Approved, show the CHECK decision only per Category
+       return $classificationRequirement = $classificationRequirement->whereHas('ecr_requirement', function ($query) use ($ecrsId) {
+            $query->where('decision', 'C');
+            $query->where('ecrs_id', $ecrsId);
+        })
+        ->get();
+        return $msg = '<!DOCTYPE html>
+            <html>
+                <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+                    <style type="text/css">
+                        body{
+                            font-family: Arial;
+                            font-size: 15px;
+                        }
+                        .text-green{
+                            color: green;
+                            font-weight: bold;
+                        }
+                    </style>
+                </head>
+                <body>
+                        //Table Code
+                </body>
+            </html>';
+    }
     public function materialEmailMsg($selectedId){
         $material = Material::with(
             'ecr',

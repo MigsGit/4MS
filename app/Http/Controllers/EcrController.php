@@ -299,8 +299,25 @@ class EcrController extends Controller
                 // $to =  'mclegaspi@pricon.ph';
                 $from = 'issinfoservice@pricon.ph';
                 $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+                $msgEcrRequirement = $this->emailInterface->ecrEmailMsgEcrRequirement($ecrsId);
                 $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
                 $from_name = "4M Change Control Management System";
+                $emailDataEcrRequirement = [
+                    "to" =>$to,
+                    "cc" =>"",
+                    "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                    "from" => $from,
+                    "from_name" =>$from_name ?? "4M Change Control Management System",
+                    "subject" =>$subject,
+                    "message" =>  $msgEcrRequirement,
+                    "attachment_filename" => "",
+                    "attachment" => "",
+                    "send_date_time" => now(),
+                    "date_time_sent" => "",
+                    "date_created" => now(),
+                    "created_by" => session('rapidx_username'),
+                    "system_name" => "rapidx_4M",
+                ];
             }
 
             if ( count($ecrApproval) != 0 ){
@@ -353,7 +370,11 @@ class EcrController extends Controller
                 "created_by" => session('rapidx_username'),
                 "system_name" => "rapidx_4M",
             ];
+
             DB::commit();
+            if ( count($ecrApproval) === 0){
+                $this->emailInterface->sendEmail($emailDataEcrRequirement);
+            }
             $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
@@ -681,7 +702,7 @@ class EcrController extends Controller
                 if($ecr['status'] === 'DIS' || $ecr['status'] === 'OK'){
                     $enabledDisabledSelect = 'disabled';
                 }
-                if($ecrApprovalPendingCount === 1){
+                if($ecrApprovalPendingCount === 0){
                     $enabledDisabledSelect = 'disabled';
                 }
 
