@@ -216,7 +216,7 @@ class EcrController extends Controller
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
             //Get Current Status
-            $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category','created_by']);
+            $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category','ecr_no','created_by']);
             //Verify if the ECR Requirement is Completed.
             $isCompletedEcrRequirementComplete = $this->isCompletedEcrRequirementComplete($ecrsId);
 
@@ -296,22 +296,23 @@ class EcrController extends Controller
                 $this->saveDetailsByCategory($ecrDetails[0]->category,$ecrsId);
                 //Send Approved Email to the Requestor
                 $to = $requestedBy['email'] ?? '';
-                // $to =  'mclegaspi@pricon.ph';
+                // $to =  'cpagtalunan@pricon.ph",';
                 $from = 'issinfoservice@pricon.ph';
                 $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
                 $msgEcrRequirement = $this->emailInterface->ecrEmailMsgEcrRequirement($ecrsId);
-                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
+                $subject = "APPROVED: Engineering Change Request (ECR)";
+                $subjectEcr = "ECR Requirements: " .$ecrDetails[0]->ecr_no;
                 $from_name = "4M Change Control Management System";
                 $emailDataEcrRequirement = [
-                    // "to" =>$to,
-                    "to" =>"cpagtalunan@pricon.ph",
+                    // "to" =>"cpagtalunan@pricon.ph",
+                    // "bcc" =>"mclegaspi@pricon.ph",
+
+                    "to" =>$to,
                     "cc" =>"",
-                    // "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
-                    "bcc" =>"mclegaspi@pricon.ph",
-                    // "from" => $from,
-                    "from" => "mclegaspi@pricon.ph",
+                    "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                    "from" => $from,
                     "from_name" =>$from_name ?? "4M Change Control Management System",
-                    "subject" =>$subject,
+                    "subject" =>$subjectEcr,
                     "message" =>  $msgEcrRequirement,
                     "attachment_filename" => "",
                     "attachment" => "",
@@ -374,11 +375,11 @@ class EcrController extends Controller
                 "system_name" => "rapidx_4M",
             ];
 
-            // DB::commit();
+            DB::commit();
             if ( count($ecrApproval) === 0){
                 $this->emailInterface->sendEmail($emailDataEcrRequirement);
             }
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

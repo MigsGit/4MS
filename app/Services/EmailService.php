@@ -110,7 +110,6 @@ class EmailService implements EmailInterface
                         <div class="col-sm-12">
                             <div class="row" style="margin: 1px 10px;">
                                 <div class="col-sm-12">
-                                    <form id="frmSaveRecord">
                                         <div class="row">
                                             <div class="col-sm-12">
                                                 <label style="font-size: 18px;">Good day!</label><br>
@@ -189,7 +188,6 @@ class EmailService implements EmailInterface
                                         </div>
 
                                         </div>
-                                    </form>
                                 </div>
                             </div>
 
@@ -323,6 +321,14 @@ class EmailService implements EmailInterface
                     break;
             }
             $result = '';
+            $result .= '<div class="row">
+                            <div class="col-sm-12">
+                                <label style="font-size: 18px;">Good day!</label><br>
+                                <label style="font-size: 18px;">Kindly the ECR Requirement</label>
+                                <br>
+                                <hr>
+                        </div>
+                    </div>';
             $result .= '<br>';
             $result .= $title;
             $result .= '<table class="table table-bordered">
