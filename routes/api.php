@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function(){
         Route::post('save_ecr', 'saveEcr')->name('save_ecr');
         Route::post('save_ecr_details', 'saveEcrDetails')->name('save_ecr_details');
         Route::post('save_ecr_approval', 'saveEcrApproval')->name('save_ecr_approval');
+        Route::post('upload_ecr_requirement_ref', 'uploadEcrRequirementRef')->name('upload_ecr_requirement_ref');
 
         Route::get('generate_control_number', 'generateControlNumber')->name('generate_control_number');
         Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_ecr_details_id', 'getEcrDetailsId')->name('get_ecr_details_id');
         Route::get('ecr_req_decision_change', 'ecrReqDecisionChange')->name('ecr_req_decision_change');
         Route::get('load_ecr_approval_summary', 'loadEcrApprovalSummary')->name('load_ecr_approval_summary');
+
     });
 
     Route::controller(CommonController::class)->group(function (): void {
@@ -86,8 +88,6 @@ Route::middleware('auth')->group(function(){
 
     Route::controller(ManController::class)->group(function () {
         Route::post('save_man', 'saveMan')->name('save_man');
-
-
         Route::get('save_man_approval', 'saveManApproval')->name('save_man_approval');
         Route::get('load_ecr_man_by_status', 'loadEcrManByStatus')->name('load_ecr_man_by_status');
         Route::get('load_man_approver_summary_ecrs_id', 'loadManApproverSummaryEcrsId')->name('load_man_approver_summary_ecrs_id');

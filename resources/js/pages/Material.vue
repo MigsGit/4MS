@@ -759,7 +759,7 @@
         </template>
     </ModalComponent>
 
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="ECR Requirements" ref="modalEcrRequirements">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
             <div class="row mt-3">
                 <!-- Man -->
@@ -797,6 +797,7 @@
                                                 <th>Evidence</th>
                                                 <th>Action</th>
                                                 <th>Upload</th>
+                                                <th>View</th>
                                             </tr>
                                         </thead>
                                     </DataTable>
@@ -840,6 +841,7 @@
                                                 <th>Evidence</th>
                                                 <th>Action</th>
                                                 <th>Upload</th>
+                                                <th>View</th>
                                             </tr>
                                         </thead>
                                     </DataTable>
@@ -882,6 +884,7 @@
                                                 <th>Evidence</th>
                                                 <th>Action</th>
                                                 <th>Upload</th>
+                                                <th>View</th>
                                             </tr>
                                         </thead>
                                     </DataTable>
@@ -924,6 +927,7 @@
                                                 <th>Evidence</th>
                                                 <th>Action</th>
                                                 <th>Upload</th>
+                                                <th>View</th>
                                             </tr>
                                         </thead>
                                     </DataTable>
@@ -966,6 +970,7 @@
                                                 <th>Evidence</th>
                                                 <th>Action</th>
                                                 <th>Upload</th>
+                                                <th>View</th>
                                             </tr>
                                         </thead>
                                     </DataTable>
@@ -994,6 +999,7 @@
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore)
+
 
     const {
         modalEcr,
@@ -1230,7 +1236,7 @@
                 }
             }
         },
-         // Other columns...
+         // File Upload & View columns...
         {
             data: null, // No specific data field, as this is for custom rendering
             orderable: false,
@@ -1246,13 +1252,26 @@
                 fileInput.multiple = true;
                 fileInput.accept = '.pdf';
                 fileInput.className = 'form-control form-control-lg';
-                fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement_id); // Assuming `ecr_requirement_id` exists in rowData
-                fileInput.setAttribute('classification-requirement-id', rowData.id); // Assuming `id` exists in rowData
+                fileInput.setAttribute('classifications-id', rowData.classifications_id);
+                fileInput.setAttribute('classification-requirements-id', rowData.id);
+                fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
+                fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
+                // console.log('test', rowData); // Assuming `id` exists in rowData
 
                 // Add an event listener for file change
                 fileInput.addEventListener('change', (event) => {
-                    const files = Array.from(event.target.files);
-                    uploadFiles(rowData.id, rowData.ecr_requirement_id, files);
+                    let files = Array.from(event.target.files);
+                    let uploadFilesParams = {
+                        classificationsId: rowData.classifications_id,
+                        classificationRequirementsId: rowData.id,
+                        ecrRequirementId: rowData.ecr_requirement.id,
+                        ecrsId: rowData.ecr_requirement.ecrs_id,
+                        requirement: rowData.requirement,
+                    };
+
+                    uploadFiles(uploadFilesParams, files);
+                    // Reset input to allow same file re-selection
+                    event.target.value = '';
                 });
 
                 inputGroup.appendChild(fileInput);
@@ -1260,30 +1279,36 @@
             },
         },
     ];
-    // Function to handle file upload
-    const uploadFiles = async (classificationRequirementId, ecrRequirementId, files) => {
-        const formData = new FormData();
-        console.log('classificationRequirementId',classificationRequirementId);
-        console.log('ecrRequirementId',ecrRequirementId);
-        console.log('files',files);
-        //Swal Question here
-        return;
-        files.forEach((file) => {
-            formData.append('files[]', file);
-        });
-        formData.append('classification_requirement_id', classificationRequirementId);
-        formData.append('ecr_requirement_id', ecrRequirementId);
 
-        try {
-            const response = await axios.post('api/upload_files', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            console.log('Files uploaded successfully:', response.data);
-        } catch (error) {
-            console.error('Error uploading files:', error);
-        }
+    // Function to handle file upload
+    const uploadFiles = async (uploadFilesParams, files) => {
+        uploadFilesParams;
+        let result = '';
+        Swal.fire({
+            title: 'Confirmation',
+            text: 'Are you sure you want to upload this Evidence / Reference ?',
+            icon: 'warning',
+            allowOutsideClick: false,
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                files.forEach((file) => {
+                    formData.append('ecrRequirementFile[]', file);
+                });
+                formData.append('category',uploadFilesParams.classificationsId);
+                formData.append('classificationRequirementsId',uploadFilesParams.classificationRequirementsId);
+                formData.append('ecrRequirementId',uploadFilesParams.ecrRequirementId);
+                formData.append('ecrsId',uploadFilesParams.ecrsId);
+
+                axiosSaveData(formData,'api/upload_ecr_requirement_ref', (response) =>{
+                    console.log('Files uploaded successfully:', response.data);
+                });
+            }
+         })
     };
     //Params
     const materialSupplierParams = {

@@ -18,6 +18,8 @@ class CreateEcrRequirementsTable extends Migration
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
             $table->foreignId('classification_requirements_id')->references('id')->on('classification_requirements')->comment ='Classifications Requirement Id';
             $table->string('decision');
+            $table->longText('original_filename')->nullable();
+            $table->longText('filtered_document_name')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

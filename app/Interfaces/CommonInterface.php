@@ -5,6 +5,7 @@ namespace App\Interfaces;
 interface CommonInterface
 {
 
+    public function uploadFileEcrRequirement($txtDocuReference,$path);
     public function uploadFile($txtDocuReference,$id,$path);
     public function uploadFileImg($machineRefBefore,$machineRefAfter,$id,$path);
     public function viewPdfFile($pdfPath);

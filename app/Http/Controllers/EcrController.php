@@ -29,6 +29,7 @@ use App\Http\Requests\EcrApprovalRequest;
 use App\Http\Requests\PmiApprovalRequest;
 use App\Models\ClassificationRequirement;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\EcrRequirementFileRequest;
 use App\Http\Requests\PmiExternalApprovalRequest;
 
 class EcrController extends Controller
@@ -377,9 +378,9 @@ class EcrController extends Controller
 
             DB::commit();
             if ( count($ecrApproval) === 0){
-                $this->emailInterface->sendEmail($emailDataEcrRequirement);
+                // $this->emailInterface->sendEmail($emailDataEcrRequirement);
             }
-            $this->emailInterface->sendEmail($emailData);
+            // $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -1014,6 +1015,43 @@ class EcrController extends Controller
            DB::rollback();
        }
    }
+   public function uploadEcrRequirementRef(EcrRequirementFileRequest $ecrRequirementFileRequest){
+       try {
+           date_default_timezone_set('Asia/Manila');
+           DB::beginTransaction();
+           $ecrsId = $ecrRequirementFileRequest->ecrsId;
+            $ecrRequirementId = $ecrRequirementFileRequest->ecrRequirementId;
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,['category'],[],
+                [
+                    // 'id' => $ecrRequirementFileRequest->ecrsId,
+                    'id' => 2,
+                ]
+            );
+            $ecr = $ecr->first();
+
+            $ecrRequirementFile = $ecrRequirementFileRequest->ecrRequirementFile;
+            $path = "ecr_requirement/".$ecr->category."/".$ecrRequirementId."/";
+            if($ecrRequirementFileRequest->hasfile('ecrRequirementFile')){
+                $arrUploadFile = $this->commonInterface->uploadFileEcrRequirement($ecrRequirementFile,$path);
+                $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
+                $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
+
+                $ecrRequirementFileRequestValidated['original_filename'] = $impOriginalFilename;
+                $ecrRequirementFileRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+
+            }
+             $conditions = [
+                 'id' =>  $ecrRequirementId
+             ];
+             $this->resourceInterface->updateConditions(EcrRequirement::class,$conditions,$ecrRequirementFileRequestValidated);
+           DB::commit();
+           return response()->json(['is_success' => 'true']);
+       } catch (Exception $e) {
+           DB::rollback();
+           throw $e;
+       }
+   }
+
 
 
 }
