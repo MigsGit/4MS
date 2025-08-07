@@ -33,7 +33,6 @@ class MaterialController extends Controller
         date_default_timezone_set('Asia/Manila');
         try {
             DB::beginTransaction();
-            $materialRequest->all();
             $currentEcrsId =  $request->ecrs_id;
             $materialsId = $request->material_id;
             $materialRequest = $materialRequest->validated();
@@ -42,7 +41,7 @@ class MaterialController extends Controller
             if ( isset($materialsId)){
                 //Validate Before Edit: FORAPP status -On going approval cannot update
                 $material = Material::where('id',$materialsId)
-                ->where('status','RUP')
+                ->whereIn('status',['RUP','DIS'])
                 ->count();
                 if ( $material === 0 ){
                     DB::rollback();
@@ -93,15 +92,18 @@ class MaterialController extends Controller
             }
 
             $materialApprovalTypes = [
-                'PURPB' => $materialApprovalRequest->pr_approved_by,
+                'PURPB' => $materialApprovalRequest->pr_prepared_by,
                 'PURCB' => $materialApprovalRequest->pr_checked_by,
-                'PURAB' => $materialApprovalRequest->pr_prepared_by,
-                'PPCPB' => $materialApprovalRequest->ppc_approved_by,
+                'PURAB' => $materialApprovalRequest->pr_approved_by,
+
+                'PPCPB' => $materialApprovalRequest->ppc_prepared_by,
                 'PPCCB' => $materialApprovalRequest->ppc_checked_by,
-                'PPCAB' => $materialApprovalRequest->ppc_prepared_by,
+                'PPCAB' => $materialApprovalRequest->ppc_approved_by,
+
                 'EMSPB' => $materialApprovalRequest->ems_prepared_by,
                 'EMSCB' => $materialApprovalRequest->ems_checked_by,
                 'EMSAB' => $materialApprovalRequest->ems_approved_by,
+
                 'LQCPB' => $materialApprovalRequest->qc_prepared_by,
                 'LQCCB' => $materialApprovalRequest->qc_checked_by,
                 'LQCAB' => $materialApprovalRequest->qc_approved_by,
@@ -180,7 +182,7 @@ class MaterialController extends Controller
             )->find($selectedId);
 
             //Get Current Ecr Approval is equal to Current Session
-            $materialApprovalCurrent = MaterialApproval::where('materials_id',$selectedId)
+            $materialApprovalCurrent = MaterialApproval::where('materials_id',$material->id)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
@@ -193,7 +195,7 @@ class MaterialController extends Controller
                 'remarks' => $request->remarks,
             ]);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-           $materialApproval = MaterialApproval::where('materials_id',$selectedId)
+           $materialApproval = MaterialApproval::where('materials_id',$material->id)
            ->whereNotNull('rapidx_user_id')
            ->where('status','-')
            ->limit(1)
@@ -218,6 +220,26 @@ class MaterialController extends Controller
                 $from_name = $currentSession['fullName'];
                 $subject = "DISAPPROVED: Material (4M CMS)";
                 $msg = $this->emailInterface->materialEmailMsg($selectedId);
+                //Array Send Email
+                $emailData = [
+                    "to" =>$to,
+                    "cc" =>"",
+                    "bcc" =>"mclegaspi@pricon.ph",
+                    "from" => $from,
+                    "from_name" =>$from_name ?? "4M Change Control Management System",
+                    "subject" =>$subject,
+                    "message" =>  $msg,
+                    "attachment_filename" => "",
+                    "attachment" => "",
+                    "send_date_time" => now(),
+                    "date_time_sent" => "",
+                    "date_created" => now(),
+                    "created_by" => session('rapidx_username'),
+                    "system_name" => "rapidx_4M",
+                ];
+                DB::commit();
+                // $this->emailInterface->sendEmail($emailData);
+                return response()->json(['is_success' => 'true']);
             }
             if ( count($materialApproval) === 0){
 
@@ -229,6 +251,11 @@ class MaterialController extends Controller
                     'approval_status' => 'CB',
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
+                $msg = '';
+                $to =  '';
+                $from = '';
+                $subject =  '';
+                $from_name =  '';
             }
             if ( count($materialApproval) != 0){
                 $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($materialApproval[0]->rapidx_user_id);
@@ -252,7 +279,7 @@ class MaterialController extends Controller
                 $msg = $this->emailInterface->materialEmailMsg($selectedId);
                 $to = $ecrCurrentApproval['email'] ?? '';
                 $from = $requestedBy['email'] ?? '';
-                $subject = "FOR APPROVAL: Material (4M CMS)";
+                $subject = "TEST FOR APPROVAL: Material (4M CMS)";
                 $from_name = "4M Change Control Management System";
             }
 
@@ -274,7 +301,7 @@ class MaterialController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -336,16 +363,19 @@ class MaterialController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($materialStatus === "EXDISPO" || $materialStatus === "OK"){
+                if($materialStatus === "EXDISPO"){
                     //Upload External Disposition
                     return $result = '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;View Disposition</button></li>';
+                }
+                if($materialStatus === "OK"){
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
                 if($materialStatus === "FORAPP" || $materialStatus === "PMIAPP"){
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
-                if($materialStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
+                if($materialStatus === "RUP" || $materialStatus === "DIS"  && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-                    // $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
 
                 $result .= '</ul>';
@@ -676,6 +706,15 @@ class MaterialController extends Controller
                     break;
                 case 'LQCAB':
                     $approvalStatus = 'QC Approved by';
+                    break;
+                case 'ENGPB':
+                    $approvalStatus = 'Engg Prepared by';
+                    break;
+                case 'ENGCB':
+                    $approvalStatus = 'Engg Checked by';
+                    break;
+                case 'ENGAB':
+                    $approvalStatus = 'Engg Approved by';
                     break;
                 case 'MENGPB':
                     $approvalStatus = 'Maintenance Engg Prepared by';

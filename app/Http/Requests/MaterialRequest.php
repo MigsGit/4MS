@@ -34,7 +34,7 @@ class MaterialRequest extends FormRequest
             "material_supplier" => 'required',
             "material_color" => 'required',
             "coc" => 'required',
-            // "rohs" => 'required',
+            "rohs" => 'required',
         ];
     }
 }

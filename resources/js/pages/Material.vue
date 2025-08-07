@@ -276,7 +276,7 @@
                                                     </tr>
                                                     <tr>
                                                         <td>
-                                                            Purchasing {{ isInternalExternal }}
+                                                            Purchasing
                                                         </td>
                                                         <td>
 
@@ -543,7 +543,7 @@
                                 </div> -->
                             </div>
                         </div>
-                        <div class="row" v-show="isModalMaterial === 'View'  && currentStatus === 'FORAPP'">
+                        <div class="row" v-show="isModalMaterial === 'View'">
                             <div class="card">
                                 <div class="card-header">
                                     <h3> Material Approvers</h3>
@@ -577,7 +577,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3" v-show="isModalMaterial === 'View' && currentStatus === 'PMIAPP'" >
+            <div class="row mt-3" v-show="isModalMaterial === 'View' && currentStatus === 'PMIAPP' || currentStatus === 'OK'" >
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
@@ -621,7 +621,7 @@
             </div>
         </template>
         <template #footer>
-            <button @click="btnApprovedDisapproved('DIS')" v-show="isModalMaterial === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalDisapproved" class="btn btn-danger btn-sm">
+            <button @click="btnApprovedDisapproved('DIS')" v-show="isModalMaterial === 'View' && commonVar.isSessionApprover === true && currentStatus !='PMIAPP' "  type="button" ref= "btnPmiInternalDisapproved" class="btn btn-danger btn-sm">
                 <font-awesome-icon class="nav-icon" icon="fas fa-thumbs-down" />&nbsp;Disapproved
             </button>
             <button @click="btnApprovedDisapproved('APP')" v-show="isModalMaterial === 'View' && commonVar.isSessionApprover === true" type="button" ref= "btnPmiInternalApproved" class="btn btn-success btn-sm">Approved</button>
@@ -762,7 +762,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,'Material')" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="ECR Requirements" ref="modalEcrRequirements">
@@ -1182,13 +1182,11 @@
                         isModalView.value = true;
                         getMaterialEcrById(ecrsId);
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        if( materialStatus === 'FORAPP'){
-                            getCurrentApprover(materialApproverParams);
-                            tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
-                        }
-                        if( materialStatus === 'PMIAPP'){
+                        getCurrentApprover(materialApproverParams);
+                        tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
+                        if( materialStatus === 'PMIAPP' || materialStatus === 'OK'){
                             getCurrentApprover(pmiApproverParams);
-                            tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
+                            tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
                         }
 
                     });
@@ -1418,137 +1416,137 @@
     const prdnPreparedByParams = {
         globalVar: materialVar.prdnPreparedBy,
         formModel: toRef(frmMaterial.value,'prdnPreparedBy'),
-        selectedVal: '',
+        selectedVal: "",
     };
     const prdnCheckedByParams = {
         globalVar: materialVar.prdnCheckedBy,
         formModel: toRef(frmMaterial.value,'prdnCheckedBy'),
-        selectedVal: '',
+        selectedVal: "",
     };
     const prdnApprovedByParams = {
         globalVar: materialVar.prdnApprovedBy,
         formModel: toRef(frmMaterial.value,'prdnApprovedBy'),
-        selectedVal: '',
+        selectedVal: "",
     };
     const prPreparedByParams = {
         globalVar: materialVar.prPreparedBy,
         formModel: toRef(frmMaterial.value,'prPreparedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const prCheckedByParams = {
         globalVar: materialVar.prCheckedBy,
         formModel: toRef(frmMaterial.value,'prCheckedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const prApprovedByParams = {
         globalVar: materialVar.prApprovedBy,
         formModel: toRef(frmMaterial.value,'prApprovedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const ppcPreparedByParams = {
         globalVar: materialVar.ppcPreparedBy,
         formModel: toRef(frmMaterial.value,'ppcPreparedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const ppcCheckedByParams = {
         globalVar: materialVar.ppcCheckedBy,
         formModel: toRef(frmMaterial.value,'ppcCheckedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const ppcApprovedByParams = {
         globalVar: materialVar.ppcApprovedBy,
         formModel: toRef(frmMaterial.value,'ppcApprovedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const emsPreparedByParams = {
         globalVar: materialVar.emsPreparedBy,
         formModel: toRef(frmMaterial.value,'emsPreparedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const emsCheckedByParams = {
         globalVar: materialVar.emsCheckedBy,
         formModel: toRef(frmMaterial.value,'emsCheckedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const emsApprovedByParams = {
         globalVar: materialVar.emsApprovedBy,
         formModel: toRef(frmMaterial.value,'emsApprovedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const qcPreparedByParams = {
         globalVar: materialVar.qcPreparedBy,
         formModel: toRef(frmMaterial.value,'qcPreparedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const qcCheckedByParams = {
         globalVar: materialVar.qcCheckedBy,
         formModel: toRef(frmMaterial.value,'qcCheckedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const qcApprovedByParams = {
         globalVar: materialVar.qcApprovedBy,
         formModel: toRef(frmMaterial.value,'qcApprovedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const proEnggPreparedByParams = {
         globalVar: materialVar.proEnggPreparedBy,
         formModel: toRef(frmMaterial.value,'proEnggPreparedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const proEnggCheckedByParams = {
         globalVar: materialVar.proEnggCheckedBy,
         formModel: toRef(frmMaterial.value,'proEnggCheckedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const proEnggApprovedByParams = {
         globalVar: materialVar.proEnggApprovedBy,
         formModel: toRef(frmMaterial.value,'proEnggApprovedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const mainEnggPreparedByParams = {
         globalVar: materialVar.mainEnggPreparedBy,
         formModel: toRef(frmMaterial.value,'mainEnggPreparedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const mainEnggCheckedByParams = {
         globalVar: materialVar.mainEnggCheckedBy,
         formModel: toRef(frmMaterial.value,'mainEnggCheckedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const mainEnggApprovedByParams = {
         globalVar: materialVar.mainEnggApprovedBy,
         formModel: toRef(frmMaterial.value,'mainEnggApprovedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const enggPreparedByParams = {
         globalVar: materialVar.enggPreparedBy,
         formModel: toRef(frmMaterial.value,'enggPreparedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const enggCheckedByParams = {
         globalVar: materialVar.enggCheckedBy,
         formModel: toRef(frmMaterial.value,'enggCheckedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const enggApprovedByParams = {
         globalVar: materialVar.enggApprovedBy,
         formModel: toRef(frmMaterial.value,'enggApprovedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const qaPreparedByParams = {
         globalVar: materialVar.qaPreparedBy,
         formModel: toRef(frmMaterial.value,'qaPreparedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const qaCheckedByParams = {
         globalVar: materialVar.qaCheckedBy,
         formModel: toRef(frmMaterial.value,'qaCheckedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
     const qaApprovedByParams = {
         globalVar: materialVar.qaApprovedBy,
         formModel: toRef(frmMaterial.value,'qaApprovedBy'),
-        selectedVal: '',
+        selectedVal: "0",
     };
 
     onMounted( async ()=>{
@@ -1597,6 +1595,7 @@
         modal.Approval.show();
     }
     const saveApproval = async (selectedId,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
+        alert(approvalType);
         let apiParams = {
             selectedId : selectedId,
             status : isApprovedDisappproved,

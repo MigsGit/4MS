@@ -723,8 +723,9 @@ class EcrController extends Controller
                 return $result;
             })
             ->addColumn('get_view_ecr_req_ref',function ($row) {
+                $filteredDocumentName = $row->ecr_requirement->filtered_document_name ?? null;
                 $result = "";
-                if($row->ecr_requirement->filtered_document_name != null){
+                if($filteredDocumentName != null){
                     $result .= ' <a ecr-requirements-id="'.$row->ecr_requirement->id.'" ecrs-id="'.$row->ecr_requirement->ecrs_id.'" href="#" id="btnViewEcrRequirementRef" class="link-primary"> View Reference </a>';
                 }
                 return $result;

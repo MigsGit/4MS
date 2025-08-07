@@ -334,11 +334,11 @@ class CommonController extends Controller
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
             //Get the ECR Category
-            $isCategory = Ecr::where('id',$ecrsId)
+            $ecr = Ecr::where('id',$ecrsId)
             ->whereNull('deleted_at')
             ->limit(1)
             ->get(['category','internal_external']);
-            $isCategory = $isCategory[0]->category;
+            $isCategory = $ecr[0]->category;
             switch ($isCategory) {
                 case 'Man':
                     $currentModel = Man::class;
@@ -393,13 +393,13 @@ class CommonController extends Controller
                 $enviromentConditions = [
                     'ecrs_id' => $ecrsId,
                 ];
-                if($isCategory[0]->internal_external === "External"){
+                if($ecr[0]->internal_external === "External"){
                     $enviromentValidated = [
                         'status' => 'EXDISPO',
                         'approval_status' => 'EXDISPO',
                     ];
                 }
-                if($isCategory[0]->internal_external === "Internal"){
+                if($ecr[0]->internal_external === "Internal"){
                     $enviromentValidated = [
                         'status' => 'OK',
                         'approval_status' => 'OK',
