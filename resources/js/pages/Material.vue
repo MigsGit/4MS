@@ -758,7 +758,6 @@
             <button @click = "saveApproval(selectedMaterialsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,'Material')" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
-
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
             <div class="row mt-3">
@@ -986,6 +985,35 @@
             <!-- <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button> -->
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Ecr Requirement References" ref="modalViewEcrRequirementRef">
+        <template #body>
+            <div class="row mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                PDF Attachment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrEcrRequirementOriginalFilename, index) in arrEcrRequirementOriginalFilenames" :key="arrEcrRequirementOriginalFilename.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewEcrRequirementRef" @click="btnLinkViewEcrRequirementRef(selectedEcrRequirementsIdEncrypted,index)">
+                                    {{ arrEcrRequirementOriginalFilename }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
@@ -1046,7 +1074,6 @@
     const modalViewMaterialRef = ref(null);
     const modalApproval = ref(null);
 
-    const modalEcrRequirements = ref(null);
 
     const isModalMaterial = ref(null);
     const isModalView = ref(true);
@@ -1061,12 +1088,15 @@
     const tblEcrByCategoryStatus = ref(null);
     const tblMaterialApproval = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
-
-    const tblEcrManRequirements = ref(null);
-
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);
     const selectedMaterialsId = ref(null);
+
+    const tblEcrManRequirements = ref(null);
+    const modalEcrRequirements = ref(null);
+    const modalViewEcrRequirementRef = ref(null);
+    const selectedEcrRequirementsIdEncrypted = ref(null);
+    const arrEcrRequirementOriginalFilenames = ref(null);
 
     //Columns
      const tblEcrByCategoryStatusColumns = [
@@ -1278,6 +1308,23 @@
                 cell.appendChild(inputGroup);
             },
         },
+        {   data: 'get_view_ecr_req_ref',
+            createdCell(cell){
+                let btnViewEcrRequirementRef = cell.querySelector('#btnViewEcrRequirementRef');
+                if(btnViewEcrRequirementRef != null){
+                    btnViewEcrRequirementRef.addEventListener('click',function(){
+                        let ecrRequirementsId = this.getAttribute('ecr-requirements-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let ecrRequirementParams = {
+                            ecrRequirementsId: ecrRequirementsId,
+                            ecrsId: ecrsId,
+                        }
+                        getEcrRequirementRefById(ecrRequirementParams);
+                    });
+                }
+            }
+        },
+
     ];
 
     // Function to handle file upload
@@ -1310,6 +1357,26 @@
             }
          })
     };
+    const getEcrRequirementRefById = async (ecrRequirementParams) => {
+        let apiParams = {
+            ecrRequirementsId: ecrRequirementParams.ecrRequirementsId,
+            ecrsId: ecrRequirementParams.ecrsId,
+        }
+        axiosFetchData(apiParams,'api/get_ecr_requirement_ref_by_id',function(response){
+            let data = response.data;
+            let ecrRequirementsId = data.ecrRequirementsId;
+            let originalFilename = data.originalFilename;
+            arrEcrRequirementOriginalFilenames.value = originalFilename;
+            selectedEcrRequirementsIdEncrypted.value = ecrRequirementsId;
+            // selectedEcrsId.value = data.ecrsId;
+            modal.ViewEcrRequirementRef.show();
+
+        });
+    }
+    const btnLinkViewEcrRequirementRef = async (selectedEcrRequirementsIdEncrypted,index) => { //view_material_ref
+        window.open(`api/view_ecr_requirement_ref?ecrRequirementsId=${selectedEcrRequirementsIdEncrypted} && index=${index}`, '_blank');
+    }
+
     //Params
     const materialSupplierParams = {
         tblReference : 'material_supplier',
@@ -1468,7 +1535,10 @@
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
 
         modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modal.ViewEcrRequirementRef = new Modal(modalViewEcrRequirementRef.value.modalRef,{ keyboard: false });
+
         modal.EcrRequirements.show();
+
         modalSaveMaterial.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMaterial.value);
         });

@@ -52,6 +52,8 @@ Route::middleware('auth')->group(function(){
         Route::get('ecr_req_decision_change', 'ecrReqDecisionChange')->name('ecr_req_decision_change');
         Route::get('load_ecr_approval_summary', 'loadEcrApprovalSummary')->name('load_ecr_approval_summary');
 
+        Route::get('get_ecr_requirement_ref_by_id', 'getEcrRequirementRefById')->name('get_ecr_requirement_ref_by_id');
+        Route::get('view_ecr_requirement_ref', 'viewEcrRequirementRef')->name('viewEcrRequirementRef');
     });
 
     Route::controller(CommonController::class)->group(function (): void {

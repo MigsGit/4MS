@@ -720,22 +720,19 @@ class EcrController extends Controller
                 $result .= '</center>';
                 return $result;
             })
-            ->addColumn('get_upload',function ($row) use($ecrRequirement,$request) {
-                $ecrRequirementCollection = collect($ecrRequirement);
-                $ecrRequirementMatch = $ecrRequirementCollection->firstWhere('classification_requirements_id', $row->id);
-                $ecrRequirementId = $ecrRequirementMatch['id'] ?? '';
+            ->addColumn('get_view_ecr_req_ref',function ($row) use($ecrRequirement,$request) {
+                // .
+                // fileInput.setAttribute('classifications-id', rowData.classifications_id);
+                // fileInput.setAttribute('classification-requirements-id', rowData.id);
+                // fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
+                // fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
                 $result = "";
-                $result .=
-                `   <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <input ecr-requirements-id ='".$ecrRequirementId."' classification-requirement-id='".$row->id."' id="ecrRequirementRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
-                    </div>
-                `;
-                return $result ;
-
-
+                $result .= ' <a ecr-requirements-id="'.$row->ecr_requirement->id.'" ecrs-id="'.$row->ecr_requirement->ecrs_id.'" href="#" id="btnViewEcrRequirementRef" class="link-primary"> View Reference </a>';
+                return $result;
             })
             ->rawColumns([
                 'get_actions',
+                'get_view_ecr_req_ref',
             ])
             ->make(true);
         } catch (Exception $e) {
@@ -1019,7 +1016,7 @@ class EcrController extends Controller
        try {
            date_default_timezone_set('Asia/Manila');
            DB::beginTransaction();
-           $ecrsId = $ecrRequirementFileRequest->ecrsId;
+            $ecrsId = $ecrRequirementFileRequest->ecrsId;
             $ecrRequirementId = $ecrRequirementFileRequest->ecrRequirementId;
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,['category'],[],
                 [
@@ -1052,6 +1049,60 @@ class EcrController extends Controller
        }
    }
 
+   public function getEcrRequirementRefById(Request $request){
+       try {
+            $ecrRequirementsId = $request->ecrRequirementsId;
+            $conditions = [
+                'id' => $ecrRequirementsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(EcrRequirement::class,[],[],$conditions);
+            $ecrRequirementRefById = $data
+            ->get([
+                'id',
+                'original_filename',
+            ]);
+            return response()->json([
+                'isSuccess' => 'true',
+                'originalFilename'=> explode(' | ',$ecrRequirementRefById[0]->original_filename),
+                'ecrRequirementsId'=> encrypt($ecrRequirementRefById[0]->id),
+            ]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+   }
 
+   public function viewEcrRequirementRef(Request $request){
+    try {
+        $ecrsId = $request->ecrsId;
+        $ecrRequirementsId = decrypt($request->ecrRequirementsId);
+
+        $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,['category'],[],
+            [
+                // 'id' => $ecrRequirementFileRequest->ecrsId,
+                'id' => 2,
+            ]
+        );
+        $ecr = $ecr->first();
+        $path = "ecr_requirement/".$ecr->category."/".$ecrRequirementsId."/";
+
+        $conditions = [
+            'id' => $ecrRequirementsId,
+        ];
+        $data = $this->resourceInterface->readCustomEloquent(EcrRequirement::class,[],[],$conditions);
+        $materialRefByEcrsId = $data
+        ->get([
+            'filtered_document_name',
+        ]);
+        if(count($materialRefByEcrsId) != 0){
+            $arrFilteredDocumentName = explode(' | ' ,$materialRefByEcrsId[0]->filtered_document_name);
+            $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+            $filePathWithEcrRequirementsId = $path;
+            $pdfPath = storage_path("app/public/".$filePathWithEcrRequirementsId.$selectedFilteredDocumentName);
+            $this->commonInterface->viewPdfFile($pdfPath);
+        }
+    } catch (Exception $e) {
+        throw $e;
+    }
+}
 
 }
