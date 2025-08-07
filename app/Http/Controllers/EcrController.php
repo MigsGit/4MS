@@ -669,8 +669,10 @@ class EcrController extends Controller
                 $classificationRequirement = $classificationRequirement->whereHas('ecr_requirement', function ($query) use ($ecrsId) {
                     $query->where('decision', 'C');
                     $query->where('ecrs_id', $ecrsId);
-                })
-                ->get();
+                })->with(['ecr_requirement' => function ($query) use ($ecrsId) {
+                    $query->where('decision', 'C');
+                    $query->where('ecrs_id', $ecrsId);
+                }])->get();
            }else{
                 $classificationRequirement = $classificationRequirement
                 ->get();
@@ -720,14 +722,11 @@ class EcrController extends Controller
                 $result .= '</center>';
                 return $result;
             })
-            ->addColumn('get_view_ecr_req_ref',function ($row) use($ecrRequirement,$request) {
-                // .
-                // fileInput.setAttribute('classifications-id', rowData.classifications_id);
-                // fileInput.setAttribute('classification-requirements-id', rowData.id);
-                // fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
-                // fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
+            ->addColumn('get_view_ecr_req_ref',function ($row) {
                 $result = "";
-                $result .= ' <a ecr-requirements-id="'.$row->ecr_requirement->id.'" ecrs-id="'.$row->ecr_requirement->ecrs_id.'" href="#" id="btnViewEcrRequirementRef" class="link-primary"> View Reference </a>';
+                if($row->ecr_requirement->filtered_document_name != null){
+                    $result .= ' <a ecr-requirements-id="'.$row->ecr_requirement->id.'" ecrs-id="'.$row->ecr_requirement->ecrs_id.'" href="#" id="btnViewEcrRequirementRef" class="link-primary"> View Reference </a>';
+                }
                 return $result;
             })
             ->rawColumns([
@@ -1020,8 +1019,7 @@ class EcrController extends Controller
             $ecrRequirementId = $ecrRequirementFileRequest->ecrRequirementId;
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,['category'],[],
                 [
-                    // 'id' => $ecrRequirementFileRequest->ecrsId,
-                    'id' => 2,
+                    'id' => $ecrRequirementFileRequest->ecrsId,
                 ]
             );
             $ecr = $ecr->first();
@@ -1073,28 +1071,28 @@ class EcrController extends Controller
 
    public function viewEcrRequirementRef(Request $request){
     try {
-        $ecrsId = $request->ecrsId;
         $ecrRequirementsId = decrypt($request->ecrRequirementsId);
-
-        $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,['category'],[],
-            [
-                // 'id' => $ecrRequirementFileRequest->ecrsId,
-                'id' => 2,
-            ]
-        );
-        $ecr = $ecr->first();
-        $path = "ecr_requirement/".$ecr->category."/".$ecrRequirementsId."/";
-
+        //Get the EcrRequirement Filtered Document
         $conditions = [
             'id' => $ecrRequirementsId,
         ];
         $data = $this->resourceInterface->readCustomEloquent(EcrRequirement::class,[],[],$conditions);
         $materialRefByEcrsId = $data
-        ->get([
+        ->first([
             'filtered_document_name',
+            'ecrs_id',
         ]);
-        if(count($materialRefByEcrsId) != 0){
-            $arrFilteredDocumentName = explode(' | ' ,$materialRefByEcrsId[0]->filtered_document_name);
+        //Get the Category
+        $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,['category'],[],
+            [
+                'id' => $materialRefByEcrsId->ecrs_id  ?? 0,
+            ]
+        );
+        $ecr = $ecr->first();
+        $path = "ecr_requirement/".$ecr->category."/".$ecrRequirementsId."/";
+
+        if(filled($materialRefByEcrsId)){
+            $arrFilteredDocumentName = explode(' | ' ,$materialRefByEcrsId->filtered_document_name);
             $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
             $filePathWithEcrRequirementsId = $path;
             $pdfPath = storage_path("app/public/".$filePathWithEcrRequirementsId.$selectedFilteredDocumentName);

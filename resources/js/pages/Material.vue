@@ -43,7 +43,7 @@
                                 <tr>
                                     <th style=""width="5%">Action</th>
                                     <th style=""width="10%">Status</th>
-                                    <th style=""width="10%">Attachment</th>
+                                    <!-- <th style=""width="10%">Attachment</th> -->
                                     <th style=""width="20%">ECR Ctrl No.</th>
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
@@ -1028,7 +1028,6 @@
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore)
 
-
     const {
         modalEcr,
         ecrVar,
@@ -1074,7 +1073,6 @@
     const modalViewMaterialRef = ref(null);
     const modalApproval = ref(null);
 
-
     const isModalMaterial = ref(null);
     const isModalView = ref(true);
     const selectedEcrsId = ref(null);
@@ -1093,6 +1091,11 @@
     const selectedMaterialsId = ref(null);
 
     const tblEcrManRequirements = ref(null);
+    const tblEcrMatRequirements = ref(null);
+    const tblEcrMachineRequirements = ref(null);
+    const tblEcrMethodRequirements = ref(null);
+    const tblEcrEnvironmentRequirements = ref(null);
+
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
     const selectedEcrRequirementsIdEncrypted = ref(null);
@@ -1186,19 +1189,19 @@
             }
         } ,
         {   data: 'get_status'} ,
-        {   data: 'get_attachment',
-            orderable: false,
-            searchable: false,
-            createdCell(cell){
-                let btnViewMaterialRef = cell.querySelector('#btnViewMaterialRef');
-                if(btnViewMaterialRef != null){
-                    btnViewMaterialRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecrs-id');
-                        getMaterialRefByEcrsId(ecrsId);
-                    });
-                }
-            }
-        } ,
+        // {   data: 'get_attachment',
+        //     orderable: false,
+        //     searchable: false,
+        //     createdCell(cell){
+        //         let btnViewMaterialRef = cell.querySelector('#btnViewMaterialRef');
+        //         if(btnViewMaterialRef != null){
+        //             btnViewMaterialRef.addEventListener('click',function(){
+        //                 let ecrsId = this.getAttribute('ecrs-id');
+        //                 getMaterialRefByEcrsId(ecrsId);
+        //             });
+        //         }
+        //     }
+        // } ,
         {   data: 'ecr_no'} ,
         {   data: 'get_details'} ,
         {   data: 'category'} ,
@@ -1286,7 +1289,7 @@
                 fileInput.setAttribute('classification-requirements-id', rowData.id);
                 fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
                 fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
-                // console.log('test', rowData); // Assuming `id` exists in rowData
+                console.log('test', rowData); // Assuming `id` exists in rowData
 
                 // Add an event listener for file change
                 fileInput.addEventListener('change', (event) => {
@@ -1352,7 +1355,13 @@
                 formData.append('ecrsId',uploadFilesParams.ecrsId);
 
                 axiosSaveData(formData,'api/upload_ecr_requirement_ref', (response) =>{
-                    console.log('Files uploaded successfully:', response.data);
+                    //Load ECR Requirement by Category and Ecrs Id
+                    tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+uploadFilesParams.ecrsId).draw();
                 });
             }
          })
@@ -1368,13 +1377,11 @@
             let originalFilename = data.originalFilename;
             arrEcrRequirementOriginalFilenames.value = originalFilename;
             selectedEcrRequirementsIdEncrypted.value = ecrRequirementsId;
-            // selectedEcrsId.value = data.ecrsId;
             modal.ViewEcrRequirementRef.show();
-
         });
     }
     const btnLinkViewEcrRequirementRef = async (selectedEcrRequirementsIdEncrypted,index) => { //view_material_ref
-        window.open(`api/view_ecr_requirement_ref?ecrRequirementsId=${selectedEcrRequirementsIdEncrypted} && index=${index}`, '_blank');
+        window.open(`api/view_ecr_requirement_ref?ecrRequirementsId=${selectedEcrRequirementsIdEncrypted} &&  && index=${index}`, '_blank');
     }
 
     //Params
@@ -1537,8 +1544,6 @@
         modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modal.ViewEcrRequirementRef = new Modal(modalViewEcrRequirementRef.value.modalRef,{ keyboard: false });
 
-        modal.EcrRequirements.show();
-
         modalSaveMaterial.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMaterial.value);
         });
@@ -1633,7 +1638,16 @@
             let material = data.material[0];
             let internalExternal = data.internalExternal;
             let materialApprovalCollection = data.materialApprovalCollection;
+            //Load ECR Requirement by Category and Ecrs Id
+            tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+material.ecrs_id).draw();
+            tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+material.ecrs_id).draw();
+            tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+material.ecrs_id).draw();
+            tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+material.ecrs_id).draw();
+            tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+material.ecrs_id).draw();
+            tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+material.ecrs_id).draw();
+            modal.EcrRequirements.show();
 
+            console.log(material.ecrs_id);
             frmMaterial.value.ecrsId = material.ecrs_id;
             frmMaterial.value.materialId = material.id;
             frmMaterial.value.pdMaterial = material.pd_material;
