@@ -20,6 +20,7 @@ class CreateEcrRequirementsTable extends Migration
             $table->string('decision');
             $table->longText('original_filename')->nullable();
             $table->longText('filtered_document_name')->nullable();
+            $table->bigtInt('updated_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

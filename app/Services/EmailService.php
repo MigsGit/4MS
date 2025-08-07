@@ -271,6 +271,15 @@ class EmailService implements EmailInterface
                     </style>
                 </head>
                 <body>';
+                    $result .= '<div class="row">
+                                    <div class="col-sm-12">
+                                        <label style="font-size: 18px;">Good day!</label><br>
+                                        <label style="font-size: 18px;">Kindly check the ECR Requirement</label>
+                                        <br>
+                                        <hr>
+                                </div>
+                            </div>';
+                    $result .= '<br>';
                     if( $ecrRequirementManCategory != 'null'){
                         $result.=  $this->tableCategory($ecrRequirementManCategory);
                     }
@@ -321,15 +330,6 @@ class EmailService implements EmailInterface
                     break;
             }
             $result = '';
-            $result .= '<div class="row">
-                            <div class="col-sm-12">
-                                <label style="font-size: 18px;">Good day!</label><br>
-                                <label style="font-size: 18px;">Kindly the ECR Requirement</label>
-                                <br>
-                                <hr>
-                        </div>
-                    </div>';
-            $result .= '<br>';
             $result .= $title;
             $result .= '<table class="table table-bordered">
                         <thead>

@@ -12,12 +12,13 @@
                 />
             </div>
         </div>
-        <div class="card mt-5"  style="width: 100%;">
+        <div class="card mt-5" style="width: 100%;">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active .menuTab" id="Pending-tab" data-bs-toggle="tab" href="#menu1" role="tab" aria-controls="menu1" aria-selected="true">For Approval</a>
                 </li>
-                <li v-show="commonVar.rapidxUserDeptGroup ==='ISS' || commonVar.rapidxUserDeptGroup ==='QA'" class="nav-item">
+                <li class="nav-item d-none">
+                <!-- <li v-show="commonVar.rapidxUserDeptGroup ==='ISS' || commonVar.rapidxUserDeptGroup ==='QA'" class="nav-item"> -->
                     <a class="nav-link .menuTab" id="Completed-tab" data-bs-toggle="tab" href="#menu2" role="tab" aria-controls="menu2" aria-selected="false">QA Approval</a>
                 </li>
             </ul>
@@ -34,7 +35,7 @@
                             class="table mt-2"
                             ref="tblEcr"
                             :columns="tblEcrColumns"
-                            ajax="api/load_ecr?status=IA,DIS"
+                            ajax="api/load_ecr?status=IA,DIS,QA"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -164,7 +165,7 @@
                     </div>
                 </div>
                   <!-- Others Disposition -->
-                  <div v-show="isSelectReadonly === false" class="card mb-2">
+                  <div class="card mb-2 d-none">
                         <h5 class="mb-0">
                             <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExternal" aria-expanded="true" aria-controls="collapseExternal">
                                 External Field
@@ -556,7 +557,7 @@
                 <div class="row">
                     <div class="modal-footer justify-content-end">
                         <button v-show="modalTitle === 'View'" @click="btnEcrRequirement(frmEcr.ecrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
-                            <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp;QA ECR Requirements
+                            <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp;ECR Requirements
                         </button>
                     </div>
                 </div>
@@ -1101,7 +1102,7 @@
         });
     }
     const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS"+"&& adminAccess="+selectedParams).draw();
+        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA"+"&& adminAccess="+selectedParams).draw();
         tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;
     }
@@ -1176,7 +1177,7 @@
         );
         axiosSaveData(formData,'api/save_ecr_approval', (response) =>{
             tblEcrApproverSummary.value.dt.draw();
-            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS").load();
+            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA").load();
             tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
             modal.EcrApproval.hide();
             modalEcr.SaveEcr.hide();
@@ -1269,7 +1270,7 @@
                 }
                 //TODO: Save Successfully
                 axiosSaveData(formData,'api/save_ecr', (response) =>{
-                    tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS && adminAccess="+selectedAdminAccess.value).load();
+                    tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA && adminAccess="+selectedAdminAccess.value).load();
                     tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA && adminAccess="+selectedAdminAccess.value).load();
                     modalEcr.SaveEcr.hide();
                 });

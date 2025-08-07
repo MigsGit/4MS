@@ -60,6 +60,13 @@
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="Material" @add-event="" ref="modalSaveMaterial">
         <template #body>
             <div class="row">
+                <div class="modal-footer justify-content-end">
+                    <button @click="btnEcrRequirement(frmMaterial.ecrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
+                        <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp;ECR Requirements
+                    </button>
+                </div>
+            </div>
+            <div class="row">
                 <div class="card">
                     <div class="card-body overflow-auto">
                         <DataTable
@@ -1289,7 +1296,7 @@
                 fileInput.setAttribute('classification-requirements-id', rowData.id);
                 fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
                 fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
-                console.log('test', rowData); // Assuming `id` exists in rowData
+                // console.log('rowData', rowData); // Assuming `id` exists in rowData
 
                 // Add an event listener for file change
                 fileInput.addEventListener('change', (event) => {
@@ -1382,6 +1389,16 @@
     }
     const btnLinkViewEcrRequirementRef = async (selectedEcrRequirementsIdEncrypted,index) => { //view_material_ref
         window.open(`api/view_ecr_requirement_ref?ecrRequirementsId=${selectedEcrRequirementsIdEncrypted} &&  && index=${index}`, '_blank');
+    }
+
+    const btnEcrRequirement = async (ecrsId) => {
+        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
+        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
+        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+        modal.EcrRequirements.show();
     }
 
     //Params

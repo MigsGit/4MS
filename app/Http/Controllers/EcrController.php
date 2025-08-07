@@ -301,16 +301,16 @@ class EcrController extends Controller
                 $from = 'issinfoservice@pricon.ph';
                 $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
                 $msgEcrRequirement = $this->emailInterface->ecrEmailMsgEcrRequirement($ecrsId);
-                $subject = "APPROVED: Engineering Change Request (ECR)";
-                $subjectEcr = "ECR Requirements: " .$ecrDetails[0]->ecr_no;
+                $subject = "TEST EMAIL  APPROVED: Engineering Change Request (ECR)";
+                $subjectEcr = "TEST EMAIL ECR Requirements: " .$ecrDetails[0]->ecr_no;
                 $from_name = "4M Change Control Management System";
                 $emailDataEcrRequirement = [
                     // "to" =>"cpagtalunan@pricon.ph",
-                    // "bcc" =>"mclegaspi@pricon.ph",
+                    "bcc" =>"mclegaspi@pricon.ph",
 
                     "to" =>$to,
                     "cc" =>"",
-                    "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                    // "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
                     "from" => $from,
                     "from_name" =>$from_name ?? "4M Change Control Management System",
                     "subject" =>$subjectEcr,
@@ -378,9 +378,9 @@ class EcrController extends Controller
 
             DB::commit();
             if ( count($ecrApproval) === 0){
-                // $this->emailInterface->sendEmail($emailDataEcrRequirement);
+                $this->emailInterface->sendEmail($emailDataEcrRequirement);
             }
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -878,11 +878,12 @@ class EcrController extends Controller
                 $data = [
                     'classification_requirements_id' => $request->classification_requirement_id,
                     'decision' => $request->ecr_req_value,
+                    'updated_by' => session('rapidx_user_id'),
                 ];
 
                 $this->resourceInterface->updateConditions(EcrRequirement::class,$conditions,$data);
             }else{ //add
-                $data = [
+                return $data = [
                     'classification_requirements_id' => $request->classification_requirement_id,
                     'decision' => $request->ecr_req_value,
                     'ecrs_id' => $request->ecrsId,
@@ -1033,7 +1034,7 @@ class EcrController extends Controller
 
                 $ecrRequirementFileRequestValidated['original_filename'] = $impOriginalFilename;
                 $ecrRequirementFileRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
-
+                $ecrRequirementFileRequestValidated['updated_by'] = session('rapidx_user_id');
             }
              $conditions = [
                  'id' =>  $ecrRequirementId
@@ -1046,7 +1047,6 @@ class EcrController extends Controller
            throw $e;
        }
    }
-
    public function getEcrRequirementRefById(Request $request){
        try {
             $ecrRequirementsId = $request->ecrRequirementsId;
@@ -1068,7 +1068,6 @@ class EcrController extends Controller
             throw $e;
         }
    }
-
    public function viewEcrRequirementRef(Request $request){
     try {
         $ecrRequirementsId = decrypt($request->ecrRequirementsId);
