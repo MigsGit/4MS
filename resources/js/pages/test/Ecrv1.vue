@@ -783,10 +783,10 @@
     import {ref , onMounted,reactive, toRef,watch} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
-    import useCommon from '../composables/common.js';
-    import useEcr from '../composables/ecr.js';
-    import useForm from '../composables/utils/useForm.js'
-    import useSettings from '../composables/settings.js';
+    import useCommon from '../../composables/common.js';
+    import useEcr from '../../composables/ecr.js';
+    import useForm from '../../composables/utils/useForm.js'
+    import useSettings from '../../composables/settings.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore);

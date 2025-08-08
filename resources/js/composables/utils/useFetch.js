@@ -34,6 +34,8 @@ export default function useFetch ()
                 responseCallback(response);
             }
         } catch (error) {
+            console.log(error);
+            // return;
             let response = error.response;
             let errorMsg = response.data.msg ?? '';
             if( response.status === 500){

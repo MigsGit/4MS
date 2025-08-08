@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-    import {defineProps} from 'vue'
+    import {defineProps,ref} from 'vue'
 
     const props = defineProps({
         frmSpecialInspection: {

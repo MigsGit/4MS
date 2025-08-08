@@ -677,7 +677,7 @@ class EcrController extends Controller
                 $classificationRequirement = $classificationRequirement
                 ->get();
            }
-
+           
             $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,[],[],
                 [
                     'ecrs_id' => $request->ecrsId ?? ""

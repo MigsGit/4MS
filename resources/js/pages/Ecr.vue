@@ -344,7 +344,7 @@
                                         <thead>
                                             <tr>
                                             <th scope="col" style="width: 10%;">#</th>
-                                            <th scope="col" style="width: 45%;">Quality Engg</th>
+                                            <th scope="col" style="width: 45%;">Quality Engineer</th>
                                             <th scope="col" style="width: 45%;">QA Manager</th>
                                             </tr>
                                         </thead>
