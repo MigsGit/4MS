@@ -1186,7 +1186,7 @@
                         tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
                         if( materialStatus === 'PMIAPP' || materialStatus === 'OK'){
                             getCurrentApprover(pmiApproverParams);
-                            tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
+                            tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
 
                     });

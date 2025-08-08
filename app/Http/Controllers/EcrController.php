@@ -301,8 +301,8 @@ class EcrController extends Controller
                 $from = 'issinfoservice@pricon.ph';
                 $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
                 $msgEcrRequirement = $this->emailInterface->ecrEmailMsgEcrRequirement($ecrsId);
-                $subject = "TEST EMAIL  APPROVED: Engineering Change Request (ECR)";
-                $subjectEcr = "TEST EMAIL ECR Requirements: " .$ecrDetails[0]->ecr_no;
+                $subject = "APPROVED: Engineering Change Request (ECR)";
+                $subjectEcr = "ECR Requirements: " .$ecrDetails[0]->ecr_no;
                 $from_name = "4M Change Control Management System";
                 $emailDataEcrRequirement = [
                     // "to" =>"cpagtalunan@pricon.ph",
@@ -884,7 +884,7 @@ class EcrController extends Controller
 
                 $this->resourceInterface->updateConditions(EcrRequirement::class,$conditions,$data);
             }else{ //add
-                return $data = [
+                $data = [
                     'classification_requirements_id' => $request->classification_requirement_id,
                     'decision' => $request->ecr_req_value,
                     'ecrs_id' => $request->ecrsId,
