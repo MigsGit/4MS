@@ -1026,11 +1026,11 @@
     import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
-    import useCommon from '../composables/common.js';
-    import useForm from '../composables/utils/useForm.js'
-    import useEcr from '../composables/ecr.js';
-    import useMaterial from '../composables/material.js';
-    import useSettings from '../composables/settings.js';
+    import useCommon from '../../composables/common.js';
+    import useForm from '../../composables/utils/useForm.js'
+    import useEcr from '../../composables/ecr.js';
+    import useMaterial from '../../composables/material.js';
+    import useSettings from '../../composables/settings.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
     DataTable.use(DataTablesCore)
@@ -1109,7 +1109,6 @@
     const arrEcrRequirementOriginalFilenames = ref(null);
 
     //Columns
-
      const tblEcrByCategoryStatusColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -1293,12 +1292,8 @@
                 fileInput.className = 'form-control form-control-lg';
                 fileInput.setAttribute('classifications-id', rowData.classifications_id);
                 fileInput.setAttribute('classification-requirements-id', rowData.id);
-
-                if(rowData.ecr_requirement !=null){
-                    fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
-                    fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
-                }
-
+                fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
+                fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
                 // console.log('rowData', rowData); // Assuming `id` exists in rowData
 
                 // Add an event listener for file change
@@ -1554,6 +1549,7 @@
         selectedVal: "0",
     };
 
+
     onMounted( async ()=>{
         modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
@@ -1563,7 +1559,7 @@
 
         modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modal.ViewEcrRequirementRef = new Modal(modalViewEcrRequirementRef.value.modalRef,{ keyboard: false });
-
+        modal.EcrRequirements.show();
         modalSaveMaterial.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMaterial.value);
         });

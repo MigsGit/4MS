@@ -767,225 +767,8 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
-            <div class="row mt-3">
-                <!-- Man -->
-                <div class="card mb-2">
-                        <h5 class="mb-0">
-                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMan" aria-expanded="true" aria-controls="collapseMan">
-                                Man
-                            </button>
-                        </h5>
-                    <div id="collapseMan" class="collapse show" data-bs-parent="#accordionMain">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <DataTable
-                                        width="100%" cellspacing="0"
-                                        class="table mt-2"
-                                        ref="tblEcrManRequirements"
-                                        :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=1"
-                                        :options="{
-                                            paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {
-                                                    orderable:false,target:[3],
-
-                                                }
-                                            ]
-                                        }"
-                                    >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
-                                    </DataTable>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <!-- Material -->
-                <div class="card mb-2">
-                        <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapMat" aria-expanded="true" aria-controls="collapMat">
-                                Material
-                            </button>
-                        </h5>
-                    <div id="collapMat" class="collapse show" data-bs-parent="#accordionMain">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <DataTable
-                                        width="100%" cellspacing="0"
-                                        class="table mt-2"
-                                        ref="tblEcrMatRequirements"
-
-                                        :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=2"
-                                        :options="{
-                                            paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {orderable:false,target:[3]}
-                                            ]
-                                        }"
-                                    >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
-                                    </DataTable>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <!-- Machine -->
-                <div class="card mb-2">
-                        <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMac" aria-expanded="true" aria-controls="collapseMac">
-                                Machine
-                            </button>
-                        </h5>
-                    <div id="collapseMac" class="collapse show" data-bs-parent="#accordionMain">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <DataTable
-                                        width="100%" cellspacing="0"
-                                        class="table mt-2"
-                                        ref="tblEcrMachineRequirements"
-                                        :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=3"
-                                        :options="{
-                                            paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {orderable:false,target:[3]}
-                                            ]
-                                        }"
-                                    >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
-                                    </DataTable>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <!-- Method -->
-                <div class="card mb-2">
-                        <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMethod" aria-expanded="true" aria-controls="collapseMethod">
-                                Method
-                            </button>
-                        </h5>
-                    <div id="collapseMethod" class="collapse show" data-bs-parent="#accordionMain">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <DataTable
-                                        width="100%" cellspacing="0"
-                                        class="table mt-2"
-                                        ref="tblEcrMethodRequirements"
-                                        :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=4"
-                                        :options="{
-                                            paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {orderable:false,target:[3]}
-                                            ]
-                                        }"
-                                    >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
-                                    </DataTable>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <!-- Method -->
-                <div class="card mb-2">
-                        <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnvironment" aria-expanded="true" aria-controls="collapseEnvironment">
-                                Environment
-                            </button>
-                        </h5>
-                    <div id="collapseEnvironment" class="collapse show" data-bs-parent="#accordionMain">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <DataTable
-                                        width="100%" cellspacing="0"
-                                        class="table mt-2"
-                                        ref="tblEcrEnvironmentRequirements"
-                                        :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=5"
-                                        :options="{
-                                            paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {orderable:false,target:[3]}
-                                            ]
-                                        }"
-                                    >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
-                                    </DataTable>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <ModalEcrRequirements ref="testing" :tblEcrRequirementsColumns="tblEcrRequirementsColumns">
+            </ModalEcrRequirements>
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -1024,15 +807,17 @@
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
-    import ModalComponent from '../../js/components/ModalComponent.vue';
+    import ModalComponent from '../components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
-    import useCommon from '../composables/common.js';
-    import useForm from '../composables/utils/useForm.js'
-    import useEcr from '../composables/ecr.js';
-    import useMaterial from '../composables/material.js';
-    import useSettings from '../composables/settings.js';
+    import useCommon from '../../composables/common.js';
+    import useForm from '../../composables/utils/useForm.js'
+    import useEcr from '../../composables/ecr.js';
+    import useMaterial from '../../composables/material.js';
+    import useSettings from '../../composables/settings.js';
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
+    import ModalEcrRequirements from '../components/ModalEcrRequirements';
+
     DataTable.use(DataTablesCore)
 
     const {
@@ -1097,7 +882,7 @@
     const approvalRemarks = ref(null);
     const selectedMaterialsId = ref(null);
 
-    const tblEcrManRequirements = ref(null);
+    // const tblEcrManRequirements = ref(null);
     const tblEcrMatRequirements = ref(null);
     const tblEcrMachineRequirements = ref(null);
     const tblEcrMethodRequirements = ref(null);
@@ -1108,8 +893,9 @@
     const selectedEcrRequirementsIdEncrypted = ref(null);
     const arrEcrRequirementOriginalFilenames = ref(null);
 
-    //Columns
+    const testing = ref(null)
 
+    //Columns
      const tblEcrByCategoryStatusColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -1189,7 +975,6 @@
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
-
                     });
                 }
             }
@@ -1291,15 +1076,15 @@
                 fileInput.multiple = true;
                 fileInput.accept = '.pdf';
                 fileInput.className = 'form-control form-control-lg';
+
+
                 fileInput.setAttribute('classifications-id', rowData.classifications_id);
                 fileInput.setAttribute('classification-requirements-id', rowData.id);
 
                 if(rowData.ecr_requirement !=null){
-                    fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
+                    fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id ?? '');
                     fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
                 }
-
-                // console.log('rowData', rowData); // Assuming `id` exists in rowData
 
                 // Add an event listener for file change
                 fileInput.addEventListener('change', (event) => {
@@ -1367,11 +1152,11 @@
                 axiosSaveData(formData,'api/upload_ecr_requirement_ref', (response) =>{
                     //Load ECR Requirement by Category and Ecrs Id
                     tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    // tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    // tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    // tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+uploadFilesParams.ecrsId).draw();
                 });
             }
          })
@@ -1396,11 +1181,11 @@
 
     const btnEcrRequirement = async (ecrsId) => {
         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
-        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
-        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
-        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
-        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+        // tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+        // tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+        // tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+        // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
+        // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
         modal.EcrRequirements.show();
     }
 
@@ -1570,12 +1355,18 @@
         modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcrDetails.value);
         });
+        console.log('modalRef',modalEcrRequirements.value)
+
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
         await getDropdownMasterByOpt(materialSupplierParams);
         await getDropdownMasterByOpt(materialColorParams);
         await getCategoryAdminAccessOpt();
+        console.log(testing.value)
+        console.log('tblEcrMatRequirements',tblEcrMatRequirements)
+
+        // tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId=1").draw();
     })
     // Override default classes for small size and readonly styles
     const multiselectSm =ref ({
