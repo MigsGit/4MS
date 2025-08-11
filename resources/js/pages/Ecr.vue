@@ -930,6 +930,7 @@
     const isApproved = ref(null);
     const currentEcrsId = ref(null);
     const selectedAdminAccess = ref(null);
+    
     const isEmptyTblEcrManRequirements = ref(null);
     const isEmptyTblEcrMachineRequirements = ref(null);
     const isEmptyTblEcrMaterialRequirements = ref(null);
