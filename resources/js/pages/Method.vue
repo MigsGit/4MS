@@ -52,6 +52,11 @@
     </div>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="SaveMethod" ref="modalSaveMethod">
         <template #body>
+            <div class="modal-footer justify-content-end">
+                <button @click="btnEcrRequirement(selectedEcrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
+                    <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp;ECR Requirements
+                </button>
+            </div>
             <div class="row">
                 <div class="card">
                     <div class="card-body overflow-auto">
@@ -538,6 +543,256 @@
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="ECR Requirements" ref="modalEcrRequirements">
+        <template #body>
+            <div class="row mt-3 man" v-show="isEmptyTblEcrManRequirements">
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMan" aria-expanded="true" aria-controls="collapseMan">
+                                Man
+                            </button>
+                        </h5>
+                    <div id="collapseMan" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrManRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=1',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrManRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
+                                        }"
+                                    >
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3" v-show="isEmptyTblEcrMaterialRequirements">
+                <!-- Material -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapMat" aria-expanded="true" aria-controls="collapMat">
+                                Material
+                            </button>
+                        </h5>
+                    <div id="collapMat" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrMatRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=2',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrMaterialRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
+                                        }"
+                                    >
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3" v-show="isEmptyTblEcrMachineRequirements">
+                <!-- Machine  -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMac" aria-expanded="true" aria-controls="collapseMac">
+                                Machine
+                            </button>
+                        </h5>
+                    <div id="collapseMac" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrMachineRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=3',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrMachineRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
+                                        }"
+                                    >
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3" v-show="isEmptyTblEcrMethodRequirements">
+                <!-- Method -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMethod" aria-expanded="true" aria-controls="collapseMethod">
+                                Method
+                            </button>
+                        </h5>
+                    <div id="collapseMethod" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrMethodRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=4',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrMethodRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
+                                        }"
+                                    >
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3 environment" v-show="isEmptyTblEcrEnvironmentRequirements">
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnvironment" aria-expanded="true" aria-controls="collapseEnvironment">
+                                Environment
+                            </button>
+                        </h5>
+                    <div id="collapseEnvironment" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrEnvironmentRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=5',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrEnvironmentRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
+                                        }"
+                                    >
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <!-- <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button> -->
+        </template>
+    </ModalComponent>
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Ecr Requirement References" ref="modalViewEcrRequirementRef">
+        <template #body>
+            <div class="row mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                PDF Attachment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrEcrRequirementOriginalFilename, index) in arrEcrRequirementOriginalFilenames" :key="arrEcrRequirementOriginalFilename.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewEcrRequirementRef" @click="btnLinkViewEcrRequirementRef(selectedEcrRequirementsIdEncrypted,index)">
+                                    {{ arrEcrRequirementOriginalFilename }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -568,6 +823,21 @@
         axiosFetchData,
         getEcrDetailsId,
         saveEcrDetails,
+        tblEcrRequirementsColumns,
+        tblEcrManRequirements,
+        tblEcrMatRequirements,
+        tblEcrMachineRequirements,
+        tblEcrMethodRequirements,
+        tblEcrEnvironmentRequirements,
+        selectedEcrRequirementsIdEncrypted,
+        arrEcrRequirementOriginalFilenames,
+        isEmptyTblEcrManRequirements,
+        isEmptyTblEcrMaterialRequirements,
+        isEmptyTblEcrMachineRequirements,
+        isEmptyTblEcrMethodRequirements,
+        isEmptyTblEcrEnvironmentRequirements,
+        btnLinkViewEcrRequirementRef,
+        btnEcrRequirement,
     } = useEcr();
     const {
         methodVar,
@@ -593,9 +863,6 @@
     const {
         getRapidxUserByIdOpt,
     } = useSettings();
-
-
-
     const modalSaveMethod = ref(null);
     const modalSaveEcrDetail = ref(null);
     const tblEcrByStatus = ref(null);
@@ -618,7 +885,10 @@
     const selectedAdminAccess = ref(null);
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
-    
+
+    const modalEcrRequirements = ref(null);
+    const modalViewEcrRequirementRef = ref(null);
+
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -668,15 +938,20 @@
                         isModal.value = 'View';
                         currentStatus.value = methodStatus;
 
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        if( methodStatus === 'FORAPP'){
-                            getCurrentApprover(methodApproverParams);
-                            tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
-                        }
-                        if( methodStatus === 'PMIAPP'){
-                            getCurrentApprover(pmiApproverParams);
+                        if( methodStatus === 'PMIAPP' || methodStatus === 'OK'){
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
+                        getCurrentApprover(methodApproverParams);
+                        tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                          //Load ECR Requirement by Category and Ecrs Id
+                        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
+                        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+                        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+                        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
+                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+                        modalEcr.EcrRequirements.show();
                         modal.SaveMethod.show();
                     });
                 }
@@ -802,10 +1077,14 @@
     };
     onMounted( async ()=>{
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });
-        modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         modal.ViewMethodRef = new Modal(modalViewMethodRef.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
+
+        modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modalEcr.ViewEcrRequirementRef = new Modal(modalViewEcrRequirementRef.value.modalRef,{ keyboard: false });
+
         modalSaveMethod.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMethod.value);
         });

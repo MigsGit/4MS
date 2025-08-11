@@ -844,8 +844,6 @@
         axiosFetchData,
         getEcrDetailsId,
         saveEcrDetails,
-
-
         tblEcrRequirementsColumns,
         tblEcrManRequirements,
         tblEcrMatRequirements,
