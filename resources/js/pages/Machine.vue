@@ -53,6 +53,11 @@
     </div>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="SaveMachine" ref="modalSaveMachine">
         <template #body>
+            <div class="modal-footer justify-content-end">
+                <button @click="btnEcrRequirement(selectedEcrsId)"type="button" ref= "btnEcrApproved" class="btn btn-primary btn-sm">
+                    <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp;ECR Requirements
+                </button>
+            </div>
             <div class="row">
                 <div class="card">
                     <div class="card-body overflow-auto">
@@ -854,8 +859,6 @@
         isEmptyTblEcrMachineRequirements,
         isEmptyTblEcrMethodRequirements,
         isEmptyTblEcrEnvironmentRequirements,
-        uploadFiles,
-        getEcrRequirementRefById,
         btnLinkViewEcrRequirementRef,
         btnEcrRequirement,
     } = useEcr();
