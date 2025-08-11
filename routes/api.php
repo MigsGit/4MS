@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function(){
     Route::controller(SettingsController::class)->group(function () {
         Route::post('save_dropdown_master_details', 'saveDropdownMasterDetails')->name('save_dropdown_master_details');
         Route::post('save_user_approver', 'saveUserApprover')->name('save_user_approver');
+        Route::post('save_rapidx_user','saveRapidxUser')->name('save_rapidx_user');
 
         Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
         Route::get('load_dropdown_master_details', 'loadDropdownMasterDetails')->name('load_dropdown_master_details');

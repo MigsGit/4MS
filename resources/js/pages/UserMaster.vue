@@ -8,7 +8,7 @@
                     <div class="row">
                         <div class="col-6 mb-3">
                             <button @click="btnAddUser" type="button" ref= "btnAddUser" class="btn btn-primary btn-sm">
-                                <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp; Add User
+                                <font-awesome-icon class="nav-icon" icon="fas fa-user" />&nbsp; Add User
                             </button>
                         </div>
                     </div>
@@ -41,7 +41,7 @@
             </div>
         </div>
     </div>
-    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="Add User" ref="modalAddUser">
+    <ModalComponent @add-event="formAddUser" icon="fa-download" modalDialog="modal-dialog modal-md" title="Add User" ref="modalAddUser">
         <template #body>
             <div class="row mt-3">
                 <div class="row">
@@ -59,6 +59,8 @@
             </div>
         </template>
         <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp;     Save</button>
         </template>
     </ModalComponent>
 </template>
@@ -76,6 +78,11 @@
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
+    import useCommon from '../../js/composables/common.js';
+    const {
+        resetEcrForm,
+    } = useCommon();
+
     DataTable.use(DataTablesCore);
     const { axiosSaveData } = useForm(); // Call the useFetch function
 
@@ -133,9 +140,11 @@
     };
     onMounted ( async () =>{
         modal.AddUser = new Modal(modalAddUser.value.modalRef,{keyboard:false});
-        modal.AddUser.show();
-
+        // modal.AddUser.show();
         getNoModuleRapidxUserByIdOpt(rapidxUserParams);
+        modalAddUser.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            resetEcrForm(frmUser.value);
+        })
     })
 
     const saveUserApprover = async (userId) => {
@@ -147,6 +156,17 @@
     }
     const btnAddUser = async () => {
         modal.AddUser.show();
+    }
+
+    const formAddUser = async () => {
+        let formData = new FormData();
+
+        formData.append('rapidxUser',frmUser.value.rapidxUser);
+
+        axiosSaveData(formData,'api/save_rapidx_user', (response) =>{
+            tblUserMaster.value.dt.draw();
+            modal.AddUser.hide();
+        });
     }
 </script>
 <style lang="scss" scoped>

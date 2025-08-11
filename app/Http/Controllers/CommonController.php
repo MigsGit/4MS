@@ -206,10 +206,14 @@ class CommonController extends Controller
     }
     public function getNoModuleRapidxUserByIdOpt(Request $request){
         try {
-            $rapidxUserById = DB::connection('mysql_rapidx')->select('SELECT id,name
-                FROM  users
+            $rapidxUserById = DB::connection('mysql_rapidx')->select('SELECT users.id,users.name
+                FROM  users users
+                LEFT JOIN user_accesses user_accesses ON user_accesses.user_id = users.id
                 WHERE 1=1
-                AND user_stat = 1'
+                AND user_stat = 1
+                -- AND user_accesses.user != users.id
+                GROUP BY users.id,users.name
+                '
             );
             if(count ($rapidxUserById) > 0){
                 return response()->json(['isSuccess' => 'true','rapidxUserById'=>$rapidxUserById]);

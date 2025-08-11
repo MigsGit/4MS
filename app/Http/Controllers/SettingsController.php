@@ -272,4 +272,43 @@ class SettingsController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
+
+    public function saveRapidxUser(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+
+
+            $isModuleAccess = DB::connection('mysql_rapidx')
+            ->table('user_accesses')
+            ->select('*')
+            ->from('user_accesses')
+            ->where('user_id',$request->rapidxUser)
+            ->where('module_id',46)
+            ->count();
+            if($isModuleAccess > 0){
+                return response()->json(['is_success' => 'false', 'msg' => 'User already has access to this module.'],409);
+            }
+            $requestValidated = [
+                'user_level_id' => 5,
+                'module_id' => 46,
+                'user_id' => $request->rapidxUser,
+                'user_access_stat' => 1,
+                'update_version' => 1,
+                'created_by' => session('rapidx_user_id'),
+                'last_updated_by' => session('rapidx_user_id'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            $validUserAccess = DB::connection('mysql_rapidx')
+            ->table('user_accesses')
+            ->insert($requestValidated);
+
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
 }

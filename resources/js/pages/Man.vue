@@ -965,6 +965,7 @@
         modalSaveManDetails.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMan.value);
         })
+
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmSpecialInspection.value);
         })
