@@ -1028,52 +1028,52 @@
     const prdnAssessedByParams = {
         globalVar: methodVar.prdnAssessedBy,
         formModel: toRef(frmMethod.value,'prdnAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const prdnCheckedByParams = {
         globalVar: methodVar.prdnCheckedBy,
         formModel: toRef(frmMethod.value,'prdnCheckedBy'),
-        selectedVal: 237,
+        selectedVal: 0,
     };
     const ppcAssessedByParams = {
         globalVar: methodVar.ppcAssessedBy,
         formModel: toRef(frmMethod.value,'ppcAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const ppcCheckedByParams = {
         globalVar: methodVar.ppcCheckedBy,
         formModel: toRef(frmMethod.value,'ppcCheckedBy'),
-        selectedVal: 237,
+        selectedVal: 0,
     };
     const mainEnggAssessedByParams = {
         globalVar: methodVar.mainEnggAssessedBy,
         formModel: toRef(frmMethod.value,'mainEnggAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const mainEnggCheckedByParams = {
         globalVar: methodVar.mainEnggCheckedBy,
         formModel: toRef(frmMethod.value,'mainEnggCheckedBy'),
-        selectedVal: 237,
+        selectedVal: 0,
     };
     const proEnggAssessedByParams = {
         globalVar: methodVar.proEnggAssessedBy,
         formModel: toRef(frmMethod.value,'proEnggAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const proEnggCheckedByParams = {
         globalVar: methodVar.proEnggCheckedBy,
         formModel: toRef(frmMethod.value,'proEnggCheckedBy'),
-        selectedVal:237,
+        selectedVal:0,
     };
     const qcAssessedByParams = {
         globalVar: methodVar.qcAssessedBy,
         formModel: toRef(frmMethod.value,'qcAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const qcCheckedByParams = {
         globalVar: methodVar.qcCheckedBy,
         formModel: toRef(frmMethod.value,'qcCheckedBy'),
-        selectedVal:237,
+        selectedVal:0,
     };
     onMounted( async ()=>{
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });

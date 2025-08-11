@@ -1049,52 +1049,52 @@
     const prdnAssessedByParams = {
         globalVar: machineVar.prdnAssessedBy,
         formModel: toRef(frmMachine.value,'prdnAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const prdnCheckedByParams = {
         globalVar: machineVar.prdnCheckedBy,
         formModel: toRef(frmMachine.value,'prdnCheckedBy'),
-        selectedVal: 237,
+        selectedVal: 0,
     };
     const ppcAssessedByParams = {
         globalVar: machineVar.ppcAssessedBy,
         formModel: toRef(frmMachine.value,'ppcAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const ppcCheckedByParams = {
         globalVar: machineVar.ppcCheckedBy,
         formModel: toRef(frmMachine.value,'ppcCheckedBy'),
-        selectedVal: 237,
+        selectedVal: 0,
     };
     const mainEnggAssessedByParams = {
         globalVar: machineVar.mainEnggAssessedBy,
         formModel: toRef(frmMachine.value,'mainEnggAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const mainEnggCheckedByParams = {
         globalVar: machineVar.mainEnggCheckedBy,
         formModel: toRef(frmMachine.value,'mainEnggCheckedBy'),
-        selectedVal: 237,
+        selectedVal: 0,
     };
     const proEnggAssessedByParams = {
         globalVar: machineVar.proEnggAssessedBy,
         formModel: toRef(frmMachine.value,'proEnggAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const proEnggCheckedByParams = {
         globalVar: machineVar.proEnggCheckedBy,
         formModel: toRef(frmMachine.value,'proEnggCheckedBy'),
-        selectedVal:237,
+        selectedVal:0,
     };
     const qcAssessedByParams = {
         globalVar: machineVar.qcAssessedBy,
         formModel: toRef(frmMachine.value,'qcAssessedBy'),
-        selectedVal: 530,
+        selectedVal: 0,
     };
     const qcCheckedByParams = {
         globalVar: machineVar.qcCheckedBy,
         formModel: toRef(frmMachine.value,'qcCheckedBy'),
-        selectedVal:237,
+        selectedVal:0,
     };
 
     onMounted( async ()=>{
