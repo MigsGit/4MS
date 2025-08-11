@@ -5,8 +5,13 @@
             <div class="card-body overflow-auto">
                 <div class="table-responsive">
                     <!-- id="dataTable" -->
-                    <!-- <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    </table> -->
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <button @click="btnAddUser" type="button" ref= "btnAddUser" class="btn btn-primary btn-sm">
+                                <font-awesome-icon class="nav-icon" icon="fas fa-check" />&nbsp; Add User
+                            </button>
+                        </div>
+                    </div>
                     <DataTable
                         width="100%" cellspacing="0"
                         class="table mt-2"
@@ -36,12 +41,34 @@
             </div>
         </div>
     </div>
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="Add User" ref="modalAddUser">
+        <template #body>
+            <div class="row mt-3">
+                <div class="row">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Full Name:</span>
+                        <Multiselect
+                            v-model="frmUser.rapidxUser"
+                            :options="settingVar.optRapidxUser"
+                            placeholder="Select an option"
+                            :searchable="true"
+                            :close-on-select="true"
+                        />
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
      import {
         onMounted,
         ref,
+        reactive,
+        toRef,
     } from 'vue'
     import Swal from 'sweetalert2';
     import ModalComponent from '../components/ModalComponent.vue';
@@ -49,11 +76,23 @@
     import useForm from '../../js/composables/utils/useForm.js'
     import DataTable from 'datatables.net-vue3';
     import DataTablesCore from 'datatables.net-bs5';
-
     DataTable.use(DataTablesCore);
     const { axiosSaveData } = useForm(); // Call the useFetch function
 
+    const {
+        getRapidxUserByIdOpt,
+        getNoModuleRapidxUserByIdOpt,
+    } = useSettings();
+
     const tblUserMaster = ref(null);
+    const modalAddUser = ref(null);
+    const modal = ref(null);
+    const frmUser = ref({
+        rapidxUser: null
+    });
+    const settingVar = reactive({
+        optRapidxUser: []
+    });
     const userMasterColumns = [
         { data: 'get_action',
         orderable: false,
@@ -86,12 +125,28 @@
         { data: 'email'},
         { data: 'get_departments'}
     ];
+
+    const rapidxUserParams = {
+        globalVar: settingVar.optRapidxUser,
+        formModel: toRef(frmUser.value,'rapidxUser'),
+        selectedVal: "",
+    };
+    onMounted ( async () =>{
+        modal.AddUser = new Modal(modalAddUser.value.modalRef,{keyboard:false});
+        modal.AddUser.show();
+
+        getNoModuleRapidxUserByIdOpt(rapidxUserParams);
+    })
+
     const saveUserApprover = async (userId) => {
         let formData = new FormData();
         formData.append('userId',userId)
         axiosSaveData(formData,'api/save_user_approver', (response) =>{
             tblUserMaster.value.dt.draw();
         });
+    }
+    const btnAddUser = async () => {
+        modal.AddUser.show();
     }
 </script>
 <style lang="scss" scoped>

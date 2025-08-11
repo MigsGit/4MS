@@ -30,9 +30,10 @@
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Environment' }">
                     <font-awesome-icon class="nav-icon" icon="tree" />&nbsp; Environment
                 </router-link>
-                <div class="sb-sidenav-menu-heading">Admin</div>
+                <div class="sb-sidenav-menu-heading">Settings</div>
 
-                <router-link v-show="departmentGroup === 'ISS' || departmentGroup === 'QAD'" class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }">
+                <router-link v-if="departmentGroup === 'ISS' || departmentGroup === 'QAD'" class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }">
+                <!-- <router-link v-show="true" class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }"> -->
                     <font-awesome-icon class="nav-icon" icon="users" />&nbsp; User Master
                 </router-link>
 
@@ -40,7 +41,7 @@
                     <font-awesome-icon class="nav-icon" icon="square-caret-down" />&nbsp; Dropdown Master
                 </router-link>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'EcrRequirementMaster' }">
-                    <font-awesome-icon class="nav-icon" icon="clipboard-list" />&nbsp; Ecr Requirement Master
+                    <font-awesome-icon class="nav-icon" icon="clipboard-list" />&nbsp; Ecr Requirement List
                 </router-link>
                 <!--  <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Settings' }">
                     <i class="fas fa-tasks"></i>&nbsp; Settings
@@ -63,13 +64,13 @@
         axiosFetchData
     } = useEcr();
 
-    const userFullName = ref("");
-    const departmentGroup = ref("");
+    const userFullName = ref(null);
+    const departmentGroup = ref(null);
 
     const getUserFullName = async () => {
         axiosFetchData({},'api/get_admin_access_opt',function(response){
             userFullName.value = response.data.activeUserFullName;
-            departmentGroup.value = response.data.activedepartmentGroup;
+            departmentGroup.value = response.data.departmentGroup;
         });
     }
     onMounted( async () => {

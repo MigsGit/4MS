@@ -45,7 +45,7 @@ export default function useForm ()
             if( response.status === 422 ){
                 Swal.fire({
                     title: "System Alert !",
-                    text: errorMsg ?? "Please Fill up all required inputs ! ",
+                    text: errorMsg ?? "Please Fill up all required input ! ",
                     icon: "error",
                     timer: 3000,
                     showConfirmButton: false

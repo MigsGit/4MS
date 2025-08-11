@@ -204,6 +204,21 @@ class CommonController extends Controller
             return response()->json(['isSuccess' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
+    public function getNoModuleRapidxUserByIdOpt(Request $request){
+        try {
+            $rapidxUserById = DB::connection('mysql_rapidx')->select('SELECT id,name
+                FROM  users
+                WHERE 1=1
+                AND user_stat = 1'
+            );
+            if(count ($rapidxUserById) > 0){
+                return response()->json(['isSuccess' => 'true','rapidxUserById'=>$rapidxUserById]);
+            }
+            return response()->json(['isSuccess' => 'false','rapidxUserById'=>[],'msg' => 'User Not Found !',],500);
+        } catch (Exception $e) {
+            return response()->json(['isSuccess' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
     public function getCurrentApproverSession(Request $request){
         try {
             switch  ($request->approvalType) {

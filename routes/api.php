@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function(){
         Route::get('test_email', 'testEmail')->name('test_email'); //test function
         Route::get('get_special_inspection_by_id', 'getSpecialInspectionById')->name('get_special_inspection_by_id');
         Route::get('get_rapidx_user_by_id_opt', 'getRapidxUserByIdOpt')->name('get_rapidx_user_by_id_opt');
+        Route::get('get_no_module_rapidx_user_by_id_opt', 'getNoModuleRapidxUserByIdOpt')->name('get_no_module_rapidx_user_by_id_opt');
         Route::get('get_current_approver_session', 'getCurrentApproverSession')->name('get_current_approver_session');
         Route::get('get_current_pmi_internal_approver', 'getCurrentPmiInternalApprover')->name('get_current_pmi_internal_approver');
         Route::get('load_pmi_internal_approval_summary', 'loadPmiInternalApprovalSummary')->name('load_pmi_internal_approval_summary');
