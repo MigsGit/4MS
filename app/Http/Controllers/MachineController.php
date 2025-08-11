@@ -23,206 +23,6 @@ class MachineController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-    public function loadMachineApproverSummaryId (Request $request){
-        try {
-            $machinesId = $request->machinesId ?? "";
-            $data = [];
-            $relations = [
-                'rapidx_user'
-            ];
-            $conditions = [
-                'machines_id' => $machinesId
-            ];
-            $machineApproval = $this->resourceInterface->readCustomEloquent(MachineApproval::class,$data,$relations,$conditions);
-            $machineApproval = $machineApproval
-            ->whereNotNull('rapidx_user_id')
-            ->orderBy('id','asc')
-            ->get();
-            return DataTables($machineApproval)
-            ->addColumn('get_count',function ($row) use(&$ctr){
-                $ctr++;
-                $result = '';
-                $result .= $ctr;
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_approver_name',function ($row){
-                $result = '';
-                $result .= $row->rapidx_user['name'];
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_role',function ($row){
-                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
-                $result = '';
-                $result .= '<center>';
-                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
-                $result .= '<center>';
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_status',function ($row){
-                switch ($row->status) {
-
-                    case 'PEN':
-                        $status = 'PENDING';
-                        $bgColor = 'badge rounded-pill bg-warning';
-                        break;
-                    case 'APP':
-                        $status = 'APPROVED';
-                        $bgColor = 'badge rounded-pill bg-success';
-                        break;
-                    case 'DIS':
-                        $status = 'DISAPPROVED';
-                        $bgColor = 'badge rounded-pill bg-danger';
-                        break;
-                    default:
-                        $status = '---';
-                        $bgColor = '';
-                        break;
-                }
-
-                $result = '';
-                $result .= '<center>';
-                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
-                $result .= '<br>';
-                $result .= '</br>';
-                return $result;
-            })
-            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
-            ->make(true);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function loadEcrMachineByStatus(Request $request){
-        try {
-            $adminAccess = $request->adminAccess;
-            $data = [];
-            $relations = [
-                'machine.machine_approvals_pending',
-                'machine',
-            ];
-            $conditions = [
-                'status' => 'OK',
-                'category' => $request->category
-            ];
-            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-
-            if( $adminAccess === 'null' || blank($adminAccess) ){
-                return $ecr->whereHas('machine.machine_approvals_pending',function($query){
-                    // if is adminAccess exist deactivate the session condition
-                    $query->where('rapidx_user_id',session('rapidx_user_id'));
-                })->get();
-            }
-
-            if( $adminAccess === 'created'){
-                $ecr->where('created_by' , session('rapidx_user_id'))
-                ->get();
-            }
-            if( $adminAccess === 'all') {
-                $ecr->get();
-            }
-            if ( $adminAccess === 'pmi') {
-                $data = [];
-                $relations = [
-                    'pmi_approvals_pending',
-                    'machine',
-                ];
-                $conditions = [
-                    'status' => 'OK',
-                    'category' => $request->category
-                ];
-                $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-                // Check PMI approvals instead
-                $ecr->whereHas('pmi_approvals_pending', function ($query) {
-                    $query->where('status', 'PEN')
-                    ->where('rapidx_user_id',session('rapidx_user_id'));
-                });
-            }
-            return DataTables($ecr)
-            ->addColumn('get_actions',function ($row) use ($request){
-                // Dropdown menu links
-                $machineStatus = $row->machine->status ?? "";
-                $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";
-                $currentApprover = $row->machine->machine_approvals_pending[0]['rapidx_user']['id'] ?? '';
-
-                $result = "";
-                $result .= '<center>';
-                $result .= '<div class="btn-group dropstart mt-4">';
-                $result .= '<button type="button" class="btn btn-secondary dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-expanded="false">';
-                $result .= '    Action';
-                $result .= '</button>';
-                $result .= '<ul class="dropdown-menu">';
-                if($machineStatus === "EXDISPO" || $machineStatus === "OK"){
-                    //Upload External Disposition
-                    return $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
-                }
-                if($row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-                }
-                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')){
-                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                }
-
-                    // $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                $result .= '</ul>';
-                $result .= '</div>';
-                $result .= '</center>';
-                return $result;
-            })
-            ->addColumn('get_status',function ($row) use($request){
-                $machineStatus = $row->machine->status ?? "";
-                $currentApprover = $row->machine->machine_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $getStatus = $this->getStatus($machineStatus);
-                $result = '';
-                $result .= '<center>';
-                $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
-                $result .= '<br>';
-                $getApprovalStatus = $this->getApprovalStatus($row->machine->approval_status);
-                if($row->status != 'DIS' && $currentApprover != ''){
-                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
-                }
-                if( $machineStatus === 'PMIAPP' ){ //TODO: Last Status PMI Internal
-                    $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                    $approvalStatus = $row->machine->approval_status;
-                    $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
-                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
-                }
-                $result .= '</center>';
-                $result .= '</br>';
-                return $result;
-            })
-            ->addColumn('get_attachment',function ($row) use ($request){
-                $machineStatus = $row->machine->status ?? "";
-                $result = '';
-                $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
-                $result .= '</center>';
-                return $result;
-            })
-            ->addColumn('get_details',function ($row) use($request){
-                $result = '';
-                $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
-                $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
-                $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
-                $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
-                $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
-                $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
-                $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
-                return $result;
-            })
-            ->rawColumns([
-                'get_actions',
-                'get_status',
-                'get_attachment',
-                'get_details',
-            ])
-            ->make(true);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
     public function saveMachine(Request $request, MachineFileRequest $machineFileRequest){
         try {
             DB::beginTransaction();
@@ -372,6 +172,209 @@ class MachineController extends Controller
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
+            throw $e;
+        }
+    }
+    public function loadMachineApproverSummaryId (Request $request){
+        try {
+            $machinesId = $request->machinesId ?? "";
+            $data = [];
+            $relations = [
+                'rapidx_user'
+            ];
+            $conditions = [
+                'machines_id' => $machinesId
+            ];
+            $machineApproval = $this->resourceInterface->readCustomEloquent(MachineApproval::class,$data,$relations,$conditions);
+            $machineApproval = $machineApproval
+            ->whereNotNull('rapidx_user_id')
+            ->orderBy('id','asc')
+            ->get();
+            return DataTables($machineApproval)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_approver_name',function ($row){
+                $result = '';
+                $result .= $row->rapidx_user['name'];
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_role',function ($row){
+                $getApprovalStatus = $this->getApprovalStatus($row->approval_status);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="badge rounded-pill bg-primary"> '.$getApprovalStatus['approvalStatus'].'</span>';
+                $result .= '<center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row){
+                switch ($row->status) {
+
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED';
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
+            ->make(true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function loadEcrMachineByStatus(Request $request){
+        try {
+            $adminAccess = $request->adminAccess;
+            $data = [];
+            $relations = [
+                'machine.machine_approvals_pending',
+                'machine',
+            ];
+            $conditions = [
+                'status' => 'OK',
+                'category' => $request->category
+            ];
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+
+            if( $adminAccess === 'null' || blank($adminAccess) ){
+                return $ecr->whereHas('machine.machine_approvals_pending',function($query){
+                    // if is adminAccess exist deactivate the session condition
+                    $query->where('rapidx_user_id',session('rapidx_user_id'));
+                })->get();
+            }
+
+            if( $adminAccess === 'created'){
+                $ecr->where('created_by' , session('rapidx_user_id'))
+                ->get();
+            }
+            if( $adminAccess === 'all') {
+                $ecr->get();
+            }
+            if ( $adminAccess === 'pmi') {
+                $data = [];
+                $relations = [
+                    'pmi_approvals_pending',
+                    'machine',
+                ];
+                $conditions = [
+                    'status' => 'OK',
+                    'category' => $request->category
+                ];
+                $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+                // Check PMI approvals instead
+                $ecr->whereHas('pmi_approvals_pending', function ($query) {
+                    $query->where('status', 'PEN')
+                    ->where('rapidx_user_id',session('rapidx_user_id'));
+                });
+            }
+            return DataTables($ecr)
+            ->addColumn('get_actions',function ($row) use ($request){
+                // Dropdown menu links
+                $machineStatus = $row->machine->status ?? "";
+                $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";
+                $currentApprover = $row->machine->machine_approvals_pending[0]['rapidx_user']['id'] ?? '';
+
+                $result = "";
+                $result .= '<center>';
+                $result .= '<div class="btn-group dropstart mt-4">';
+                $result .= '<button type="button" class="btn btn-secondary dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-expanded="false">';
+                $result .= '    Action';
+                $result .= '</button>';
+                $result .= '<ul class="dropdown-menu">';
+                if($machineStatus === "EXDISPO" || $machineStatus === "OK"){
+                    //Upload External Disposition
+                    // $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
+                if($row->created_by === session('rapidx_user_id')){
+                    $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                }
+                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')){
+                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                }
+
+
+
+                $result .= '</ul>';
+                $result .= '</div>';
+                $result .= '</center>';
+                return $result;
+            })
+            ->addColumn('get_status',function ($row) use($request){
+                $machineStatus = $row->machine->status ?? "";
+                $currentApprover = $row->machine->machine_approvals_pending[0]['rapidx_user']['name'] ?? '';
+                $getStatus = $this->getStatus($machineStatus);
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
+                $result .= '<br>';
+                $getApprovalStatus = $this->getApprovalStatus($row->machine->approval_status);
+                if($row->status != 'DIS' && $currentApprover != ''){
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
+                if( $machineStatus === 'PMIAPP' ){ //TODO: Last Status PMI Internal
+                    $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
+                    $approvalStatus = $row->machine->approval_status;
+                    $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
+                $result .= '</center>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_attachment',function ($row) use ($request){
+                $machineStatus = $row->machine->status ?? "";
+                $result = '';
+                $result .= '<center>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                $result .= '</center>';
+                return $result;
+            })
+            ->addColumn('get_details',function ($row) use($request){
+                $result = '';
+                $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
+                $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
+                $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
+                $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
+                $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
+                $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
+                return $result;
+            })
+            ->rawColumns([
+                'get_actions',
+                'get_status',
+                'get_attachment',
+                'get_details',
+            ])
+            ->make(true);
+        } catch (Exception $e) {
             throw $e;
         }
     }

@@ -1108,7 +1108,6 @@
     const isEmptyTblEcrMethodRequirements = ref(null);
     const isEmptyTblEcrEnvironmentRequirements = ref(null);
 
-
     //Columns
      const tblEcrByCategoryStatusColumns = [
         {   data: 'get_actions',

@@ -94,6 +94,22 @@ export default function useEcr(){
     ]);
     const tblEcrDetails = ref(null);
 
+     //Ecr Req
+     const tblEcrManRequirements = ref(null);
+     const tblEcrMatRequirements = ref(null);
+     const tblEcrMachineRequirements = ref(null);
+     const tblEcrMethodRequirements = ref(null);
+     const tblEcrEnvironmentRequirements = ref(null);
+
+     const selectedEcrRequirementsIdEncrypted = ref(null);
+     const arrEcrRequirementOriginalFilenames = ref(null);
+
+     const isEmptyTblEcrManRequirements = ref(null);
+     const isEmptyTblEcrMaterialRequirements = ref(null);
+     const isEmptyTblEcrMachineRequirements = ref(null);
+     const isEmptyTblEcrMethodRequirements = ref(null);
+     const isEmptyTblEcrEnvironmentRequirements = ref(null);
+
     //Obj Params
     const descriptionOfChangeParams ={
         tblReference : 'ecr_doc',
@@ -448,7 +464,7 @@ export default function useEcr(){
             let originalFilename = data.originalFilename;
             arrEcrRequirementOriginalFilenames.value = originalFilename;
             selectedEcrRequirementsIdEncrypted.value = ecrRequirementsId;
-            modal.ViewEcrRequirementRef.show();
+            modalEcr.ViewEcrRequirementRef.show();
         });
     }
     const btnLinkViewEcrRequirementRef = async (selectedEcrRequirementsIdEncrypted,index) => { //view_material_ref
@@ -488,6 +504,18 @@ export default function useEcr(){
         saveEcrDetails,
 
         tblEcrRequirementsColumns,
+        tblEcrManRequirements,
+        tblEcrMatRequirements,
+        tblEcrMachineRequirements,
+        tblEcrMethodRequirements,
+        tblEcrEnvironmentRequirements,
+        selectedEcrRequirementsIdEncrypted,
+        arrEcrRequirementOriginalFilenames,
+        isEmptyTblEcrManRequirements,
+        isEmptyTblEcrMaterialRequirements,
+        isEmptyTblEcrMachineRequirements,
+        isEmptyTblEcrMethodRequirements,
+        isEmptyTblEcrEnvironmentRequirements,
         uploadFiles,
         getEcrRequirementRefById,
         btnLinkViewEcrRequirementRef,
