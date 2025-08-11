@@ -557,6 +557,8 @@
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+
+
 </template>
 
 <script setup>
@@ -590,6 +592,13 @@
         axiosFetchData,
         getEcrDetailsId,
         saveEcrDetails,
+
+
+        tblEcrRequirementsColumns,
+        uploadFiles,
+        getEcrRequirementRefById,
+        btnLinkViewEcrRequirementRef,
+        btnEcrRequirement,
     } = useEcr();
     const {
         machineVar,

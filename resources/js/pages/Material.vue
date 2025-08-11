@@ -1394,7 +1394,6 @@
     const btnLinkViewEcrRequirementRef = async (selectedEcrRequirementsIdEncrypted,index) => { //view_material_ref
         window.open(`api/view_ecr_requirement_ref?ecrRequirementsId=${selectedEcrRequirementsIdEncrypted} &&  && index=${index}`, '_blank');
     }
-
     const btnEcrRequirement = async (ecrsId) => {
         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
         tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
