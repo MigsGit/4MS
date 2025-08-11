@@ -960,12 +960,12 @@
                         isModal.value = 'View';
                         currentStatus.value = machineStatus;
 
-                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         getCurrentApprover(machineApproverParams);
-                        tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_id?machinesId="+machinesId).draw();
-                        if( machineStatus === 'PMIAPP'){
+                        if( machineStatus === 'PMIAPP' || machineStatus === 'OK'){
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
+                        tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
+                        tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_id?machinesId="+machinesId).draw();
                         //Load ECR Requirement by Category and Ecrs Id
                         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
                         tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
