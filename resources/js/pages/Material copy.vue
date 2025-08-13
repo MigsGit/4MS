@@ -767,8 +767,7 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
-            <div class="row mt-3">
-                <!-- Man -->
+            <div class="row mt-3 man" v-show="isEmptyTblEcrManRequirements">
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMan" aria-expanded="true" aria-controls="collapseMan">
@@ -784,28 +783,25 @@
                                         class="table mt-2"
                                         ref="tblEcrManRequirements"
                                         :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=1"
                                         :options="{
                                             paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {
-                                                    orderable:false,target:[3],
-
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=1',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrManRequirements = json.data && json.data.length > 0;
+                                                return json.data;
                                                 }
-                                            ]
+                                            }
                                         }"
                                     >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
                                     </DataTable>
                                 </div>
                             </div>
@@ -813,7 +809,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3">
+            <div class="row mt-3" v-show="isEmptyTblEcrMaterialRequirements">
                 <!-- Material -->
                 <div class="card mb-2">
                         <h5 class="mb-0">
@@ -829,27 +825,26 @@
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
                                         ref="tblEcrMatRequirements"
-
                                         :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=2"
                                         :options="{
                                             paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {orderable:false,target:[3]}
-                                            ]
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=2',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrMaterialRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
                                         }"
                                     >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
                                     </DataTable>
                                 </div>
                             </div>
@@ -857,8 +852,8 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3">
-                <!-- Machine -->
+            <div class="row mt-3" v-show="isEmptyTblEcrMachineRequirements">
+                <!-- Machine  -->
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMac" aria-expanded="true" aria-controls="collapseMac">
@@ -874,25 +869,25 @@
                                         class="table mt-2"
                                         ref="tblEcrMachineRequirements"
                                         :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=3"
                                         :options="{
                                             paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {orderable:false,target:[3]}
-                                            ]
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=3',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrMachineRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
                                         }"
                                     >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
                                     </DataTable>
                                 </div>
                             </div>
@@ -900,7 +895,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3">
+            <div class="row mt-3" v-show="isEmptyTblEcrMethodRequirements">
                 <!-- Method -->
                 <div class="card mb-2">
                         <h5 class="mb-0">
@@ -917,25 +912,25 @@
                                         class="table mt-2"
                                         ref="tblEcrMethodRequirements"
                                         :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=4"
                                         :options="{
                                             paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {orderable:false,target:[3]}
-                                            ]
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=4',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrMethodRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
                                         }"
                                     >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
                                     </DataTable>
                                 </div>
                             </div>
@@ -943,8 +938,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3">
-                <!-- Method -->
+            <div class="row mt-3 environment" v-show="isEmptyTblEcrEnvironmentRequirements">
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnvironment" aria-expanded="true" aria-controls="collapseEnvironment">
@@ -960,25 +954,25 @@
                                         class="table mt-2"
                                         ref="tblEcrEnvironmentRequirements"
                                         :columns="tblEcrRequirementsColumns"
-                                        ajax="api/load_ecr_requirements?category=5"
                                         :options="{
                                             paging:false,
-                                            serverSide: true, //Serverside true will load the network
-                                            columnDefs:[
-                                                {orderable:false,target:[3]}
-                                            ]
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=5',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrEnvironmentRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
                                         }"
                                     >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                                <th>Upload</th>
-                                                <th>View</th>
-                                            </tr>
-                                        </thead>
                                     </DataTable>
                                 </div>
                             </div>
@@ -1096,7 +1090,7 @@
     const isApprovedDisappproved = ref(null);
     const approvalRemarks = ref(null);
     const selectedMaterialsId = ref(null);
-
+    //Ecr Req
     const tblEcrManRequirements = ref(null);
     const tblEcrMatRequirements = ref(null);
     const tblEcrMachineRequirements = ref(null);
@@ -1108,8 +1102,13 @@
     const selectedEcrRequirementsIdEncrypted = ref(null);
     const arrEcrRequirementOriginalFilenames = ref(null);
 
-    //Columns
+    const isEmptyTblEcrManRequirements = ref(null);
+    const isEmptyTblEcrMaterialRequirements = ref(null);
+    const isEmptyTblEcrMachineRequirements = ref(null);
+    const isEmptyTblEcrMethodRequirements = ref(null);
+    const isEmptyTblEcrEnvironmentRequirements = ref(null);
 
+    //Columns
      const tblEcrByCategoryStatusColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -1193,7 +1192,7 @@
                     });
                 }
             }
-        } ,
+        , title: 'Requirement'} ,
         {   data: 'get_status'} ,
         // {   data: 'get_attachment',
         //     orderable: false,
@@ -1252,10 +1251,11 @@
         {   data: 'get_status'} ,
     ];
     const tblEcrRequirementsColumns = [
-        {   data: 'requirement'} ,
-        {   data: 'details'} ,
-        {   data: 'evidence'} ,
+        {   data: 'requirement', title: 'Requirement'} ,
+        {   data: 'details', title: 'Details'} ,
+        {   data: 'evidence', title: 'Evidence'} ,
         {   data: 'get_actions',
+            title: 'Action',
             createdCell(cell){
                 let btnChangeEcrReqDecision = cell.querySelector('#btnChangeEcrReqDecision');
                 if(btnChangeEcrReqDecision != null){
@@ -1275,9 +1275,10 @@
                 }
             }
         },
-         // File Upload & View columns...
+          // File Upload & View columns...
         {
             data: null, // No specific data field, as this is for custom rendering
+            title: 'Upload',
             orderable: false,
             searchable: false,
             render: () => '', // Leave empty initially
@@ -1322,6 +1323,7 @@
             },
         },
         {   data: 'get_view_ecr_req_ref',
+            title: 'View',
             createdCell(cell){
                 let btnViewEcrRequirementRef = cell.querySelector('#btnViewEcrRequirementRef');
                 if(btnViewEcrRequirementRef != null){
@@ -1337,9 +1339,7 @@
                 }
             }
         },
-
     ];
-
     // Function to handle file upload
     const uploadFiles = async (uploadFilesParams, files) => {
         uploadFilesParams;
@@ -1393,7 +1393,6 @@
     const btnLinkViewEcrRequirementRef = async (selectedEcrRequirementsIdEncrypted,index) => { //view_material_ref
         window.open(`api/view_ecr_requirement_ref?ecrRequirementsId=${selectedEcrRequirementsIdEncrypted} &&  && index=${index}`, '_blank');
     }
-
     const btnEcrRequirement = async (ecrsId) => {
         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
         tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();

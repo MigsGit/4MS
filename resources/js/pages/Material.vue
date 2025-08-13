@@ -1041,6 +1041,22 @@
         axiosFetchData,
         getEcrDetailsId,
         saveEcrDetails,
+
+        tblEcrRequirementsColumns,
+        tblEcrManRequirements,
+        tblEcrMatRequirements,
+        tblEcrMachineRequirements,
+        tblEcrMethodRequirements,
+        tblEcrEnvironmentRequirements,
+        selectedEcrRequirementsIdEncrypted,
+        arrEcrRequirementOriginalFilenames,
+        isEmptyTblEcrManRequirements,
+        isEmptyTblEcrMaterialRequirements,
+        isEmptyTblEcrMachineRequirements,
+        isEmptyTblEcrMethodRequirements,
+        isEmptyTblEcrEnvironmentRequirements,
+        btnLinkViewEcrRequirementRef,
+        btnEcrRequirement,
     } = useEcr();
      // getDropdownMasterByOpt,
      // getRapidxUserByIdOpt,
@@ -1091,22 +1107,8 @@
     const approvalRemarks = ref(null);
     const selectedMaterialsId = ref(null);
     //Ecr Req
-    const tblEcrManRequirements = ref(null);
-    const tblEcrMatRequirements = ref(null);
-    const tblEcrMachineRequirements = ref(null);
-    const tblEcrMethodRequirements = ref(null);
-    const tblEcrEnvironmentRequirements = ref(null);
-
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
-    const selectedEcrRequirementsIdEncrypted = ref(null);
-    const arrEcrRequirementOriginalFilenames = ref(null);
-
-    const isEmptyTblEcrManRequirements = ref(null);
-    const isEmptyTblEcrMaterialRequirements = ref(null);
-    const isEmptyTblEcrMachineRequirements = ref(null);
-    const isEmptyTblEcrMethodRequirements = ref(null);
-    const isEmptyTblEcrEnvironmentRequirements = ref(null);
 
     //Columns
      const tblEcrByCategoryStatusColumns = [
@@ -1250,158 +1252,6 @@
         {   data: 'remarks'},
         {   data: 'get_status'} ,
     ];
-    const tblEcrRequirementsColumns = [
-        {   data: 'requirement', title: 'Requirement'} ,
-        {   data: 'details', title: 'Details'} ,
-        {   data: 'evidence', title: 'Evidence'} ,
-        {   data: 'get_actions',
-            title: 'Action',
-            createdCell(cell){
-                let btnChangeEcrReqDecision = cell.querySelector('#btnChangeEcrReqDecision');
-                if(btnChangeEcrReqDecision != null){
-                    btnChangeEcrReqDecision.addEventListener('change',function(){
-                        let ecrReqId = this.getAttribute('ecr-requirements-id');
-                        let ecrReqValue = this.value;
-                        let classificationRequirementId = this.getAttribute('classification-requirement-id');
-                        let ecrReqDecisionParams = {
-                            ecrReqId : ecrReqId,
-                            ecrReqValue : ecrReqValue,
-                            classificationRequirementId : classificationRequirementId,
-                            btnChangeEcrReqDecisionClass: this.classList,
-                        }
-
-                        ecrReqDecisionChange(ecrReqDecisionParams);
-                    });
-                }
-            }
-        },
-          // File Upload & View columns...
-        {
-            data: null, // No specific data field, as this is for custom rendering
-            title: 'Upload',
-            orderable: false,
-            searchable: false,
-            render: () => '', // Leave empty initially
-            createdCell(cell, cellData, rowData) {
-                // Create the file input element dynamically
-                const inputGroup = document.createElement('div');
-                inputGroup.className = 'input-group flex-nowrap mb-2 input-group-sm';
-
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.multiple = true;
-                fileInput.accept = '.pdf';
-                fileInput.className = 'form-control form-control-lg';
-                fileInput.setAttribute('classifications-id', rowData.classifications_id);
-                fileInput.setAttribute('classification-requirements-id', rowData.id);
-
-                if(rowData.ecr_requirement !=null){
-                    fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
-                    fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
-                }
-
-                // console.log('rowData', rowData); // Assuming `id` exists in rowData
-
-                // Add an event listener for file change
-                fileInput.addEventListener('change', (event) => {
-                    let files = Array.from(event.target.files);
-                    let uploadFilesParams = {
-                        classificationsId: rowData.classifications_id,
-                        classificationRequirementsId: rowData.id,
-                        ecrRequirementId: rowData.ecr_requirement.id,
-                        ecrsId: rowData.ecr_requirement.ecrs_id,
-                        requirement: rowData.requirement,
-                    };
-
-                    uploadFiles(uploadFilesParams, files);
-                    // Reset input to allow same file re-selection
-                    event.target.value = '';
-                });
-
-                inputGroup.appendChild(fileInput);
-                cell.appendChild(inputGroup);
-            },
-        },
-        {   data: 'get_view_ecr_req_ref',
-            title: 'View',
-            createdCell(cell){
-                let btnViewEcrRequirementRef = cell.querySelector('#btnViewEcrRequirementRef');
-                if(btnViewEcrRequirementRef != null){
-                    btnViewEcrRequirementRef.addEventListener('click',function(){
-                        let ecrRequirementsId = this.getAttribute('ecr-requirements-id');
-                        let ecrsId = this.getAttribute('ecrs-id');
-                        let ecrRequirementParams = {
-                            ecrRequirementsId: ecrRequirementsId,
-                            ecrsId: ecrsId,
-                        }
-                        getEcrRequirementRefById(ecrRequirementParams);
-                    });
-                }
-            }
-        },
-    ];
-    // Function to handle file upload
-    const uploadFiles = async (uploadFilesParams, files) => {
-        uploadFilesParams;
-        let result = '';
-        Swal.fire({
-            title: 'Confirmation',
-            text: 'Are you sure you want to upload this Evidence / Reference ?',
-            icon: 'warning',
-            allowOutsideClick: false,
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const formData = new FormData();
-                files.forEach((file) => {
-                    formData.append('ecrRequirementFile[]', file);
-                });
-                formData.append('category',uploadFilesParams.classificationsId);
-                formData.append('classificationRequirementsId',uploadFilesParams.classificationRequirementsId);
-                formData.append('ecrRequirementId',uploadFilesParams.ecrRequirementId);
-                formData.append('ecrsId',uploadFilesParams.ecrsId);
-
-                axiosSaveData(formData,'api/upload_ecr_requirement_ref', (response) =>{
-                    //Load ECR Requirement by Category and Ecrs Id
-                    tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+uploadFilesParams.ecrsId).draw();
-                });
-            }
-         })
-    };
-    const getEcrRequirementRefById = async (ecrRequirementParams) => {
-        let apiParams = {
-            ecrRequirementsId: ecrRequirementParams.ecrRequirementsId,
-            ecrsId: ecrRequirementParams.ecrsId,
-        }
-        axiosFetchData(apiParams,'api/get_ecr_requirement_ref_by_id',function(response){
-            let data = response.data;
-            let ecrRequirementsId = data.ecrRequirementsId;
-            let originalFilename = data.originalFilename;
-            arrEcrRequirementOriginalFilenames.value = originalFilename;
-            selectedEcrRequirementsIdEncrypted.value = ecrRequirementsId;
-            modal.ViewEcrRequirementRef.show();
-        });
-    }
-    const btnLinkViewEcrRequirementRef = async (selectedEcrRequirementsIdEncrypted,index) => { //view_material_ref
-        window.open(`api/view_ecr_requirement_ref?ecrRequirementsId=${selectedEcrRequirementsIdEncrypted} &&  && index=${index}`, '_blank');
-    }
-    const btnEcrRequirement = async (ecrsId) => {
-        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
-        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
-        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
-        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
-        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
-        modal.EcrRequirements.show();
-    }
 
     //Params
     const materialSupplierParams = {
@@ -1554,14 +1404,13 @@
     };
 
     onMounted( async ()=>{
-        modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
         modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
         modal.UploadMaterialRef = new Modal(modalUploadMaterialRef.value.modalRef,{ keyboard: false });
         modal.ViewMaterialRef = new Modal(modalViewMaterialRef.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
-
-        modal.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
-        modal.ViewEcrRequirementRef = new Modal(modalViewEcrRequirementRef.value.modalRef,{ keyboard: false });
+        modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
+        modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modalEcr.ViewEcrRequirementRef = new Modal(modalViewEcrRequirementRef.value.modalRef,{ keyboard: false });
 
         modalSaveMaterial.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMaterial.value);
@@ -1665,7 +1514,7 @@
             tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+material.ecrs_id).draw();
             tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+material.ecrs_id).draw();
             tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+material.ecrs_id).draw();
-            modal.EcrRequirements.show();
+            modalEcr.EcrRequirements.show();
 
             console.log(material.ecrs_id);
             frmMaterial.value.ecrsId = material.ecrs_id;
@@ -1828,5 +1677,4 @@
             console.log(response);
         });
     }
-
 </script>
