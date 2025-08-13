@@ -59,7 +59,7 @@ class EcrController extends Controller
                 'id'=> $ecrsId
             ]);
             $ecrDetails = $ecr->get();
-            return $ecrCollection = collect($ecrDetails)
+            $ecrCollection = collect($ecrDetails)
             ->map(function ($ecrCollectionRow){
                return [
                     $ecrCollectionRow
