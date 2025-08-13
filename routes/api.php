@@ -53,7 +53,8 @@ Route::middleware('auth')->group(function(){
         Route::get('load_ecr_approval_summary', 'loadEcrApprovalSummary')->name('load_ecr_approval_summary');
 
         Route::get('get_ecr_requirement_ref_by_id', 'getEcrRequirementRefById')->name('get_ecr_requirement_ref_by_id');
-        Route::get('view_ecr_requirement_ref', 'viewEcrRequirementRef')->name('viewEcrRequirementRef');
+        Route::get('view_ecr_requirement_ref', 'viewEcrRequirementRef')->name('view_ecr_requirement_ref');
+        Route::get('download_ecr_excel_by_ecrs_id', 'downloadEcrExcelByEcrsId')->name('download_ecr_excel_by_ecrs_id');
     });
 
     Route::controller(CommonController::class)->group(function (): void {

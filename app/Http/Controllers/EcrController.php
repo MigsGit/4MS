@@ -8,6 +8,7 @@ use App\Models\Machine;
 use App\Models\Material;
 use App\Models\EcrDetail;
 use App\Models\ManDetail;
+use App\Exports\EcrExport;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\Environment;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
 use App\Models\DropdownMasterDetail;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\EcrDetailRequest;
 use App\Http\Requests\EcrApprovalRequest;
@@ -45,6 +47,30 @@ class EcrController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
         $this->emailInterface = $emailInterface;
+    }
+    public function downloadEcrExcelByEcrsId(Request $request){
+        try {
+            $ecrsId = $request->ecrsId;
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
+            [
+                'ecr_approvals',
+            ],
+            [
+                'id'=> $ecrsId
+            ]);
+            $ecrDetails = $ecr->get();
+            return $ecrCollection = collect($ecrDetails)
+            ->map(function ($ecrCollectionRow){
+               return [
+                    $ecrCollectionRow
+                ];
+            });
+
+            return Excel::download(new EcrExport($ecrCollection),"ECR.xlsx");
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
     public function saveEcr(Request $request, EcrRequest $ecrRequest,EcrApprovalRequest $ecrApprovalRequest,PmiApprovalRequest $pmiApprovalRequest){
         date_default_timezone_set('Asia/Manila');
@@ -490,9 +516,18 @@ class EcrController extends Controller
                 $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })
+            ->addColumn('get_attachment',function ($row) use ($request){
+                $status = $row->status ?? "";
+                $result = '';
+                $result .= '<center>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" ecrs-id="'.$row->id.'" ecr-status= "'.$status.'" id="btnViewEcrRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                $result .= '</center>';
+                return $result;
+            })
             ->rawColumns([
                 'get_actions',
                 'get_status',
+                'get_attachment',
                 'get_details'
             ])
             ->make(true);

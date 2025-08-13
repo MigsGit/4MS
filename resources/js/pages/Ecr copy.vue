@@ -51,8 +51,7 @@
                                 <tr>
                                     <th style=""width="5%">Action</th>
                                     <th style=""width="10%">Status</th>
-                                    <th style=""width="10%">Attachment</th>
-                                    <th style=""width="10%">ECR Ctrl No.</th>
+                                    <th style=""width="20%">ECR Ctrl No.</th>
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
@@ -90,8 +89,7 @@
                                     <tr>
                                         <th style=""width="5%">Action</th>
                                         <th style=""width="10%">Status</th>
-                                        <th style=""width="10%">Attachment</th>
-                                        <th style=""width="10%">ECR Ctrl No.</th>
+                                        <th style=""width="20%">ECR Ctrl No.</th>
                                         <th style=""width="25%">Details</th>
                                         <th style=""width="10%">Category</th>
                                         <th style=""width="10%">Section</th>
@@ -932,14 +930,14 @@
     const isApproved = ref(null);
     const currentEcrsId = ref(null);
     const selectedAdminAccess = ref(null);
-
+    
     const isEmptyTblEcrManRequirements = ref(null);
     const isEmptyTblEcrMachineRequirements = ref(null);
     const isEmptyTblEcrMaterialRequirements = ref(null);
     const isEmptyTblEcrMethodRequirements = ref(null);
     const isEmptyTblEcrEnvironmentRequirements = ref(null);
 
-    //Table Column btnViewEcrRef
+    //Table Column
     const tblEcrColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -983,24 +981,6 @@
             }
         } ,
         {   data: 'get_status'} ,
-        {   data: 'get_attachment',
-            orderable: false,
-            searchable: false,
-            createdCell(cell){
-                let btnViewEcrRef = cell.querySelector('#btnViewEcrRef');
-                if(btnViewEcrRef != null){
-                    btnViewEcrRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecrs-id');
-                        let params = {
-                            ecrsId : ecrsId,
-                        };
-                        var queryString = $.param(params);
-                        window.location.href="api/download_ecr_excel_by_ecrs_id?" + queryString;
-                        // getMethodRefByEcrsId(methodsId);
-                    });
-                }
-            }
-        } ,
         {   data: 'ecr_no'} ,
         {   data: 'get_details'} ,
         {   data: 'category'} ,
