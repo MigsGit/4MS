@@ -3,6 +3,7 @@ namespace App\Services;
 use setasign\Fpdi\Fpdi;
 use App\Models\RapidxUser;
 use App\Models\RapidMailer;
+use Illuminate\Support\Str;
 use App\Models\RapidAutoMailer;
 use App\Interfaces\FileInterface;
 use Illuminate\Support\Facades\DB;
@@ -260,6 +261,58 @@ class CommonService implements CommonInterface
              return [
                  'approvalStatus' => $approvalStatus,
              ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getRapidxUserDeptByDeptId($departmentId){
+        try {
+           $departmentId;
+            $rapidx_user = DB::connection('mysql_rapidx')
+            ->select(" SELECT department_group
+                FROM departments
+                WHERE department_id = '".$departmentId."'
+            ");
+            $hris_data = DB::connection('mysql_systemone_hris')
+            ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
+            $subcon_data = DB::connection('mysql_systemone_subcon')
+            ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
+            if(count($hris_data) > 0 && count($rapidx_user)> 0){
+                $vwEmployeeinfo =  $hris_data;
+                $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
+                $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN") ? "ADMIN" :
+                $rapidx_user[0]->department_group);
+            }
+            if(count($subcon_data) > 0 && count($rapidx_user) > 0){
+                $vwEmployeeinfo =  $subcon_data;
+                $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
+                $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN")  ? "ADMIN" :
+                $rapidx_user[0]->department_group);
+            }
+            return [
+                'division' => $division,
+                'filteredSection' => $filteredSection,
+            ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function getFilteredSection($department){
+        try {
+            if ( Str::contains($department, "LQC")) {
+                $filteredSection = "LQC";
+            } elseif (Str::contains($department, "Engineering")) {
+                $filteredSection = "ENG'G";
+            } elseif (Str::contains($department, "Production")) {
+                $filteredSection = "PROD";
+            }elseif (Str::contains($department, "-")) {
+                $filteredSection = "LOG-PCH";
+            }
+            else {
+                $filteredSection = "???";
+            }
+            return $filteredSection;
         } catch (Exception $e) {
             throw $e;
         }

@@ -54,15 +54,26 @@ class EcrController extends Controller
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
             [
                 'ecr_approvals',
+                'ecr_approvals.rapidx_user',
+                'ecr_details.dropdown_master_detail_description_of_change',
+                'ecr_details.dropdown_master_detail_reason_of_change',
             ],
             [
                 'id'=> $ecrsId
             ]);
             $ecrDetails = $ecr->get();
             $ecrCollection = collect($ecrDetails)
-            ->map(function ($ecrCollectionRow){
-               return [
-                    $ecrCollectionRow
+            ->flatMap(function ($ecrCollectionRow){
+                $ecrApprovals = $ecrCollectionRow->ecr_approvals ?? '';
+                //Get the Department / Section of the user
+                $requestedByDeptCollection = collect($ecrApprovals)->map(function ($ecrApprovalsRow){
+                    $departmentId = $ecrApprovalsRow->rapidx_user->department_id ?? '';
+                    return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
+
+                });
+                return [
+                    'requestedByDeptCollection' => $requestedByDeptCollection,
+                    'ecrCollection' => $ecrCollectionRow,
                 ];
             });
 

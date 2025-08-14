@@ -2,18 +2,20 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
-use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNullComparison
 {
+
     protected $ecr;
 
     /**
@@ -41,31 +43,31 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
      */
     public function registerEvents(): array
     {
+
         return [
             AfterSheet::class => function(AfterSheet $event) {
+                $requestedByDeptCollection = $this->ecr['requestedByDeptCollection'];
+                $ecrCollection = $this->ecr['ecrCollection'];
+                $ecrApprovalsCollection = $ecrCollection->ecr_approvals;
+                $ecrDetailsCollection = $ecrCollection->ecr_details;
+
+            //      echo  json_encode(
+            //     [
+            //         'AAAAAAAAAAAAA' => $ecrCollection,
+            //         'BBBBBBBBBBBBBBBB' => $ecrApprovalsCollection,
+            //         'CCCCCCCCCCCCCCCCCCCC' => $ecrDetailsCollection,
+            //         ]
+            //     );
+            //   exit;
                 $sheet = $event->sheet->getDelegate();
 
-                // Detect last row & column automatically
-                $highestRow = $sheet->getHighestRow();
-                $highestColumn = $sheet->getHighestColumn();
 
-                // === 1. Apply full borders to all cells ===
-                $sheet->getStyle("A1:{$highestColumn}{$highestRow}")
-                    ->applyFromArray([
-                        'borders' => [
-                            'allBorders' => [
-                                'borderStyle' => Border::BORDER_THIN,
-                                'color' => ['rgb' => '000000'],
-                            ],
-                        ],
-                    ]);
-
-                // === 2. Main Title ===
-                $sheet->mergeCells('B2:H2');
-                $sheet->setCellValue('B2', 'ENGINEERING CHANGE REQUEST');
-                $sheet->getStyle('B2')->applyFromArray([
+                // === Header Title ===
+                $sheet->mergeCells('A2:H2');
+                $sheet->setCellValue('A2', 'ENGINEERING CHANGE REQUEST');
+                $sheet->getStyle('A2')->applyFromArray([
                     'font' => [
-                        'bold' => true,
+                        'Aold' => true,
                         'size' => 14,
                     ],
                     'alignment' => [
@@ -75,16 +77,16 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                 ]);
                 $sheet->getRowDimension(2)->setRowHeight(25);
 
-                // === 3. Section Headers Styling ===
+                // === Section Headers Styling ===
 
                 $sectionHeaders = [
-                    'B3' => 'INFORMATION',
+                    'A3' => 'INFORMATION',
                     'G3' => 'ECR NO.:',
-                    'B9' => 'DESCRIPTION OF CHANGE',
-                    'B16' => 'REASON OF CHANGE',
-                    'B25' => 'REQUESTED BY',
-                    'B29' => 'REVIEWED BY / ENGINEERING',
-                    'B46' => 'AGREED BY',
+                    'A9' => 'DESCRIPTION OF CHANGE',
+                    'A16' => 'REASON OF CHANGE',
+                    'A25' => 'REQUESTED BY',
+                    'A29' => 'REVIEWED BY / ENGG. SECTION HEAD',
+                    'A40' => 'AGREED BY',
                 ];
 
                 foreach ($sectionHeaders as $cell => $value) {
@@ -101,12 +103,13 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     ]);
                 }
 
+                // === Section Information Content ===
                 $sectionContents = [
-                    'B4' => 'Customer Name:',
-                    'B5' => 'Part Name:',
-                    'B6' => 'Product Line:',
-                    'B7' => 'Section:',
-                    'B8' => 'Customer Name',
+                    'A4' => 'Customer Name:',
+                    'A5' => 'Part Name:',
+                    'A6' => 'Product Line:',
+                    'A7' => 'Section:',
+                    'A8' => 'Customer Name',
 
                     'F5' => 'Part Number:',
                     'F6' => 'Device Name:',
@@ -123,24 +126,110 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                         ],
                     ]);
                 }
+                // === Approvers By Content ===
+                $approverContents = [
+                    'A26' => 'Department',
+                    'B26' => 'Name',
+                    'D26' => 'Title',
+                    'E26' => 'Customer Name',
+                    'F26' => 'Signature',
+                    'H26' => 'Date',
+                    // === Reviewed By / Section Head Content ===
+                    'C30' => 'APPROVED',
+                    'F30' => 'NOT APPROVED',
+                    'A36' => 'Department',
+                    'B36' => 'Name',
+                    'D36' => 'Title',
+                    'E36' => 'Customer Name',
+                    'F36' => 'Signature',
+                    'H36' => 'Date',
+                    // === QA Content ===
+                    'A41' => 'Department',
+                    'B41' => 'Name',
+                    'D41' => 'Title',
+                    'E41' => 'Customer Name',
+                    'F41' => 'Signature',
+                    'H41' => 'Date',
 
-                // === 4. Specific Merged Cells ===
-                $mergeCells = [
-                    'B3:F3', 'G3:H3',
-                    'B9:H9',
-                    'B16:H16',
-                    'B25:H25',
-                    'B29:H29',
-                    'B46:H46',
                 ];
+
+                foreach ($approverContents as $cell => $value) {
+                    $sheet->setCellValue($cell, $value);
+                    $sheet->getStyle($cell)->applyFromArray([
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+                }
+                //Ecr Collection Exist
+                if(filled($ecrCollection)) {
+                    $ecrCollectionContent = [
+                        'B4' => $ecrCollection->customer_name,
+                        'B5' => $ecrCollection->part_name,
+                        'B6' => $ecrCollection->product_line,
+                        'B7' => $ecrCollection->section,
+                        'B8' => $ecrCollection->customer_name,
+
+                        'G5' => $ecrCollection->part_no,
+                        'G6' =>  $ecrCollection->device_name,
+                        'G7' =>  $ecrCollection->customer_ec_no,
+                        'G8' =>  $ecrCollection->date_of_request,
+                    ];
+                    foreach ($ecrCollectionContent as $cell => $value) {
+                        $sheet->setCellValue($cell, $value);
+                    }
+                     //Ecr Collection Exist
+                     /**
+                        ecrApprovalsCollection
+                        ecrDetailsCollection
+                      */
+                    if(filled($ecrDetailsCollection)) {
+                        $startRowDocCollection = 10;
+                        $startRowRocCollection = 17;
+                        $startColumnEcrDetailsCollection = 'A';
+                        foreach ($ecrDetailsCollection as $index => $value) {
+                            $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
+                            $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details;
+                            $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowDocCollection}", $descriptionOfChange);
+                            $startRowDocCollection++;
+
+                            $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowRocCollection}", $reasonOfChange);
+                            $startRowRocCollection++;
+                        }
+                    }
+
+
+                    // if(filled($ecrApprovalsCollection)) {
+                    //     $startRowEcrApprovalsCollection = 37;
+                    //     $startColumnEcrApprovalsCollection = 'A';
+                    //     foreach ($ecrApprovalsCollection as $index => $value) {
+                    //         $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
+                    //         $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details;
+                    //         $sheet->setCellValue("{$startColumnEcrApprovalsCollection}{$startRowEcrApprovalsCollection}", $descriptionOfChange);
+                    //         $startRowEcrApprovalsCollection++;
+                    //     }
+                    // }
+
+                }
+
+                // === Specific Merged Cells ===
+                $mergeCells = [
+                    'A3:F3', 'G3:H3',
+                    'A9:H9',
+                    'A16:H16',
+                    'A25:H25',
+                    'A29:H29',
+                    'A46:H46',
+                ];
+
                 foreach ($mergeCells as $range) {
                     $sheet->mergeCells($range);
                 }
 
-                // === 5. Column Widths ===
+                // === Column Widths ===
                 $columnWidths = [
-                    'A' => 2,  // Padding column
-                    'B' => 20,
+                    'A' => 20,
                     'C' => 20,
                     'D' => 20,
                     'E' => 20,
@@ -152,7 +241,7 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     $sheet->getColumnDimension($col)->setWidth($width);
                 }
 
-                // === 6. Row Heights for form look ===
+                // ===Row Heights for form look ===
                 $customRowHeights = [
                     4 => 20,
                     9 => 20,
@@ -165,17 +254,43 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     $sheet->getRowDimension($row)->setRowHeight($height);
                 }
 
-                // === 7. Alignment for input cells ===
-                $sheet->getStyle("B5:H{$highestRow}")->applyFromArray([
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_LEFT,
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                        'wrapText' => true,
-                    ],
-                ]);
+                // Detect last row & column automatically
+                $highestRow = $sheet->getHighestRow();
+                $highestColumn = $sheet->getHighestColumn();
+
+                // === Apply full borders to all cells ===
+                // $sheet->getStyle("A1:{$highestColumn}{$highestRow}")
+                // ->applyFromArray([
+                //     'borders' => [
+                //         'allBorders' => [
+                //             'borderStyle' => Border::BORDER_THIN,
+                //             'color' => ['rgb' => '000000'],
+                //         ],
+                //     ],
+                // ]);
+
+                // === Alignment for input cells ===
+                // $sheet->getStyle("A5:H{$highestRow}")->applyFromArray([
+                //     'alignment' => [
+                //         'horizontal' => Alignment::HORIZONTAL_LEFT,
+                //         'vertical' => Alignment::VERTICAL_CENTER,
+                //         'wrapText' => true,
+                //     ],
+                // ]);
+
+                // === Alignment for input cells ===
+                // $sheet->getStyle("A1:{$highestColumn}{$highestRow}")->applyFromArray([
+                //     // 'font' => ['bold' => true, 'size' => 14],
+                //     'alignment' => ['horizontal' => 'center'],
+                //     'fill' => [
+                //         'fillType' => 'solid',
+                //         'startColor' => ['argb' => Color::COLOR_WHITE], // White background
+                //         'wrapText' => true,
+                //     ],
+                // ]);
 
                 // === 8. Freeze Pane (keep title and headers visible) ===
-                // $sheet->freezePane('B5');
+                // $sheet->freezePane('A5');
             },
         ];
     }

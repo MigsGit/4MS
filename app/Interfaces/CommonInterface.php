@@ -13,4 +13,5 @@ interface CommonInterface
     public function getPmiApprovalStatus($approvalStatus);
     public function getEcrStatus($status);
     public function getEcrApprovalStatus($approvalStatus);
+    public function getRapidxUserDeptByDeptId($departmentId);
 }

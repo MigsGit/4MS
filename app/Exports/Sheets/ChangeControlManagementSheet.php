@@ -95,7 +95,7 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                 //         'wrapText' => true,
                 //     ],
                 // ]);
-
+               
                 // === Bold for header
                 $sheet->getStyle('A1:A3')->getFont()->setBold(true);
 
