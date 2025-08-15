@@ -33,7 +33,7 @@
                                 <th>Roles</th>
                                 <th>Name</th>
                                 <th>Email</th>
-                                <th>Roles</th>
+                                <th>Section / Department</th>
                             </tr>
                         </thead>
                     </DataTable>

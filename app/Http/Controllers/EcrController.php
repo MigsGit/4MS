@@ -83,7 +83,7 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function saveEcr(Request $request, EcrRequest $ecrRequest,EcrApprovalRequest $ecrApprovalRequest,PmiApprovalRequest $pmiApprovalRequest){
+    public function saveEcr(Request $request, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest){
         date_default_timezone_set('Asia/Manila');
         try {
             //TODO:  DELETE, InsertById, N/A in Dropdown

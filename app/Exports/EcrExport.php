@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use Carbon\Carbon;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -43,31 +44,21 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
      */
     public function registerEvents(): array
     {
-
+        date_default_timezone_set('Asia/Manila');
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 $requestedByDeptCollection = $this->ecr['requestedByDeptCollection'];
                 $ecrCollection = $this->ecr['ecrCollection'];
                 $ecrApprovalsCollection = $ecrCollection->ecr_approvals;
                 $ecrDetailsCollection = $ecrCollection->ecr_details;
-
-            //      echo  json_encode(
-            //     [
-            //         'AAAAAAAAAAAAA' => $ecrCollection,
-            //         'BBBBBBBBBBBBBBBB' => $ecrApprovalsCollection,
-            //         'CCCCCCCCCCCCCCCCCCCC' => $ecrDetailsCollection,
-            //         ]
-            //     );
-            //   exit;
                 $sheet = $event->sheet->getDelegate();
-
 
                 // === Header Title ===
                 $sheet->mergeCells('A2:H2');
                 $sheet->setCellValue('A2', 'ENGINEERING CHANGE REQUEST');
                 $sheet->getStyle('A2')->applyFromArray([
                     'font' => [
-                        'Aold' => true,
+                        'bold' => true,
                         'size' => 14,
                     ],
                     'alignment' => [
@@ -76,12 +67,12 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     ],
                 ]);
                 $sheet->getRowDimension(2)->setRowHeight(25);
-
+                // echo 'ECR NO.:'.' '. $ecrCollection->ecr_no;
+                // exit;
                 // === Section Headers Styling ===
-
                 $sectionHeaders = [
                     'A3' => 'INFORMATION',
-                    'G3' => 'ECR NO.:',
+                    'F3' => 'ECR NO.:'.' '. $ecrCollection->ecr_no,
                     'A9' => 'DESCRIPTION OF CHANGE',
                     'A16' => 'REASON OF CHANGE',
                     'A25' => 'REQUESTED BY',
@@ -131,25 +122,22 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     'A26' => 'Department',
                     'B26' => 'Name',
                     'D26' => 'Title',
-                    'E26' => 'Customer Name',
-                    'F26' => 'Signature',
-                    'H26' => 'Date',
+                    'E26' => 'Signature',
+                    'G26' => 'Date',
                     // === Reviewed By / Section Head Content ===
                     'C30' => 'APPROVED',
                     'F30' => 'NOT APPROVED',
                     'A36' => 'Department',
                     'B36' => 'Name',
                     'D36' => 'Title',
-                    'E36' => 'Customer Name',
-                    'F36' => 'Signature',
-                    'H36' => 'Date',
+                    'E36' => 'Signature',
+                    'G36' => 'Date',
                     // === QA Content ===
                     'A41' => 'Department',
                     'B41' => 'Name',
                     'D41' => 'Title',
-                    'E41' => 'Customer Name',
-                    'F41' => 'Signature',
-                    'H41' => 'Date',
+                    'E41' => 'Signature',
+                    'G41' => 'Date',
 
                 ];
 
@@ -200,27 +188,57 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     }
 
 
-                    // if(filled($ecrApprovalsCollection)) {
-                    //     $startRowEcrApprovalsCollection = 37;
-                    //     $startColumnEcrApprovalsCollection = 'A';
-                    //     foreach ($ecrApprovalsCollection as $index => $value) {
-                    //         $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
-                    //         $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details;
-                    //         $sheet->setCellValue("{$startColumnEcrApprovalsCollection}{$startRowEcrApprovalsCollection}", $descriptionOfChange);
-                    //         $startRowEcrApprovalsCollection++;
-                    //     }
-                    // }
-
+                    if(filled($ecrApprovalsCollection)) {
+                        $startRowRequestedByApprovalsCollection = 27;
+                        $startRowOtherApprovalsCollection = 37;
+                        $startRowQaApprovalCollection = 42;
+                        // $startColumnOtherApprovalsCollection = 'A';
+                        foreach ($ecrApprovalsCollection as $index => $value) {
+                            $approvalStatus = $value->approval_status ?? "";
+                            $ecrApprover = $value->rapidx_user->name ?? "";
+                            // date('Y-m-d',$value->rapidx_user->created_at) ?? "";
+                            $approvedDate = Carbon::parse($value->created_at)->format('m-d-Y') ?? "";
+                            $division = $requestedByDeptCollection[$index]['division'] ?? "";
+                            $filteredSection = $requestedByDeptCollection[$index]['filteredSection'] ?? "";
+                            if (str_contains($approvalStatus, 'QA')) {
+                                $sheet->setCellValue("A{$startRowQaApprovalCollection}", $division);
+                                $sheet->setCellValue("B{$startRowQaApprovalCollection}", $ecrApprover);
+                                $sheet->setCellValue("D{$startRowQaApprovalCollection}", $approvalStatus);
+                                // $sheet->setCellValue("E{$startRowQaApprovalCollection}", 'Signature');
+                                $sheet->setCellValue("G{$startRowQaApprovalCollection}", $approvedDate);
+                                $startRowQaApprovalCollection++;
+                            }else{
+                                if (str_contains($approvalStatus, 'OTRB')) {
+                                    $sheet->setCellValue("A{$startRowRequestedByApprovalsCollection}", $division);
+                                    $sheet->setCellValue("B{$startRowRequestedByApprovalsCollection}", $ecrApprover);
+                                    $sheet->setCellValue("D{$startRowRequestedByApprovalsCollection}", $approvalStatus);
+                                    // $sheet->setCellValue("E{$startRowRequestedByApprovalsCollection}", 'Signature');
+                                    $sheet->setCellValue("G{$startRowRequestedByApprovalsCollection}", $approvedDate);
+                                    $startRowRequestedByApprovalsCollection++;
+                                }
+                                if ( !str_contains($approvalStatus, 'OTRB')) {
+                                    $sheet->setCellValue("A{$startRowOtherApprovalsCollection}", $division);
+                                    $sheet->setCellValue("B{$startRowOtherApprovalsCollection}", $ecrApprover);
+                                    $sheet->setCellValue("D{$startRowOtherApprovalsCollection}", $approvalStatus);
+                                    // $sheet->setCellValue("E{$startRowOtherApprovalsCollection}", 'Signature');
+                                    $sheet->setCellValue("G{$startRowOtherApprovalsCollection}", $approvedDate);
+                                    $startRowOtherApprovalsCollection++;
+                                }
+                            }
+                        }
+                    }
+                    // exit;
                 }
 
                 // === Specific Merged Cells ===
                 $mergeCells = [
-                    'A3:F3', 'G3:H3',
+                    'A3:E3',
+                    'F3:H3',
                     'A9:H9',
                     'A16:H16',
                     'A25:H25',
                     'A29:H29',
-                    'A46:H46',
+                    'A40:H40',
                 ];
 
                 foreach ($mergeCells as $range) {
@@ -248,7 +266,7 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     16 => 20,
                     25 => 20,
                     29 => 20,
-                    46 => 20,
+                    40 => 20,
                 ];
                 foreach ($customRowHeights as $row => $height) {
                     $sheet->getRowDimension($row)->setRowHeight($height);

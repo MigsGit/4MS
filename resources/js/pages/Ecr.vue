@@ -242,7 +242,7 @@
                                                 </td>
                                                 <td>
                                                     <!-- @click="btnRemoveEcrOtherDispoRows(index)" -->
-                                                    <button  class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                    <button  class="btn btn-outline-danger btn-sm" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
                                                 </td>
@@ -274,9 +274,9 @@
                                         <thead>
                                             <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col" style="width: 30%;">Requested By</th>
-                                            <th scope="col" style="width: 30%;">Reviewed By / Engineering</th>
-                                            <th class="d-none" scope="col" style="width: 30%;">Reviewed By / Section Heads</th>
+                                            <th scope="col" style="width: 40%;">Requested By</th>
+                                            <th scope="col" style="width: 40%;">Reviewed By / Engineering</th>
+                                            <th class="d-none" scope="col" style="width: 10%;">Reviewed By / Section Heads</th>
                                             <th scope="col">Action</th>
                                             </tr>
                                         </thead>
@@ -314,9 +314,12 @@
                                                     />
 
                                                 </td>
-                                                <td>
-                                                    <button @click="btnRemoveEcrOtherDispoRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                <td class="d-flex justify-content-between">
+                                                    <button @click="btnRemoveEcrOtherDispoRows(index)" class="btn btn-outline-danger btn-sm mr-3" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
+                                                    </button>
+                                                    <button @click="reloadApprovers(commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                                                        <font-awesome-icon class="nav-icon" icon="refresh" />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -346,8 +349,9 @@
                                         <thead>
                                             <tr>
                                             <th scope="col" style="width: 10%;">#</th>
-                                            <th scope="col" style="width: 45%;">Quality Engineer</th>
-                                            <th scope="col" style="width: 45%;">QA Manager</th>
+                                            <th scope="col" style="width: 40%;">Quality Engineer</th>
+                                            <th scope="col" style="width: 40%;">QA Manager</th>
+                                            <th scope="col" style="width: 10%;">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -372,7 +376,12 @@
                                                         :options="ecrVar.optQadApprovedByInternal"
                                                         :disabled="isSelectReadonly"
                                                         />
-                                                    </td>
+                                                </td>
+                                                <td>
+                                                    <button @click="reloadQaApprover()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                                                        <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                    </button>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -399,8 +408,8 @@
                                         <thead>
                                             <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col" style="width: 30%;">Prepared By</th>
-                                            <th scope="col" style="width: 30%;">Checked By</th>
+                                            <th scope="col" style="width: 25%;">Prepared By</th>
+                                            <th scope="col" style="width: 25%;">Checked By</th>
                                             <th scope="col" style="width: 30%;">Approved By</th>
                                             <th scope="col">Action</th>
                                             </tr>
@@ -441,9 +450,12 @@
                                                         :disabled="isSelectReadonly"
                                                     />
                                                 </td>
-                                                <td>
-                                                    <button @click="btnRemoveEcrPmiApproverRows(index)" class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                                <td  class="d-flex justify-content-between">
+                                                    <button @click="btnRemoveEcrPmiApproverRows(index)" class="btn btn-outline-danger btn-sm" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
+                                                    </button>
+                                                    <button @click="reloadPmiApprover(commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                                                        <font-awesome-icon class="nav-icon" icon="refresh" />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -1087,61 +1099,63 @@
         async (newVal) => {
             if (!newVal) return;
             //constant object params
-            const otherDispoRequestedByParams = {
+            let otherDispoRequestedByParams = {
                 globalVar: ecrVar.requestedBy,
                 formModel: toRef(frmEcrOtherDispoRows.value[0], 'requestedBy'),
                 // rapidxUserDeptGroup: newVal,
                 selectedVal: '0',
             };
-            const otherDispoTechnicalEvaluationParams = {
+            let otherDispoTechnicalEvaluationParams = {
                 globalVar: ecrVar.technicalEvaluation,
                 formModel: toRef(frmEcrOtherDispoRows.value[0],'technicalEvaluation'),
                 // rapidxUserDeptGroup: newVal,
                 selectedVal: '0',
             };
-            const otherDispoReviewedByParams = {
+            let otherDispoReviewedByParams = {
                 globalVar: ecrVar.reviewedBy,
                 formModel: toRef(frmEcrOtherDispoRows.value[0],'reviewedBy'),
                 // rapidxUserDeptGroup: newVal,
                 isApprover: true,
                 selectedVal: '0',
             };
-            const qadCheckedByParams = {
+            let qadCheckedByParams = {
                 globalVar: ecrVar.optQadCheckedBy,
                 formModel: toRef(frmEcrQadRows.value,'qadCheckedBy'),
+                rapidxUserDeptGroup: 'QAD',
                 selectedVal: '0',
             };
-            const qadApprovedByInternalParams = {
+            let qadApprovedByInternalParams = {
                 globalVar: ecrVar.optQadApprovedByInternal,
                 formModel: toRef(frmEcrQadRows.value,'qadApprovedByInternal'),
+                rapidxUserDeptGroup: 'QAD',
                 selectedVal: '0',
             };
-            const pmiApproverPreparedByParams = {
+            let pmiApproverPreparedByParams = {
                 globalVar: ecrVar.preparedBy,
                 formModel: toRef(frmEcrPmiApproverRows.value[0],'preparedBy'),
                 selectedVal: '0',
             };
-            const pmiApproverCheckedByParams = {
+            let pmiApproverCheckedByParams = {
                 globalVar: ecrVar.checkedBy,
                 formModel: toRef(frmEcrPmiApproverRows.value[0],'checkedBy'),
                 selectedVal: '0',
             };
-            const pmiApproverApprovedByParams = {
+            let pmiApproverApprovedByParams = {
                 globalVar: ecrVar.approvedBy,
                 formModel: toRef(frmEcrPmiApproverRows.value[0],'approvedBy'),
                 selectedVal: '0',
             };
-            const pmiExternalApproverPreparedByParams = {
+            let pmiExternalApproverPreparedByParams = {
                 globalVar: ecrVar.preparedBy,
                 formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'preparedBy'),
                 selectedVal: '0',
             };
-            const pmiExternalApproverCheckedByParams = {
+            let pmiExternalApproverCheckedByParams = {
                 globalVar: ecrVar.checkedBy,
                 formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'checkedBy'),
                 selectedVal: '0',
             };
-            const pmiExternalApproverApprovedByParams = {
+            let pmiExternalApproverApprovedByParams = {
                 globalVar: ecrVar.approvedBy,
                 formModel: toRef(frmEcrPmiExternalApproverRows.value[0],'approvedBy'),
                 selectedVal: '0',
@@ -1174,6 +1188,70 @@
         isSelectReadonly.value = false;
         await generateControlNumber();
 
+    }
+    const reloadApprovers = async (rapidxUserDeptGroup) => {
+        alert(rapidxUserDeptGroup);
+        let otherDispoRequestedByParams = {
+            globalVar: ecrVar.requestedBy,
+            rapidxUserDeptGroup: rapidxUserDeptGroup,
+            // isApprover: true,
+        };
+        await Promise.all([
+            getRapidxUserByIdOpt(otherDispoRequestedByParams),
+        ]);
+    }
+    const reloadQaApprover = async () => {
+        let qadCheckedByParams = {
+            globalVar: ecrVar.optQadCheckedBy,
+            rapidxUserDeptGroup: 'QAD',
+        };
+        let qadApprovedByInternalParams = {
+            globalVar: ecrVar.optQadApprovedByInternal,
+            rapidxUserDeptGroup: 'QAD',
+        };
+        await Promise.all([
+            getRapidxUserByIdOpt(qadCheckedByParams),
+            getRapidxUserByIdOpt(qadApprovedByInternalParams),
+        ]);
+    }
+    const reloadPmiApprover = async (rapidxUserDeptGroup) => {
+        let pmiApproverPreparedByParams = {
+            globalVar: ecrVar.preparedBy,
+            rapidxUserDeptGroup: rapidxUserDeptGroup,
+        };
+        let pmiApproverCheckedByParams = {
+            globalVar: ecrVar.checkedBy,
+            rapidxUserDeptGroup: rapidxUserDeptGroup,
+        };
+        let pmiApproverApprovedByParams = {
+            globalVar: ecrVar.approvedBy,
+            rapidxUserDeptGroup: rapidxUserDeptGroup,
+            isApprover: true,
+        };
+        await Promise.all([
+            getRapidxUserByIdOpt(pmiApproverPreparedByParams),
+            getRapidxUserByIdOpt(pmiApproverCheckedByParams),
+            getRapidxUserByIdOpt(pmiApproverApprovedByParams),
+        ]);
+    }
+    const reloadPmiExternalApprover = async () => {
+        let pmiExternalApproverPreparedByParams = {
+            globalVar: ecrVar.preparedBy,
+            rapidxUserDeptGroup: rapidxUserDeptGroup,
+        };
+        let pmiExternalApproverCheckedByParams = {
+            globalVar: ecrVar.checkedBy,
+            rapidxUserDeptGroup: rapidxUserDeptGroup,
+        };
+        let pmiExternalApproverApprovedByParams = {
+            globalVar: ecrVar.approvedBy,
+            rapidxUserDeptGroup: rapidxUserDeptGroup,
+        };
+        await Promise.all([
+            getRapidxUserByIdOpt(pmiExternalApproverPreparedByParams),
+            getRapidxUserByIdOpt(pmiExternalApproverCheckedByParams),
+            getRapidxUserByIdOpt(pmiExternalApproverApprovedByParams),
+        ]);
     }
     const generateControlNumber = async () => {
         let apiParams = {};
