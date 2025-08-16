@@ -319,8 +319,7 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Man Details" @add-event="saveManDetails()" ref="modalSaveManDetails">
         <template #body>
-            <div class="row">
-
+            <div class="row d-none">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
                     <input v-model="frmMan.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>

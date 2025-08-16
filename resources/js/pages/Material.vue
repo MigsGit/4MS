@@ -1448,7 +1448,6 @@
         modal.Approval.show();
     }
     const saveApproval = async (selectedId,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
-        alert(approvalType);
         let apiParams = {
             selectedId : selectedId,
             status : isApprovedDisappproved,

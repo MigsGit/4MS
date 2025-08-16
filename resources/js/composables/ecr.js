@@ -111,13 +111,13 @@ export default function useEcr(){
      const isEmptyTblEcrEnvironmentRequirements = ref(null);
 
     //Obj Params
-    const descriptionOfChangeParams ={
+    let descriptionOfChangeParams ={
         tblReference : 'ecr_doc',
         globalVar: ecrVar.optDescriptionOfChange,
         formModel: toRef(frmEcrReasonRows.value[0],'descriptionOfChange'), // Good Practice create a reactive reference to a property inside an object
         selectedVal: '',
     };
-    const reasonOfChangeParams = {
+    let reasonOfChangeParams = {
         tblReference : 'ecr_roc',
         globalVar: ecrVar.optReasonOfChange,
         formModel: toRef(frmEcrReasonRows.value[0],'reasonOfChange'),

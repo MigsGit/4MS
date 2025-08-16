@@ -17,9 +17,9 @@
                             <thead>
                                 <tr>
                                 <th scope="col">#</th>
-                                <th scope="col" style="width: 60%;">Change Details</th>
-                                <th scope="col" style="width: 60%;">Reason of Change</th>
-                                <th scope="col" v-show="isSelectReadonly === false">Action</th>
+                                <th scope="col" style="width: 40%;">Change Details</th>
+                                <th scope="col" style="width: 40%;">Reason of Change</th>
+                                <th scope="col" style="width: 15%;" v-show="isSelectReadonly === false">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -48,9 +48,13 @@
                                             :disabled="isSelectReadonly"
                                         />
                                     </td>
-                                    <td>
+                                    <td class="d-flex justify-content-between">
                                         <button v-show="isSelectReadonly === false" @click="$emit('removeEcrReasonRowsEvent')" class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                             <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
+                                        </button>
+                                        <!-- <button @click="reloadEcrRequirements()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove"> -->
+                                        <button @click="$emit('reloadEcrRequirements')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                                            <font-awesome-icon class="nav-icon" icon="refresh" />
                                         </button>
                                     </td>
                                 </tr>
@@ -76,8 +80,9 @@
             required: true,
         },
         isSelectReadonly: {
-            // required: true,
+            required: true,
         },
+
 
     })
 </script>

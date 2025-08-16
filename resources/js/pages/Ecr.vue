@@ -245,6 +245,7 @@
                                                     <button  class="btn btn-outline-danger btn-sm" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
+
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -254,7 +255,7 @@
                         </div>
                     </div>
                 </div>
-                <EcrChangeComponent :isSelectReadonly="isSelectReadonly" @remove-ecr-reason-rows-event="removeEcrReasonRows(index)" @add-ecr-reason-rows-event="addEcrReasonRows()":frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
+                <EcrChangeComponent :isSelectReadonly="isSelectReadonly" @remove-ecr-reason-rows-event="removeEcrReasonRows(index)" @add-ecr-reason-rows-event="addEcrReasonRows()" :frmEcrReasonRows="frmEcrReasonRows"   @reload-ecr-requirements="reloadEcrRequirements()" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
                 </EcrChangeComponent>
                 <!-- Others Disposition -->
                 <div v-show="isSelectReadonly === false" class="card mb-2">
@@ -526,6 +527,9 @@
                                                 <td>
                                                     <button @click="btnRemoveEcrPmiExternalApproverRows" class="btn btn-danger btn-sm" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
+                                                    </button>
+                                                    <button @click="reloadPmiExternalApprover(commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                                                        <font-awesome-icon class="nav-icon" icon="refresh" />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -1196,8 +1200,16 @@
             rapidxUserDeptGroup: rapidxUserDeptGroup,
             // isApprover: true,
         };
+        let otherDispoTechnicalEvaluationParams = {
+            globalVar: ecrVar.technicalEvaluation,
+        };
+        let otherDispoReviewedByParams = {
+            globalVar: ecrVar.reviewedBy,
+        };
         await Promise.all([
             getRapidxUserByIdOpt(otherDispoRequestedByParams),
+            getRapidxUserByIdOpt(otherDispoTechnicalEvaluationParams),
+            getRapidxUserByIdOpt(otherDispoReviewedByParams),
         ]);
     }
     const reloadQaApprover = async () => {
@@ -1253,6 +1265,19 @@
             getRapidxUserByIdOpt(pmiExternalApproverApprovedByParams),
         ]);
     }
+    const reloadEcrRequirements = async () => {
+        let descriptionOfChangeParams ={
+            tblReference : 'ecr_doc',
+            globalVar: ecrVar.optDescriptionOfChange,
+        };
+        let reasonOfChangeParams = {
+            tblReference : 'ecr_roc',
+            globalVar: ecrVar.optReasonOfChange,
+        };
+        await getDropdownMasterByOpt(descriptionOfChangeParams);
+        await getDropdownMasterByOpt(reasonOfChangeParams);
+    }
+
     const generateControlNumber = async () => {
         let apiParams = {};
         axiosFetchData(apiParams,'api/generate_control_number',function(response){
