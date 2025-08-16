@@ -38,7 +38,9 @@ export default function useSettings(){
                 }),
             );
 
-            params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
+            if(params.selectedVal != undefined ){
+                params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
+            }
         });
     }
     const getRapidxUserByIdOpt = async (params) => {
@@ -61,7 +63,9 @@ export default function useSettings(){
                     }
                 }),
             );
-            params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
+            if(params.selectedVal != undefined ){
+                params.formModel.value = params.selectedVal; //Make sure the data type is correct | String or Array
+            }
         });
     }
     const getNoModuleRapidxUserByIdOpt = async (params) => {

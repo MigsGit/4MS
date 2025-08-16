@@ -290,6 +290,9 @@
                             :searchable="true"
                             :close-on-select="true"
                         />
+                        <button @click="reloadDropdown()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                            <font-awesome-icon class="nav-icon" icon="refresh" />
+                        </button>
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
@@ -379,6 +382,9 @@
                             :searchable="true"
                             :close-on-select="true"
                         />
+                        <button @click="reloadRapidxUserDropdown()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                            <font-awesome-icon class="nav-icon" icon="refresh" />
+                        </button>
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Process Change Factor:</span>
@@ -407,6 +413,9 @@
                             :searchable="true"
                             :close-on-select="true"
                         />
+                        <button @click="reloadRapidxUserDropdown()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                            <font-awesome-icon class="nav-icon" icon="refresh" />
+                        </button>
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Trainer Sample Size:</span>
@@ -431,6 +440,9 @@
                             :searchable="true"
                             :close-on-select="true"
                         />
+                        <button @click="reloadRapidxUserDropdown()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                            <font-awesome-icon class="nav-icon" icon="refresh" />
+                        </button>
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">LQC Sample Size:</span>
@@ -688,7 +700,7 @@
 </template>
 
 <script setup>
-    import {ref , onMounted,reactive, toRef} from 'vue';
+    import {ref , onMounted,reactive, toRef,watch} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import ModalSpecialInspectionComponent from '../components/ModalSpecialInspectionComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
@@ -922,11 +934,7 @@
             }
         }
     ];
-    const qcInspectorOperatorParams = {
-        globalVar: commonVar.optUserMaster,
-        formModel: toRef(frmMan.value,'qcInspectorOperator'),
-        selectedVal: '',
-    };
+
     const tblPmiInternalApproverSummaryColumns = [
         {   data: 'get_count'} ,
         {   data: 'get_role'} ,
@@ -974,11 +982,31 @@
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
-        await getRapidxUserByIdOpt(qcInspectorOperatorParams);
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
         await getCategoryAdminAccessOpt();
     })
 
+    watch(
+        () => commonVar.rapidxUserDeptGroup,
+        async (newVal) => {
+            if (!newVal) return;
+
+            let rapidxUserOpt = {
+                globalVar: commonVar.optUserMaster,
+
+            };
+            await getRapidxUserByIdOpt(rapidxUserOpt);
+        }
+    )
+    const reloadDropdown = async () => {
+        await getDropdownMasterByOpt(typeOfPartParams);
+    }
+    const reloadRapidxUserDropdown = async () => {
+        let rapidxUserOpt = {
+            globalVar: commonVar.optUserMaster,
+        };
+        await getRapidxUserByIdOpt(rapidxUserOpt);
+    }
     const onChangeAdminAccess = async (selectedParams)=>{
         tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;
@@ -989,8 +1017,6 @@
     }
     const addManDetails = async () => {
         frmMan.value.ecrsId = selectedEcrsId.value;
-        alert(selectedEcrsId.value);
-
         modal.SaveManDetails.show();
     }
     const btnAddSpecialInspection = async () => {
@@ -1114,6 +1140,9 @@
             modal.SaveMan.hide();
         });
     }
+
+
+
 </script>
 
 

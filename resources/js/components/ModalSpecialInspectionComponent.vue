@@ -45,6 +45,9 @@
                     :searchable="true"
                     :close-on-select="true"
                 />
+                <button @click="$emit('reloadApprovers')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                    <font-awesome-icon class="nav-icon" icon="refresh" />
+                </button>
             </div>
             <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Samples:</span>
