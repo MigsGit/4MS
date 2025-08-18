@@ -173,6 +173,9 @@
                                         :searchable="true"
                                         :close-on-select="true"
                                     />
+                                    <button @click="reloadDropdownMaster('materialSupplierParams')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                                        <font-awesome-icon class="nav-icon" icon="refresh" />
+                                    </button>
                                 </div>
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">Product Color:</span>
@@ -184,6 +187,9 @@
                                         :searchable="true"
                                         :close-on-select="true"
                                     />
+                                    <button @click="reloadDropdownMaster('materialColorParams')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                                        <font-awesome-icon class="nav-icon" icon="refresh" />
+                                    </button>
                                 </div>
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                                     <span class="input-group-text" id="addon-wrapping">ROHS:</span>
@@ -235,9 +241,10 @@
                                                 <thead>
                                                     <tr>
                                                     <th scope="col" style="width: 10%;">Section</th>
-                                                    <th scope="col" style="width: 30%;">Prepared by</th>
-                                                    <th scope="col" style="width: 30%;">Checked by</th>
+                                                    <th scope="col" style="width: 25%;">Prepared by</th>
+                                                    <th scope="col" style="width: 25%;">Checked by</th>
                                                     <th scope="col" style="width: 30%;">Approved By</th>
+                                                    <th scope="col" style="width: 10%;">Action</th>
                                                     </tr>
                                                 </thead>
 
@@ -273,6 +280,11 @@
                                                                 :options="materialVar.prdnApprovedBy"
                                                             />
                                                         </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('prdnPreparedByParams',commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td>
@@ -306,6 +318,11 @@
                                                                 :options="materialVar.prApprovedBy"
                                                             />
                                                         </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('prdnCheckedByParams',commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                     <tr >
                                                         <td>
@@ -337,6 +354,11 @@
                                                                 :searchable="true"
                                                                 :options="materialVar.ppcApprovedBy"
                                                             />
+                                                        </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('prdnApprovedByParams',commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                     <tr >
@@ -650,6 +672,9 @@
                             :searchable="true"
                             :close-on-select="true"
                         />
+                        <button @click="reloadDropdownMaster('typeOfPartParams')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                            <font-awesome-icon class="nav-icon" icon="refresh" />
+                        </button>
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Change Imp Date:</span>
@@ -1425,6 +1450,51 @@
         await getDropdownMasterByOpt(materialColorParams);
         await getCategoryAdminAccessOpt();
     })
+
+    const reloadDropdownMaster = async (dropdownMastersDetails) => {
+        let stringToVal = '';
+        switch (dropdownMastersDetails) {
+            case 'typeOfPartParams':
+
+                stringToVal = eval(dropdownMastersDetails);
+                break;
+            case 'materialSupplierParams':
+                stringToVal = eval(dropdownMastersDetails);
+                break;
+            case 'materialColorParams':
+                stringToVal = eval(dropdownMastersDetails);
+                break;
+            default:
+                stringToVal = '';
+                break;
+        }
+        if(stringToVal === ''){
+            alert('Invalid Dropdown Master Details')
+        }
+        await getDropdownMasterByOpt(stringToVal);
+    }
+    const reloadRapidxUserMaster = async (dropdownRapidxUserMaster,rapidxUserDeptGroup=null) => {
+        let params = '';
+        switch (dropdownRapidxUserMaster) {
+            case 'prdnPreparedByParams':
+                params = eval(dropdownRapidxUserMaster);
+                break;
+            case 'prdnCheckedByParams':
+                params = eval(dropdownRapidxUserMaster);
+                break;
+            case 'prdnApprovedByParams':
+                params = eval(dropdownRapidxUserMaster);
+                break;
+            default:
+                params = '';
+                break;
+        }
+        if(params === ''){
+            alert('Invalid Dropdown Master Details');
+            return;
+        }
+        await getRapidxUserByIdOpt(params);
+    }
     // Override default classes for small size and readonly styles
     const multiselectSm =ref ({
         container: 'text-sm rounded border-gray-300 bg-gray-100 opacity-70 cursor-not-allowed',

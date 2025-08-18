@@ -531,7 +531,10 @@ class EcrController extends Controller
                 $status = $row->status ?? "";
                 $result = '';
                 $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" ecrs-id="'.$row->id.'" ecr-status= "'.$status.'" id="btnViewEcrRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                if($row->status === 'OK'){
+                    $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" ecrs-id="'.$row->id.'" ecr-status= "'.$status.'" id="btnViewEcrRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                }
+
                 $result .= '</center>';
                 return $result;
             })

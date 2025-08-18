@@ -107,13 +107,16 @@
     </div>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" :title="modalTitle+' '+'ECR'" @add-event="frmSaveEcr()" ref="modalSaveEcr">
         <template #body>
-                <div class="row">
-                    <div class="input flex-nowrap mb-2 input-group-sm d-none">
+                <div class="row d-none">
+                    <div class="input flex-nowrap mb-2 input-group-sm">
                         <input  v-model="frmEcr.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                     </div>
                     <div class="input flex-nowrap mb-2 input-group-sm">
                         <input  v-model="frmEcr.departmentGroup" type="text" :value="commonVar.rapidxUserDeptGroup" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                     </div>
+
+                </div>
+                <div class="row">
                     <div class="col-sm-6">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Ecr Ctrl No:</span>
@@ -451,7 +454,7 @@
                                                         :disabled="isSelectReadonly"
                                                     />
                                                 </td>
-                                                <td  class="d-flex justify-content-between">
+                                                <td class="d-flex justify-content-between">
                                                     <button @click="btnRemoveEcrPmiApproverRows(index)" class="btn btn-outline-danger btn-sm" type="button" data-item-process="add">
                                                         <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                                     </button>
@@ -1194,7 +1197,6 @@
 
     }
     const reloadApprovers = async (rapidxUserDeptGroup) => {
-        alert(rapidxUserDeptGroup);
         let otherDispoRequestedByParams = {
             globalVar: ecrVar.requestedBy,
             rapidxUserDeptGroup: rapidxUserDeptGroup,

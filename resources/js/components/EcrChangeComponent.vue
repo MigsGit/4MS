@@ -49,11 +49,10 @@
                                         />
                                     </td>
                                     <td class="d-flex justify-content-between">
-                                        <button v-show="isSelectReadonly === false" @click="$emit('removeEcrReasonRowsEvent')" class="btn btn-danger btn-sm" type="button" data-item-process="add">
+                                        <button v-show="isSelectReadonly === false" @click="$emit('removeEcrReasonRowsEvent')" class="btn btn-outline-danger btn-sm" type="button" data-item-process="add">
                                             <font-awesome-icon class="nav-icon" icon="fas fa-trash" />
                                         </button>
-                                        <!-- <button @click="reloadEcrRequirements()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove"> -->
-                                        <button @click="$emit('reloadEcrRequirements')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                                        <button v-show="isSelectReadonly === false" @click="$emit('reloadEcrRequirements')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
                                             <font-awesome-icon class="nav-icon" icon="refresh" />
                                         </button>
                                     </td>
