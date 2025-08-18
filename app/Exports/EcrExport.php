@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -13,6 +14,8 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
+use Intervention\Image\Facades\Image;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNullComparison
 {
@@ -38,6 +41,30 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
     {
         return 'ECR Data';
     }
+
+    public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
+{
+    // Get the full storage path of the image
+    $imageStoragePath = Storage::path($imagePath.'.png');
+    if( !file_exits($imageStoragePath) ){
+        echo 'Image not found: Please file a ticket to http://rapidx/iss_service_request/my_tickets';
+        exit;
+    }
+    // Resize the image
+    $image = Image::make($imageStoragePath)->resize($width, $height);
+    $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
+    $image->save($tempPath);
+
+    // Insert the image into the worksheet
+    $drawing = new Drawing();
+    $drawing->setName("Inserted Image");
+    $drawing->setDescription("Inserted Image");
+    $drawing->setPath($tempPath); // Path to the resized image
+    $drawing->setCoordinates($coordinates); // Cell coordinates
+    $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+}
+
+
 
     /**
      * @return array
@@ -206,6 +233,19 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                                 $sheet->setCellValue("D{$startRowQaApprovalCollection}", $approvalStatus);
                                 // $sheet->setCellValue("E{$startRowQaApprovalCollection}", 'Signature');
                                 $sheet->setCellValue("G{$startRowQaApprovalCollection}", $approvedDate);
+                                  // === E-signature Images
+                                $imageEsigPath = 'public/e_signatures/';
+                                // echo $value->rapidx_user->employee_number;
+                                $imageEsigWithEmpNumberPath = $imageEsigPath.$value->rapidx_user->employee_number;
+
+                                $this->insertEsignatureImageIntoSheet(
+                                    $imageEsigWithEmpNumberPath,
+                                    "E".$startRowQaApprovalCollection,
+                                    50,
+                                    50,
+                                    $sheet,
+                                    'ecr_qa'.$index
+                                );
                                 $startRowQaApprovalCollection++;
                             }else{
                                 if (str_contains($approvalStatus, 'OTRB')) {
@@ -227,8 +267,8 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                             }
                         }
                     }
-                    // exit;
                 }
+                // exit;
 
                 // === Specific Merged Cells ===
                 $mergeCells = [
@@ -272,7 +312,9 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     $sheet->getRowDimension($row)->setRowHeight($height);
                 }
 
-                // Detect last row & column automatically
+
+
+                //==== Detect last row & column automatically
                 $highestRow = $sheet->getHighestRow();
                 $highestColumn = $sheet->getHighestColumn();
 
