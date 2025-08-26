@@ -51,7 +51,7 @@ class EcrController extends Controller
     }
     public function downloadEcrExcelByEcrsId(Request $request){
         try {
-            $ecrsId = $request->ecrsId;
+            $ecrsId = decrypt($request->ecrsId);
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
             [
                 'ecr_approvals',
@@ -551,10 +551,7 @@ class EcrController extends Controller
                 $status = $row->status ?? "";
                 $result = '';
                 $result .= '<center>';
-                if($row->status === 'OK'){
-                    $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" ecrs-id="'.$row->id.'" ecr-status= "'.$status.'" id="btnViewEcrRef"><i class="fa-solid fa-download"></i>Attachment</a>';
-                }
-
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" ecrs-id="'.$row->id.'" ecr-status= "'.$status.'" ecrs-id-encrypted="'.encrypt($row->id).'" id="btnViewEcrRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })
@@ -1170,6 +1167,49 @@ class EcrController extends Controller
     } catch (Exception $e) {
         throw $e;
     }
-}
+   }
+   public function getEcrRefDownload(Request $request){
+        try {
+
+            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],[
+
+            ],['id' => decrypt($request->ecrsId)]);
+            $ecr = $ecr->first();
+            return response()->json([
+                'originalFilename' => explode(' | ',$ecr->original_filename),
+                'filteredDocumentName' => explode(' | ',$ecr->filtered_document_name),
+                'isSuccess' => 'true',
+                'ersIdEncryted' => encrypt($ecr->id),
+        ]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+   }
+   public function viewEcrRef(Request $request){
+        try {
+            $ecrsId = decrypt($request->ecrsId);
+            $conditions = [
+                'id' => $ecrsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Ecr::class,[],[],$conditions);
+          $ecrRefByEcrsId = $data
+            ->get([
+                'filtered_document_name',
+                'category',
+            ]);
+            if(count($ecrRefByEcrsId) != 0){
+                $arrFilteredDocumentName = explode(' | ' ,$ecrRefByEcrsId[0]->filtered_document_name);
+                $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                $filePathWithEcrsId = $ecrRefByEcrsId[0]->file_path."/".$ecrsId."/".$selectedFilteredDocumentName;
+                $path = "app/public/ecr/".$ecrRefByEcrsId[0]->category."/".$filePathWithEcrsId;
+                $pdfPath = storage_path($path);
+                $this->commonInterface->viewPdfFile($pdfPath);
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+   }
+
+
 
 }

@@ -176,6 +176,7 @@
                             <input v-model="frmEcr.dateOfRequest" type="date" class="form-control" aria-describedby="addon-wrapping">
                         </div>
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
+                            <span class="input-group-text" id="addon-wrapping">Attachment (Optional)</span>
                             <input @change="changeEcrRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                         </div>
                     </div>
@@ -888,7 +889,54 @@
         </template>
     </ModalComponent>
 
-   
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Ecr Reference" ref="modalViewEcrRef">
+        <template #body>
+            <div class="row mt-3">
+                <table class="table" v-show="arrOriginalFilenames">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(arrOriginalFilename, index) in arrOriginalFilenames" :key="arrOriginalFilename.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewEcrRef" @click="btnLinkViewEcrRef(selectedEcrsIdEncrypted,index)">
+                                    {{ arrOriginalFilename }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <thead>
+
+                        <tr>
+                            <!-- <th class="d-none"  scope="col">
+                                Internal Ecr
+                            </th> -->
+                            <th scope="col">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a href="#" class="link-primary" @click="btnLinkDownloadEcr(selectedEcrsIdEncrypted)">
+                                    Download Ecr Excel Export
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -942,8 +990,10 @@
     const modalTitle = ref('Add');
     const modalEcrRequirements = ref(null);
     const modalEcrApproval = ref(null);
+    const modalViewEcrRef = ref(null);
     const isSelectReadonly = ref(null);
     const currentStatus = ref(null);
+    const selectedEcrsIdEncrypted = ref(null);
     const ecrRef = ref(null);
     const tblEcr = ref(null);
     const tblEcrQa = ref(null);
@@ -958,6 +1008,8 @@
     const isApproved = ref(null);
     const currentEcrsId = ref(null);
     const selectedAdminAccess = ref(null);
+    const arrOriginalFilenames = ref(null);
+    const arrFilteredDocumentName = ref(null);
 
     const isEmptyTblEcrManRequirements = ref(null);
     const isEmptyTblEcrMachineRequirements = ref(null);
@@ -1016,13 +1068,14 @@
                 let btnViewEcrRef = cell.querySelector('#btnViewEcrRef');
                 if(btnViewEcrRef != null){
                     btnViewEcrRef.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecrs-id');
+                        let ecrsIdEncrypted = this.getAttribute('ecrs-id-encrypted');
+                        let ecrStatus = this.getAttribute('ecr-status');
                         let params = {
-                            ecrsId : ecrsId,
+                            ecrsId : ecrsIdEncrypted,
+                            ecrStatus : ecrStatus,
                         };
-                        var queryString = $.param(params);
-                        window.location.href="api/download_ecr_excel_by_ecrs_id?" + queryString;
-                        // getMethodRefByEcrsId(methodsId);
+                        getEcrRefDownload(params)
+                        modal.ViewEcrRef.show();
                     });
                 }
             }
@@ -1072,6 +1125,7 @@
         modalEcr.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
+        modal.ViewEcrRef = new Modal(modalViewEcrRef.value.modalRef,{ keyboard: false });
         modalSaveEcr.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcr.value);
             frmEcrReasonRows.value = [];
@@ -1192,6 +1246,35 @@
     );
 
     //Functions
+
+    const getEcrRefDownload = async (params)  => {
+        let apiParams = {
+            ecrsId : params.ecrsId,
+            ecrStatus : params.ecrStatus,
+        }
+        axiosFetchData(apiParams,'api/get_ecr_ref_download',function(response){
+            let data = response.data;
+            arrOriginalFilenames.value=[];
+            arrFilteredDocumentName.value=[];
+            selectedEcrsIdEncrypted.value=[];
+            if(data.originalFilename[0] != ""){
+                arrOriginalFilenames.value = data.originalFilename;
+                arrFilteredDocumentName.value = data.filteredDocumentName;
+                selectedEcrsIdEncrypted.value = data.ersIdEncryted;
+            }
+        });
+    }
+    const btnLinkViewEcrRef = async (selectedEcrsIdEncrypted,index)  => {
+        window.open(`api/view_ecr_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
+    }
+    const btnLinkDownloadEcr = async (selectedEcrsIdEncrypted)  => {
+        let params = {
+            ecrsId : selectedEcrsIdEncrypted,
+        };
+        var queryString = $.param(params);
+        window.location.href="api/download_ecr_excel_by_ecrs_id?" + queryString;
+    }
+
     const changeEcrRef = async (event)  => {
         ecrRef.value =  Array.from(event.target.files) ?? [];
     }
