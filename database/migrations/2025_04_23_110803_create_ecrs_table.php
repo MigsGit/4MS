@@ -15,8 +15,10 @@ class CreateEcrsTable extends Migration
     {
         Schema::create('ecrs', function (Blueprint $table) {
             $table->id();
-            $table->string('ecr_no');
             $table->string('status')->default('IA')->comment('IA - Internal Approval | QA Approval | DO- Done');
+            $table->string('ecr_no');
+            $table->longText('original_filename')->nullable();
+            $table->longText('filtered_document_name')->nullable();
             $table->string('approval_status')->default('RB');
             $table->string('category');
             $table->string('internal_external');

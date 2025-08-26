@@ -25,6 +25,7 @@ use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
 use App\Models\DropdownMasterDetail;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Requests\EcrFileRequest;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\EcrDetailRequest;
 use App\Http\Requests\EcrApprovalRequest;
@@ -83,8 +84,10 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function saveEcr(Request $request, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest){
+    // public function saveEcr(Request $request, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest){
+    public function saveEcr(Request $request,EcrFileRequest $ecrFileRequest){ //nmodify
         date_default_timezone_set('Asia/Manila');
+
         try {
             //TODO:  DELETE, InsertById, N/A in Dropdown
             DB::beginTransaction();
@@ -127,6 +130,23 @@ class EcrController extends Controller
                 $ecr =  $this->resourceInterface->create(Ecr::class,$ecrRequest);
                 $currenErcId = $ecr['data_id'];
             }
+
+            //File Upload & Updat eEcr
+            $ecrFileRequestValidated = [];
+            $ecrRFile = $ecrFileRequest->ecr_ref;
+            $path = "ecr/".$request->category."/".$currenErcId."/";
+            if($ecrFileRequest->hasfile('ecr_ref')){
+                // $arrUploadFile = $this->commonInterface->uploadFileEcrRequirement($ecrRFile,$path);
+                $arrUploadFile = $this->commonInterface->uploadFileEcrRequirement($ecrRFile,$path);
+                $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
+                $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
+
+                $ecrFileRequestValidated['original_filename'] = $impOriginalFilename;
+                $ecrFileRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $ecrFileRequestValidated['updated_by'] = session('rapidx_user_id');
+                $this->resourceInterface->updateConditions(Ecr::class,['id'=>$currenErcId],$ecrFileRequestValidated);
+            }
+
             $ecrDetailRequest = collect($request->description_of_change)->map(function ($description_of_change,$index) use ($request,$currenErcId){
                 return [
                     'ecrs_id' =>  $currenErcId,
@@ -1063,14 +1083,14 @@ class EcrController extends Controller
        }
    }
    public function uploadEcrRequirementRef(EcrRequirementFileRequest $ecrRequirementFileRequest){
-       try {
+       try { //nmodify
            date_default_timezone_set('Asia/Manila');
            DB::beginTransaction();
             $ecrsId = $ecrRequirementFileRequest->ecrsId;
             $ecrRequirementId = $ecrRequirementFileRequest->ecrRequirementId;
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,['category'],[],
                 [
-                    'id' => $ecrRequirementFileRequest->ecrsId,
+                    'id' => $ecrsId,
                 ]
             );
             $ecr = $ecr->first();

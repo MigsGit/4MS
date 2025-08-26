@@ -175,6 +175,9 @@
                             <span class="input-group-text" id="addon-wrapping">Date of Request:</span>
                             <input v-model="frmEcr.dateOfRequest" type="date" class="form-control" aria-describedby="addon-wrapping">
                         </div>
+                        <div class="input-group flex-nowrap mb-2 input-group-sm">
+                            <input @change="changeEcrRef" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        </div>
                     </div>
                 </div>
                   <!-- Others Disposition -->
@@ -383,8 +386,9 @@
                                                 </td>
                                                 <td>
                                                     <button @click="reloadQaApprover()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
-                                                        <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                        <font-awesome-icon class="nav-icon" icon="refresh"/>
                                                     </button>
+                                                        <!-- fa fa-circle-o-notch fa-spin refresh-->
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -883,6 +887,8 @@
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+
+   
 </template>
 
 <script setup>
@@ -938,6 +944,7 @@
     const modalEcrApproval = ref(null);
     const isSelectReadonly = ref(null);
     const currentStatus = ref(null);
+    const ecrRef = ref(null);
     const tblEcr = ref(null);
     const tblEcrQa = ref(null);
     const tblEcrManRequirements = ref(null);
@@ -1185,6 +1192,9 @@
     );
 
     //Functions
+    const changeEcrRef = async (event)  => {
+        ecrRef.value =  Array.from(event.target.files) ?? [];
+    }
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {
             frmElement[key] = '';
@@ -1382,6 +1392,12 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 let formData = new FormData();
+                if(ecrRef.value){
+                    ecrRef.value.forEach((file, index) => {
+                        formData.append('ecr_ref[]', file);
+                    });
+                }
+
                 //Append form data
                 [
                     ["ecrs_id", frmEcr.value.ecrsId],

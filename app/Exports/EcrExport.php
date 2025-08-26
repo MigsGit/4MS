@@ -46,8 +46,8 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
 {
     // Get the full storage path of the image
     $imageStoragePath = Storage::path($imagePath.'.png');
-    if( !file_exits($imageStoragePath) ){
-        echo 'Image not found: Please file a ticket to http://rapidx/iss_service_request/my_tickets';
+    if( !file_exists($imageStoragePath) ){
+        echo 'Signature not found: Please file a ticket to http://rapidx/iss_service_request/my_tickets';
         exit;
     }
     // Resize the image
@@ -80,17 +80,33 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                 $ecrDetailsCollection = $ecrCollection->ecr_details;
                 $sheet = $event->sheet->getDelegate();
 
+                // === Alignment for input cells ===
+                // $sheet->getStyle("A1:A46")->applyFromArray([
+                //     'font' => ['bold' => true, 'size' => 12,'name'=> 'Arial'],
+                //     'alignment' => ['horizontal' => 'center'],
+                //     'fill' => [
+                //         'fillType' => 'solid',
+                //         'startColor' => ['argb' => Color::COLOR_WHITE], // White background
+                //         'wrapText' => true,
+                //     ],
+                // ]);
                 // === Header Title ===
                 $sheet->mergeCells('A2:H2');
                 $sheet->setCellValue('A2', 'ENGINEERING CHANGE REQUEST');
                 $sheet->getStyle('A2')->applyFromArray([
                     'font' => [
                         'bold' => true,
-                        'size' => 14,
+                        'size' => 20,
+                        'name' => 'Arial',
                     ],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                         'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => 'solid',
+                        'startColor' => ['rgb' => 'D3D3D3' ], // White background
+                        'wrapText' => true,
                     ],
                 ]);
                 $sheet->getRowDimension(2)->setRowHeight(25);
@@ -106,10 +122,19 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     'A29' => 'REVIEWED BY / ENGG. SECTION HEAD',
                     'A40' => 'AGREED BY',
                 ];
-
+                $sectionHeadersEndRow = [
+                    '3',
+                    '3',
+                    '9',
+                    '16',
+                    '25',
+                    '29',
+                    '40',
+                ];
+                $sectionHeadersCount = 0;
                 foreach ($sectionHeaders as $cell => $value) {
                     $sheet->setCellValue($cell, $value);
-                    $sheet->getStyle($cell)->applyFromArray([
+                    $sheet->getStyle("{$cell}:H".$sectionHeadersEndRow[$sectionHeadersCount])->applyFromArray([
                         'font' => [
                             'bold' => true,
                             'color' => ['rgb' => '0000FF'], // Blue text for headers
@@ -118,7 +143,19 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                             'horizontal' => Alignment::HORIZONTAL_LEFT,
                             'vertical' => Alignment::VERTICAL_CENTER,
                         ],
+                        'fill' => [
+                            'fillType' => 'solid',
+                            'startColor' => ['rgb' => 'D3D3D3' ], // White background
+                            'wrapText' => true,
+                        ],
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '000000'],
+                            ],
+                        ],
                     ]);
+                    $sectionHeadersCount++;
                 }
 
                 // === Section Information Content ===
@@ -177,97 +214,124 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                         ],
                     ]);
                 }
+                $sheet->getStyle("B30")->applyFromArray([
+                    'fill' => [
+                        'fillType' => 'solid',
+                        'startColor' => ['rgb' => '000000' ], // White background
+                        'wrapText' => true,
+                    ],
+                ]);
                 //Ecr Collection Exist
-                if(filled($ecrCollection)) {
-                    $ecrCollectionContent = [
-                        'B4' => $ecrCollection->customer_name,
-                        'B5' => $ecrCollection->part_name,
-                        'B6' => $ecrCollection->product_line,
-                        'B7' => $ecrCollection->section,
-                        'B8' => $ecrCollection->customer_name,
+                // if(filled($ecrCollection)) {
+                //     $ecrCollectionContent = [
+                //         'B4' => $ecrCollection->customer_name,
+                //         'B5' => $ecrCollection->part_name,
+                //         'B6' => $ecrCollection->product_line,
+                //         'B7' => $ecrCollection->section,
+                //         'B8' => $ecrCollection->customer_name,
 
-                        'G5' => $ecrCollection->part_no,
-                        'G6' =>  $ecrCollection->device_name,
-                        'G7' =>  $ecrCollection->customer_ec_no,
-                        'G8' =>  $ecrCollection->date_of_request,
-                    ];
-                    foreach ($ecrCollectionContent as $cell => $value) {
-                        $sheet->setCellValue($cell, $value);
-                    }
-                     //Ecr Collection Exist
-                     /**
-                        ecrApprovalsCollection
-                        ecrDetailsCollection
-                      */
-                    if(filled($ecrDetailsCollection)) {
-                        $startRowDocCollection = 10;
-                        $startRowRocCollection = 17;
-                        $startColumnEcrDetailsCollection = 'A';
-                        foreach ($ecrDetailsCollection as $index => $value) {
-                            $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
-                            $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details;
-                            $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowDocCollection}", $descriptionOfChange);
-                            $startRowDocCollection++;
+                //         'G5' => $ecrCollection->part_no,
+                //         'G6' =>  $ecrCollection->device_name,
+                //         'G7' =>  $ecrCollection->customer_ec_no,
+                //         'G8' =>  $ecrCollection->date_of_request,
+                //     ];
+                //     foreach ($ecrCollectionContent as $cell => $value) {
+                //         $sheet->setCellValue($cell, $value);
+                //     }
+                //      //Ecr Collection Exist
+                //      /**
+                //         ecrApprovalsCollection
+                //         ecrDetailsCollection
+                //       */
+                //     if(filled($ecrDetailsCollection)) {
+                //         $startRowDocCollection = 10;
+                //         $startRowRocCollection = 17;
+                //         $startColumnEcrDetailsCollection = 'A';
+                //         foreach ($ecrDetailsCollection as $index => $value) {
+                //             $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
+                //             $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details;
+                //             $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowDocCollection}", $descriptionOfChange);
+                //             $startRowDocCollection++;
 
-                            $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowRocCollection}", $reasonOfChange);
-                            $startRowRocCollection++;
-                        }
-                    }
+                //             $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowRocCollection}", $reasonOfChange);
+                //             $startRowRocCollection++;
+                //         }
+                //     }
 
 
-                    if(filled($ecrApprovalsCollection)) {
-                        $startRowRequestedByApprovalsCollection = 27;
-                        $startRowOtherApprovalsCollection = 37;
-                        $startRowQaApprovalCollection = 42;
-                        // $startColumnOtherApprovalsCollection = 'A';
-                        foreach ($ecrApprovalsCollection as $index => $value) {
-                            $approvalStatus = $value->approval_status ?? "";
-                            $ecrApprover = $value->rapidx_user->name ?? "";
-                            // date('Y-m-d',$value->rapidx_user->created_at) ?? "";
-                            $approvedDate = Carbon::parse($value->created_at)->format('m-d-Y') ?? "";
-                            $division = $requestedByDeptCollection[$index]['division'] ?? "";
-                            $filteredSection = $requestedByDeptCollection[$index]['filteredSection'] ?? "";
-                            if (str_contains($approvalStatus, 'QA')) {
-                                $sheet->setCellValue("A{$startRowQaApprovalCollection}", $division);
-                                $sheet->setCellValue("B{$startRowQaApprovalCollection}", $ecrApprover);
-                                $sheet->setCellValue("D{$startRowQaApprovalCollection}", $approvalStatus);
-                                // $sheet->setCellValue("E{$startRowQaApprovalCollection}", 'Signature');
-                                $sheet->setCellValue("G{$startRowQaApprovalCollection}", $approvedDate);
-                                  // === E-signature Images
-                                $imageEsigPath = 'public/e_signatures/';
-                                // echo $value->rapidx_user->employee_number;
-                                $imageEsigWithEmpNumberPath = $imageEsigPath.$value->rapidx_user->employee_number;
-
-                                $this->insertEsignatureImageIntoSheet(
-                                    $imageEsigWithEmpNumberPath,
-                                    "E".$startRowQaApprovalCollection,
-                                    50,
-                                    50,
-                                    $sheet,
-                                    'ecr_qa'.$index
-                                );
-                                $startRowQaApprovalCollection++;
-                            }else{
-                                if (str_contains($approvalStatus, 'OTRB')) {
-                                    $sheet->setCellValue("A{$startRowRequestedByApprovalsCollection}", $division);
-                                    $sheet->setCellValue("B{$startRowRequestedByApprovalsCollection}", $ecrApprover);
-                                    $sheet->setCellValue("D{$startRowRequestedByApprovalsCollection}", $approvalStatus);
-                                    // $sheet->setCellValue("E{$startRowRequestedByApprovalsCollection}", 'Signature');
-                                    $sheet->setCellValue("G{$startRowRequestedByApprovalsCollection}", $approvedDate);
-                                    $startRowRequestedByApprovalsCollection++;
-                                }
-                                if ( !str_contains($approvalStatus, 'OTRB')) {
-                                    $sheet->setCellValue("A{$startRowOtherApprovalsCollection}", $division);
-                                    $sheet->setCellValue("B{$startRowOtherApprovalsCollection}", $ecrApprover);
-                                    $sheet->setCellValue("D{$startRowOtherApprovalsCollection}", $approvalStatus);
-                                    // $sheet->setCellValue("E{$startRowOtherApprovalsCollection}", 'Signature');
-                                    $sheet->setCellValue("G{$startRowOtherApprovalsCollection}", $approvedDate);
-                                    $startRowOtherApprovalsCollection++;
-                                }
-                            }
-                        }
-                    }
-                }
+                //     if(filled($ecrApprovalsCollection)) {
+                //         $startRowRequestedByApprovalsCollection = 27;
+                //         $startRowOtherApprovalsCollection = 37;
+                //         $startRowQaApprovalCollection = 42;
+                //         // $startColumnOtherApprovalsCollection = 'A';
+                //         foreach ($ecrApprovalsCollection as $index => $value) {
+                //             $approvalStatus = $value->approval_status ?? "";
+                //             $ecrApprover = $value->rapidx_user->name ?? "";
+                //             // date('Y-m-d',$value->rapidx_user->created_at) ?? "";
+                //             $approvedDate = Carbon::parse($value->created_at)->format('m-d-Y') ?? "";
+                //             $division = $requestedByDeptCollection[$index]['division'] ?? "";
+                //             $filteredSection = $requestedByDeptCollection[$index]['filteredSection'] ?? "";
+                //             if (str_contains($approvalStatus, 'QA')) {
+                //                 $sheet->setCellValue("A{$startRowQaApprovalCollection}", $division);
+                //                 $sheet->setCellValue("B{$startRowQaApprovalCollection}", $ecrApprover);
+                //                 $sheet->setCellValue("D{$startRowQaApprovalCollection}", $approvalStatus);
+                //                 // $sheet->setCellValue("E{$startRowQaApprovalCollection}", 'Signature');
+                //                 $sheet->setCellValue("G{$startRowQaApprovalCollection}", $approvedDate);
+                //                   // === E-signature Images
+                //                 $imageEsigPath = 'public/e_signatures/';
+                //                 $imageEsigWithEmpNumberPath = $imageEsigPath.$value->rapidx_user->employee_number;
+                //                 $this->insertEsignatureImageIntoSheet(
+                //                     $imageEsigWithEmpNumberPath,
+                //                     "E".$startRowQaApprovalCollection,
+                //                     50,
+                //                     50,
+                //                     $sheet,
+                //                     'ecr_qa'.$index
+                //                 );
+                //                 $startRowQaApprovalCollection++;
+                //             }else{
+                //                 if (str_contains($approvalStatus, 'OTRB')) {
+                //                     $sheet->setCellValue("A{$startRowRequestedByApprovalsCollection}", $division);
+                //                     $sheet->setCellValue("B{$startRowRequestedByApprovalsCollection}", $ecrApprover);
+                //                     $sheet->setCellValue("D{$startRowRequestedByApprovalsCollection}", $approvalStatus);
+                //                     // $sheet->setCellValue("E{$startRowRequestedByApprovalsCollection}", 'Signature');
+                //                     $sheet->setCellValue("G{$startRowRequestedByApprovalsCollection}", $approvedDate);
+                //                     // === Insert e-signature
+                //                     $imageEsigPath = 'public/e_signatures/';
+                //                     $imageEsigWithEmpNumberPath = $imageEsigPath.$value->rapidx_user->employee_number;
+                //                     $this->insertEsignatureImageIntoSheet(
+                //                         $imageEsigWithEmpNumberPath,
+                //                         "E".$startRowRequestedByApprovalsCollection,
+                //                         50,
+                //                         50,
+                //                         $sheet,
+                //                         'ecr_requestedby'.$index
+                //                     );
+                //                     $startRowRequestedByApprovalsCollection++;
+                //                 }
+                //                 if ( !str_contains($approvalStatus, 'OTRB')) {
+                //                     $sheet->setCellValue("A{$startRowOtherApprovalsCollection}", $division);
+                //                     $sheet->setCellValue("B{$startRowOtherApprovalsCollection}", $ecrApprover);
+                //                     $sheet->setCellValue("D{$startRowOtherApprovalsCollection}", $approvalStatus);
+                //                     // $sheet->setCellValue("E{$startRowOtherApprovalsCollection}", 'Signature');
+                //                     $sheet->setCellValue("G{$startRowOtherApprovalsCollection}", $approvedDate);
+                //                       // === Insert e-signature
+                //                       $imageEsigPath = 'public/e_signatures/';
+                //                       $imageEsigWithEmpNumberPath = $imageEsigPath.$value->rapidx_user->employee_number;
+                //                       $this->insertEsignatureImageIntoSheet(
+                //                           $imageEsigWithEmpNumberPath,
+                //                           "E".$startRowOtherApprovalsCollection,
+                //                           50,
+                //                           50,
+                //                           $sheet,
+                //                           'ecr_engg'.$index
+                //                       );
+                //                     $startRowOtherApprovalsCollection++;
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
                 // exit;
 
                 // === Specific Merged Cells ===
@@ -287,7 +351,7 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
 
                 // === Column Widths ===
                 $columnWidths = [
-                    'A' => 20,
+                    'A' => 0,
                     'C' => 20,
                     'D' => 20,
                     'E' => 20,
@@ -312,11 +376,49 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                     $sheet->getRowDimension($row)->setRowHeight($height);
                 }
 
+                // === Apply borders to specific cells ===
+                // $sheet->getStyle("A1:H1")
+                // ->applyFromArray([
+                //     'borders' => [
+                //         'bottom' => [
+                //             'borderStyle' => Border::BORDER_THICK,
+                //             'color' => ['rgb' => '000000'],
+                //         ],
+                //     ],
+                // ]);
+                // $sheet->getStyle("A46:H46")
+                // ->applyFromArray([
+                //     'borders' => [
+                //         'bottom' => [
+                //             'borderStyle' => Border::BORDER_THICK,
+                //             'color' => ['rgb' => '000000'],
+                //         ],
+                //     ],
+                // ]);
 
+                // $sheet->getStyle("A2:A46")
+                // ->applyFromArray([
+                //     'borders' => [
+                //         'left' => [
+                //             'borderStyle' => Border::BORDER_THICK,
+                //             'color' => ['rgb' => '000000'],
+                //         ],
+                //     ],
+                // ]);
+                // $sheet->getStyle("H2:H46")
+                // ->applyFromArray([
+                //     'borders' => [
+                //         'right' => [
+                //             'borderStyle' => Border::BORDER_THICK,
+                //             'color' => ['rgb' => '000000'],
+                //         ],
+                //     ],
+                // ]);
 
                 //==== Detect last row & column automatically
-                $highestRow = $sheet->getHighestRow();
-                $highestColumn = $sheet->getHighestColumn();
+                // $highestRow = $sheet->getHighestRow();
+                // $highestColumn = $sheet->getHighestColumn();
+
 
                 // === Apply full borders to all cells ===
                 // $sheet->getStyle("A1:{$highestColumn}{$highestRow}")
@@ -338,16 +440,7 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                 //     ],
                 // ]);
 
-                // === Alignment for input cells ===
-                // $sheet->getStyle("A1:{$highestColumn}{$highestRow}")->applyFromArray([
-                //     // 'font' => ['bold' => true, 'size' => 14],
-                //     'alignment' => ['horizontal' => 'center'],
-                //     'fill' => [
-                //         'fillType' => 'solid',
-                //         'startColor' => ['argb' => Color::COLOR_WHITE], // White background
-                //         'wrapText' => true,
-                //     ],
-                // ]);
+
 
                 // === 8. Freeze Pane (keep title and headers visible) ===
                 // $sheet->freezePane('A5');
