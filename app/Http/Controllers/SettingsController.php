@@ -23,6 +23,126 @@ class SettingsController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
+    public function saveDropdownMasterDetails (Request $request,DropdownMasterDetailRequest $dropdownMasterDetailRequest){
+        date_default_timezone_set('Asia/Manila');
+        try {
+            $dropdownMasterDetailRequest = $dropdownMasterDetailRequest->validated();
+            $dropdownMasterDetailRequest ['dropdown_masters_id'] = $request->dropdown_masters_id;
+            $dropdownMasterDetailRequest ['remarks'] = $request->remarks;
+            if ( isset($request->dropdown_master_details_id) ){
+                $conditions =[
+                    'id' => $request->dropdown_master_details_id
+                ];
+                $this->resourceInterface->updateConditions(DropdownMasterDetail::class,$conditions,$dropdownMasterDetailRequest);
+            }else{
+                $dropdownMasterDetailRequest ['created_at'] = now();
+                $this->resourceInterface->create(DropdownMasterDetail::class,$dropdownMasterDetailRequest);
+            }
+
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function saveUserApprover(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+
+            $getUser = User::where( 'rapidx_user_id' , $request->userId)->first();
+            if( filled( $getUser) ){
+                if($getUser->roles === "APP"){
+                    User::where( 'rapidx_user_id' , $request->userId)->update([
+                        'roles' => "USER",
+                    ]);
+                }
+                if($getUser->roles != "APP"){
+                    User::where( 'rapidx_user_id' , $request->userId)->update([
+                        'roles' => "APP",
+                    ]);
+                }
+                DB::commit();
+                return response()->json(['isSuccess' => 'true']);
+            }
+
+            $user = User::insert([
+                'rapidx_user_id' => $request->userId,
+                'roles' => 'APP',
+            ]);
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveRapidxUser(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $isModuleAccess = DB::connection('mysql_rapidx')
+            ->table('user_accesses')
+            ->select('*')
+            ->from('user_accesses')
+            ->where('user_id',$request->rapidxUser)
+            ->where('module_id',46)
+            ->count();
+            if($isModuleAccess > 0){
+                return response()->json(['is_success' => 'false', 'msg' => 'User already has access to this module.'],409);
+            }
+            $requestValidated = [
+                'user_level_id' => 5,
+                'module_id' => 46,
+                'user_id' => $request->rapidxUser,
+                'user_access_stat' => 1,
+                'update_version' => 1,
+                'created_by' => session('rapidx_user_id'),
+                'last_updated_by' => session('rapidx_user_id'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            $validUserAccess = DB::connection('mysql_rapidx')
+            ->table('user_accesses')
+            ->insert($requestValidated);
+
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveEcrRequirementDetails(ClassificationRequirementRequest $classificationRequirementRequest){
+        try {
+            DB::beginTransaction();
+            date_default_timezone_set('Asia/Manila');
+            $classificationRequirementRequestValidated = $classificationRequirementRequest->validated();
+            $classificationRequirementRequestValidated['created_at'] = now();
+
+            if(blank($classificationRequirementRequest->ecr_requirement_details_id)){
+                $this->resourceInterface->create(ClassificationRequirement::class, $classificationRequirementRequestValidated);
+            }else{
+                $this->resourceInterface->updateConditions(ClassificationRequirement::class,['id' => $classificationRequirementRequest->ecr_requirement_details_id], $classificationRequirementRequest->validated());
+            }
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function delClassificationRequirements(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $this->resourceInterface->updateConditions(ClassificationRequirement::class,['id' => (int)$request->classificationRequirementsId], ['deleted_at' => now()]);
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
     public function getAdminAccessOpt(Request $request){ //get_admin_access_opt
         try {
             $validUserAccess = DB::connection('mysql_rapidx')->select(
@@ -123,6 +243,7 @@ class SettingsController extends Controller
     public function getDropdownMasterCategory(Request $request){
         try {
             $dropdownMaster =  $this->resourceInterface->readCustomEloquent(DropdownMaster::class,['category'],[],[]);
+           $dropdownMaster->whereNull('deleted_at');
            $dropdownMaster= $dropdownMaster->groupBy('category')->get();
             return response()->json([
                 'is_success' => 'true',
@@ -143,6 +264,7 @@ class SettingsController extends Controller
 
             $dropdownMaster =  $this->resourceInterface->readCustomEloquent(DropdownMasterDetail::class,[],$relations,$conditions);
 
+            $dropdownMaster->whereNull('deleted_at');
             $dropdownMaster->orderBy('dropdown_masters_details');
             return DataTables::of($dropdownMaster)
             ->addColumn('get_action',function($row){
@@ -173,11 +295,16 @@ class SettingsController extends Controller
 
             $dropdownMaster =  $this->resourceInterface->readCustomEloquent(ClassificationRequirement::class,[],$relations,$conditions);
 
+           $dropdownMaster->whereNull('deleted_at');
            $dropdownMaster->orderBy('id');
             // ->get();
             return DataTables::of($dropdownMaster)
             ->addColumn('get_action',function($row){
-                return $btn = '<button dropdown-master-details-id = "'.$row->id.'"  class="btn btn-outline-info btn-sm" data-toggle="modal" id="btnDropdownMasterDetails" type="button" title="Edit"><i class="fas fa-edit"></i></button>';
+                $btn = '';
+                $btn .= '<button dropdown-master-details-id = "'.$row->id.'"  class="btn btn-outline-info btn-sm" data-toggle="modal" id="btnDropdownMasterDetails" type="button" title="Edit"><i class="fas fa-edit"></i></button>';
+                $btn .= '<br>';
+                $btn .= '<button dropdown-master-details-id = "'.$row->id.'"  class="btn btn-outline-danger btn-sm" data-toggle="modal" id="btnDelClassificationRequirements" type="button" title="Delete"><i class="fas fa-trash"></i></button>';
+                return $btn;
             })
             ->addColumn('get_status',function($row){
                 $result = '';
@@ -207,77 +334,10 @@ class SettingsController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
-    public function saveDropdownMasterDetails (Request $request,DropdownMasterDetailRequest $dropdownMasterDetailRequest){
-        date_default_timezone_set('Asia/Manila');
-        try {
-            $dropdownMasterDetailRequest = $dropdownMasterDetailRequest->validated();
-            $dropdownMasterDetailRequest ['dropdown_masters_id'] = $request->dropdown_masters_id;
-            $dropdownMasterDetailRequest ['remarks'] = $request->remarks;
-            if ( isset($request->dropdown_master_details_id) ){
-                $conditions =[
-                    'id' => $request->dropdown_master_details_id
-                ];
-                $this->resourceInterface->updateConditions(DropdownMasterDetail::class,$conditions,$dropdownMasterDetailRequest);
-            }else{
-                $dropdownMasterDetailRequest ['created_at'] = now();
-                $this->resourceInterface->create(DropdownMasterDetail::class,$dropdownMasterDetailRequest);
-            }
-
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function saveUserApprover(Request $request){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-
-            $getUser = User::where( 'rapidx_user_id' , $request->userId)->first();
-            if( filled( $getUser) ){
-                if($getUser->roles === "APP"){
-                    User::where( 'rapidx_user_id' , $request->userId)->update([
-                        'roles' => "USER",
-                    ]);
-                }
-                if($getUser->roles != "APP"){
-                    User::where( 'rapidx_user_id' , $request->userId)->update([
-                        'roles' => "APP",
-                    ]);
-                }
-                DB::commit();
-                return response()->json(['isSuccess' => 'true']);
-            }
-
-            $user = User::insert([
-                'rapidx_user_id' => $request->userId,
-                'roles' => 'APP',
-            ]);
-            DB::commit();
-            return response()->json(['isSuccess' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
-    public function saveEcrRequirementDetails(ClassificationRequirementRequest $classificationRequirementRequest){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            if(blank($classificationRequirementRequest->ecr_requirement_details_id)){
-                $this->resourceInterface->create(ClassificationRequirement::class, $classificationRequirementRequest->validated());
-            }else{
-                $this->resourceInterface->updateConditions(ClassificationRequirement::class,['id' => $classificationRequirementRequest->ecr_requirement_details_id], $classificationRequirementRequest->validated());
-            }
-            DB::commit();
-            return response()->json(['isSuccess' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
     public function getEcrRequirementMasterCategory(Request $request){
         try {
             $dropdownMaster =  $this->resourceInterface->readCustomEloquent(Classification::class,['category','id'],[],[]);
+           $dropdownMaster->whereNull('deleted_at');
            $dropdownMaster= $dropdownMaster
            ->get();
             return response()->json([
@@ -291,6 +351,7 @@ class SettingsController extends Controller
     public function getEcrRequirementDetailsById(Request $request){
         try {
            $classificationRequirement =  $this->resourceInterface->readCustomEloquent(ClassificationRequirement::class,[],[],['id'=>$request->dropdownMasterDetailsId]);
+           $classificationRequirement->whereNull('deleted_at');
            $classificationRequirement = $classificationRequirement
            ->first();
             return response()->json([
@@ -301,42 +362,5 @@ class SettingsController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
-    public function saveRapidxUser(Request $request){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
 
-
-            $isModuleAccess = DB::connection('mysql_rapidx')
-            ->table('user_accesses')
-            ->select('*')
-            ->from('user_accesses')
-            ->where('user_id',$request->rapidxUser)
-            ->where('module_id',46)
-            ->count();
-            if($isModuleAccess > 0){
-                return response()->json(['is_success' => 'false', 'msg' => 'User already has access to this module.'],409);
-            }
-            $requestValidated = [
-                'user_level_id' => 5,
-                'module_id' => 46,
-                'user_id' => $request->rapidxUser,
-                'user_access_stat' => 1,
-                'update_version' => 1,
-                'created_by' => session('rapidx_user_id'),
-                'last_updated_by' => session('rapidx_user_id'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-            $validUserAccess = DB::connection('mysql_rapidx')
-            ->table('user_accesses')
-            ->insert($requestValidated);
-
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
 }

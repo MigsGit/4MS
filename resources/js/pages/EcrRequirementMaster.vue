@@ -16,7 +16,7 @@
         <div class="card mt-3"  style="width: 100%;">
             <div class="row justify-content-end">
                 <div class="col-md-2 mt-3">
-                    <button v-if="frmDropdownMasterDetails.dropdownMastersId != ''" @click="btnAddDropdownMasterDetails" type="button" class="btn btn-primary btn-sm mb-2"><i class="fas fa-plus"></i> Add Dropdown Details</button>
+                    <button v-if="slctDropdownMasterByCategory!= ''" @click="btnAddDropdownMasterDetails" type="button" class="btn btn-primary btn-sm mb-2"><i class="fas fa-plus"></i> Add Dropdown Details</button>
                 </div>
             </div>
             <div class="card-body overflow-auto">
@@ -58,6 +58,7 @@
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
                             <span class="input-group-text" id="addon-wrapping">Ecr Category:</span>
                             <Multiselect
+                                :disabled="isDisabledCategory"
                                 v-model="frmEcrRequirementDetails.category"
                                 :close-on-select="true"
                                 :searchable="true"
@@ -116,6 +117,7 @@
     const slctDropdownMasterByCategory = ref(null);
     const btnDropdownMasterDetails = ref(null);
     const tblDropdownMasterDetails = ref(null);
+    const isDisabledCategory = ref(true);
 
     //Constant Object
     const {
@@ -131,13 +133,31 @@
     const { axiosSaveData } = useForm(); // Call the useFetch function
     const selectedCategory = ref(null);
     const tblDropdownMasterDetailsColumns = [
-    {   data: 'get_action',
+        {   data: 'get_action',
             createdCell(cell){
                 let btnDropdownMasterDetails = cell.querySelector('#btnDropdownMasterDetails');
+                let btnDelClassificationRequirements = cell.querySelector('#btnDelClassificationRequirements');
                 if(btnDropdownMasterDetails != null){
                     btnDropdownMasterDetails.addEventListener('click',function(){
-                        let dropdownMasterDetailsId = this.getAttribute('dropdown-master-details-id');
-                        getEcrRequirementDetailsById(dropdownMasterDetailsId);
+                        let classificationRequirementsId = this.getAttribute('dropdown-master-details-id');
+                        getEcrRequirementDetailsById(classificationRequirementsId);
+                    });
+                }
+                if(btnDelClassificationRequirements != null){
+                    btnDelClassificationRequirements.addEventListener('click',function(){
+                        let classificationRequirementsId = this.getAttribute('dropdown-master-details-id');
+                        Swal.fire({
+                            title: 'Confirmation',
+                            text: 'Are you sure to delete this data !',
+                            icon: 'warning',
+                            allowOutsideClick: false,
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes'
+                        }).then((result) => {
+                            delClassificationRequirements(classificationRequirementsId)
+                        })
                     });
                 }
             }
@@ -174,7 +194,6 @@
         axiosFetchData(apiParams,'api/get_ecr_requirement_details_by_id',function(response){
             let data = response.data;
             let classificationRequirement = data.classificationRequirement;
-            console.log(data);
             frmEcrRequirementDetails.value.ecrRequirementDetailsId = classificationRequirement.id,
             frmEcrRequirementDetails.value.category = classificationRequirement.classifications_id,
             frmEcrRequirementDetails.value.requirement = classificationRequirement.requirement,
@@ -201,6 +220,7 @@
         });
     }
     const onDropdownMasterByCategory = async (category) => {
+        frmEcrRequirementDetails.value.category = category;
         tblDropdownMasterDetails.value.dt.ajax.url('api/load_classification_requirements?dropDownMastersId='+category).draw();
         // frmDropdownMasterDetails.value.dropdownMastersId = dropDownMastersId;
     }
@@ -224,6 +244,19 @@
         );
         axiosSaveData(formData,'api/save_ecr_requirement_details', (response) =>{
             modal.SaveEcrRequirementDetails.hide();
+            tblDropdownMasterDetails.value.dt.ajax.url('api/load_classification_requirements?dropDownMastersId='+frmEcrRequirementDetails.value.category).draw();
+        });
+    }
+    const delClassificationRequirements = async (classificationRequirementsId) => {
+        let formData = new FormData();
+        //Append form data
+        [
+             ["classificationRequirementsId", classificationRequirementsId],
+        ].forEach(([key, value]) =>
+            formData.append(key, value)
+        );
+
+        axiosSaveData(formData,'api/del_classification_requirements', (response) =>{
             tblDropdownMasterDetails.value.dt.ajax.url('api/load_classification_requirements?dropDownMastersId='+frmEcrRequirementDetails.value.category).draw();
         });
     }

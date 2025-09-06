@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function(){
         Route::post('save_ecr_requirement_details', 'saveEcrRequirementDetails')->name('save_ecr_requirement_details');
         Route::post('save_user_approver', 'saveUserApprover')->name('save_user_approver');
         Route::post('save_rapidx_user','saveRapidxUser')->name('save_rapidx_user');
+        Route::post('del_classification_requirements','delClassificationRequirements')->name('del_classification_requirements');
 
         Route::get('get_user_master', 'getUserMaster')->name('get_user_master');
         Route::get('load_dropdown_master_details', 'loadDropdownMasterDetails')->name('load_dropdown_master_details');
