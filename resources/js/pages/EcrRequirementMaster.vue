@@ -48,23 +48,40 @@
             </div>
         </div>
     </div>
-    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" title="Dropdown Master Details" @add-event="saveDropdownMasterDetails()" ref="modalSaveDropdownMasterDetails">
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" title="Ecr Requirement Master Details" @add-event="saveEcrRequirementDetails()" ref="modalSaveEcrRequirementDetails">
         <template #body>
                 <div class="row">
                     <div class="input flex-nowrap mb-2 input-group-sm">
-                            <input v-model="frmDropdownMasterDetails.dropdownMastersId" type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
-                            <input v-model="frmDropdownMasterDetails.dropdownMasterDetailsId" type="hidden" class="form-control form-control" aria-describedby="addon-wrapping">
+                            <input v-model="frmEcrRequirementDetails.ecrRequirementDetailsId" type="number" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                     </div>
                     <div class="col-sm-12">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
-                            <span class="input-group-text" id="addon-wrapping">Details:</span>
-                            <input  v-model="frmDropdownMasterDetails.dropdownMastersDetails" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                            <span class="input-group-text" id="addon-wrapping">Ecr Category:</span>
+                            <Multiselect
+                                v-model="frmEcrRequirementDetails.category"
+                                :close-on-select="true"
+                                :searchable="true"
+                                :options="optDropdownMasterByCategory"
+                            />
                         </div>
                     </div>
                     <div class="col-sm-12">
                         <div class="input-group flex-nowrap mb-2 input-group-sm">
-                            <span class="input-group-text" id="addon-wrapping">Remarks:</span>
-                            <textarea v-model="frmDropdownMasterDetails.remarks"class="form-control form-control" aria-describedby="addon-wrapping">
+                            <span class="input-group-text" id="addon-wrapping">Requirement:</span>
+                            <input  v-model="frmEcrRequirementDetails.requirement" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="input-group flex-nowrap mb-2 input-group-sm">
+                            <span class="input-group-text" id="addon-wrapping">Details:</span>
+                            <textarea v-model="frmEcrRequirementDetails.details"class="form-control form-control" aria-describedby="addon-wrapping">
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="input-group flex-nowrap mb-2 input-group-sm">
+                            <span class="input-group-text" id="addon-wrapping">Evidence:</span>
+                            <textarea v-model="frmEcrRequirementDetails.evidence"class="form-control form-control" aria-describedby="addon-wrapping">
                             </textarea>
                         </div>
                     </div>
@@ -81,6 +98,7 @@
     import {
         onMounted,
         ref,
+        toRef,
     } from 'vue'
     import ModalComponent from '../components/ModalComponent.vue';
     import useSettings from '../composables/settings.js';
@@ -91,7 +109,7 @@
     DataTable.use(DataTablesCore);
 
     //Ref State
-    const modalSaveDropdownMasterDetails = ref(null);
+    const modalSaveEcrRequirementDetails = ref(null);
     const optDropdownMaster = ref([]);
     const optDropdownMasterByCategory = ref([]);
     const slctDropdownMaster = ref(null);
@@ -103,6 +121,7 @@
     const {
         modal,
         frmDropdownMasterDetails,
+        frmEcrRequirementDetails,
         axiosFetchData,
         getDropdownMasterByOpt
     } = useSettings();
@@ -118,7 +137,7 @@
                 if(btnDropdownMasterDetails != null){
                     btnDropdownMasterDetails.addEventListener('click',function(){
                         let dropdownMasterDetailsId = this.getAttribute('dropdown-master-details-id');
-                        getDropdownMasterDetailsId(dropdownMasterDetailsId);
+                        getEcrRequirementDetailsById(dropdownMasterDetailsId);
                     });
                 }
             }
@@ -129,41 +148,38 @@
         {   data: 'evidence'} ,
     ];
 
-    const dropDropdownMasterByCategoryParams = {
+    const dropdownMasterByCategoryParams = {
         globalVar: optDropdownMasterByCategory,
         formModel: slctDropdownMasterByCategory,
+        selectedVal: '',
+    };
+    const ecrDropdownMasterByCategoryParams = {
+        globalVar: optDropdownMasterByCategory,
+        formModel: toRef(frmEcrRequirementDetails.value,'category'),
         selectedVal: '',
     };
 
 
     // optDropdownMasterByCategory
     onMounted(async () => {
-        modal.modalSaveDropdownMasterDetails = new Modal(modalSaveDropdownMasterDetails.value.modalRef,{ keyboard: false });
-        await getDropdownMasterCategory(dropDropdownMasterByCategoryParams);
-        modalSaveDropdownMasterDetails.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            frmDropdownMasterDetails.value.dropdownMasterDetailsId = '';
-            frmDropdownMasterDetails.value.dropdownMastersDetails = '';
-            frmDropdownMasterDetails.value.remarks = '';
-        });
+        modal.SaveEcrRequirementDetails = new Modal(modalSaveEcrRequirementDetails.value.modalRef,{ keyboard: false });
+        await getDropdownMasterCategory(dropdownMasterByCategoryParams);
+        await getDropdownMasterCategory(ecrDropdownMasterByCategoryParams);
     })
     //Functions
-    const getDropdownMaster = async (params) =>{
+    const getEcrRequirementDetailsById = async (dropdownMasterDetailsId) => {
         let apiParams = {
-            category : params.category
+            dropdownMasterDetailsId : dropdownMasterDetailsId
         }
-        axiosFetchData(apiParams,'api/get_dropdown_master',function(response){
+        axiosFetchData(apiParams,'api/get_ecr_requirement_details_by_id',function(response){
             let data = response.data;
-            let dropdownMaster = data.dropdownMaster;
-            params.globalVar.value.splice(0, params.globalVar.value.length,
-                { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
-                    ...dropdownMaster.map((value) => {
-                    return {
-                        value: value.id,
-                        label: value.dropdown_masters
-                    }
-                }),
-            );
-            params.formModel.value = params.selectedVal; //selectedValue after the reading data
+            let classificationRequirement = data.classificationRequirement;
+            console.log(data);
+            frmEcrRequirementDetails.value.ecrRequirementDetailsId = classificationRequirement.id,
+            frmEcrRequirementDetails.value.requirement = classificationRequirement.requirement,
+            frmEcrRequirementDetails.value.details = classificationRequirement.details,
+            frmEcrRequirementDetails.value.evidence = classificationRequirement.evidence,
+            modal.SaveEcrRequirementDetails.show();
         });
     }
     const getDropdownMasterCategory = async (params) =>{
@@ -189,24 +205,11 @@
     }
 
     const btnAddDropdownMasterDetails = async () => {
-        modal.modalSaveDropdownMasterDetails.show();
+        modal.SaveEcrRequirementDetails.show();
     }
 
-    const getDropdownMasterDetailsId = async (dropdownMasterDetailsId) => {
-        let apiParams = {
-            'dropdownMasterDetailsId' : dropdownMasterDetailsId
-        }
-        axiosFetchData(apiParams,'api/get_dropdown_master_details_id',function(response){
-            let data = response.data;
-            let dropdownMasterDetail = data.dropdownMasterDetail[0];
-            frmDropdownMasterDetails.value.dropdownMasterDetailsId = dropdownMasterDetail.id;
-            frmDropdownMasterDetails.value.dropdownMastersDetails = dropdownMasterDetail.dropdown_masters_details;
-            frmDropdownMasterDetails.value.remarks = dropdownMasterDetail.remarks;
-            modal.modalSaveDropdownMasterDetails.show();
-        });
-    }
 
-    const saveDropdownMasterDetails = async () => {
+    const saveEcrRequirementDetails = async () => {
         let formData = new FormData();
         //Append form data
         [
@@ -218,7 +221,7 @@
             formData.append(key, value)
         );
         axiosSaveData(formData,'api/save_dropdown_master_details', (response) =>{
-            modal.modalSaveDropdownMasterDetails.hide();
+            modal.SaveEcrRequirementDetails.hide();
             tblDropdownMasterDetails.value.dt.ajax.url('api/load_classification_requirements?dropDownMastersId='+frmDropdownMasterDetails.value.dropdownMastersId).draw();
         });
     }

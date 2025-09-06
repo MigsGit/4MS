@@ -91,6 +91,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_admin_access_opt', 'getAdminAccessOpt')->name('get_admin_access_opt');
         Route::get('get_dropdown_master_category', 'getDropdownMasterCategory')->name('get_dropdown_master_category');
         Route::get('get_ecr_requirement_master_category', 'getEcrRequirementMasterCategory')->name('get_ecr_requirement_master_category');
+        Route::get('get_ecr_requirement_details_by_id', 'getEcrRequirementDetailsById')->name('get_ecr_requirement_details_by_id');
     });
 
     Route::controller(ManController::class)->group(function () {

@@ -48,6 +48,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="col-xl-3 col-md-6">
                                 <div class="card text-white mb-4" :class="ecrApproval != 0 ? 'bg-danger' : 'bg-dark'" >

@@ -272,7 +272,19 @@ class SettingsController extends Controller
             return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
         }
     }
-
+    public function getEcrRequirementDetailsById(Request $request){
+        try {
+           $classificationRequirement =  $this->resourceInterface->readCustomEloquent(ClassificationRequirement::class,[],[],['id'=>$request->dropdownMasterDetailsId]);
+           $classificationRequirement = $classificationRequirement
+           ->first();
+            return response()->json([
+                'is_success' => 'true',
+                'classificationRequirement' => $classificationRequirement
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
+        }
+    }
     public function saveRapidxUser(Request $request){
         try {
             date_default_timezone_set('Asia/Manila');

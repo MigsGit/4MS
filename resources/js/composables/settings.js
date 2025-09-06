@@ -10,6 +10,12 @@ export default function useSettings(){
         dropdownMastersDetails : '',
         remarks : '',
     });
+    const frmEcrRequirementDetails = ref({
+        ecrRequirementDetailsId : '',
+        requirement : '',
+        details : '',
+        evidence : '',
+    });
     const modal ={}
 
     const getDropdownMasterByOpt = async (params) => {
@@ -97,6 +103,7 @@ export default function useSettings(){
     return {
         modal,
         frmDropdownMasterDetails,
+        frmEcrRequirementDetails,
         axiosFetchData,
         getDropdownMasterByOpt,
         getRapidxUserByIdOpt,
