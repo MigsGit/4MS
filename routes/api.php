@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function(){
 
     Route::controller(SettingsController::class)->group(function () {
         Route::post('save_dropdown_master_details', 'saveDropdownMasterDetails')->name('save_dropdown_master_details');
+        Route::post('save_ecr_requirement_details', 'saveEcrRequirementDetails')->name('save_ecr_requirement_details');
         Route::post('save_user_approver', 'saveUserApprover')->name('save_user_approver');
         Route::post('save_rapidx_user','saveRapidxUser')->name('save_rapidx_user');
 

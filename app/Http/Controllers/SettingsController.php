@@ -13,6 +13,7 @@ use App\Models\DropdownMasterDetail;
 use App\Interfaces\ResourceInterface;
 use App\Models\ClassificationRequirement;
 use App\Http\Requests\DropdownMasterDetailRequest;
+use App\Http\Requests\ClassificationRequirementRequest;
 
 class SettingsController extends Controller
 {
@@ -252,6 +253,21 @@ class SettingsController extends Controller
                 'rapidx_user_id' => $request->userId,
                 'roles' => 'APP',
             ]);
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveEcrRequirementDetails(ClassificationRequirementRequest $classificationRequirementRequest){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            if(blank($classificationRequirementRequest->ecr_requirement_details_id)){
+                $this->resourceInterface->create(ClassificationRequirement::class, $classificationRequirementRequest->validated());
+            }else{
+                $this->resourceInterface->updateConditions(ClassificationRequirement::class,['id' => $classificationRequirementRequest->ecr_requirement_details_id], $classificationRequirementRequest->validated());
+            }
             DB::commit();
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {

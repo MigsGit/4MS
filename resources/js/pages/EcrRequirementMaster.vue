@@ -176,6 +176,7 @@
             let classificationRequirement = data.classificationRequirement;
             console.log(data);
             frmEcrRequirementDetails.value.ecrRequirementDetailsId = classificationRequirement.id,
+            frmEcrRequirementDetails.value.category = classificationRequirement.classifications_id,
             frmEcrRequirementDetails.value.requirement = classificationRequirement.requirement,
             frmEcrRequirementDetails.value.details = classificationRequirement.details,
             frmEcrRequirementDetails.value.evidence = classificationRequirement.evidence,
@@ -213,16 +214,17 @@
         let formData = new FormData();
         //Append form data
         [
-            ["dropdown_masters_id", frmDropdownMasterDetails.value.dropdownMastersId],
-            ["dropdown_master_details_id", frmDropdownMasterDetails.value.dropdownMasterDetailsId],
-            ["dropdown_masters_details", frmDropdownMasterDetails.value.dropdownMastersDetails],
-            ["remarks", frmDropdownMasterDetails.value.remarks],
+             ["ecr_requirement_details_id", frmEcrRequirementDetails.value.ecrRequirementDetailsId],
+             ["classifications_id", frmEcrRequirementDetails.value.category],
+             ["requirement", frmEcrRequirementDetails.value.requirement ],
+             ["details", frmEcrRequirementDetails.value.details ],
+             ["evidence", frmEcrRequirementDetails.value.evidence ],
         ].forEach(([key, value]) =>
             formData.append(key, value)
         );
-        axiosSaveData(formData,'api/save_dropdown_master_details', (response) =>{
+        axiosSaveData(formData,'api/save_ecr_requirement_details', (response) =>{
             modal.SaveEcrRequirementDetails.hide();
-            tblDropdownMasterDetails.value.dt.ajax.url('api/load_classification_requirements?dropDownMastersId='+frmDropdownMasterDetails.value.dropdownMastersId).draw();
+            tblDropdownMasterDetails.value.dt.ajax.url('api/load_classification_requirements?dropDownMastersId='+frmEcrRequirementDetails.value.category).draw();
         });
     }
 </script>
