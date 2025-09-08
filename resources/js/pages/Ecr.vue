@@ -911,7 +911,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table">
+                <table class="table" v-show="currentStatus=== 'OK'" >
                     <thead>
 
                         <tr>
@@ -1070,6 +1070,7 @@
                     btnViewEcrRef.addEventListener('click',function(){
                         let ecrsIdEncrypted = this.getAttribute('ecrs-id-encrypted');
                         let ecrStatus = this.getAttribute('ecr-status');
+                        currentStatus.value = ecrStatus;
                         let params = {
                             ecrsId : ecrsIdEncrypted,
                             ecrStatus : ecrStatus,

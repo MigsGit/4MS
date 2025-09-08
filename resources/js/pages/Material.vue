@@ -270,6 +270,7 @@
                                                                 :searchable="true"
                                                                 :options="materialVar.prdnCheckedBy"
                                                             />
+
                                                         </td>
                                                         <td>
                                                             <Multiselect
@@ -281,7 +282,7 @@
                                                             />
                                                         </td>
                                                         <td>
-                                                            <button @click="reloadRapidxUserMaster('prdnPreparedByParams',commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                            <button @click="reloadRapidxUserMaster('prdn')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
                                                                 <font-awesome-icon class="nav-icon" icon="refresh" />
                                                             </button>
                                                         </td>
@@ -319,7 +320,7 @@
                                                             />
                                                         </td>
                                                         <td>
-                                                            <button @click="reloadRapidxUserMaster('prdnCheckedByParams',commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                            <button @click="reloadRapidxUserMaster('purchasing')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
                                                                 <font-awesome-icon class="nav-icon" icon="refresh" />
                                                             </button>
                                                         </td>
@@ -356,12 +357,12 @@
                                                             />
                                                         </td>
                                                         <td>
-                                                            <button @click="reloadRapidxUserMaster('prdnApprovedByParams',commonVar.rapidxUserDeptGroup)" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                            <button @click="reloadRapidxUserMaster('ppc')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
                                                                 <font-awesome-icon class="nav-icon" icon="refresh" />
                                                             </button>
                                                         </td>
                                                     </tr>
-                                                    <tr >
+                                                    <tr class="EMS">
                                                         <td>
                                                             EMS
                                                         </td>
@@ -392,8 +393,13 @@
                                                                 :options="materialVar.emsApprovedBy"
                                                             />
                                                         </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('ems')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
+                                                        </td>
                                                     </tr>
-                                                    <tr >
+                                                    <tr class="QC">
                                                         <td>
                                                             QC
                                                         </td>
@@ -423,6 +429,11 @@
                                                                 :searchable="true"
                                                                 :options="materialVar.qcApprovedBy"
                                                             />
+                                                        </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('qc')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                     <tr class="pro-engineer" v-show="isInternalExternal == 'External'">
@@ -456,6 +467,11 @@
                                                                 :options="materialVar.proEnggApprovedBy"
                                                             />
                                                         </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('proEngg')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                     <tr class="main-engineer" v-show="isInternalExternal == 'External'">
                                                         <td>
@@ -487,6 +503,11 @@
                                                                 :searchable="true"
                                                                 :options="materialVar.mainEnggApprovedBy"
                                                             />
+                                                        </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('mainEngg')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                     <tr class="engineer" v-show="isInternalExternal == 'Internal'">
@@ -520,8 +541,13 @@
                                                                 :options="materialVar.enggApprovedBy"
                                                             />
                                                         </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('engg')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
+                                                        </td>
                                                     </tr>
-                                                    <tr >
+                                                    <tr class="QA">
                                                         <td>
                                                             QA
                                                         </td>
@@ -551,6 +577,11 @@
                                                                 :searchable="true"
                                                                 :options="materialVar.qaApprovedBy"
                                                             />
+                                                        </td>
+                                                        <td>
+                                                            <button @click="reloadRapidxUserMaster('qa')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="refresh">
+                                                                <font-awesome-icon class="nav-icon" icon="refresh" />
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -1474,26 +1505,57 @@
         await getDropdownMasterByOpt(stringToVal);
     }
     const reloadRapidxUserMaster = async (dropdownRapidxUserMaster,rapidxUserDeptGroup=null) => {
-        let params = '';
         switch (dropdownRapidxUserMaster) {
-            case 'prdnPreparedByParams':
-                params = eval(dropdownRapidxUserMaster);
+            case 'prdn':
+                await getRapidxUserByIdOpt(prdnPreparedByParams);
+                await getRapidxUserByIdOpt(prdnCheckedByParams);
+                await getRapidxUserByIdOpt(prdnApprovedByParams);
                 break;
-            case 'prdnCheckedByParams':
-                params = eval(dropdownRapidxUserMaster);
+            case 'purchasing':
+                    getRapidxUserByIdOpt(prPreparedByParams);
+                    getRapidxUserByIdOpt(prCheckedByParams);
+                    getRapidxUserByIdOpt(prApprovedByParams);
                 break;
-            case 'prdnApprovedByParams':
-                params = eval(dropdownRapidxUserMaster);
+            case 'ppc':
+                getRapidxUserByIdOpt(ppcPreparedByParams);
+                getRapidxUserByIdOpt(ppcCheckedByParams);
+                getRapidxUserByIdOpt(ppcApprovedByParams);
+                break;
+            case 'ems':
+                getRapidxUserByIdOpt(emsPreparedByParams);
+                getRapidxUserByIdOpt(emsCheckedByParams);
+                getRapidxUserByIdOpt(emsApprovedByParams);
+                break;
+            case 'qc':
+                getRapidxUserByIdOpt(qcPreparedByParams);
+                getRapidxUserByIdOpt(qcCheckedByParams);
+                getRapidxUserByIdOpt(qcApprovedByParams);
+                break;
+            case 'proEngg':
+                getRapidxUserByIdOpt(proEnggPreparedByParams);
+                getRapidxUserByIdOpt(proEnggCheckedByParams);
+                getRapidxUserByIdOpt(proEnggApprovedByParams);
+                break;
+            case 'mainEngg':
+                getRapidxUserByIdOpt(mainEnggPreparedByParams);
+                getRapidxUserByIdOpt(mainEnggCheckedByParams);
+                getRapidxUserByIdOpt(mainEnggApprovedByParams);
+                break;
+            case 'engg':
+                getRapidxUserByIdOpt(enggPreparedByParams);
+                getRapidxUserByIdOpt(enggCheckedByParams);
+                getRapidxUserByIdOpt(enggApprovedByParams);
+                break;
+            case 'qa':
+                getRapidxUserByIdOpt(qaPreparedByParams);
+                getRapidxUserByIdOpt(qaCheckedByParams);
+                getRapidxUserByIdOpt(qaApprovedByParams);
                 break;
             default:
-                params = '';
+                alert('Invalid Dropdown Master Details');
                 break;
         }
-        if(params === ''){
-            alert('Invalid Dropdown Master Details');
-            return;
-        }
-        await getRapidxUserByIdOpt(params);
+
     }
     // Override default classes for small size and readonly styles
     const multiselectSm =ref ({
