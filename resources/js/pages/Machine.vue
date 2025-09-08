@@ -539,7 +539,7 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Special Inspection" @add-event="saveSpecialInspection()" ref="modalSaveSpecialInspection">
         <template #body>
-            <ModalSpecialInspectionComponent @reload-lqc="reloadLqc()" @reload-inspector="reloadInspector()" :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
+            <ModalSpecialInspectionComponent @click-reload-lqc="reloadLqc()" @click-reload-inspector="reloadInspector()" :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
             </ModalSpecialInspectionComponent>
         </template>
         <template #footer>
@@ -873,6 +873,7 @@
         modalSaveSpecialInspection,
         modalExternalDisposition,
         specialInsQcInspectorParams,
+        specialInsLqcParams,
         frmSpecialInspection,
         saveSpecialInspection,
         getCurrentApprover,
@@ -1114,7 +1115,7 @@
             resetEcrForm(frmEcrDetails.value);
         });
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            resetEcrForm(frmSpecialInspection.value);
+            frmSpecialInspection.value.ecrsId;
         });
 
         await getDropdownMasterByOpt(descriptionOfChangeParams);
@@ -1127,11 +1128,11 @@
     })
 
     // === Functions
-    const reloadLqc = async ()=>{
-        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
-    }
     const reloadInspector = async ()=>{
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+    }
+    const reloadLqc = async ()=>{
+        await getRapidxUserByIdOpt(specialInsLqcParams,);
     }
     const onChangeAdminAccess = async (selectedParams)=>{
         tblEcrByStatus.value.dt.ajax.url("api/load_ecr_machine_by_status?category=Machine"+"&& adminAccess="+selectedParams).draw();

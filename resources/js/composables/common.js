@@ -57,7 +57,6 @@ export default function useCommon(){
     const externalDisposition  = ref(null);
 
     const frmSpecialInspection = ref({
-        ecrsId : "",
         productDetail : "",
         lotQty : "",
         samples : "",

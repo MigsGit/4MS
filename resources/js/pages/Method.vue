@@ -405,7 +405,7 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Special Inspection" @add-event="saveSpecialInspection()" ref="modalSaveSpecialInspection">
         <template #body>
-            <ModalSpecialInspectionComponent :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
+            <ModalSpecialInspectionComponent @click-reload-lqc="reloadLqc()" @click-reload-inspector="reloadInspector()" :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
             </ModalSpecialInspectionComponent>
         </template>
         <template #footer>
@@ -852,6 +852,7 @@
         modalSaveSpecialInspection,
         modalExternalDisposition,
         specialInsQcInspectorParams,
+        specialInsLqcParams,
         frmSpecialInspection,
         saveSpecialInspection,
         getCurrentApprover,
@@ -1090,7 +1091,7 @@
             resetEcrForm(frmEcrDetails.value);
         });
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            resetEcrForm(frmSpecialInspection.value);
+            frmSpecialInspection.value.ecrsId;
         });
         modal.ExternalDisposition = new Modal(modalExternalDisposition.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
@@ -1100,6 +1101,12 @@
         await getCategoryAdminAccessOpt();
     })
     // === Functions
+    const reloadInspector = async ()=>{
+        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+    }
+    const reloadLqc = async ()=>{
+        await getRapidxUserByIdOpt(specialInsLqcParams,);
+    }
     const onChangeAdminAccess = async (selectedParams)=>{
         tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;
@@ -1116,7 +1123,6 @@
         var queryString = $.param(params);
         window.location.href="api/download_excel_by_ecrs_id?" + queryString;
     }
-
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
         modal.Approval.show();
@@ -1129,7 +1135,6 @@
     const btnLinkViewMethodRefAfter = async (selectedMethodsId,index) => {
         window.open(`api/view_method_ref?methodsId=${selectedMethodsId} && index=${index} && imageType=after`, '_blank');
     }
-
     const getMethodRefByEcrsId = async (methodsId) => {
         let apiParams = {
             methodsId : methodsId,
@@ -1158,8 +1163,6 @@
     const changeMethodRefAfter = async (event) => {
         methodRefAfter.value =  Array.from(event.target.files);
     }
-
-
     const saveMethod = async () => {
         let formData = new FormData();
 

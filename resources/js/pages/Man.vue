@@ -975,8 +975,8 @@
         })
 
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            resetEcrForm(frmSpecialInspection.value);
-        })
+            frmSpecialInspection.value.ecrsId;
+        });
         modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcrDetails.value);
         });
@@ -999,7 +999,7 @@
             await getRapidxUserByIdOpt(rapidxUserOpt);
         }
     )
-     // === Functions
+    // === Functions
     const reloadInspector = async ()=>{
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
     }
@@ -1148,9 +1148,6 @@
             modal.SaveMan.hide();
         });
     }
-
-
-
 </script>
 
 
