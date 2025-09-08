@@ -259,6 +259,9 @@ class ManController extends Controller
             if($row->man_detail->status === "RUP" && $row->created_by === session('rapidx_user_id')){
                 $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
             }
+            if($row->man_detail->status === "DIS" && $row->created_by === session('rapidx_user_id')){
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+            }
 
             $result .= '</ul>';
             $result .= '</div>';
@@ -326,14 +329,13 @@ class ManController extends Controller
                 $currentAppprover = $row->man_pending_approvals->rapidx_user_id ?? "";
                 $status = $row->man_pending_approvals->status ?? "";
                 $approvalStatus = $row->man_pending_approvals->approval_status ?? "";
-                $result = '';//rapidx_user_id
+                $result = '';
                 if($currentAppprover === session('rapidx_user_id')){
                     if(($status != 'PMIAPP' && $approvalStatus != 'CHCK')){
                         $result .= "<button class='btn btn-outline-info btn-sm mr-1 mb-3' ecrs-id = '".$row->ecrs_id."' man-details-id='".$row->id."' id='btnManDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
                     }
 
                 }
-
                 if($approvalStatus === 'CHCK' && $currentAppprover === session('rapidx_user_id')){
                     $result .= "<button class='btn btn-outline-success btn-sm mr-1' ecrs-id = '".$row->ecrs_id."' man-details-id='".$row->id."' id='btnManChecklistId'> <i class='fa-solid fa-check'></i></button>";
                     $result .= '</center>';

@@ -539,7 +539,7 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Special Inspection" @add-event="saveSpecialInspection()" ref="modalSaveSpecialInspection">
         <template #body>
-            <ModalSpecialInspectionComponent :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
+            <ModalSpecialInspectionComponent @reload-lqc="reloadLqc()" @reload-inspector="reloadInspector()" :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
             </ModalSpecialInspectionComponent>
         </template>
         <template #footer>
@@ -1127,6 +1127,12 @@
     })
 
     // === Functions
+    const reloadLqc = async ()=>{
+        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+    }
+    const reloadInspector = async ()=>{
+        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+    }
     const onChangeAdminAccess = async (selectedParams)=>{
         tblEcrByStatus.value.dt.ajax.url("api/load_ecr_machine_by_status?category=Machine"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;

@@ -45,7 +45,7 @@
                     :searchable="true"
                     :close-on-select="true"
                 />
-                <button @click="$emit('reloadApprovers')" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                <button @click="clickReloadInspector" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
                     <font-awesome-icon class="nav-icon" icon="refresh" />
                 </button>
             </div>
@@ -76,13 +76,16 @@
                     :searchable="true"
                     :close-on-select="true"
                 />
+                <button @click="clickReloadLqc" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                    <font-awesome-icon class="nav-icon" icon="refresh" />
+                </button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-    import {defineProps,ref} from 'vue'
+    import {defineProps,ref,defineEmits} from 'vue'
 
     const props = defineProps({
         frmSpecialInspection: {
@@ -92,6 +95,16 @@
             required: true,
         },
     })
+
+    const emit = defineEmits(['click-reload-lqc', 'click-reload-inspector'])
+
+    function clickReloadLqc() {
+        emit('click-reload-lqc')
+    }
+
+    function clickReloadInspector() {
+        emit('click-reload-inspector')
+    }
 
 </script>
 

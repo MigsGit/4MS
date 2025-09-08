@@ -75,6 +75,12 @@ export default function useCommon(){
         formModel: toRef(frmSpecialInspection.value,'inspector'),
         selectedVal: '',
     };
+    //Params
+    const specialInsLqcParams = {
+        globalVar: commonVar.optUserMaster,
+        formModel: toRef(frmSpecialInspection.value,'lqcSectionHead'),
+        selectedVal: '',
+    };
     //DT Columns
     const tblSpecialInspectionColumns = [
         {   title: '<i class="fa fa-cogs"></i>',
@@ -236,6 +242,7 @@ export default function useCommon(){
         modalSaveSpecialInspection,
         modalExternalDisposition,
         specialInsQcInspectorParams,
+        specialInsLqcParams,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,

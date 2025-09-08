@@ -672,7 +672,7 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Special Inspection" @add-event="saveSpecialInspection()" ref="modalSaveSpecialInspection">
         <template #body>
-            <ModalSpecialInspectionComponent :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
+            <ModalSpecialInspectionComponent @click-reload-lqc="reloadLqc()" @click-reload-inspector="reloadInspector()" :commonVar="commonVar" :frmSpecialInspection="frmSpecialInspection">
             </ModalSpecialInspectionComponent>
         </template>
         <template #footer>
@@ -741,6 +741,7 @@
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
         specialInsQcInspectorParams,
+        specialInsLqcParams,
         frmSpecialInspection,
         saveSpecialInspection,
         getCurrentApprover,
@@ -998,6 +999,13 @@
             await getRapidxUserByIdOpt(rapidxUserOpt);
         }
     )
+     // === Functions
+    const reloadInspector = async ()=>{
+        await getRapidxUserByIdOpt(specialInsQcInspectorParams);
+    }
+    const reloadLqc = async ()=>{
+        await getRapidxUserByIdOpt(specialInsLqcParams,);
+    }
     const reloadDropdown = async () => {
         await getDropdownMasterByOpt(typeOfPartParams);
     }
