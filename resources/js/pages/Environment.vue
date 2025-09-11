@@ -480,6 +480,57 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-3" v-show="isEmptyTblEcrEnvironmentRequirements">
+                <!-- Others -->
+                <div class="card mb-2">
+                        <h5 class="mb-0">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnvironment" aria-expanded="true" aria-controls="collapseEnvironment">
+                                Others
+                            </button>
+                        </h5>
+                    <div id="collapseEnvironment" class="collapse show" data-bs-parent="#accordionMain">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <DataTable
+                                        width="100%" cellspacing="0"
+                                        class="table mt-2"
+                                        ref="tblEcrEnvironmentRequirements"
+                                        :columns="tblEcrRequirementsColumns"
+                                        :options="{
+                                            paging:false,
+                                            serverSide: true,
+                                            columnDefs: [
+                                                { orderable: false, target: [3] }
+                                            ],
+                                            language: {
+                                                zeroRecords: 'No data available',
+                                                emptyTable: 'No data available'
+                                            },
+                                            ajax: {
+                                                url: 'api/load_ecr_requirements?category=6',
+                                                dataSrc: function (json) {
+                                                isEmptyTblEcrEnvironmentRequirements = json.data && json.data.length > 0;
+                                                return json.data;
+                                                }
+                                            }
+                                        }"
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Requirement</th>
+                                                <th>Details</th>
+                                                <th>Evidence</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                    </DataTable>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>

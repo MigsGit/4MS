@@ -64,7 +64,6 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
         $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
         $pmiApprovalCollection = collect($ecrsDetails->pmi_approvals)->groupBy('approval_status')->toArray();
         $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
-
         return [
             AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
 
@@ -95,7 +94,8 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                 //         'wrapText' => true,
                 //     ],
                 // ]);
-               
+             
+
                 // === Bold for header
                 $sheet->getStyle('A1:A3')->getFont()->setBold(true);
 

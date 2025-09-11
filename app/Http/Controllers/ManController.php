@@ -319,6 +319,8 @@ class ManController extends Controller
                 'rapidx_user_trainer',
                 'rapidx_user_lqc_supervisor',
                 'man_pending_approvals',
+                'man',
+                'ecr',
             ];
             $conditions = [
                 'ecrs_id' => $request->ecrsId ?? ''
@@ -339,6 +341,9 @@ class ManController extends Controller
                 if($approvalStatus === 'CHCK' && $currentAppprover === session('rapidx_user_id')){
                     $result .= "<button class='btn btn-outline-success btn-sm mr-1' ecrs-id = '".$row->ecrs_id."' man-details-id='".$row->id."' id='btnManChecklistId'> <i class='fa-solid fa-check'></i></button>";
                     $result .= '</center>';
+                }
+                if($row->man->status === 'DIS' && $row->ecr->created_by === session('rapidx_user_id')){
+                    $result .= "<button class='btn btn-outline-info btn-sm mr-1 mb-3' ecrs-id = '".$row->ecrs_id."' man-details-id='".$row->id."' id='btnManDetailsId'> <i class='fa-solid fa-pen-to-square'></i></button>";
                 }
                 return $result;
             })

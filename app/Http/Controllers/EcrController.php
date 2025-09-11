@@ -51,6 +51,7 @@ class EcrController extends Controller
     }
     public function downloadEcrExcelByEcrsId(Request $request){
         try {
+            
             $ecrsId = decrypt($request->ecrsId);
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
             [
