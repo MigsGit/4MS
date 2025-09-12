@@ -480,22 +480,21 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3" v-show="isEmptyTblEcrEnvironmentRequirements">
-                <!-- Others -->
+            <div class="row mt-3 Others" v-show="isEmptyTblEcrOthersRequirements">
                 <div class="card mb-2">
                         <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnvironment" aria-expanded="true" aria-controls="collapseEnvironment">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOthers" aria-expanded="true" aria-controls="collapseOthers">
                                 Others
                             </button>
                         </h5>
-                    <div id="collapseEnvironment" class="collapse show" data-bs-parent="#accordionMain">
+                    <div id="collapseOthers" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-12">
                                     <DataTable
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
-                                        ref="tblEcrEnvironmentRequirements"
+                                        ref="tblEcrOthersRequirements"
                                         :columns="tblEcrRequirementsColumns"
                                         :options="{
                                             paging:false,
@@ -510,20 +509,12 @@
                                             ajax: {
                                                 url: 'api/load_ecr_requirements?category=6',
                                                 dataSrc: function (json) {
-                                                isEmptyTblEcrEnvironmentRequirements = json.data && json.data.length > 0;
+                                                isEmptyTblEcrOthersRequirements = json.data && json.data.length > 0;
                                                 return json.data;
                                                 }
                                             }
                                         }"
                                     >
-                                        <thead>
-                                            <tr>
-                                                <th>Requirement</th>
-                                                <th>Details</th>
-                                                <th>Evidence</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
                                     </DataTable>
                                 </div>
                             </div>
@@ -601,6 +592,7 @@
         tblEcrMachineRequirements,
         tblEcrMethodRequirements,
         tblEcrEnvironmentRequirements,
+        tblEcrOthersRequirements,
         selectedEcrRequirementsIdEncrypted,
         arrEcrRequirementOriginalFilenames,
         isEmptyTblEcrManRequirements,
@@ -608,6 +600,7 @@
         isEmptyTblEcrMachineRequirements,
         isEmptyTblEcrMethodRequirements,
         isEmptyTblEcrEnvironmentRequirements,
+        isEmptyTblEcrOthersRequirements,
         btnLinkViewEcrRequirementRef,
         btnEcrRequirement,
     } = useEcr();

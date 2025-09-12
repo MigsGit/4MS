@@ -100,6 +100,7 @@ export default function useEcr(){
      const tblEcrMachineRequirements = ref(null);
      const tblEcrMethodRequirements = ref(null);
      const tblEcrEnvironmentRequirements = ref(null);
+     const tblEcrOthersRequirements = ref(null);
 
      const selectedEcrRequirementsIdEncrypted = ref(null);
      const arrEcrRequirementOriginalFilenames = ref(null);
@@ -109,6 +110,7 @@ export default function useEcr(){
      const isEmptyTblEcrMachineRequirements = ref(null);
      const isEmptyTblEcrMethodRequirements = ref(null);
      const isEmptyTblEcrEnvironmentRequirements = ref(null);
+     const isEmptyTblEcrOthersRequirements = ref(null);
 
     //Obj Params
     let descriptionOfChangeParams ={
@@ -503,19 +505,21 @@ export default function useEcr(){
         getEcrDetailsId,
         saveEcrDetails,
 
+        selectedEcrRequirementsIdEncrypted,
+        arrEcrRequirementOriginalFilenames,
         tblEcrRequirementsColumns,
         tblEcrManRequirements,
         tblEcrMatRequirements,
         tblEcrMachineRequirements,
         tblEcrMethodRequirements,
         tblEcrEnvironmentRequirements,
-        selectedEcrRequirementsIdEncrypted,
-        arrEcrRequirementOriginalFilenames,
+        tblEcrOthersRequirements,
         isEmptyTblEcrManRequirements,
         isEmptyTblEcrMaterialRequirements,
         isEmptyTblEcrMachineRequirements,
         isEmptyTblEcrMethodRequirements,
         isEmptyTblEcrEnvironmentRequirements,
+        isEmptyTblEcrOthersRequirements,
         uploadFiles,
         getEcrRequirementRefById,
         btnLinkViewEcrRequirementRef,

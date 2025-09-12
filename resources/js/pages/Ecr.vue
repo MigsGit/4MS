@@ -865,22 +865,21 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3" v-show="isEmptyTblEcrEnvironmentRequirements">
-                <!-- Others -->
+            <div class="row mt-3 Others" v-show="isEmptyTblEcrOthersRequirements">
                 <div class="card mb-2">
                         <h5 class="mb-0">
-                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEnvironment" aria-expanded="true" aria-controls="collapseEnvironment">
+                            <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOthers" aria-expanded="true" aria-controls="collapseOthers">
                                 Others
                             </button>
                         </h5>
-                    <div id="collapseEnvironment" class="collapse show" data-bs-parent="#accordionMain">
+                    <div id="collapseOthers" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-12">
                                     <DataTable
                                         width="100%" cellspacing="0"
                                         class="table mt-2"
-                                        ref="tblEcrEnvironmentRequirements"
+                                        ref="tblEcrOthersRequirements"
                                         :columns="tblEcrRequirementsColumns"
                                         :options="{
                                             paging:false,
@@ -895,7 +894,7 @@
                                             ajax: {
                                                 url: 'api/load_ecr_requirements?category=6',
                                                 dataSrc: function (json) {
-                                                isEmptyTblEcrEnvironmentRequirements = json.data && json.data.length > 0;
+                                                isEmptyTblEcrOthersRequirements = json.data && json.data.length > 0;
                                                 return json.data;
                                                 }
                                             }
@@ -1012,6 +1011,18 @@
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
         frmEcrPmiExternalApproverRows,
+        tblEcrManRequirements,
+        tblEcrMatRequirements,
+        tblEcrMachineRequirements,
+        tblEcrMethodRequirements,
+        tblEcrEnvironmentRequirements,
+        tblEcrOthersRequirements,
+        isEmptyTblEcrManRequirements,
+        isEmptyTblEcrMachineRequirements,
+        isEmptyTblEcrMaterialRequirements,
+        isEmptyTblEcrMethodRequirements,
+        isEmptyTblEcrEnvironmentRequirements,
+        isEmptyTblEcrOthersRequirements,
         descriptionOfChangeParams,
         reasonOfChangeParams,
         resetArrEcrRows,
@@ -1047,12 +1058,8 @@
     const ecrRef = ref(null);
     const tblEcr = ref(null);
     const tblEcrQa = ref(null);
-    const tblEcrManRequirements = ref(null);
-    const tblEcrMatRequirements = ref(null);
-    const tblEcrMachineRequirements = ref(null);
-    const tblEcrMethodRequirements = ref(null);
-    const tblEcrEnvironmentRequirements = ref(null);
     const tblEcrApproverSummary = ref(null);
+
     const btnEcrApproved = ref(null);
     const btnEcrDisapproved = ref(null);
     const isApproved = ref(null);
@@ -1061,11 +1068,7 @@
     const arrOriginalFilenames = ref(null);
     const arrFilteredDocumentName = ref(null);
 
-    const isEmptyTblEcrManRequirements = ref(null);
-    const isEmptyTblEcrMachineRequirements = ref(null);
-    const isEmptyTblEcrMaterialRequirements = ref(null);
-    const isEmptyTblEcrMethodRequirements = ref(null);
-    const isEmptyTblEcrEnvironmentRequirements = ref(null);
+
 
     //Table Column btnViewEcrRef
     const tblEcrColumns = [
