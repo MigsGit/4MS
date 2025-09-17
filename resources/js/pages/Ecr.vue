@@ -1060,6 +1060,7 @@
     const tblEcrQa = ref(null);
     const tblEcrApproverSummary = ref(null);
 
+
     const btnEcrApproved = ref(null);
     const btnEcrDisapproved = ref(null);
     const isApproved = ref(null);
@@ -1067,7 +1068,6 @@
     const selectedAdminAccess = ref(null);
     const arrOriginalFilenames = ref(null);
     const arrFilteredDocumentName = ref(null);
-
 
 
     //Table Column btnViewEcrRef
@@ -1109,7 +1109,7 @@
                         tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
                         tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
                         tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
-                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+                        tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+currentEcrsId.value).draw();
                     });
                 }
             }
@@ -1454,7 +1454,7 @@
             tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
             tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
             tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
-            tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+            tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+currentEcrsId.value).draw();
         });
     }
     const btnAddEcrOtherDispoRows = async () => {
@@ -1498,7 +1498,8 @@
         tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
         tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
         tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+        tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+
         modalEcr.EcrRequirements.show();
     }
     const frmSaveEcrApproval = async () => {

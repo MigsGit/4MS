@@ -44,6 +44,7 @@ class EmailService implements EmailInterface
     }
     public function sendEmail($data){
         try {
+            // return $data;
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
             return RapidMailer::insert($data);

@@ -23,13 +23,11 @@ WithEvents
     {
         $this->ecrsCategoryDetailsCollection = $ecrsCategoryDetailsCollection;
     }
-
     public function array(): array
     {
         return [[]];
     }
-
-/**
+    /**
  * Inserts an image into the Excel sheet.
  *
  * @param string $imagePath Path to the image in storage.
@@ -38,27 +36,24 @@ WithEvents
  * @param int $height Height to resize the image.
  * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet Worksheet object.
  */
+    public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
+    {
+        // Get the full storage path of the image
+        $imageStoragePath = Storage::path($imagePath.'.png');
 
-public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
-{
-    // Get the full storage path of the image
-    $imageStoragePath = Storage::path($imagePath.'.png');
+        // Resize the image
+        $image = Image::make($imageStoragePath)->resize($width, $height);
+        $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
+        $image->save($tempPath);
 
-    // Resize the image
-    $image = Image::make($imageStoragePath)->resize($width, $height);
-    $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
-    $image->save($tempPath);
-
-    // Insert the image into the worksheet
-    $drawing = new Drawing();
-    $drawing->setName("Inserted Image");
-    $drawing->setDescription("Inserted Image");
-    $drawing->setPath($tempPath); // Path to the resized image
-    $drawing->setCoordinates($coordinates); // Cell coordinates
-    $drawing->setWorksheet($sheet); // Attach the image to the worksheet
-}
-
-
+        // Insert the image into the worksheet
+        $drawing = new Drawing();
+        $drawing->setName("Inserted Image");
+        $drawing->setDescription("Inserted Image");
+        $drawing->setPath($tempPath); // Path to the resized image
+        $drawing->setCoordinates($coordinates); // Cell coordinates
+        $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+    }
     public function registerEvents(): array
     {
         $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
@@ -94,7 +89,7 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                 //         'wrapText' => true,
                 //     ],
                 // ]);
-             
+
 
                 // === Bold for header
                 $sheet->getStyle('A1:A3')->getFont()->setBold(true);
@@ -107,11 +102,11 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                     $sheet->getRowDimension($j)->setRowHeight( 33.5);
                 }
                 // === HEADER
-                $sheet->mergeCells('A1:F1')->setCellValue('A1', 'PRICON MICROELECTRONICS, INC.');
-                $sheet->mergeCells('A2:F2')->setCellValue('A2', 'OPERATIONS DIVISION');
-                $sheet->mergeCells('C3:I4')->setCellValue('C3', 'CHANGE CONTROL APPLICATION REPORT');
-                $sheet->mergeCells('K1:L1')->setCellValue('K1', 'PPS-101-018');
-                $sheet->mergeCells('J4:L4')->setCellValue('J4', 'Control Number');
+                $sheet->setCellValue('A1', 'PRICON MICROELECTRONICS, INC.');
+                $sheet->setCellValue('A2', 'OPERATIONS DIVISION');
+                $sheet->setCellValue('C3', 'CHANGE CONTROL APPLICATION REPORT');
+                $sheet->setCellValue('K1', 'PPS-101-018');
+                $sheet->setCellValue('J4', 'Control Number');
                 $sheet->setCellValue('J5', $ecrsDetails->ecr_no);
                 // === SECTION INFO
                 $sheet->setCellValue('A6', 'SECTION NAME');
@@ -152,93 +147,99 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                 for ($i=0; $i < count($category); $i++) {
                     $sheet->setCellValue($categoryCol. $categoryRow, $category[$i]); $categoryCol++;
                 }
-                $sheet->mergeCells('G6:L6')->setCellValue('G6', 'Document Affected');
+                $sheet->setCellValue('G6', 'Document Affected');
 
                 // ======= Insert Before and After Image ========
                 // Retrieve the image path
                 $filteredDocumentNameBefore = explode(' | ',$categoryDetails->filtered_document_name_before);
                 $storageImageDirBefore = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/before/';
-                $startBeforeImageCol = "A";
-                $startBeforeImageRow = "22";
+                if(file_exists($storageImageDirBefore) ){
+                    $startBeforeImageCol = "A";
+                    $startBeforeImageRow = "22";
+                    foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
+                        $imagePathBefore[]= Storage::path($storageImageDirBefore.$valueBefore);
+                    }
+                    foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
+                            // Resize the image (optional, requires Intervention Image package)
+                            $image = Image::make($imagePathBeforeValue)->resize(150, 300); // Resize to 300x300 pixels
+                            $tempPath = storage_path("app/temp_resized_image_$key.jpg");
+                            $image->save($tempPath);
 
-                foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
-                    $imagePathBefore[]= Storage::path($storageImageDirBefore.$valueBefore);
+                            // Calculate the cell coordinates dynamically
+                            $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
+
+                            // Merge cells to accommodate the image
+                            $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+                            // $sheet->mergeCells("$startBeforeImageCol$currentRow:$endColumn" . ($currentRow + 1));
+
+                            // Dynamically adjust column widths and row heights
+                            $imageWidth = $image->width();
+                            $imageHeight = $image->height();
+
+                            $columnWidth = $imageWidth / 9.5; // Approximation for column width
+                            // $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
+                            // $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
+                            // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
+
+                            $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                            $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                            $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+
+                            // Insert the image into the merged cells
+                            $drawing = new Drawing();
+                            $drawing->setName("Image $key");
+                            $drawing->setDescription("Image $key");
+                            $drawing->setPath($tempPath); // Path to the resized image
+                            $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                            $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                    }
                 }
-                foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
-                        // Resize the image (optional, requires Intervention Image package)
-                        $image = Image::make($imagePathBeforeValue)->resize(150, 300); // Resize to 300x300 pixels
-                        $tempPath = storage_path("app/temp_resized_image_$key.jpg");
-                        $image->save($tempPath);
 
-                        // Calculate the cell coordinates dynamically
-                        $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
 
-                        // Merge cells to accommodate the image
-                        $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                        // $sheet->mergeCells("$startBeforeImageCol$currentRow:$endColumn" . ($currentRow + 1));
 
-                        // Dynamically adjust column widths and row heights
-                        $imageWidth = $image->width();
-                        $imageHeight = $image->height();
-
-                        $columnWidth = $imageWidth / 9.5; // Approximation for column width
-                        // $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
-                        // $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
-                        // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
-
-                        $rowHeight = $imageHeight / 1.5; // Approximation for row height
-                        $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
-                        $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
-
-                        // Insert the image into the merged cells
-                        $drawing = new Drawing();
-                        $drawing->setName("Image $key");
-                        $drawing->setDescription("Image $key");
-                        $drawing->setPath($tempPath); // Path to the resized image
-                        $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
-                        $drawing->setWorksheet($sheet); // Attach the image to the worksheet
-                }
                 $filteredDocumentNameAfter = explode(' | ',$categoryDetails->filtered_document_name_after);
                 $storageImageDirAfter = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/after/';
-                $startAfterImageCol = "D";
-                $startAfterImageRow = "22";
-                foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
-                    $imagePathAfter[]= Storage::path($storageImageDirAfter.$valueAfter);
-                }
+                if(file_exists($storageImageDirBefore) ){
+                    $startAfterImageCol = "D";
+                    $startAfterImageRow = "22";
+                    foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
+                        $imagePathAfter[]= Storage::path($storageImageDirAfter.$valueAfter);
+                    }
 
-                foreach ($imagePathAfter as $index => $imagePathAfterValue) {
-                        // Resize the image (optional, requires Intervention Image package)
-                        $image = Image::make($imagePathAfterValue)->resize(150, 300); // Resize to 300x300 pixels
-                        $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
-                        $image->save($tempPath);
+                    foreach ($imagePathAfter as $index => $imagePathAfterValue) {
+                            // Resize the image (optional, requires Intervention Image package)
+                            $image = Image::make($imagePathAfterValue)->resize(150, 300); // Resize to 300x300 pixels
+                            $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
+                            $image->save($tempPath);
 
-                        // Calculate the cell coordinates dynamically
-                        $currentRow = $startAfterImageRow + ($index*1); // Move down 5 rows for each image
+                            // Calculate the cell coordinates dynamically
+                            $currentRow = $startAfterImageRow + ($index*1); // Move down 5 rows for each image
 
-                        // Merge cells to accommodate the image
-                        $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                        // $sheet->mergeCells("$startAfterImageCol$currentRow:$endColumn" . ($currentRow + 1));
+                            // Merge cells to accommodate the image
+                            $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+                            // $sheet->mergeCells("$startAfterImageCol$currentRow:$endColumn" . ($currentRow + 1));
 
-                        // Dynamically adjust column widths and row heights
-                        $imageWidth = $image->width();
-                        $imageHeight = $image->height();
+                            // Dynamically adjust column widths and row heights
+                            $imageWidth = $image->width();
+                            $imageHeight = $image->height();
 
-                        $columnWidth = $imageWidth / 10.5; // Approximation for column width
-                        // $sheet->getColumnDimension($startAfterImageCol)->setWidth($columnWidth);
-                        // $sheet->getColumnDimension(chr(ord($startAfterImageCol) + 1))->setWidth($columnWidth);
-                        // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
+                            $columnWidth = $imageWidth / 10.5; // Approximation for column width
+                            // $sheet->getColumnDimension($startAfterImageCol)->setWidth($columnWidth);
+                            // $sheet->getColumnDimension(chr(ord($startAfterImageCol) + 1))->setWidth($columnWidth);
+                            // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
-                        $rowHeight = $imageHeight / 1.5; // Approximation for row height
-                        $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
-                        $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+                            $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                            $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                            $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
 
-                        // Insert the image into the merged cells
-                        $drawing = new Drawing();
-                        $drawing->setName("Image $index");
-                        $drawing->setDescription("Image $index");
-                        $drawing->setPath($tempPath); // Path to the resized image
-                        $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
-                        $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                            // Insert the image into the merged cells
+                            $drawing = new Drawing();
+                            $drawing->setName("Image $index");
+                            $drawing->setDescription("Image $index");
+                            $drawing->setPath($tempPath); // Path to the resized image
+                            $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                            $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                    }
                 }
 
                 // === Document Type
@@ -268,9 +269,9 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                 $sheet->setCellValue('J20', '☐ No');
 
                 // === BEFORE/AFTER
-                $sheet->mergeCells('A21:C21')->setCellValue('A21', 'BEFORE');
-                $sheet->mergeCells('D21:F21')->setCellValue('D21', 'AFTER');
-                $sheet->mergeCells('G21:L21')->setCellValue('G21', 'REASON FOR APPLICATION');
+                $sheet->setCellValue('A21', 'BEFORE');
+                $sheet->setCellValue('D21', 'AFTER');
+                $sheet->setCellValue('G21', 'REASON FOR APPLICATION');
                 $sheet->setCellValue('G26', 'Prepared by:');
 
                 $imageEsigPath = 'public/e_signatures/';
@@ -287,7 +288,7 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
 
                 // exit();
                 $sheet->setCellValue('J26', 'Checked by:');
-                $sheet->mergeCells('A29:L29')->setCellValue('A29', '4M / 1E CHANGE ASSESSMENT');
+                $sheet->setCellValue('A29', '4M / 1E CHANGE ASSESSMENT');
                 // === 4M Assessment
                 $rowsEffects = [
                     'Effect on Man (By Production)',
@@ -364,26 +365,108 @@ public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width,
                 $sheet->setCellValue('A56', 'YEC Approval?');
                 $sheet->setCellValue('C56', '☐ Need');
                 $sheet->setCellValue('C58', '☐ No Need');
-                $sheet->setCellValue('H55', 'Final Disposition:');
-                $sheet->setCellValue('I57', '☐ Accept');
-                $sheet->setCellValue('I58', '☐ Reject');
-                $sheet->setCellValue('H59', 'REMARKS:');
+                $sheet->setCellValue('I55', 'Final Disposition:');
+                $sheet->setCellValue('J57', '☐ Accept');
+                $sheet->setCellValue('J58', '☐ Reject');
+                $sheet->setCellValue('I59', 'REMARKS:');
 
 
                 // === NOTE Column
-                $sheet->mergeCells('A59:G59')->setCellValue('A59', '**Note: If  YEC approval is necessary, PMI shall implement 4M change after the receipt of  YECs  Process
+                $sheet->setCellValue('A59', '**Note: If  YEC approval is necessary, PMI shall implement 4M change after the receipt of  YECs  Process
                     Change Application approval sheet.
                     If no need YEC approval, PMI can implement the  4M change immediately with PMI heads approval
                 ');
                 // === Conditional Section
-                $sheet->mergeCells('A62:G62')->setCellValue('A62', 'USE THIS PORTION IF DISPOSITION IS ACCEPTED WITH CONDITION');
-                $sheet->mergeCells('A63:B64')->setCellValue('A63', 'Action/s Required');
-                $sheet->mergeCells('C63:D64')->setCellValue('C63', 'Target Date');
-                $sheet->mergeCells('E63:F64')->setCellValue('E63', 'In-Charge');
-                $sheet->mergeCells('G63:H64')->setCellValue('G63', 'Result');
+                $sheet->setCellValue('A62', 'USE THIS PORTION IF DISPOSITION IS ACCEPTED WITH CONDITION');
+                $sheet->setCellValue('A63', 'Action/s Required');
+                $sheet->setCellValue('C63', 'Target Date');
+                $sheet->setCellValue('E63', 'In-Charge');
+                $sheet->setCellValue('G63', 'Result');
                 $sheet->setCellValue('I68', 'QAD SIGNATURE');
 
 
+                // === Specific Merged Cells ===
+                $mergeCells = [
+                    'J4:L4',
+                    'J5:L5',
+                    'A1:F1',
+                    'A2:F2',
+                    'C3:I4',
+                    'K1:L1',
+                    'J4:L4',
+                    'G6:L6',
+
+                    'A21:C21',
+                    'D21:F21',
+                    'G21:L21',
+                    'A29:L29',
+                    'A59:G59',
+
+                    'A62:H62',
+                    'A63:B64',
+                    'C63:D64',
+                    'E63:F64',
+                    'G63:H64',
+                ];
+
+                foreach ($mergeCells as $range) {
+                    $sheet->mergeCells($range);
+                }
+
+                //Style
+                $arrCenterColumn = [
+                    'C3',
+                    'G6',
+                    'J4',
+                    'J5',
+                    'J5',
+                    'A62',
+                    'A63',
+                    'C63',
+                    'E63',
+                    'G63',
+                ];
+                foreach ($arrCenterColumn as $centerColumn) {
+                    $sheet->getStyle($centerColumn)->applyFromArray([
+                        'alignment' => [
+                            'horizontal' => 'center',
+                            'vertical' => 'center'
+                        ],
+                    ]);
+                }
+
+
+
+
+                $arrOutlineThin = [
+                    'J4:L4',
+                    'J5:L5',
+
+                    'A6:F13',
+                    'G6:L13',
+
+                    'A14:F20',
+                    'G14:L20',
+                ];
+                foreach ($arrOutlineThin as $outlineThin) {
+                    $sheet->getStyle($outlineThin)
+                    ->applyFromArray([
+                        'borders' => [
+                            'outline' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                            ],
+                        ],
+                    ]);
+                }
+
+                $sheet->getStyle('A1:L69')
+                ->applyFromArray([
+                    'borders' => [
+                        'outline' => [
+                            'borderStyle' => Border::BORDER_THICK,
+                        ],
+                    ],
+                ]);
             }
         ];
     }

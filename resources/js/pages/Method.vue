@@ -36,7 +36,7 @@
                                 <tr>
                                     <th style=""width="5%">Action</th>
                                     <th style=""width="10%">Status</th>
-                                    <!-- <th style=""width="10%">Attachment</th> -->
+                                    <th style=""width="10%">Attachment</th>
                                     <th style=""width="20%">ECR Ctrl No.</th>
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
@@ -962,6 +962,15 @@
                         getRapidxUserByIdOpt(proEnggCheckedByParams);
                         getRapidxUserByIdOpt(qcAssessedByParams);
                         getRapidxUserByIdOpt(qcCheckedByParams);
+                        
+                        //Load ECR Requirement by Category and Ecrs Id
+                        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
+                        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+                        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+                        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
+                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+                        modalEcr.EcrRequirements.show();
                         modal.SaveMethod.show();
                     });
                 }
@@ -1010,22 +1019,22 @@
             }
         } ,
         {   data: 'get_status'} ,
-        // {   data: 'get_attachment',
-        //     orderable: false,
-        //     searchable: false,
-        //     createdCell(cell){
-        //         let btnViewMethodRef = cell.querySelector('#btnViewMethodRef');
-        //         if(btnViewMethodRef != null){
-        //             btnViewMethodRef.addEventListener('click',function(){
-        //                 let methodsId = this.getAttribute('methods-id');
-        //                 let ecrsId = this.getAttribute('ecrs-id');
-        //                 selectedEcrsId.value = ecrsId;
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewMethodRef = cell.querySelector('#btnViewMethodRef');
+                if(btnViewMethodRef != null){
+                    btnViewMethodRef.addEventListener('click',function(){
+                        let methodsId = this.getAttribute('methods-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
 
-        //                 getMethodRefByEcrsId(methodsId);
-        //             });
-        //         }
-        //     }
-        // } ,
+                        getMethodRefByEcrsId(methodsId);
+                    });
+                }
+            }
+        } ,
         {   data: 'ecr_no'} ,
         {   data: 'get_details'} ,
         {   data: 'category'} ,

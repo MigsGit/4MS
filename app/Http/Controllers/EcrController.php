@@ -51,7 +51,7 @@ class EcrController extends Controller
     }
     public function downloadEcrExcelByEcrsId(Request $request){
         try {
-            
+
             $ecrsId = decrypt($request->ecrsId);
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
             [
@@ -85,8 +85,8 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    // public function saveEcr(Request $request, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest){
-    public function saveEcr(Request $request,EcrFileRequest $ecrFileRequest){ //nmodify
+    public function saveEcr(Request $request, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest,EcrFileRequest $ecrFileRequest){
+    // public function saveEcr(Request $request,EcrFileRequest $ecrFileRequest){ //nmodify
         date_default_timezone_set('Asia/Manila');
 
         try {
@@ -252,8 +252,36 @@ class EcrController extends Controller
                 //Save PMI Internal Approval
                 PmiApproval::insert($pmiApprovalRequest);
             }
-
             DB::commit();
+
+            //Send For Approval Email to Next Approver
+            $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$currenErcId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId( $ecrApprovalCurrent->rapidx_user_id);
+            $to = $ecrCurrentApproval['email'] ?? '';
+            $from = 'issinfoservice@pricon.ph';
+            $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
+            $from_name = "4M Change Control Management System";
+            $msg = $this->emailInterface->ecrEmailMsg($currenErcId);
+            $emailData = [
+                "to" =>$to,
+                "cc" =>"",
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                "from" => $from,
+                "from_name" =>$from_name ?? "4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -364,11 +392,11 @@ class EcrController extends Controller
                 $from_name = "4M Change Control Management System";
                 $emailDataEcrRequirement = [
                     // "to" =>"cpagtalunan@pricon.ph",
-                    "bcc" =>"mclegaspi@pricon.ph",
+                    // "bcc" =>"mclegaspi@pricon.ph",
 
                     "to" =>$to,
                     "cc" =>"",
-                    // "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                    "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
                     "from" => $from,
                     "from_name" =>$from_name ?? "4M Change Control Management System",
                     "subject" =>$subjectEcr,
@@ -768,7 +796,7 @@ class EcrController extends Controller
                 $result = '';
                 $result .= '<center>';
                 $ecr = Ecr::where('id',$request->ecrsId)->first(['status']);
-                $ecrApprovalPendingCount = EcrApproval::where('ecrs_id',$request->ecrsId)
+                return $ecrApprovalPendingCount = EcrApproval::where('ecrs_id',$request->ecrsId)
                 ->where('status','PEN')
                 ->where('rapidx_user_id',session('rapidx_user_id'))
                 ->count();

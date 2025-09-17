@@ -450,7 +450,7 @@ export default function useEcr(){
                     tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+uploadFilesParams.ecrsId).draw();
                     tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+uploadFilesParams.ecrsId).draw();
                     tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+uploadFilesParams.ecrsId).draw();
-                    tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+uploadFilesParams.ecrsId).draw();
+                    tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+uploadFilesParams.ecrsId).draw();
                 });
             }
          })
@@ -478,8 +478,9 @@ export default function useEcr(){
         tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
         tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
         tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+        tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
         modalEcr.EcrRequirements.show();
+
     }
 
     return {
@@ -513,7 +514,6 @@ export default function useEcr(){
         tblEcrMachineRequirements,
         tblEcrMethodRequirements,
         tblEcrEnvironmentRequirements,
-        tblEcrOthersRequirements,
         isEmptyTblEcrManRequirements,
         isEmptyTblEcrMaterialRequirements,
         isEmptyTblEcrMachineRequirements,

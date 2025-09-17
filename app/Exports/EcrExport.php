@@ -62,9 +62,7 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
     $drawing->setPath($tempPath); // Path to the resized image
     $drawing->setCoordinates($coordinates); // Cell coordinates
     $drawing->setWorksheet($sheet); // Attach the image to the worksheet
-}
-
-
+    }
 
     /**
      * @return array
