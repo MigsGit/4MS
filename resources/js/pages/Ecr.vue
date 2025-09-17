@@ -1016,7 +1016,6 @@
         tblEcrMachineRequirements,
         tblEcrMethodRequirements,
         tblEcrEnvironmentRequirements,
-        tblEcrOthersRequirements,
         isEmptyTblEcrManRequirements,
         isEmptyTblEcrMachineRequirements,
         isEmptyTblEcrMaterialRequirements,
@@ -1059,6 +1058,7 @@
     const tblEcr = ref(null);
     const tblEcrQa = ref(null);
     const tblEcrApproverSummary = ref(null);
+    const tblEcrOthersRequirements = ref(null);
 
 
     const btnEcrApproved = ref(null);

@@ -796,7 +796,7 @@ class EcrController extends Controller
                 $result = '';
                 $result .= '<center>';
                 $ecr = Ecr::where('id',$request->ecrsId)->first(['status']);
-                return $ecrApprovalPendingCount = EcrApproval::where('ecrs_id',$request->ecrsId)
+                $ecrApprovalPendingCount = EcrApproval::where('ecrs_id',$request->ecrsId)
                 ->where('status','PEN')
                 ->where('rapidx_user_id',session('rapidx_user_id'))
                 ->count();
