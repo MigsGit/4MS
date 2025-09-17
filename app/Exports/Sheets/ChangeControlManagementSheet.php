@@ -61,7 +61,6 @@ WithEvents
         $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
         return [
             AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
-
                 $sheet = $event->sheet->getDelegate();
                  // =========================================== //
 
@@ -447,6 +446,36 @@ WithEvents
 
                     'A14:F20',
                     'G14:L20',
+
+                    'A21:C28',
+                    'D21:F28',
+                    'G21:L28',
+
+                    'A29:L29',
+
+                    //APPROVAL
+                    'A30:L33',
+                    'A34:L37',
+                    'A38:L41',
+                    'A42:L45',
+                    'A46:L49',
+                    'A50:L54',
+
+                    //YEC APPROVAL
+                    'A55:H61',
+                    'I55:L58',
+                    // REMARKS / FINAL DISPO
+                    'A62:H62',
+                    'A63:L69',
+
+                    //ACTION TABLE
+                    'A63:H64',
+                    'A63:B69',
+                    'C63:D69',
+                    'E63:F69',
+                    'G63:H69',
+                    //QA
+                    'I68:L69',
                 ];
                 foreach ($arrOutlineThin as $outlineThin) {
                     $sheet->getStyle($outlineThin)
