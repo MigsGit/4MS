@@ -238,7 +238,7 @@ class MaterialController extends Controller
                     "system_name" => "rapidx_4M",
                 ];
                 DB::commit();
-                // $this->emailInterface->sendEmail($emailData);
+                $this->emailInterface->sendEmail($emailData);
                 return response()->json(['is_success' => 'true']);
             }
             if ( count($materialApproval) === 0){
@@ -301,7 +301,7 @@ class MaterialController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -321,6 +321,7 @@ class MaterialController extends Controller
                 'category' => $request->category
             ];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+            $ecr->whereNull('deleted_at');
 
             if( $adminAccess === 'null' || blank($adminAccess) ){
                 $ecr->whereHas('material.material_approvals_pending',function($query){
@@ -442,6 +443,7 @@ class MaterialController extends Controller
             $pmiApproval = $pmiApproval
             ->whereNotNull('rapidx_user_id')
             ->orderBy('counter','asc')
+            ->whereNull('deleted_at')
             ->get();
             return DataTables($pmiApproval)
             ->addColumn('get_count',function ($row) use(&$ctr){

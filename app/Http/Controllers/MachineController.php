@@ -189,6 +189,7 @@ class MachineController extends Controller
             $machineApproval = $machineApproval
             ->whereNotNull('rapidx_user_id')
             ->orderBy('id','asc')
+            ->whereNull('deleted_at')
             ->get();
             return DataTables($machineApproval)
             ->addColumn('get_count',function ($row) use(&$ctr){

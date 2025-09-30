@@ -275,11 +275,12 @@
              <!-- Description of Change / Reason for Change -->
              <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
-            <div class="row">
+            <div class="row d-none">
                 <div class="input-group flex-nowrap mb-2 input-group-sm d-none">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
                     <input v-model="frmEcrDetails.ecrDetailsId"  type="hidden" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>
                 </div>
+                <div class="row">
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
@@ -1417,7 +1418,7 @@
         //Append form data
         [
             ["ecrs_id", frmMan.value.ecrsId],
-            ["man_id", frmMan.value.manId],
+            ["man_id", frmMan.value.manId ?? ''],
             ["is_update_man_approver", frmMan.value.isUpdateManApprover],
             ["first_assign", frmMan.value.firstAssign],
             ["long_interval", frmMan.value.longInterval],

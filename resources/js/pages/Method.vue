@@ -100,11 +100,13 @@
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Before:</span>
                                     <input @change="changeMethodRefBefore" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">After:</span>
                                     <input @change="changeMethodRefAfter" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                                 </div>
                             </div>
@@ -361,11 +363,13 @@
              <!-- Description of Change / Reason for Change -->
              <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
-            <div class="row">
+            <div class="row d-none">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
                     <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
+            </div>
+            <div class="row">
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
@@ -525,7 +529,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(selectedMachinesId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(selectedMethodsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload External Disposition" ref="modalExternalDisposition" @add-event="saveExternalDisposition()">
@@ -993,9 +997,12 @@
                         currentStatus.value = methodStatus;
 
                         if( methodStatus === 'PMIAPP' || methodStatus === 'OK'){
+                            getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
-                        getCurrentApprover(methodApproverParams);
+                        if( methodStatus != 'PMIAPP'){
+                            getCurrentApprover(methodApproverParams);
+                        }
                         tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         //Load ECR Requirement by Category and Ecrs Id
@@ -1082,52 +1089,52 @@
     const prdnAssessedByParams = {
         globalVar: methodVar.prdnAssessedBy,
         formModel: toRef(frmMethod.value,'prdnAssessedBy'),
-        selectedVal: 0,
+        selectedVal: 237,
     };
     const prdnCheckedByParams = {
         globalVar: methodVar.prdnCheckedBy,
         formModel: toRef(frmMethod.value,'prdnCheckedBy'),
-        selectedVal: 0,
+        selectedVal: 237,
     };
     const ppcAssessedByParams = {
         globalVar: methodVar.ppcAssessedBy,
         formModel: toRef(frmMethod.value,'ppcAssessedBy'),
-        selectedVal: 0,
+        selectedVal: 237,
     };
     const ppcCheckedByParams = {
         globalVar: methodVar.ppcCheckedBy,
         formModel: toRef(frmMethod.value,'ppcCheckedBy'),
-        selectedVal: 0,
+        selectedVal: 237,
     };
     const mainEnggAssessedByParams = {
         globalVar: methodVar.mainEnggAssessedBy,
         formModel: toRef(frmMethod.value,'mainEnggAssessedBy'),
-        selectedVal: 0,
+        selectedVal: 237,
     };
     const mainEnggCheckedByParams = {
         globalVar: methodVar.mainEnggCheckedBy,
         formModel: toRef(frmMethod.value,'mainEnggCheckedBy'),
-        selectedVal: 0,
+        selectedVal: 237,
     };
     const proEnggAssessedByParams = {
         globalVar: methodVar.proEnggAssessedBy,
         formModel: toRef(frmMethod.value,'proEnggAssessedBy'),
-        selectedVal: 0,
+        selectedVal: 237,
     };
     const proEnggCheckedByParams = {
         globalVar: methodVar.proEnggCheckedBy,
         formModel: toRef(frmMethod.value,'proEnggCheckedBy'),
-        selectedVal:0,
+        selectedVal:237,
     };
     const qcAssessedByParams = {
         globalVar: methodVar.qcAssessedBy,
         formModel: toRef(frmMethod.value,'qcAssessedBy'),
-        selectedVal: 0,
+        selectedVal: 237,
     };
     const qcCheckedByParams = {
         globalVar: methodVar.qcCheckedBy,
         formModel: toRef(frmMethod.value,'qcCheckedBy'),
-        selectedVal:0,
+        selectedVal:237,
     };
     onMounted( async ()=>{
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });
@@ -1244,6 +1251,8 @@
         });
         axiosSaveData(formData,'api/save_method',(response) =>{
             console.log(response);
+            modal.SaveMethod.hide();
+            tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }
     const saveApproval = async (selectedId,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {

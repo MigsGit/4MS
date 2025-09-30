@@ -1,5 +1,5 @@
 <template>
-    <div class="row">
+    <div class="row d-none">
         <div class="input-group flex-nowrap mb-2 input-group-sm">
             <span class="input-group-text" id="addon-wrapping">ECR Id:</span>
             <input v-model="frmSpecialInspection.ecrsId" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" readonly>

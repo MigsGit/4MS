@@ -36,6 +36,7 @@ export default function useEcr(){
     //Ref State
     const frmEcr = ref({
         ecrsId: '',
+        departmentGroup: '',
         ecrNo: '',
         approvalStatus: '',
         category: '',

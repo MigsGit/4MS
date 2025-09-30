@@ -85,7 +85,7 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function saveEcr(Request $request, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest,EcrFileRequest $ecrFileRequest){
+    public function saveEcr(Request $request,EcrApprovalRequest $ecrApprovalRequest, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest,EcrFileRequest $ecrFileRequest){
     // public function saveEcr(Request $request,EcrFileRequest $ecrFileRequest){ //nmodify
         date_default_timezone_set('Asia/Manila');
 
@@ -520,6 +520,7 @@ class EcrController extends Controller
                 $ecr->whereIn('status',$status)
                 ->get();
             }
+            $ecr->whereNull('deleted_at');
             $ecr->orderBy('id','DESC');
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
@@ -844,8 +845,9 @@ class EcrController extends Controller
                 $filteredSection = "PROD";
             }elseif (Str::contains($department, "-")) {
                 $filteredSection = "LOG-PCH";
-            }
-            else {
+            }elseif (Str::contains($department, "Quality Management Department")) {
+                $filteredSection = "QA";
+            }else {
                 $filteredSection = "???";
             }
             return $filteredSection;
@@ -868,7 +870,7 @@ class EcrController extends Controller
         if(count($hris_data) > 0 && count($rapidx_user)> 0){
             $vwEmployeeinfo =  $hris_data;
             $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
-            $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN") ? "ADMIN" :
+            $division =($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN" ) ? "ADMIN" :
             $rapidx_user[0]->department_group);
         }
         if(count($subcon_data) > 0 && count($rapidx_user) > 0){
@@ -882,7 +884,7 @@ class EcrController extends Controller
         $ecr = Ecr::orderBy('id','desc')->whereYear('created_at',now())
             ->whereNull('deleted_at')
             ->limit(1)->get(['ecr_no']);
-        //If not exist reset the ecr to 1
+        //If not exist reset the ecr to 1 ???
         if(count( $ecr ) != 0){
             $currentCtrlNo = explode('-',$ecr[0]->ecr_no);
             $arrCtrNo		 	= end($currentCtrlNo);

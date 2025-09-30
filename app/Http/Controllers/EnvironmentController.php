@@ -33,6 +33,7 @@ class EnvironmentController extends Controller
             ];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
 
+            $ecr->whereNull('deleted_at');
             if( $adminAccess === 'null' || blank($adminAccess) || $adminAccess === 'pmi' ){
                 $ecr->whereHas('pmi_approvals_pending', function ($query) {
                     $query->where('rapidx_user_id',session('rapidx_user_id'));

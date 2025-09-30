@@ -687,11 +687,13 @@
              <!-- Description of Change / Reason for Change -->
              <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
-            <div class="row">
+            <div class="row d-none">
                 <div class="input-group flex-nowrap mb-2 input-group-sm d-none">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
                     <input :disabled="isModalView" v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
+            </div>
+            <div class="row">
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>

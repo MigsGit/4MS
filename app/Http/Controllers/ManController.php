@@ -33,7 +33,8 @@ class ManController extends Controller
             $manModel = Man::class;
             $ecrsId = $request->ecrs_id;
             $manRequestValidated = $manRequest->validated();
-            if ( isset($request->man_id) ){ //Edit
+            if ( filled($request->man_id)){ //Edit
+
                 $trnrCount = $manModel::where('approval_status','TRNR')->exists();
                 $lqcCount = $manModel::where('approval_status','LQCSUP')->exists();
                 if($trnrCount){
@@ -55,11 +56,11 @@ class ManController extends Controller
             $manApprovalTypes = [
                 'RUP' => session('rapidx_user_id'),
                 'TRNR' => $request->trainer,
-                'LQCSUP' => $request->qc_inspector_operator,
+                'LQCSUP' => $request->lqc_supervisor,
                 'CHCK' => session('rapidx_user_id'), //Checklist Update
             ];
             $manApprovalRequestCtr = 0; //assigned counter
-            $manApprovalRequest = collect($manApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$manApprovalRequestCtr,$ecrsId){
+           $manApprovalRequest = collect($manApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$manApprovalRequestCtr,$ecrsId){
                     return collect($users)->map(function ($userId) use ($request,$approval_status,&$manApprovalRequestCtr,$ecrsId){
                         return [
                             'ecrs_id' =>  $ecrsId,
@@ -211,6 +212,8 @@ class ManController extends Controller
         ];
         $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
         //  ||
+        $ecr->whereNull('deleted_at');
+
         if( $adminAccess === 'null' || blank($adminAccess) ){
             $ecr->whereHas('man_detail.man_approvals_pending',function($query){
                  // if is adminAccess exist deactivate the session condition

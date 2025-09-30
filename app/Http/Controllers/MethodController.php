@@ -7,6 +7,7 @@ use App\Models\Method;
 use Illuminate\Http\Request;
 use App\Models\MethodApproval;
 use App\Models\MachineApproval;
+use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Models\ExternalDisposition;
@@ -18,11 +19,130 @@ class MethodController extends Controller
 {
     protected $resourceInterface;
     protected $commonInterface;
-    public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
+    protected $emailInterface;
+    public function __construct(
+        ResourceInterface $resourceInterface,
+        CommonInterface $commonInterface,
+        EmailInterface $emailInterface
+    ) {
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
+        $this->emailInterface = $emailInterface;
     }
     public function saveMethod(Request $request, MethodFileRequest $methodFileRequest){
+        try {
+            DB::beginTransaction();
+            $methodRequestValidated = [];
+            $ecrsId = $methodFileRequest->ecrsId;
+            $methodsId = $methodFileRequest->methodsId;
+
+            if($methodFileRequest->hasfile('methodRefBefore') && $methodFileRequest->hasfile('methodRefAfter')){
+               $arrUploadFile = $this->commonInterface->uploadFileImg($methodFileRequest->methodRefBefore,$methodFileRequest->methodRefAfter,$methodsId,'method');
+                $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
+                $impFilteredDocumentNameBefore = implode(' | ',$arrUploadFile['arr_filtered_document_name_before']);
+                $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
+                $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
+
+                $methodRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
+                $methodRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
+                $methodRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
+                $methodRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
+
+            }
+            $conditions = [
+                'id' =>  $methodsId
+            ];
+            $this->resourceInterface->updateConditions(Method::class,$conditions,$methodRequestValidated);
+            $arrMachineApprovalRequest = [
+                'PRDNAB'  => $request->prdnAssessedBy,
+                'PRDNCB'  => $request->prdnCheckedBy,
+                'PPCAB'   => $request->ppcAssessedBy,
+                'PPCCB'   => $request->ppcCheckedBy,
+                'MENGAB'  => $request->proEnggAssessedBy,
+                'MENGCB'  => $request->proEnggCheckedBy,
+                'PENGAB'  => $request->mainEnggAssessedBy,
+                'PENGCB'  => $request->mainEnggCheckedBy,
+                'LQCAB'   => $request->qcAssessedBy,
+                'LQCCB'   => $request->qcCheckedBy,
+            ];
+
+           $methodApprovalValidated = collect($arrMachineApprovalRequest)->flatMap(function ($users,$approvalStatus) use ($request,$ecrsId){
+                return collect($users)->map(function ($userId) use ($request,$approvalStatus,&$ecrsId){
+                    return [
+                        'ecrs_id' => $ecrsId,
+                        'methods_id' => $request->methodsId,
+                        'rapidx_user_id' => $userId == 0 ? NULL : $userId,
+                        'approval_status' => $approvalStatus,
+                        'created_at' => now(),
+                    ];
+                });
+
+            })->toArray();
+            MethodApproval::where('methods_id',$methodsId)->delete();
+            MethodApproval::insert($methodApprovalValidated);
+            $methodApproval =  MethodApproval::whereNotNull('rapidx_user_id')
+            ->whereNull('deleted_at')
+            ->where('methods_id', $methodsId)
+            ->first();
+            if ($methodApproval) {
+                $methodApproval->update(['status' => 'PEN']);
+                Method::where('id', $methodsId)->first()
+                ->update([
+                    'approval_status' => $methodApproval->approval_status,
+                    'status' => 'FORAPP', //FOR APPROVAL
+                ]);
+            }
+            //Reset the PMI Approval
+            /*
+                PmiApproval::whereNotNull('rapidx_user_id')
+                ->where('ecrs_id', $currentEcrsId)
+                ->update([
+                    'status' => '-',
+                    'remarks' => '',
+                ]);
+                //Update Pending PMI Approval
+                $firstPmiApproval =  PmiApproval::whereNotNull('rapidx_user_id')
+                ->where('ecrs_id', $currentEcrsId)
+                ->first();
+                if ($firstPmiApproval) {
+                    $firstPmiApproval->update(['status' => 'PEN']);
+                }
+            */
+           $ecrApprovalCurrent = MethodApproval::where('ecrs_id',$ecrsId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId( $ecrApprovalCurrent->rapidx_user_id);
+            $to = $ecrCurrentApproval['email'] ?? '';
+            $from = 'issinfoservice@pricon.ph';
+            $subject = "FOR APPROVAL: Method (4M)";
+            $from_name = "4M Change Control Management System";
+            $msg = $this->emailInterface->ecrEmailMsgByCategory($ecrsId,'METHOD');
+            $emailData = [
+                "to" =>$to,
+                "cc" =>"",
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                "from" => $from,
+                "from_name" =>$from_name ?? "4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
+            DB::commit();
+            $this->emailInterface->sendEmail($emailData);
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveMethodTest(Request $request, MethodFileRequest $methodFileRequest){
         try {
             DB::beginTransaction();
             $methodRequestValidated = [];
@@ -108,7 +228,8 @@ class MethodController extends Controller
             throw $e;
         }
     }
-    public function saveMethodApproval(Request $request){
+
+    public function saveMethodApprovalTest1(Request $request){
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
@@ -176,6 +297,133 @@ class MethodController extends Controller
             throw $e;
         }
     }
+    public function saveMethodApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $selectedId = $request->selectedId;
+            //Get Current Ecr Approval is equal to Current Session
+            $methodApprovalCurrent = MethodApproval::where('methods_id',$selectedId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            $methodCurrent = Method::findOrFail($selectedId);
+            //Get Current Status
+            $ecrDetails= Ecr::where('id',$methodCurrent->ecrs_id)->get(['id','approval_status','status','category','ecr_no','created_by']);
+            $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by ?? '');
+            if($methodApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+
+            //Update the machine Approval Status
+            $methodApprovalCurrent->update([
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ]);
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+           $methodApproval = MethodApproval::where('methods_id',$selectedId)
+           ->whereNotNull('rapidx_user_id')
+           ->where('status','-')
+           ->limit(1)
+           ->get(['id','approval_status','rapidx_user_id']);
+            if ( count($methodApproval) != 0){
+                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($methodApproval[0]->rapidx_user_id);
+                $methodApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $methodApprovalConditions = [
+                    'id' => $methodApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(MethodApproval::class,$methodApprovalConditions,$methodApprovalValidated);
+                //Update the ECR Approval Status
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'approval_status' => $methodApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
+
+                //Send Approval Email
+                $msg = $this->emailInterface->ecrEmailMsgByCategory($methodCurrent->ecrs_id,'METHOD');
+                //Send For Approval Email to Next Approver
+                $to = $ecrCurrentApproval['email'] ?? '';
+                $from = $createdByEmail['email'] ?? '';
+                $subject = "FOR APPROVAL:  Method (4M)";
+                $from_name = "4M Change Control Management System";
+            }else{
+                $enviromentConditions = [
+                    'id' => $selectedId,
+                ];
+                $enviromentValidated = [
+                    'status' => 'PMIAPP',
+                    'approval_status' => 'PB',
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
+
+            }
+             //DISAPPROVED ECR
+             if($request->status === "DIS"){
+                $conditions = [
+                    'id' => $selectedId,
+                ];
+                $requestValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'DIS', //Repeat the status
+                ];
+                $this->resourceInterface->updateConditions(Method::class,$conditions,$requestValidated);
+
+                // $to = $requestedBy['email'] ?? '';
+                // $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                // $from =$currentSession['email'] ?? '';
+                // $from_name = $currentSession['fullName'];
+                // $subject = "DISAPPROVED: Engineering Change Request (ECR)";
+                // $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+
+                // $emailData = [
+                //     "to" =>$to,
+                //     "cc" =>"",
+                //     "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                //     "from" => $from,
+                //     "from_name" =>$from_name ?? "4M Change Control Management System",
+                //     "subject" =>$subject,
+                //     "message" =>  $msg,
+                //     "attachment_filename" => "",
+                //     "attachment" => "",
+                //     "send_date_time" => now(),
+                //     "date_time_sent" => "",
+                //     "date_created" => now(),
+                //     "created_by" => session('rapidx_username'),
+                //     "system_name" => "rapidx_4M",
+                // ];
+                // $this->emailInterface->sendEmail($emailData);
+                    return response()->json(['isSuccess' => 'true']);
+                }
+                $emailData = [
+                   "to" => $to,
+                    "cc" => $from,
+                    "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                    // "bcc" =>"mrronquez@pricon.ph",
+                    "from" => $from,
+                    "from_name" =>$from_name ?? "4M Change Control Management System",
+                    "subject" =>$subject,
+                    "message" =>  $msg,
+                    "attachment_filename" => "",
+                    "attachment" => "",
+                    "send_date_time" => now(),
+                    "date_time_sent" => "",
+                    "date_created" => now(),
+                    "created_by" => session('rapidx_username'),
+                    "system_name" => "rapidx_4M",
+                ];
+            DB::commit();
+            $this->emailInterface->sendEmail($emailData);
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
     public function loadMachineApproverSummaryMaterialId (Request $request){
         try {
             $methodsId = $request->methodsId ?? "";
@@ -189,6 +437,7 @@ class MethodController extends Controller
             $methodApproval = $this->resourceInterface->readCustomEloquent(MethodApproval::class,$data,$relations,$conditions);
             $methodApproval = $methodApproval
             ->whereNotNull('rapidx_user_id')
+            ->whereNull('deleted_at')
             ->orderBy('id','asc')
             ->get();
             return DataTables($methodApproval)
@@ -261,6 +510,7 @@ class MethodController extends Controller
                 'category' => $request->category
             ];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+            $ecr->whereNull('deleted_at');
 
             if( $adminAccess === 'null' || blank($adminAccess) ){
                 return $ecr->whereHas('method.method_approvals_pending',function($query){

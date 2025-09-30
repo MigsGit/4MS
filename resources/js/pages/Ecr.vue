@@ -112,7 +112,7 @@
                         <input  v-model="frmEcr.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                     </div>
                     <div class="input flex-nowrap mb-2 input-group-sm">
-                        <input  v-model="frmEcr.departmentGroup" type="text" :value="commonVar.rapidxUserDeptGroup" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
+                        <input  v-model="frmEcr.departmentGroup" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                     </div>
 
                 </div>
@@ -1087,6 +1087,14 @@
                         currentEcrsId.value = ecrsId;
                         getEcrById(ecrsId);
                         tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecrs_id="+ecrsId).draw();
+
+                        tblEcrApproverSummary.value.dt.ajax.url("api/load_ecr_approval_summary?ecrsId="+ecrsId).draw();
+                        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
+                        tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+currentEcrsId.value).draw();
                     });
                 }
                 if(btnViewEcrId !=null){
@@ -1177,6 +1185,8 @@
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js class
+
+
         modalEcr.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
@@ -1221,6 +1231,7 @@
         () => commonVar.rapidxUserDeptGroup,
         async (newVal) => {
             if (!newVal) return;
+            frmEcr.value.departmentGroup = commonVar.rapidxUserDeptGroup;
             //constant object params
             let otherDispoRequestedByParams = {
                 globalVar: ecrVar.requestedBy,
@@ -1339,6 +1350,7 @@
         }
     };
     const btnEcr = async () => {
+
         modalEcr.SaveEcr.show();
         isSelectReadonly.value = false;
         await generateControlNumber();
