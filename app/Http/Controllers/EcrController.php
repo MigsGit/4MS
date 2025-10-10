@@ -55,7 +55,7 @@ class EcrController extends Controller
             $ecrsId = decrypt($request->ecrsId);
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
             [
-                'ecr_approvals',
+
                 'ecr_approvals.rapidx_user',
                 'ecr_details.dropdown_master_detail_description_of_change',
                 'ecr_details.dropdown_master_detail_reason_of_change',
@@ -63,7 +63,19 @@ class EcrController extends Controller
             [
                 'id'=> $ecrsId
             ]);
+            // $ecr->whereNotNull('rapidx_user_id');
+            $ecr->whereHas('ecr_approvals',function($query) use ($request){
+                    $query->where('status','APP');
+                    $query->whereNotNull('rapidx_user_id');
+            })
+            ->with(['ecr_approvals' => function($query) {
+                $query->where('status', 'APP')
+                      ->whereNotNull('rapidx_user_id');
+            }, 'ecr_approvals.rapidx_user']); // eager load user
+
             $ecrDetails = $ecr->get();
+
+            // return  $ecrDetails = $ecr->get();
             $ecrCollection = collect($ecrDetails)
             ->flatMap(function ($ecrCollectionRow){
                 $ecrApprovals = $ecrCollectionRow->ecr_approvals ?? '';
@@ -72,7 +84,8 @@ class EcrController extends Controller
                     $departmentId = $ecrApprovalsRow->rapidx_user->department_id ?? '';
                     return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
 
-                });
+                }); //removed the NULL Value
+                // })->filter()->all(); //removed the NULL Value
                 return [
                     'requestedByDeptCollection' => $requestedByDeptCollection,
                     'ecrCollection' => $ecrCollectionRow,

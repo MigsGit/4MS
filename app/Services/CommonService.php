@@ -267,32 +267,35 @@ class CommonService implements CommonInterface
     }
     public function getRapidxUserDeptByDeptId($departmentId){
         try {
-           $departmentId;
             $rapidx_user = DB::connection('mysql_rapidx')
             ->select(" SELECT department_group
                 FROM departments
                 WHERE department_id = '".$departmentId."'
             ");
-            $hris_data = DB::connection('mysql_systemone_hris')
-            ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
-            $subcon_data = DB::connection('mysql_systemone_subcon')
-            ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
-            if(count($hris_data) > 0 && count($rapidx_user)> 0){
-                $vwEmployeeinfo =  $hris_data;
-                $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
-                $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN") ? "ADMIN" :
-                $rapidx_user[0]->department_group);
+
+            if(count($rapidx_user) != 0){
+                $hris_data = DB::connection('mysql_systemone_hris')
+                ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
+                $subcon_data = DB::connection('mysql_systemone_subcon')
+                ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
+                if(count($hris_data) > 0 && count($rapidx_user)> 0){
+                    $vwEmployeeinfo =  $hris_data;
+                    $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
+                    $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN") ? "ADMIN" :
+                    $rapidx_user[0]->department_group);
+                }
+                if(count($subcon_data) > 0 && count($rapidx_user) > 0){
+                    $vwEmployeeinfo =  $subcon_data;
+                    $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
+                    $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN")  ? "ADMIN" :
+                    $rapidx_user[0]->department_group);
+                }
+                return [
+                    'division' => $division,
+                    'filteredSection' => $filteredSection,
+                ];
             }
-            if(count($subcon_data) > 0 && count($rapidx_user) > 0){
-                $vwEmployeeinfo =  $subcon_data;
-                $filteredSection = str_replace("'", "", $this->getFilteredSection($vwEmployeeinfo[0]->Department));
-                $division = ($rapidx_user[0]->department_group == "PPS" || $rapidx_user[0]->department_group == "PPD") ? "PPD" : (($rapidx_user[0]->department_group == "LOG" || $rapidx_user[0]->department_group == "ISS" || $rapidx_user[0]->department_group == "FIN")  ? "ADMIN" :
-                $rapidx_user[0]->department_group);
-            }
-            return [
-                'division' => $division,
-                'filteredSection' => $filteredSection,
-            ];
+
         } catch (Exception $e) {
             throw $e;
         }

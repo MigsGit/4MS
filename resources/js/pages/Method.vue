@@ -462,7 +462,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table">
+                <table class="table" v-show="currentStatus === 'OK'">
                     <thead>
 
                         <tr>
@@ -1035,6 +1035,8 @@
                     btnViewMethodRef.addEventListener('click',function(){
                         let methodsId = this.getAttribute('methods-id');
                         let ecrsId = this.getAttribute('ecrs-id');
+                        let methodStatus = this.getAttribute('method-status');
+                        currentStatus.value = methodStatus;
                         selectedEcrsId.value = ecrsId;
 
                         getMethodRefByEcrsId(methodsId);

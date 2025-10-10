@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use Carbon\Carbon;
+use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -13,9 +14,8 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
-use Intervention\Image\Facades\Image;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
 class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNullComparison
 {
@@ -43,25 +43,59 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
     }
 
     public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
-{
-    // Get the full storage path of the image
-    $imageStoragePath = Storage::path($imagePath.'.png');
-    if( !file_exists($imageStoragePath) ){
-        echo 'Signature not found: Please file a ticket to http://rapidx/iss_service_request/my_tickets';
-        exit;
-    }
-    // Resize the image
-    $image = Image::make($imageStoragePath)->resize($width, $height);
-    $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
-    $image->save($tempPath);
+    {
+        $imageEsigPath = '../RapidX_E-Signature/'.$imagePath;
+        // Get the full storage path of the image
+        $imageStoragePath = $imageEsigPath.'.png';
+        // $defaultSignature = Storage::path($imagePath.'.png'); $imageEsigPath
 
-    // Insert the image into the worksheet
-    $drawing = new Drawing();
-    $drawing->setName("Inserted Image");
-    $drawing->setDescription("Inserted Image");
-    $drawing->setPath($tempPath); // Path to the resized image
-    $drawing->setCoordinates($coordinates); // Cell coordinates
-    $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+        if( !file_exists($imageStoragePath) ){
+            echo  'Signature not found: Please as the HR for the E-Signature then Please file a ticket to http://rapidx/iss_service_request/my_tickets';
+
+            exit;
+        }
+        // Resize the image
+        $image = Image::make($imageStoragePath)->resize($width, $height);
+        $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
+        $image->save($tempPath);
+
+        // Insert the image into the worksheet
+        $drawing = new Drawing();
+        $drawing->setName("Inserted Image");
+        $drawing->setDescription("Inserted Image");
+        $drawing->setPath($tempPath); // Path to the resized image
+        $drawing->setCoordinates($coordinates); // Cell coordinates
+        $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+    }
+    public function getEcrApprovalStatus($approvalStatus){
+        try {
+             switch ($approvalStatus) {
+                 case 'OTRB':
+                     $approvalStatus = 'Requested by:';
+                     break;
+                 case 'OTTE':
+                     $approvalStatus = 'Technical Engg:';
+                     break;
+                 case 'OTRVB':
+                     $approvalStatus = 'Reviewed By:';
+                     break;
+                 case 'QACB':
+                     $approvalStatus = 'QA Engineer';
+                     break;
+                 case 'QAIN':
+                     $approvalStatus = 'QA Manager';
+                     break;
+                 case 'QAEX':
+                     $approvalStatus = 'QMS Head';
+                     break;
+                 default:
+                     $approvalStatus = '';
+                     break;
+             }
+             return  $approvalStatus;
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -277,13 +311,15 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                             if (str_contains($approvalStatus, 'QA')) {
                                 $sheet->setCellValue("A{$startRowQaApprovalCollection}", $division);
                                 $sheet->setCellValue("B{$startRowQaApprovalCollection}", $ecrApprover);
-                                $sheet->setCellValue("D{$startRowQaApprovalCollection}", $approvalStatus);
+                                $sheet->setCellValue("D{$startRowQaApprovalCollection}",$this->getEcrApprovalStatus($approvalStatus));
                                 // $sheet->setCellValue("E{$startRowQaApprovalCollection}", 'Signature');
                                 $sheet->setCellValue("F{$startRowQaApprovalCollection}", $approvedDate);
                                 $sheet->setCellValue("G{$startRowQaApprovalCollection}", $remarks);
                                   // === E-signature Images
-                                $imageEsigPath = 'public/e_signatures/';
-                                $imageEsigWithEmpNumberPath = $imageEsigPath.$value->rapidx_user->employee_number;
+                                // $imageEsigPath = 'public/e_signatures/';
+
+
+                                $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
                                 $this->insertEsignatureImageIntoSheet(
                                     $imageEsigWithEmpNumberPath,
                                     "E".$startRowQaApprovalCollection,
@@ -297,12 +333,13 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                                 if (str_contains($approvalStatus, 'OTRB')) {
                                     $sheet->setCellValue("A{$startRowRequestedByApprovalsCollection}", $division);
                                     $sheet->setCellValue("B{$startRowRequestedByApprovalsCollection}", $ecrApprover);
-                                    $sheet->setCellValue("D{$startRowRequestedByApprovalsCollection}", $approvalStatus);
+                                    $sheet->setCellValue("D{$startRowRequestedByApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
                                     $sheet->setCellValue("F{$startRowRequestedByApprovalsCollection}", $approvedDate);
                                     $sheet->setCellValue("G{$startRowOtherApprovalsCollection}", $remarks);
                                     // === Insert e-signature
-                                    $imageEsigPath = 'public/e_signatures/';
-                                    $imageEsigWithEmpNumberPath = $imageEsigPath.$value->rapidx_user->employee_number;
+                                    // $imageEsigPath = 'public/e_signatures/';
+
+                                    $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
                                     $this->insertEsignatureImageIntoSheet(
                                         $imageEsigWithEmpNumberPath,
                                         "E".$startRowRequestedByApprovalsCollection,
@@ -317,12 +354,14 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                                     $sheet->setCellValue("A{$startRowOtherApprovalsCollection}", $division);
                                     $sheet->setCellValue("B{$startRowOtherApprovalsCollection}", $ecrApprover);
                                     $sheet->setCellValue("D{$startRowOtherApprovalsCollection}", $approvalStatus);
+                                    $sheet->setCellValue("D{$startRowOtherApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
                                     // $sheet->setCellValue("E{$startRowOtherApprovalsCollection}", 'Signature');
                                     $sheet->setCellValue("F{$startRowOtherApprovalsCollection}", $approvedDate);
                                     $sheet->setCellValue("G{$startRowOtherApprovalsCollection}", $remarks);
                                       // === Insert e-signature
-                                      $imageEsigPath = 'public/e_signatures/';
-                                      $imageEsigWithEmpNumberPath = $imageEsigPath.$value->rapidx_user->employee_number;
+                                    //   $imageEsigPath = 'public/e_signatures/';
+
+                                      $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
                                       $this->insertEsignatureImageIntoSheet(
                                           $imageEsigWithEmpNumberPath,
                                           "E".$startRowOtherApprovalsCollection,
@@ -385,8 +424,8 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                 // === Column Widths ===
                 $columnWidths = [
                     'A' => 0,
-                    'C' => 10,
-                    'D' => 10,
+                    'C' => 20,
+                    'D' => 20,
                     'E' => 10,
                     'F' => 30,
                     'G' => 30,
@@ -505,6 +544,14 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                         ],
                     ]);
                 }
+
+                $sheet->getStyle("B5:B8")->applyFromArray([
+                    'alignment' => ['horizontal' => 'left'],
+                ]);
+
+                $sheet->getStyle("G5:G8")->applyFromArray([
+                    'alignment' => ['horizontal' => 'left'],
+                ]);
 
             },
         ];
