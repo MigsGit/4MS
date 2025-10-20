@@ -233,7 +233,6 @@ export default function useEcr(){
                         ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
                     );
                     ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
-                        console.log('requestedBy',requestedBy[index]);
 
                         frmEcrOtherDispoRows.value.push({
                             requestedBy: requestedBy[index].rapidx_user_id ?? 0,
@@ -376,36 +375,10 @@ export default function useEcr(){
                 fileInput.setAttribute('classifications-id', rowData.classifications_id);
                 fileInput.setAttribute('classification-requirements-id', rowData.id);
 
-                fileInput.disabled = true;
                 if(rowData.ecr_requirement !=null){
-                    // console.log(fileInput);
-
-                    let machine = rowData.ecr_requirement.machine ?? '';
-                    let man = rowData.ecr_requirement.man ?? '';
-                    let method = rowData.ecr_requirement.method ?? '';
-                    let material = rowData.ecr_requirement.material ?? '';
-                    let environment = rowData.ecr_requirement.environment ?? '';
-                    // console.log(rowData.ecr_requirement.id);
-                    if(machine != ''){
-                        fileInput.disabled = false;
-                    }
-                    if(man != ''){
-                        fileInput.disabled = false;
-                    }
-                    if(method != ''){
-                        fileInput.disabled = false;
-                    }
-                    if(material != ''){
-                        fileInput.disabled = false;
-                    }
-                    if(environment != ''){
-                        fileInput.disabled = false;
-                    }
                     fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
                     fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
                 }
-
-                // console.log('rowData', rowData); // Assuming `id` exists in rowData
 
                 // Add an event listener for file change
                 fileInput.addEventListener('change', (event) => {
