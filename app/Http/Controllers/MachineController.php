@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
 use App\Exports\InternalMachineExport;
 use App\Http\Requests\MachineFileRequest;
+use App\Http\Requests\MachineApprovalRequest;
 
 class MachineController extends Controller
 {
@@ -23,13 +24,12 @@ class MachineController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-    public function saveMachine(Request $request, MachineFileRequest $machineFileRequest){
+    public function saveMachine(Request $request, MachineFileRequest $machineFileRequest,MachineApprovalRequest $machineApprovalRequest){
         try {
             DB::beginTransaction();
             $machineRequestValidated = [];
             $ecrsId = $machineFileRequest->ecrsId;
             $machinesId = $machineFileRequest->machinesId;
-
             if($machineFileRequest->hasfile('machineRefBefore') && $machineFileRequest->hasfile('machineRefAfter')){
                $arrUploadFile = $this->commonInterface->uploadFileImg($machineFileRequest->machineRefBefore,$machineFileRequest->machineRefAfter,$machinesId,'machine');
                 $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
@@ -43,6 +43,7 @@ class MachineController extends Controller
                 $machineRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
 
             }
+            // return $machineRequestValidated;
             $conditions = [
                 'id' =>  $machinesId
             ];
@@ -254,6 +255,7 @@ class MachineController extends Controller
             $data = [];
             $relations = [
                 'machine.machine_approvals_pending',
+                'rapidx_user_created_by',
                 'machine',
             ];
             $conditions = [
@@ -263,18 +265,17 @@ class MachineController extends Controller
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
 
             if( $adminAccess === 'null' || blank($adminAccess) ){
-                return $ecr->whereHas('machine.machine_approvals_pending',function($query){
+               $ecr->whereHas('machine.machine_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
-                })->get();
+                });
             }
 
             if( $adminAccess === 'created'){
-                $ecr->where('created_by' , session('rapidx_user_id'))
-                ->get();
+                $ecr->where('created_by' , session('rapidx_user_id'));
             }
             if( $adminAccess === 'all') {
-                $ecr->get();
+                $ecr;
             }
             if ( $adminAccess === 'pmi') {
                 $data = [];
@@ -293,6 +294,8 @@ class MachineController extends Controller
                     ->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
+            $ecr->get();
+
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
@@ -307,6 +310,7 @@ class MachineController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
+                // $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 if($machineStatus === "EXDISPO" || $machineStatus === "OK"){
                     //Upload External Disposition
                     // $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
@@ -344,6 +348,9 @@ class MachineController extends Controller
                     $approvalStatus = $row->machine->approval_status;
                     $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
+                if($machineStatus == "RUP"){
+                    $result .= $row->rapidx_user_created_by->name ?? '';
                 }
                 $result .= '</center>';
                 $result .= '</br>';

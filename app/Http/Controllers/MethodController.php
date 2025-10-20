@@ -14,6 +14,7 @@ use App\Models\ExternalDisposition;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\MethodFileRequest;
+use App\Http\Requests\MethodApprovalRequest;
 
 class MethodController extends Controller
 {
@@ -29,7 +30,7 @@ class MethodController extends Controller
         $this->commonInterface = $commonInterface;
         $this->emailInterface = $emailInterface;
     }
-    public function saveMethod(Request $request, MethodFileRequest $methodFileRequest){
+    public function saveMethod(Request $request, MethodFileRequest $methodFileRequest,MethodApprovalRequest $machineApprovalRequest){
         try {
             DB::beginTransaction();
             $methodRequestValidated = [];
@@ -513,24 +514,25 @@ class MethodController extends Controller
             $ecr->whereNull('deleted_at');
 
             if( $adminAccess === 'null' || blank($adminAccess) ){
-                return $ecr->whereHas('method.method_approvals_pending',function($query){
+                $ecr->whereHas('method.method_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
-                })->get();
+                });
+
             }
 
             if( $adminAccess === 'created'){
-                $ecr->where('created_by' , session('rapidx_user_id'))
-                ->get();
+                $ecr->where('created_by' , session('rapidx_user_id'));
             }
             if( $adminAccess === 'all') {
-                $ecr->get();
+                $ecr;
             }
             if ( $adminAccess === 'pmi') {
                 $data = [];
                 $relations = [
                     'pmi_approvals_pending',
                     'method',
+                    'rapidx_user_created_by',
                 ];
                 $conditions = [
                     'status' => 'OK',
@@ -543,6 +545,8 @@ class MethodController extends Controller
                     ->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
+            $ecr->get();
+
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
@@ -557,6 +561,7 @@ class MethodController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
+                // $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 if($methodStatus === "EXDISPO" || $methodStatus === "OK"){
                     //Upload External Disposition
                     // $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'"id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
@@ -572,6 +577,7 @@ class MethodController extends Controller
 
                 $result .= '</ul>';
                 $result .= '</div>';
+
                 $result .= '</center>';
                 return $result;
             })
@@ -592,6 +598,9 @@ class MethodController extends Controller
                     $approvalStatus = $row->method->approval_status;
                     $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
+                if($methodStatus == "RUP"){
+                    $result .= $row->rapidx_user_created_by->name ?? '';
                 }
                 $result .= '</center>';
                 $result .= '</br>';

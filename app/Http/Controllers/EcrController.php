@@ -520,21 +520,20 @@ class EcrController extends Controller
                     // if is adminAccess exist deactivate the session condition
                     $query->where('status','PEN');
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
-                })->get();
+                });
             }
             if( $adminAccess === 'created'){
-                $ecr->whereIn('status',$status)
-                ->where('created_by' , session('rapidx_user_id'))
-                ->get();
-            }
-            if( $adminAccess === 'all') {
-
                 $status =  array_merge($status,['OK']);
                 $ecr->whereIn('status',$status)
-                ->get();
+                ->where('created_by' , session('rapidx_user_id'));
+            }
+            if( $adminAccess === 'all') {
+                $status =  array_merge($status,['OK']);
+                $ecr->whereIn('status',$status);
             }
             $ecr->whereNull('deleted_at');
             $ecr->orderBy('id','DESC');
+            $ecr->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
                 $result = "";
@@ -767,6 +766,7 @@ class EcrController extends Controller
             $data = [];
             $relations = [
                 'ecr_requirement',
+                'ecr_requirement.machine',
             ];
             $conditions = [
                 'classifications_id' => $request->category

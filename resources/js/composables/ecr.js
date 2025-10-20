@@ -364,6 +364,7 @@ export default function useEcr(){
             render: () => '', // Leave empty initially
             createdCell(cell, cellData, rowData) {
                 // Create the file input element dynamically
+                // console.log('rowData',rowData.get_actions)
                 const inputGroup = document.createElement('div');
                 inputGroup.className = 'input-group flex-nowrap mb-2 input-group-sm';
 
@@ -375,7 +376,31 @@ export default function useEcr(){
                 fileInput.setAttribute('classifications-id', rowData.classifications_id);
                 fileInput.setAttribute('classification-requirements-id', rowData.id);
 
+                fileInput.disabled = true;
                 if(rowData.ecr_requirement !=null){
+                    // console.log(fileInput);
+
+                    let machine = rowData.ecr_requirement.machine ?? '';
+                    let man = rowData.ecr_requirement.man ?? '';
+                    let method = rowData.ecr_requirement.method ?? '';
+                    let material = rowData.ecr_requirement.material ?? '';
+                    let environment = rowData.ecr_requirement.environment ?? '';
+                    // console.log(rowData.ecr_requirement.id);
+                    if(machine != ''){
+                        fileInput.disabled = false;
+                    }
+                    if(man != ''){
+                        fileInput.disabled = false;
+                    }
+                    if(method != ''){
+                        fileInput.disabled = false;
+                    }
+                    if(material != ''){
+                        fileInput.disabled = false;
+                    }
+                    if(environment != ''){
+                        fileInput.disabled = false;
+                    }
                     fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
                     fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
                 }

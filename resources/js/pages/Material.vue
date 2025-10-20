@@ -634,7 +634,7 @@
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
-                                ECR Approver Summary
+                                Material Approver Summary
                             </button>
                         </h5>
                     <div id="collapsePmiInternalApprovalSummary" class="collapse show" data-bs-parent="#accordionMain">
