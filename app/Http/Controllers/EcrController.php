@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use DateTime;
+use Carbon\Carbon;
 use App\Models\Ecr;
 use App\Models\Man;
 use App\Models\Method;
@@ -536,10 +538,12 @@ class EcrController extends Controller
             $ecr->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
+                $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
+
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
-                $result .= "<button ecr-id='".$row->id."' ecr-status='".$row->status."'  type='button' class='btn btn-secondary dropdown-toggle btn-sm' data-bs-toggle='dropdown' aria-expanded='false'>";
+                $result .= "<button ecr-id='".$row->id."' ecr-status='".$row->status."' type='button' class='btn btn-secondary dropdown-toggle btn-sm' data-bs-toggle='dropdown' aria-expanded='false'>";
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
@@ -549,7 +553,7 @@ class EcrController extends Controller
                 if($row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
                 }
-                // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
+                // if($currentApprover === session('rapidx_user_id') || $row->created_by === session('rapidx_user_id')   || session('rapidx_department_id') === 22){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item'  id='btnViewEcrId'> <i class='fa-solid fa-eye'></i> View/Approval</button>
                     </li>";
                 // }
@@ -578,7 +582,19 @@ class EcrController extends Controller
                 $result .= '</center>';
                 $result .= '</br>';
                 return $result;
-            })->addColumn('get_details',function ($row) use($request) {
+                })->addColumn('get_details',function ($row) use($request) {
+                $date = Carbon::parse($row->date_of_request); //String to Object Date conversion
+
+                // Number of working days to add
+                $daysToAdd = 14;
+
+                while ($daysToAdd > 0) {
+                    $date->addDay(); // add one day at a time
+                    if ($date->isWeekday()) { // exclude Saturday & Sunday
+                        $daysToAdd--;
+                    }
+                }
+
                 $result = '';
                 $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
                 $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
@@ -586,6 +602,7 @@ class EcrController extends Controller
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Target Completion:</strong> ' .$date->toDateString(). '</p>';
                 $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })
@@ -781,10 +798,10 @@ class EcrController extends Controller
                 })->with(['ecr_requirement' => function ($query) use ($ecrsId) {
                     $query->where('decision', 'C');
                     $query->where('ecrs_id', $ecrsId);
-                }])->get();
+                }]);
            }else{
-                $classificationRequirement = $classificationRequirement
-                ->get();
+                $classificationRequirement;
+
            }
 
             $ecrRequirement = $this->resourceInterface->readWithRelationsConditionsActive(EcrRequirement::class,[],[],
@@ -792,6 +809,7 @@ class EcrController extends Controller
                     'ecrs_id' => $request->ecrsId ?? ""
                 ]
             );
+            $classificationRequirement->get();
             return DataTables($classificationRequirement)
             ->addColumn('get_actions',function ($row) use($ecrRequirement,$request) {
                 $ecrRequirementCollection = collect($ecrRequirement);
@@ -1206,6 +1224,14 @@ class EcrController extends Controller
             $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
             $filePathWithEcrRequirementsId = $path;
             $pdfPath = storage_path("app/public/".$filePathWithEcrRequirementsId.$selectedFilteredDocumentName);
+
+            if (!file_exists($pdfPath)) {
+                abort(404, 'PDF not found.');
+            }
+            //To read the ENCRYPTED PDF,you can simply serve the PDF file to the browser and let the browser's built-in PDF viewer handle it.
+            return response()->file($pdfPath);
+
+            //This function cannot read the ENCRYPTED PDF, I cannot install the "composer require setasign/fpdi-pdf-parser"
             $this->commonInterface->viewPdfFile($pdfPath);
         }
     } catch (Exception $e) {

@@ -511,7 +511,6 @@ class MethodController extends Controller
                 'category' => $request->category
             ];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-            $ecr->whereNull('deleted_at');
 
             if( $adminAccess === 'null' || blank($adminAccess) ){
                 $ecr->whereHas('method.method_approvals_pending',function($query){
@@ -545,8 +544,8 @@ class MethodController extends Controller
                     ->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
+            $ecr->whereNull('deleted_at');
             $ecr->get();
-
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
@@ -571,7 +570,7 @@ class MethodController extends Controller
                 if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
-                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')){
+                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')  || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id')  ){
                     $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
 
@@ -724,7 +723,7 @@ class MethodController extends Controller
 
             if( filled($methodRefByEcrsId) ){
                 if ($request->imageType === "before"){
-                    return  $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_before);
+                    $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_before);
                     $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
                     $filePathWithEcrsId = $methodRefByEcrsId[0]->file_path."/".$methodsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
                     $filePath = "app/public/".$filePathWithEcrsId."";

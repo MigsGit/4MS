@@ -327,15 +327,14 @@ class MaterialController extends Controller
                 $ecr->whereHas('material.material_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
-                })->get();
+                });
             }
 
             if( $adminAccess === 'created'){
-                $ecr->where('created_by' , session('rapidx_user_id'))
-                ->get();
+                $ecr->where('created_by' , session('rapidx_user_id'));
             }
             if( $adminAccess === 'all') {
-                $ecr->get();
+                $ecr;
             }
             if ( $adminAccess === 'pmi') {
                 $data = [];
@@ -354,6 +353,8 @@ class MaterialController extends Controller
                     ->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
+            $ecr->whereNull('deleted_at');
+            $ecr->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 $materialStatus = $row->material->status ?? "";

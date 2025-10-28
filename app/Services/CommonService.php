@@ -120,6 +120,7 @@ class CommonService implements CommonInterface
     public function viewPdfFile($pdfPath){
 
         try {
+            $fpdi = new Fpdi();
             $pageCount = $this->fpdi->setSourceFile($pdfPath);
             //Read all page using page count
             for ($i=1; $i <= $pageCount; $i++) {

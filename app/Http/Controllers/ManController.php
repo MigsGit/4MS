@@ -212,21 +212,19 @@ class ManController extends Controller
         ];
         $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
         //  ||
-        $ecr->whereNull('deleted_at');
 
         if( $adminAccess === 'null' || blank($adminAccess) ){
             $ecr->whereHas('man_detail.man_approvals_pending',function($query){
                  // if is adminAccess exist deactivate the session condition
                  $query->where('rapidx_user_id',session('rapidx_user_id'));
-             })->get();
+             });
         }
 
         if( $adminAccess === 'created'){
-            $ecr->where('created_by' , session('rapidx_user_id'))
-            ->get();
+            $ecr->where('created_by' , session('rapidx_user_id'));
         }
         if( $adminAccess === 'all') {
-            $ecr->get();
+            $ecr;
         }
         //If the Man Approval is OK / Zero, PMI Approvals Pending displayed
         if ( $adminAccess === 'pmi' || $ecr->count() === 0) {
@@ -246,9 +244,12 @@ class ManController extends Controller
                 ->where('rapidx_user_id',session('rapidx_user_id'));
             });
         }
+        $ecr->whereNull('deleted_at');
+        $ecr->get();
 
         return DataTables($ecr)
         ->addColumn('get_actions',function ($row) use ($request){
+            $manDetailStatus = $row->man_detail->status ?? '';
             $result = "";
             $result .= '<center>';
             $result .= '<div class="btn-group dropstart mt-4">';
@@ -256,14 +257,14 @@ class ManController extends Controller
             $result .= '    Action';
             $result .= '</button>';
             $result .= '<ul class="dropdown-menu">';
-            // if($row->man_detail->status === "RUP" || $row->man_detail->status === "PMIAPP"){
-                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-            // }
-            if($row->man_detail->status === "RUP" && $row->created_by === session('rapidx_user_id')){
-                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+            if($row->man_detail->status === "RUP" || $row->man_detail->status === "PMIAPP" || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
             }
-            if($row->man_detail->status === "DIS" && $row->created_by === session('rapidx_user_id')){
-                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$row->man_detail->status.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+            if($manDetailStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+            }
+            if($manDetailStatus === "DIS" && $row->created_by === session('rapidx_user_id')){
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
             }
 
             $result .= '</ul>';
@@ -272,8 +273,9 @@ class ManController extends Controller
             return $result;
         })
         ->addColumn('get_status',function ($row) use($request){
+            $manDetailStatus = $row->man_detail->status ?? '';
             $currentApprover = $row->man_detail->man_approvals_pending[0]['rapidx_user']['name'] ?? '';
-            $getStatus = $this->getStatus($row->man_detail->status);
+            $getStatus = $this->getStatus($manDetailStatus);
             $result = '';
             $result .= '<center>';
             $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
@@ -281,7 +283,7 @@ class ManController extends Controller
             if( $currentApprover != ''){
                 $result .= '<span class="badge rounded-pill bg-danger"> '.$currentApprover.' </span>';
             }
-            if( $row->man_detail->status === 'PMIAPP' ){ //TODO: Last Status PMI Internal
+            if( $manDetailStatus === 'PMIAPP' ){ //TODO: Last Status PMI Internal
                 $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                 $approvalStatus = $row->man_detail->approval_status;
                 $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
