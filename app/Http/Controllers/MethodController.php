@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Ecr;
 use App\Models\Method;
 use Illuminate\Http\Request;
@@ -614,6 +615,17 @@ class MethodController extends Controller
                 return $result;
             })
             ->addColumn('get_details',function ($row) use($request){
+                $date = Carbon::parse($row->method->created_at); //String to Object Date conversion
+
+                // Number of working days to add
+                $daysToAdd = 14;
+
+                while ($daysToAdd > 0) {
+                    $date->addDay(); // add one day at a time
+                    if ($date->isWeekday()) { // exclude Saturday & Sunday
+                        $daysToAdd--;
+                    }
+                }
                 $result = '';
                 $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
                 $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
@@ -621,6 +633,7 @@ class MethodController extends Controller
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Target Completion:</strong> ' .$date->toDateString(). '</p>';
                 $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })

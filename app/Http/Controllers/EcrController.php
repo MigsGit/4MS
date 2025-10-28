@@ -1224,14 +1224,13 @@ class EcrController extends Controller
             $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
             $filePathWithEcrRequirementsId = $path;
             $pdfPath = storage_path("app/public/".$filePathWithEcrRequirementsId.$selectedFilteredDocumentName);
-
             if (!file_exists($pdfPath)) {
                 abort(404, 'PDF not found.');
             }
-            //To read the ENCRYPTED PDF,you can simply serve the PDF file to the browser and let the browser's built-in PDF viewer handle it.
+            // To read the ENCRYPTED PDF,you can simply serve the PDF file to the browser and let the browser's built-in PDF viewer handle it.
             return response()->file($pdfPath);
 
-            //This function cannot read the ENCRYPTED PDF, I cannot install the "composer require setasign/fpdi-pdf-parser"
+            // This function cannot read the ENCRYPTED PDF, I cannot install the "composer require setasign/fpdi-pdf-parser"
             $this->commonInterface->viewPdfFile($pdfPath);
         }
     } catch (Exception $e) {
