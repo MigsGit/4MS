@@ -117,10 +117,11 @@ class EcrController extends Controller
 
             if( isset($ecrsId) ){ //Edit
                 //Validate Before Edit: On going approval cannot update
-                $ecrEcrApproval = EcrApproval::where('id',$ecrsId)
+                $ecrEcrApproval = EcrApproval::where('ecrs_id',$ecrsId)
                 ->where('status','PEN')
                 ->where('approval_status','OTRB')
-                ->count();
+                ->whereNull('deleted_at')
+                ->get();
 
                 if ( $ecrEcrApproval === 1 ){
                     DB::rollback();
@@ -267,7 +268,6 @@ class EcrController extends Controller
                 //Save PMI Internal Approval
                 PmiApproval::insert($pmiApprovalRequest);
             }
-            DB::commit();
 
             //Send For Approval Email to Next Approver
             $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$currenErcId)
@@ -296,6 +296,7 @@ class EcrController extends Controller
                 "created_by" => session('rapidx_username'),
                 "system_name" => "rapidx_4M",
             ];
+            DB::commit();
             $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
@@ -672,7 +673,8 @@ class EcrController extends Controller
                         $bgColor = 'badge rounded-pill bg-warning';
                         break;
                     case 'APP':
-                        $status = 'APPROVED';
+                        $status = 'APPROVED - '.$row->updated_at;
+                        // $status = 'APPROVED";
                         $bgColor = 'badge rounded-pill bg-success';
                         break;
                     case 'DIS':
