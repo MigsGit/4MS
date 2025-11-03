@@ -962,6 +962,8 @@ class EcrController extends Controller
             $data = [];
             $relations = [
                 'ecr_details',
+                'ecr_details.dropdown_master_detail_description_of_change',
+                'ecr_details.dropdown_master_detail_reason_of_change',
                 'ecr_approvals',
                 'pmi_approvals',
 
