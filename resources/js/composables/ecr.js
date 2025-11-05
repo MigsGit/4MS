@@ -36,6 +36,7 @@ export default function useEcr(){
     //Ref State
     const frmEcr = ref({
         ecrsId: '',
+        departmentGroup: '',
         ecrNo: '',
         approvalStatus: '',
         category: '',
@@ -204,14 +205,15 @@ export default function useEcr(){
             let pmiExternalApprovalCollection = data.pmiExternalApprovalCollection;
             let ecrDetails = ecr.ecr_details;
 
-
             setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
                 //Reasons
                 if (ecrDetails.length != 0){
                     ecrDetails.forEach((ecrDetailsEl,index) =>{
                         frmEcrReasonRows.value.push({
                             descriptionOfChange : ecrDetailsEl.description_of_change,
-                            reasonOfChange : ecrDetailsEl.reason_of_change
+                            reasonOfChange : ecrDetailsEl.reason_of_change,
+                            descriptionOfChangeView : ecrDetailsEl.dropdown_master_detail_description_of_change.dropdown_masters_details,
+                            reasonOfChangeView : ecrDetailsEl.dropdown_master_detail_reason_of_change.dropdown_masters_details
                         });
                     })
                 }
@@ -232,7 +234,6 @@ export default function useEcr(){
                         ecrApprovalCollection[a].length > ecrApprovalCollection[b].length ? a : b
                     );
                     ecrApprovalCollection[maxKey].forEach((ecrApprovalsEl,index) => {
-                        console.log('requestedBy',requestedBy[index]);
 
                         frmEcrOtherDispoRows.value.push({
                             requestedBy: requestedBy[index].rapidx_user_id ?? 0,
@@ -363,6 +364,7 @@ export default function useEcr(){
             render: () => '', // Leave empty initially
             createdCell(cell, cellData, rowData) {
                 // Create the file input element dynamically
+                // console.log('rowData',rowData.get_actions)
                 const inputGroup = document.createElement('div');
                 inputGroup.className = 'input-group flex-nowrap mb-2 input-group-sm';
 
@@ -378,8 +380,6 @@ export default function useEcr(){
                     fileInput.setAttribute('ecr-requirements-id', rowData.ecr_requirement.id);
                     fileInput.setAttribute('ecrs-id', rowData.ecr_requirement.ecrs_id);
                 }
-
-                // console.log('rowData', rowData); // Assuming `id` exists in rowData
 
                 // Add an event listener for file change
                 fileInput.addEventListener('change', (event) => {

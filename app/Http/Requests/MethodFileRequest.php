@@ -24,7 +24,10 @@ class MethodFileRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'methodRefBefore.*' => 'file|mimes:jpeg,png|max:2048',
+            'methodRefAfter.*' => 'file|mimes:jpeg,png|max:2048',
+            'ecrsId' => 'required',
+            'methodsId' => 'required',
         ];
     }
 }

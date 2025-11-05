@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Ecr;
 use App\Models\Machine;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
 use App\Exports\InternalMachineExport;
 use App\Http\Requests\MachineFileRequest;
+use App\Http\Requests\MachineApprovalRequest;
 
 class MachineController extends Controller
 {
@@ -23,13 +25,12 @@ class MachineController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
     }
-    public function saveMachine(Request $request, MachineFileRequest $machineFileRequest){
+    public function saveMachine(Request $request, MachineFileRequest $machineFileRequest,MachineApprovalRequest $machineApprovalRequest){
         try {
             DB::beginTransaction();
             $machineRequestValidated = [];
             $ecrsId = $machineFileRequest->ecrsId;
             $machinesId = $machineFileRequest->machinesId;
-
             if($machineFileRequest->hasfile('machineRefBefore') && $machineFileRequest->hasfile('machineRefAfter')){
                $arrUploadFile = $this->commonInterface->uploadFileImg($machineFileRequest->machineRefBefore,$machineFileRequest->machineRefAfter,$machinesId,'machine');
                 $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
@@ -43,6 +44,7 @@ class MachineController extends Controller
                 $machineRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
 
             }
+            // return $machineRequestValidated;
             $conditions = [
                 'id' =>  $machinesId
             ];
@@ -189,6 +191,7 @@ class MachineController extends Controller
             $machineApproval = $machineApproval
             ->whereNotNull('rapidx_user_id')
             ->orderBy('id','asc')
+            ->whereNull('deleted_at')
             ->get();
             return DataTables($machineApproval)
             ->addColumn('get_count',function ($row) use(&$ctr){
@@ -253,6 +256,7 @@ class MachineController extends Controller
             $data = [];
             $relations = [
                 'machine.machine_approvals_pending',
+                'rapidx_user_created_by',
                 'machine',
             ];
             $conditions = [
@@ -262,18 +266,17 @@ class MachineController extends Controller
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
 
             if( $adminAccess === 'null' || blank($adminAccess) ){
-                return $ecr->whereHas('machine.machine_approvals_pending',function($query){
+               $ecr->whereHas('machine.machine_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
-                })->get();
+                });
             }
 
             if( $adminAccess === 'created'){
-                $ecr->where('created_by' , session('rapidx_user_id'))
-                ->get();
+                $ecr->where('created_by' , session('rapidx_user_id'));
             }
             if( $adminAccess === 'all') {
-                $ecr->get();
+                $ecr;
             }
             if ( $adminAccess === 'pmi') {
                 $data = [];
@@ -292,6 +295,8 @@ class MachineController extends Controller
                     ->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
+            $ecr->whereNull('deleted_at');
+            $ecr->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 // Dropdown menu links
@@ -306,6 +311,7 @@ class MachineController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
+                // $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 if($machineStatus === "EXDISPO" || $machineStatus === "OK"){
                     //Upload External Disposition
                     // $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
@@ -315,7 +321,8 @@ class MachineController extends Controller
                 if($row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
-                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')){
+                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')
+                || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
                     $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
 
@@ -344,6 +351,9 @@ class MachineController extends Controller
                     $getPmiApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getPmiApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
+                if($machineStatus == "RUP"){
+                    $result .= $row->rapidx_user_created_by->name ?? '';
+                }
                 $result .= '</center>';
                 $result .= '</br>';
                 return $result;
@@ -357,6 +367,18 @@ class MachineController extends Controller
                 return $result;
             })
             ->addColumn('get_details',function ($row) use($request){
+                $date = Carbon::parse($row->machine->created_at); //String to Object Date conversion
+
+                // Number of working days to add
+                $daysToAdd = 14;
+
+                while ($daysToAdd > 0) {
+                    $date->addDay(); // add one day at a time
+                    if ($date->isWeekday()) { // exclude Saturday & Sunday
+                        $daysToAdd--;
+                    }
+                }
+
                 $result = '';
                 $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
                 $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
@@ -364,6 +386,7 @@ class MachineController extends Controller
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $result .= '<p class="card-text"><strong>Target Completion:</strong> ' .$date->toDateString(). '</p>';
                 $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })

@@ -30,8 +30,8 @@ class EcrApprovalRequest extends FormRequest
             'technical_evaluation' => ['required', 'array'],
             'technical_evaluation.0' => ['required', 'integer', 'min:1'],
 
-            'reviewed_by' => ['required', 'array'],
-            'reviewed_by.0' => ['required', 'integer', 'min:1'],
+            // 'reviewed_by' => ['required', 'array'],
+            // 'reviewed_by.0' => ['required', 'integer', 'min:1'],
 
             // 'qad_approved_by_external' => ['required', 'integer', 'min:1'], // index 0 must be = 1
             'qad_checked_by' => ['required', 'integer', 'min:1'],
@@ -44,7 +44,7 @@ class EcrApprovalRequest extends FormRequest
         return [
             'requested_by.0.min' => 'The Requested By is required.',
             'technical_evaluation.0.min' => 'The first Technical Evaluation is required.',
-            'reviewed_by.0.min' => 'The Reviewed By / Section Heads is required.',
+            // 'reviewed_by.0.min' => 'The Reviewed By / Section Heads is required.',
             // 'qad_checked_by.0.required' => 'The QA Engg is required.',
             // 'qad_approved_by_internal.0.required' => 'The QA Manager is required.',
             'qad_checked_by.min' => 'The QA Engg is required',

@@ -100,11 +100,13 @@
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">Before:</span>
                                     <input @change="changeMethodRefBefore" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                    <span class="input-group-text" id="addon-wrapping">After:</span>
                                     <input @change="changeMethodRefAfter" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                                 </div>
                             </div>
@@ -241,7 +243,7 @@
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMachineApproverSummary" aria-expanded="true" aria-controls="collapseMachineApproverSummary">
-                                ECR Approver Summary
+                                Method Approver Summary
                             </button>
                         </h5>
                     <div id="collapseMachineApproverSummary" class="collapse show" data-bs-parent="#accordionMain">
@@ -361,11 +363,13 @@
              <!-- Description of Change / Reason for Change -->
              <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
-            <div class="row">
+            <div class="row d-none">
                 <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
                     <input v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
+            </div>
+            <div class="row">
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Type of Part:</span>
@@ -458,7 +462,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table">
+                <table class="table" v-show="currentStatus === 'OK'">
                     <thead>
 
                         <tr>
@@ -525,7 +529,7 @@
         </template>
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button @click = "saveApproval(selectedMachinesId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+            <button @click = "saveApproval(selectedMethodsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
     <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload External Disposition" ref="modalExternalDisposition" @add-event="saveExternalDisposition()">
@@ -993,9 +997,12 @@
                         currentStatus.value = methodStatus;
 
                         if( methodStatus === 'PMIAPP' || methodStatus === 'OK'){
+                            getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
-                        getCurrentApprover(methodApproverParams);
+                        if( methodStatus != 'PMIAPP'){
+                            getCurrentApprover(methodApproverParams);
+                        }
                         tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         //Load ECR Requirement by Category and Ecrs Id
@@ -1028,6 +1035,8 @@
                     btnViewMethodRef.addEventListener('click',function(){
                         let methodsId = this.getAttribute('methods-id');
                         let ecrsId = this.getAttribute('ecrs-id');
+                        let methodStatus = this.getAttribute('method-status');
+                        currentStatus.value = methodStatus;
                         selectedEcrsId.value = ecrsId;
 
                         getMethodRefByEcrsId(methodsId);
@@ -1244,6 +1253,8 @@
         });
         axiosSaveData(formData,'api/save_method',(response) =>{
             console.log(response);
+            modal.SaveMethod.hide();
+            tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }
     const saveApproval = async (selectedId,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {

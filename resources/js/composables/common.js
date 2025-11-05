@@ -204,7 +204,7 @@ export default function useCommon(){
             specialInspectionsId : specialInspectionsId
         }
         axiosFetchData(apiParams,'api/get_special_inspection_by_id',function(response){
-            let data = response.data;
+            let data = response.data; //frmSpecialInspection.value.lqcSectionHead
             let specialInspection = response.data.specialInspection;
             frmSpecialInspection.value.specialInspectionsId = specialInspection.id;
             frmSpecialInspection.value.ecrsId = specialInspection.ecrs_id;
@@ -215,6 +215,7 @@ export default function useCommon(){
             frmSpecialInspection.value.modQty = specialInspection.mod_qty;
             frmSpecialInspection.value.judgement = specialInspection.judgement;
             frmSpecialInspection.value.inspectionDate = specialInspection.inspection_date;
+            frmSpecialInspection.value.lqcSectionHead = specialInspection.lqc_section_head;
             frmSpecialInspection.value.inspector = specialInspection.inspector;
             frmSpecialInspection.value.remarks = specialInspection.remarks;
         });

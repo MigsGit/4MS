@@ -656,7 +656,7 @@ class CommonController extends Controller
                 "created_by" => "mclegaspi",
                 "system_name" => "rapidx_4M",
             ];
-        //    $this->emailInterface->sendEmail($data);
+           $this->emailInterface->sendEmail($data);
            return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             throw $e;
@@ -669,6 +669,8 @@ class CommonController extends Controller
             with('ecr')
             ->whereHas('ecr', function ($query) {
                 $query->where('status','!=', 'DIS');
+                $query->whereNull('deleted_at');
+
             })
             ->where('rapidx_user_id',$rapidxUserId)
             ->where('status','PEN')
@@ -677,6 +679,8 @@ class CommonController extends Controller
             with('man_detail')
             ->whereHas('man_detail', function ($query) {
                 $query->where('status','!=', 'DIS');
+                $query->whereNull('deleted_at');
+
             })
             ->where('rapidx_user_id',$rapidxUserId)
             ->where('status','PEN')
@@ -685,6 +689,8 @@ class CommonController extends Controller
             with('material')
             ->whereHas('material', function ($query) {
                 $query->where('status','!=', 'DIS');
+                $query->whereNull('deleted_at');
+
             })
             ->where('rapidx_user_id',$rapidxUserId)
             ->where('status','PEN')->count();
@@ -692,6 +698,8 @@ class CommonController extends Controller
             with('machine')
             ->whereHas('machine', function ($query) {
                 $query->where('status','!=', 'DIS');
+                $query->whereNull('deleted_at');
+
             })
             ->where('rapidx_user_id',$rapidxUserId)
             ->where('status','PEN')
@@ -700,6 +708,8 @@ class CommonController extends Controller
             with('method')
             ->whereHas('method', function ($query) {
                 $query->where('status','!=', 'DIS');
+                $query->whereNull('deleted_at');
+
             })
             ->where('rapidx_user_id',$rapidxUserId)
             ->where('status','PEN'

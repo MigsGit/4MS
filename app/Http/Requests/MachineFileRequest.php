@@ -25,8 +25,8 @@ class MachineFileRequest extends FormRequest
     {
         return [
 
-            'machineRefBefore.*' => 'required|file|mimes:jpeg,png|max:2048',
-            'machineRefAfter.*' => 'required|file|mimes:jpeg,png|max:2048',
+            'machineRefBefore.*' => 'file|mimes:jpeg,png|max:2048',
+            'machineRefAfter.*' => 'file|mimes:jpeg,png|max:2048',
             'ecrsId' => 'required',
             'machinesId' => 'required',
         ];

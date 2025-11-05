@@ -29,7 +29,10 @@
                                         {{index+1}}
                                     </td>
                                     <td>
-                                        <Multiselect
+                                         <textarea v-show="isSelectReadonly" v-model="frmEcrReasonRow.descriptionOfChangeView" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" :disabled="isSelectReadonly">
+                                        </textarea>
+
+                                        <Multiselect v-show="isSelectReadonly ===false"
                                             v-model="frmEcrReasonRow.descriptionOfChange"
                                             :options="optDescriptionOfChange"
                                             placeholder="Select an option"
@@ -39,7 +42,9 @@
                                         />
                                     </td>
                                     <td>
-                                        <Multiselect
+                                         <textarea v-show="isSelectReadonly" v-model="frmEcrReasonRow.reasonOfChangeView" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" :disabled="isSelectReadonly">
+                                        </textarea>
+                                        <Multiselect v-show="isSelectReadonly ===false"
                                             v-model="frmEcrReasonRow.reasonOfChange"
                                             :close-on-select="true"
                                             :searchable="true"

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Ecr;
 use App\Models\Material;
 use App\Models\PmiApproval;
@@ -238,7 +239,7 @@ class MaterialController extends Controller
                     "system_name" => "rapidx_4M",
                 ];
                 DB::commit();
-                // $this->emailInterface->sendEmail($emailData);
+                $this->emailInterface->sendEmail($emailData);
                 return response()->json(['is_success' => 'true']);
             }
             if ( count($materialApproval) === 0){
@@ -301,7 +302,7 @@ class MaterialController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -321,20 +322,20 @@ class MaterialController extends Controller
                 'category' => $request->category
             ];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+            $ecr->whereNull('deleted_at');
 
             if( $adminAccess === 'null' || blank($adminAccess) ){
                 $ecr->whereHas('material.material_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
-                })->get();
+                });
             }
 
             if( $adminAccess === 'created'){
-                $ecr->where('created_by' , session('rapidx_user_id'))
-                ->get();
+                $ecr->where('created_by' , session('rapidx_user_id'));
             }
             if( $adminAccess === 'all') {
-                $ecr->get();
+                $ecr;
             }
             if ( $adminAccess === 'pmi') {
                 $data = [];
@@ -353,6 +354,8 @@ class MaterialController extends Controller
                     ->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
+            $ecr->whereNull('deleted_at');
+            $ecr->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 $materialStatus = $row->material->status ?? "";
@@ -405,6 +408,18 @@ class MaterialController extends Controller
                 return $result;
             })
             ->addColumn('get_details',function ($row) use($request){
+                $date = Carbon::parse($row->material->created_at); //String to Object Date conversion
+
+                // Number of working days to add
+                $daysToAdd = 14;
+
+                while ($daysToAdd > 0) {
+                    $date->addDay(); // add one day at a time
+                    if ($date->isWeekday()) { // exclude Saturday & Sunday
+                        $daysToAdd--;
+                    }
+                }
+
                 $result = '';
                 $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
                 $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
@@ -413,6 +428,7 @@ class MaterialController extends Controller
                 $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
                 $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
                 $result .= '<p class="card-text"><strong>Internal/External:</strong> ' . $row->internal_external . '</p>';
+                $result .= '<p class="card-text"><strong>Target Completion:</strong> ' .$date->toDateString(). '</p>';
                 $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
 
                 return $result;
@@ -442,6 +458,7 @@ class MaterialController extends Controller
             $pmiApproval = $pmiApproval
             ->whereNotNull('rapidx_user_id')
             ->orderBy('counter','asc')
+            ->whereNull('deleted_at')
             ->get();
             return DataTables($pmiApproval)
             ->addColumn('get_count',function ($row) use(&$ctr){
