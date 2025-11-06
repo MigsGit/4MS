@@ -166,13 +166,12 @@ class MaterialController extends Controller
             if ($firstPmiApproval) {
                 $firstPmiApproval->update(['status' => 'PEN']);
             }
-
-
-           $ecrApprovalCurrent = MaterialApproval::where('ecrs_id',$currentEcrsId)
+            //Auto Email 4M Approval Based on Category
+            $ecrApprovalCurrent = MaterialApproval::where('ecrs_id',$currentEcrsId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
-           $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId( $ecrApprovalCurrent->rapidx_user_id);
+            $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId( $ecrApprovalCurrent->rapidx_user_id);
             $to = $ecrCurrentApproval['email'] ?? '';
             $from = 'issinfoservice@pricon.ph';
             $subject = "FOR APPROVAL: Method (4M)";
@@ -195,7 +194,7 @@ class MaterialController extends Controller
                 "created_by" => session('rapidx_username'),
                 "system_name" => "rapidx_4M",
             ];
-            // DB::commit();
+            DB::commit();
             $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

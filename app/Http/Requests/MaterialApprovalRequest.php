@@ -28,21 +28,21 @@ class MaterialApprovalRequest extends FormRequest
             'ppc_checked_by' => 'required',
             'ppc_prepared_by' => 'required',
 
-            'pr_approved_by' => 'required',
-            'pr_checked_by' => 'required',
-            'pr_prepared_by' => 'required',
+            // 'pr_approved_by' => 'required',
+            // 'pr_checked_by' => 'required',
+            // 'pr_prepared_by' => 'required',
 
-            'ems_prepared_by' => 'required',
-            'ems_checked_by' => 'required',
-            'ems_approved_by' => 'required',
+            // 'ems_prepared_by' => 'required',
+            // 'ems_checked_by' => 'required',
+            // 'ems_approved_by' => 'required',
 
-            'qc_prepared_by' => 'required',
-            'qc_checked_by' => 'required',
-            'qc_approved_by' => 'required',
+            // 'qc_prepared_by' => 'required',
+            // 'qc_checked_by' => 'required',
+            // 'qc_approved_by' => 'required',
 
-            'qa_prepared_by' => 'required',
-            'qa_checked_by' => 'required',
-            'qa_approved_by' => 'required',
+            // 'qa_prepared_by' => 'required',
+            // 'qa_checked_by' => 'required',
+            // 'qa_approved_by' => 'required',
         ];
     }
 }
