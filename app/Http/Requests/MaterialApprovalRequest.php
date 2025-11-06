@@ -24,9 +24,9 @@ class MaterialApprovalRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'ppc_approved_by' => 'required',
-            // 'ppc_checked_by' => 'required',
-            // 'ppc_prepared_by' => 'required',
+            'ppc_approved_by' => 'required',
+            'ppc_checked_by' => 'required',
+            'ppc_prepared_by' => 'required',
 
             // 'pr_approved_by' => 'required',
             // 'pr_checked_by' => 'required',
