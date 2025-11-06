@@ -7,6 +7,7 @@ use App\Models\Ecr;
 use App\Models\Machine;
 use Illuminate\Http\Request;
 use App\Models\MachineApproval;
+use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Models\ExternalDisposition;
@@ -21,9 +22,15 @@ class MachineController extends Controller
 {
     protected $resourceInterface;
     protected $commonInterface;
-    public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
+    protected $emailInterface;
+    public function __construct(
+        ResourceInterface $resourceInterface,
+        CommonInterface $commonInterface,
+        EmailInterface $emailInterface
+    ) {
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
+        $this->emailInterface = $emailInterface;
     }
     public function saveMachine(Request $request, MachineFileRequest $machineFileRequest,MachineApprovalRequest $machineApprovalRequest){
         try {
@@ -119,6 +126,12 @@ class MachineController extends Controller
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
+
+            $machineCurrent = Machine::findOrFail($selectedId);
+            $ecrDetails= Ecr::where('id',$machineCurrent->ecrs_id)->get(['id','approval_status','status','category','ecr_no','created_by']);
+
+            $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by ?? '');
+
             if($machineApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
@@ -128,12 +141,14 @@ class MachineController extends Controller
                 'remarks' => $request->remarks,
             ]);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-           $machineApproval = MachineApproval::where('machines_id',$selectedId)
+            $machineApproval = MachineApproval::where('machines_id',$selectedId)
            ->whereNotNull('rapidx_user_id')
            ->where('status','-')
            ->limit(1)
-           ->get(['id','approval_status']);
+           ->get(['id','approval_status','rapidx_user_id']);
+
             if ( count($machineApproval) != 0){
+                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($machineApproval[0]->rapidx_user_id);
                 $machineApprovalValidated = [
                     'status' => 'PEN',
                 ];
@@ -149,6 +164,12 @@ class MachineController extends Controller
                     'approval_status' => $machineApproval[0]->approval_status,
                 ];
                 $this->resourceInterface->updateConditions(Machine::class,$enviromentConditions,$enviromentValidated);
+                //Send Approval Email
+                $to = $currentApproval['email'] ?? '';
+                $from = $createdByEmail['email'] ?? '';
+                $subject = "FOR APPROVAL: MACHINE (4M)";
+                $from_name = "4M Change Control Management System";
+                $msg = $this->emailInterface->ecrEmailMsgByCategory($machineCurrent->ecrs_id,'MACHINE');
             }else{
                 $enviromentConditions = [
                     'id' => $selectedId,
@@ -158,6 +179,14 @@ class MachineController extends Controller
                     'approval_status' => 'PB',
                 ];
                 $this->resourceInterface->updateConditions(Machine::class,$enviromentConditions,$enviromentValidated);
+                //Send APPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = 'issinfoservice@pricon.ph';
+                $from_name = "4M Change Control Management System";
+                $subject = "APPROVED: MACHINE (4M CMS)";
+                $header = "Your MACHINE 4M  has been APPROVED";
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($machineCurrent->ecrs_id,$header);
             }
              //DISAPPROVED ECR
              if($request->status === "DIS"){
@@ -169,8 +198,54 @@ class MachineController extends Controller
                     'approval_status' => 'DIS', //Repeat the status
                 ];
                 $this->resourceInterface->updateConditions(Machine::class,$enviromentConditions,$enviromentValidated);
+                //Send DISAPPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = $currentSession;
+                $from_name = "4M Change Control Management System";
+                $subject = "DISAPPROVED: MACHINE (4M CMS)";
+                $header = "Your MACHINE 4M has been DISAPPROVED";
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($machineCurrent->ecrs_id,$header);
+                //Array Send Email
+                $emailData = [
+                    "to" =>$to,
+                    "cc" =>"",
+                    "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                    "from" => $from,
+                    "from_name" => $from_name ?? "4M Change Control Management System",
+                    "subject" =>$subject,
+                    "message" =>  $msg,
+                    "attachment_filename" => "",
+                    "attachment" => "",
+                    "send_date_time" => now(),
+                    "date_time_sent" => "",
+                    "date_created" => now(),
+                    "created_by" => session('rapidx_username'),
+                    "system_name" => "rapidx_4M",
+                ];
+                DB::commit();
+                $this->emailInterface->sendEmail($emailData);
+                return response()->json(['isSuccess' => 'true']);
             }
+            $emailData = [
+                "to" => $to,
+                "cc" => $from,
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                // "bcc" =>"mrronquez@pricon.ph",
+                "from" => $from,
+                "from_name" => $from_name ?? "4M Change Control Management System",
+                "subject" => $subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
             DB::commit();
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

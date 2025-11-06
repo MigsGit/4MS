@@ -313,6 +313,7 @@ class MethodController extends Controller
             //Get Current Status
             $ecrDetails= Ecr::where('id',$methodCurrent->ecrs_id)->get(['id','approval_status','status','category','ecr_no','created_by']);
             $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by ?? '');
+
             if($methodApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
@@ -329,7 +330,7 @@ class MethodController extends Controller
            ->limit(1)
            ->get(['id','approval_status','rapidx_user_id']);
             if ( count($methodApproval) != 0){
-                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($methodApproval[0]->rapidx_user_id);
+                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($methodApproval[0]->rapidx_user_id);
                 $methodApprovalValidated = [
                     'status' => 'PEN',
                 ];
@@ -349,7 +350,7 @@ class MethodController extends Controller
                 //Send Approval Email
                 $msg = $this->emailInterface->ecrEmailMsgByCategory($methodCurrent->ecrs_id,'METHOD');
                 //Send For Approval Email to Next Approver
-                $to = $ecrCurrentApproval['email'] ?? '';
+                $to = $currentApproval['email'] ?? '';
                 $from = $createdByEmail['email'] ?? '';
                 $subject = "FOR APPROVAL:  Method (4M)";
                 $from_name = "4M Change Control Management System";
@@ -362,10 +363,18 @@ class MethodController extends Controller
                     'approval_status' => 'PB',
                 ];
                 $this->resourceInterface->updateConditions(Method::class,$enviromentConditions,$enviromentValidated);
+                //Send APPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = 'issinfoservice@pricon.ph';
+                $from_name = "4M Change Control Management System";
+                $subject = "APPROVED: METHOD (4M CMS)";
+                $header = "Your METHOD 4M  has been APPROVED";
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($selectedId,$header);
 
             }
              //DISAPPROVED ECR
-             if($request->status === "DIS"){
+            if($request->status === "DIS"){
                 $conditions = [
                     'id' => $selectedId,
                 ];
@@ -374,40 +383,21 @@ class MethodController extends Controller
                     'approval_status' => 'DIS', //Repeat the status
                 ];
                 $this->resourceInterface->updateConditions(Method::class,$conditions,$requestValidated);
-
-                // $to = $requestedBy['email'] ?? '';
-                // $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
-                // $from =$currentSession['email'] ?? '';
-                // $from_name = $currentSession['fullName'];
-                // $subject = "DISAPPROVED: Engineering Change Request (ECR)";
-                // $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
-
-                // $emailData = [
-                //     "to" =>$to,
-                //     "cc" =>"",
-                //     "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
-                //     "from" => $from,
-                //     "from_name" =>$from_name ?? "4M Change Control Management System",
-                //     "subject" =>$subject,
-                //     "message" =>  $msg,
-                //     "attachment_filename" => "",
-                //     "attachment" => "",
-                //     "send_date_time" => now(),
-                //     "date_time_sent" => "",
-                //     "date_created" => now(),
-                //     "created_by" => session('rapidx_username'),
-                //     "system_name" => "rapidx_4M",
-                // ];
-                // $this->emailInterface->sendEmail($emailData);
-                    return response()->json(['isSuccess' => 'true']);
-                }
-                $emailData = [
-                   "to" => $to,
-                    "cc" => $from,
+                //Send DISAPPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = $currentSession;
+                $from_name = "4M Change Control Management System";
+                $subject = "DISAPPROVED: METHOD (4M CMS)";
+                $header = "Your METHOD 4M has been DISAPPROVED";
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($selectedId,$header);
+                 //Array Send Email
+                 $emailData = [
+                    "to" =>$to,
+                    "cc" =>"",
                     "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
-                    // "bcc" =>"mrronquez@pricon.ph",
                     "from" => $from,
-                    "from_name" =>$from_name ?? "4M Change Control Management System",
+                    "from_name" => $from_name ?? "4M Change Control Management System",
                     "subject" =>$subject,
                     "message" =>  $msg,
                     "attachment_filename" => "",
@@ -418,6 +408,27 @@ class MethodController extends Controller
                     "created_by" => session('rapidx_username'),
                     "system_name" => "rapidx_4M",
                 ];
+                DB::commit();
+                $this->emailInterface->sendEmail($emailData);
+                return response()->json(['isSuccess' => 'true']);
+            }
+            $emailData = [
+                "to" => $to,
+                "cc" => $from,
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                // "bcc" =>"mrronquez@pricon.ph",
+                "from" => $from,
+                "from_name" => $from_name ?? "4M Change Control Management System",
+                "subject" => $subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
             DB::commit();
             $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);

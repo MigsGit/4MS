@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-4">Material</h4>
+        <h4 class="mt-4">Material 1x</h4>
         <div class="card">
             <div class="card-header">
                 <h5>Filter</h5>
@@ -1292,7 +1292,6 @@
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
-
                     });
                 }
             }
@@ -1709,84 +1708,91 @@
             frmMaterial.value.remarks = material.remarks;
             isInternalExternal.value = internalExternal;
 
-            let prPreparedBy = materialApprovalCollection.PURPB[0].rapidx_user_id ?? "0";
-            let prCheckedBy = materialApprovalCollection.PURCB[0].rapidx_user_id ?? "0";
-            let prApprovedBy = materialApprovalCollection.PURAB[0].rapidx_user_id ?? "0";
-            let ppcPreparedBy = materialApprovalCollection.PPCPB[0].rapidx_user_id ?? "0";
-            let ppcCheckedBy = materialApprovalCollection.PPCCB[0].rapidx_user_id ?? "0";
-            let ppcApprovedBy = materialApprovalCollection.PPCAB[0].rapidx_user_id ?? "0";
-            let emsPreparedBy = materialApprovalCollection.EMSPB[0].rapidx_user_id ?? "0";
-            let emsCheckedBy = materialApprovalCollection.EMSCB[0].rapidx_user_id ?? "0";
-            let emsApprovedBy = materialApprovalCollection.EMSAB[0].rapidx_user_id ?? "0";
-            let qcPreparedBy = materialApprovalCollection.LQCPB[0].rapidx_user_id ?? "0";
-            let qcCheckedBy = materialApprovalCollection.LQCCB[0].rapidx_user_id ?? "0";
-            let qcApprovedBy = materialApprovalCollection.LQCAB[0].rapidx_user_id ?? "0";
-            let qaPreparedBy = materialApprovalCollection.QAPB[0].rapidx_user_id ?? "0";
-            let qaCheckedBy = materialApprovalCollection.QACB[0].rapidx_user_id ?? "0";
-            let qaApprovedBy = materialApprovalCollection.QAAB[0].rapidx_user_id ?? "0";
-            setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be
-                frmMaterial.value.prPreparedBy = prPreparedBy
-                frmMaterial.value.prCheckedBy = prCheckedBy
-                frmMaterial.value.prApprovedBy = prApprovedBy
-                frmMaterial.value.ppcPreparedBy = ppcPreparedBy
-                frmMaterial.value.ppcCheckedBy = ppcCheckedBy
-                frmMaterial.value.ppcApprovedBy = ppcApprovedBy
-                frmMaterial.value.emsPreparedBy = emsPreparedBy
-                frmMaterial.value.emsCheckedBy = emsCheckedBy
-                frmMaterial.value.emsApprovedBy = emsApprovedBy
-                frmMaterial.value.qcPreparedBy = qcPreparedBy
-                frmMaterial.value.qcCheckedBy = qcCheckedBy
-                frmMaterial.value.qcApprovedBy = qcApprovedBy
-                frmMaterial.value.qaPreparedBy = qaPreparedBy
-                frmMaterial.value.qaCheckedBy = qaCheckedBy
-                frmMaterial.value.qaApprovedBy = qaApprovedBy
-            }, 500);
-            if (internalExternal === "External"){
-                setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
-                    let prdnPreparedBy = materialApprovalCollection.PRDNPB[0].rapidx_user_id ?? "0";
-                    let prdnCheckedBy = materialApprovalCollection.PRDNCB[0].rapidx_user_id ?? "0";
-                    let prdnApprovedBy = materialApprovalCollection.PRDNAP[0].rapidx_user_id ?? "0";
-                    let mainEnggPreparedBy = materialApprovalCollection.MENGPB[0].rapidx_user_id ?? "0";
-                    let mainEnggCheckedBy = materialApprovalCollection.MENGCB[0].rapidx_user_id ?? "0";
-                    let mainEnggApprovedBy = materialApprovalCollection.MENGAB[0].rapidx_user_id ?? "0";
-                    let proEnggPreparedBy = materialApprovalCollection.PENGPB[0].rapidx_user_id ?? "0";
-                    let proEnggCheckedBy = materialApprovalCollection.PENGCB[0].rapidx_user_id ?? "0";
-                    let proEnggApprovedBy = materialApprovalCollection.PENGAB[0].rapidx_user_id ?? "0";
-                    frmMaterial.value.prdnPreparedBy = prdnPreparedBy;
-                    frmMaterial.value.prdnCheckedBy = prdnCheckedBy;
-                    frmMaterial.value.prdnApprovedBy = prdnApprovedBy;
-                    frmMaterial.value.mainEnggPreparedBy = mainEnggPreparedBy;
-                    frmMaterial.value.mainEnggCheckedBy = mainEnggCheckedBy;
-                    frmMaterial.value.mainEnggApprovedBy = mainEnggApprovedBy;
-                    frmMaterial.value.proEnggPreparedBy = proEnggPreparedBy;
-                    frmMaterial.value.proEnggCheckedBy = proEnggCheckedBy;
-                    frmMaterial.value.proEnggApprovedBy = proEnggApprovedBy;
-                    frmMaterial.value.engPreparedBy = '0'
-                    frmMaterial.value.engCheckedBy = '0'
-                    frmMaterial.value.engApprovedBy = '0'
+            if(materialApprovalCollection.length > 0 ){
+                let prPreparedBy = materialApprovalCollection.PURPB[0].rapidx_user_id ?? "0";
+                let prCheckedBy = materialApprovalCollection.PURCB[0].rapidx_user_id ?? "0";
+                let prApprovedBy = materialApprovalCollection.PURAB[0].rapidx_user_id ?? "0";
+                let ppcPreparedBy = materialApprovalCollection.PPCPB[0].rapidx_user_id ?? "0";
+                let ppcCheckedBy = materialApprovalCollection.PPCCB[0].rapidx_user_id ?? "0";
+                let ppcApprovedBy = materialApprovalCollection.PPCAB[0].rapidx_user_id ?? "0";
+                let emsPreparedBy = materialApprovalCollection.EMSPB[0].rapidx_user_id ?? "0";
+                let emsCheckedBy = materialApprovalCollection.EMSCB[0].rapidx_user_id ?? "0";
+                let emsApprovedBy = materialApprovalCollection.EMSAB[0].rapidx_user_id ?? "0";
+                let qcPreparedBy = materialApprovalCollection.LQCPB[0].rapidx_user_id ?? "0";
+                let qcCheckedBy = materialApprovalCollection.LQCCB[0].rapidx_user_id ?? "0";
+                let qcApprovedBy = materialApprovalCollection.LQCAB[0].rapidx_user_id ?? "0";
+                let qaPreparedBy = materialApprovalCollection.QAPB[0].rapidx_user_id ?? "0";
+                let qaCheckedBy = materialApprovalCollection.QACB[0].rapidx_user_id ?? "0";
+                let qaApprovedBy = materialApprovalCollection.QAAB[0].rapidx_user_id ?? "0";
 
+                setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be
+                    frmMaterial.value.prPreparedBy = prPreparedBy
+                    frmMaterial.value.prCheckedBy = prCheckedBy
+                    frmMaterial.value.prApprovedBy = prApprovedBy
+                    frmMaterial.value.ppcPreparedBy = ppcPreparedBy
+                    frmMaterial.value.ppcCheckedBy = ppcCheckedBy
+                    frmMaterial.value.ppcApprovedBy = ppcApprovedBy
+                    frmMaterial.value.emsPreparedBy = emsPreparedBy
+                    frmMaterial.value.emsCheckedBy = emsCheckedBy
+                    frmMaterial.value.emsApprovedBy = emsApprovedBy
+                    frmMaterial.value.qcPreparedBy = qcPreparedBy
+                    frmMaterial.value.qcCheckedBy = qcCheckedBy
+                    frmMaterial.value.qcApprovedBy = qcApprovedBy
+                    frmMaterial.value.qaPreparedBy = qaPreparedBy
+                    frmMaterial.value.qaCheckedBy = qaCheckedBy
+                    frmMaterial.value.qaApprovedBy = qaApprovedBy
                 }, 500);
-            }
-            if (internalExternal === "Internal"){
-                setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
-                    let engPreparedBy = materialApprovalCollection.ENGPB[0].rapidx_user_id ?? "0";
-                    let engCheckedBy = materialApprovalCollection.ENGCB[0].rapidx_user_id ?? "0";
-                    let engApprovedBy = materialApprovalCollection.ENGAB[0].rapidx_user_id ?? "0";
 
-                    frmMaterial.value.prdnPreparedBy = '0';
-                    frmMaterial.value.prdnCheckedBy = '0';
-                    frmMaterial.value.prdnApprovedBy = '0';
-                    frmMaterial.value.mengPreparedBy = '0';
-                    frmMaterial.value.mengCheckedBy = '0';
-                    frmMaterial.value.mengApprovedBy = '0';
-                    frmMaterial.value.pengPreparedBy = '0';
-                    frmMaterial.value.pengCheckedBy = '0';
-                    frmMaterial.value.pengApprovedBy = '0';
-                    frmMaterial.value.engPreparedBy = engPreparedBy;
-                    frmMaterial.value.engCheckedBy = engCheckedBy;
-                    frmMaterial.value.engApprovedBy = engApprovedBy;
-                }, 500);
+
+                if (internalExternal === "External"){
+                    setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
+                        let prdnPreparedBy = materialApprovalCollection.PRDNPB[0].rapidx_user_id ?? "0";
+                        let prdnCheckedBy = materialApprovalCollection.PRDNCB[0].rapidx_user_id ?? "0";
+                        let prdnApprovedBy = materialApprovalCollection.PRDNAP[0].rapidx_user_id ?? "0";
+                        let mainEnggPreparedBy = materialApprovalCollection.MENGPB[0].rapidx_user_id ?? "0";
+                        let mainEnggCheckedBy = materialApprovalCollection.MENGCB[0].rapidx_user_id ?? "0";
+                        let mainEnggApprovedBy = materialApprovalCollection.MENGAB[0].rapidx_user_id ?? "0";
+                        let proEnggPreparedBy = materialApprovalCollection.PENGPB[0].rapidx_user_id ?? "0";
+                        let proEnggCheckedBy = materialApprovalCollection.PENGCB[0].rapidx_user_id ?? "0";
+                        let proEnggApprovedBy = materialApprovalCollection.PENGAB[0].rapidx_user_id ?? "0";
+                        frmMaterial.value.prdnPreparedBy = prdnPreparedBy;
+                        frmMaterial.value.prdnCheckedBy = prdnCheckedBy;
+                        frmMaterial.value.prdnApprovedBy = prdnApprovedBy;
+                        frmMaterial.value.mainEnggPreparedBy = mainEnggPreparedBy;
+                        frmMaterial.value.mainEnggCheckedBy = mainEnggCheckedBy;
+                        frmMaterial.value.mainEnggApprovedBy = mainEnggApprovedBy;
+                        frmMaterial.value.proEnggPreparedBy = proEnggPreparedBy;
+                        frmMaterial.value.proEnggCheckedBy = proEnggCheckedBy;
+                        frmMaterial.value.proEnggApprovedBy = proEnggApprovedBy;
+                        frmMaterial.value.engPreparedBy = '0'
+                        frmMaterial.value.engCheckedBy = '0'
+                        frmMaterial.value.engApprovedBy = '0'
+
+                    }, 500);
+                }
+                if (internalExternal === "Internal"){
+                    setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
+                        let engPreparedBy = materialApprovalCollection.ENGPB[0].rapidx_user_id ?? "0";
+                        let engCheckedBy = materialApprovalCollection.ENGCB[0].rapidx_user_id ?? "0";
+                        let engApprovedBy = materialApprovalCollection.ENGAB[0].rapidx_user_id ?? "0";
+
+                        frmMaterial.value.prdnPreparedBy = '0';
+                        frmMaterial.value.prdnCheckedBy = '0';
+                        frmMaterial.value.prdnApprovedBy = '0';
+                        frmMaterial.value.mengPreparedBy = '0';
+                        frmMaterial.value.mengCheckedBy = '0';
+                        frmMaterial.value.mengApprovedBy = '0';
+                        frmMaterial.value.pengPreparedBy = '0';
+                        frmMaterial.value.pengCheckedBy = '0';
+                        frmMaterial.value.pengApprovedBy = '0';
+                        frmMaterial.value.engPreparedBy = engPreparedBy;
+                        frmMaterial.value.engCheckedBy = engCheckedBy;
+                        frmMaterial.value.engApprovedBy = engApprovedBy;
+                    }, 500);
+                }
             }
+
+
             modal.SaveMaterial.show();
         });
     }

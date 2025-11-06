@@ -166,7 +166,37 @@ class MaterialController extends Controller
             if ($firstPmiApproval) {
                 $firstPmiApproval->update(['status' => 'PEN']);
             }
-            DB::commit();
+
+
+           $ecrApprovalCurrent = MaterialApproval::where('ecrs_id',$currentEcrsId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+           $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId( $ecrApprovalCurrent->rapidx_user_id);
+            $to = $ecrCurrentApproval['email'] ?? '';
+            $from = 'issinfoservice@pricon.ph';
+            $subject = "FOR APPROVAL: Method (4M)";
+            $from_name = "4M Change Control Management System";
+            $msg = $this->emailInterface->ecrEmailMsgByCategory($currentEcrsId,'MATERIAL');
+            $emailData = [
+                // "to" =>$to,
+                "to" =>"cdcasuyon@pricon.ph",
+                "cc" =>"mclegaspi@pricon.ph",
+                // "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                "from" => $from,
+                "from_name" =>$from_name ?? "4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
+            // DB::commit();
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -204,8 +234,8 @@ class MaterialController extends Controller
             //Initialize the Email Address of the User
             $requestedBy = $this->emailInterface->getEmailByRapidxUserId($material->ecr->created_by);
 
-             //DISAPPROVED ECR
-            if($request->status === "DIS"){
+
+            if($request->status === "DIS"){ //DISAPPROVED MATERIAL
                 $enviromentConditions = [
                     'id' => $selectedId,
                 ];
@@ -227,7 +257,7 @@ class MaterialController extends Controller
                     "cc" =>"",
                     "bcc" =>"mclegaspi@pricon.ph",
                     "from" => $from,
-                    "from_name" =>$from_name ?? "4M Change Control Management System",
+                    "from_name" => $from_name ?? "4M Change Control Management System",
                     "subject" =>$subject,
                     "message" =>  $msg,
                     "attachment_filename" => "",
@@ -242,8 +272,7 @@ class MaterialController extends Controller
                 $this->emailInterface->sendEmail($emailData);
                 return response()->json(['is_success' => 'true']);
             }
-            if ( count($materialApproval) === 0){
-
+            if ( count($materialApproval) === 0){ //APPROVED
                 $enviromentConditions = [
                     'id' => $selectedId,
                 ];
@@ -252,14 +281,18 @@ class MaterialController extends Controller
                     'approval_status' => 'CB',
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
-                $msg = '';
-                $to =  '';
-                $from = '';
-                $subject =  '';
-                $from_name =  '';
+                //Send APPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = 'issinfoservice@pricon.ph';
+                $from_name = "4M Change Control Management System";
+                $subject = "APPROVED: MATERIAL (4M CMS)";
+                $header = "Your 4M MATERIAL has been APPROVED";
+                $msg = $this->emailInterface->materialEmailMsg($selectedId);
             }
-            if ( count($materialApproval) != 0){
-                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($materialApproval[0]->rapidx_user_id);
+
+            if ( count($materialApproval) != 0){ //Count the PENDING Status
+                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($materialApproval[0]->rapidx_user_id);
 
                 $materialApprovalValidated = [
                     'status' => 'PEN',
@@ -277,10 +310,12 @@ class MaterialController extends Controller
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,   $enviromentValidated);
                 //Send For Approval Email to Next Approver
+                // $header = "Your 4M MATERIAL has been approved";
+                // $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($selectedId,$header);
                 $msg = $this->emailInterface->materialEmailMsg($selectedId);
-                $to = $ecrCurrentApproval['email'] ?? '';
+                $to = $currentApproval['email'] ?? '';
                 $from = $requestedBy['email'] ?? '';
-                $subject = "TEST FOR APPROVAL: Material (4M CMS)";
+                $subject = "FOR APPROVAL: Material (4M CMS)";
                 $from_name = "4M Change Control Management System";
             }
 
@@ -288,9 +323,9 @@ class MaterialController extends Controller
             $emailData = [
                 "to" =>$to,
                 "cc" =>"",
-                "bcc" =>"mclegaspi@pricon.ph",
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
                 "from" => $from,
-                "from_name" =>$from_name ?? "4M Change Control Management System",
+                "from_name" => $from_name ?? "4M Change Control Management System",
                 "subject" =>$subject,
                 "message" =>  $msg,
                 "attachment_filename" => "",
@@ -366,9 +401,10 @@ class MaterialController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($materialStatus === "RUP" || $materialStatus === "DIS"  && $row->created_by === session('rapidx_user_id')){
-                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-
+                if($materialStatus === "RUP" || $materialStatus === "DIS" ){
+                    if( $row->created_by === session('rapidx_user_id')){
+                        $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                    }
                 }
                 $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 $result .= '</ul>';
