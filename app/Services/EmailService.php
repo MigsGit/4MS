@@ -488,7 +488,7 @@ class EmailService implements EmailInterface
         $getMaterialStatus = $material->status;
         if($getMaterialStatus == 'DIS'){
             $header = "Your request has been disapproved";
-        }else if($getMaterialStatus == 'OK'){
+        }else if($getMaterialStatus == 'PMIAPP'){ //APPROVED MATERIAL Submit to PMI Approval
             $header = "Your request has been approved";
         }else{
             $header = "Please see the request for your approval.";

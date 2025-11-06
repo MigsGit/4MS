@@ -166,7 +166,36 @@ class MaterialController extends Controller
             if ($firstPmiApproval) {
                 $firstPmiApproval->update(['status' => 'PEN']);
             }
+            //Auto Email 4M Approval Based on Category
+            $ecrApprovalCurrent = MaterialApproval::where('ecrs_id',$currentEcrsId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+            $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId( $ecrApprovalCurrent->rapidx_user_id);
+            $to = $ecrCurrentApproval['email'] ?? '';
+            $from = 'issinfoservice@pricon.ph';
+            $subject = "FOR APPROVAL: Method (4M)";
+            $from_name = "4M Change Control Management System";
+            $msg = $this->emailInterface->ecrEmailMsgByCategory($currentEcrsId,'MATERIAL');
+            $emailData = [
+                // "to" =>$to,
+                "to" =>"cdcasuyon@pricon.ph",
+                "cc" =>"mclegaspi@pricon.ph",
+                // "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                "from" => $from,
+                "from_name" =>$from_name ?? "4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
             DB::commit();
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -252,11 +281,13 @@ class MaterialController extends Controller
                     'approval_status' => 'CB',
                 ];
                 $this->resourceInterface->updateConditions(Material::class,$enviromentConditions,$enviromentValidated);
-                $msg = '';
-                $to =  '';
-                $from = '';
-                $subject =  '';
-                $from_name =  '';
+                //Send APPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = 'issinfoservice@pricon.ph';
+                $from_name = "4M Change Control Management System";
+                $subject = "APPROVED: Material (4M CMS)";
+                $msg = $this->emailInterface->materialEmailMsg($selectedId);
             }
             if ( count($materialApproval) != 0){
                 $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($materialApproval[0]->rapidx_user_id);
@@ -280,7 +311,7 @@ class MaterialController extends Controller
                 $msg = $this->emailInterface->materialEmailMsg($selectedId);
                 $to = $ecrCurrentApproval['email'] ?? '';
                 $from = $requestedBy['email'] ?? '';
-                $subject = "TEST FOR APPROVAL: Material (4M CMS)";
+                $subject = "FOR APPROVAL: Material (4M CMS)";
                 $from_name = "4M Change Control Management System";
             }
 
