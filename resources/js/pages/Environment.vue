@@ -689,20 +689,20 @@
             }
         } ,
         {   data: 'get_status'} ,
-        // {   data: 'get_attachment',
-        //     orderable: false,
-        //     searchable: false,
-        //     createdCell(cell){
-        //         let btnViewEnvironmentRef = cell.querySelector('#btnViewEnvironmentRef');
-        //         if(btnViewEnvironmentRef != null){
-        //             btnViewEnvironmentRef.addEventListener('click',function(){
-        //                 let ecrsId = this.getAttribute('ecr-id');
-        //                 getEnvironmentRefByEcrsId(ecrsId);
-        //             });
-        //         }
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewEnvironmentRef = cell.querySelector('#btnViewEnvironmentRef');
+                if(btnViewEnvironmentRef != null){
+                    btnViewEnvironmentRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecr-id');
+                        getEnvironmentRefByEcrsId(ecrsId);
+                    });
+                }
 
-        //     }
-        // } ,
+            }
+        } ,
         {   data: 'ecr_no'} ,
         {   data: 'get_details'} ,
         {   data: 'category'} ,

@@ -349,6 +349,8 @@ class CommonController extends Controller
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
+            $currentApproval = $this->emailInterface->getEmailByRapidxUserId($pmiInternalApprovalCurrent->rapidx_user_id);
+
             if($pmiInternalApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
@@ -356,7 +358,9 @@ class CommonController extends Controller
             $ecr = Ecr::where('id',$ecrsId)
             ->whereNull('deleted_at')
             ->limit(1)
-            ->get(['category','internal_external']);
+            ->get();
+            $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecr[0]->created_by ?? '');
+
             $isCategory = $ecr[0]->category;
             switch ($isCategory) {
                 case 'Man':
@@ -386,16 +390,42 @@ class CommonController extends Controller
             }
             //DISAPPROVED ECR
             if($request->status === "DIS"){
-                $enviromentConditions = [
+                $categoryConditions = [
                     'ecrs_id' => $ecrsId,
                 ];
-                $enviromentValidated = [
+                $categoryRequestValidated = [
                     'status' => 'DIS',
                     'approval_status' => 'PB',
                 ];
-                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
-                DB::commit();
-                return response()->json(['is_success' => 'true']);
+                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
+                 //Send DISAPPROVED Email to Requestor
+                 $to = $requestedBy['email'] ?? '';
+                 $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                 $from = $currentSession;
+                 $from_name = "4M Change Control Management System";
+                 $subject = "DISAPPROVED: " .$ecr[0]->category. " (4M CMS)";
+                 $header = "Your " .$ecr[0]->category. " 4M has been DISAPPROVED";
+                 $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
+                 //Array Send Email
+                $emailData = [
+                     "to" =>$to,
+                     "cc" =>"",
+                     "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                     "from" => $from,
+                     "from_name" => $from_name ?? "4M Change Control Management System",
+                     "subject" =>$subject,
+                     "message" =>  $msg,
+                     "attachment_filename" => "",
+                     "attachment" => "",
+                     "send_date_time" => now(),
+                     "date_time_sent" => "",
+                     "date_created" => now(),
+                     "created_by" => session('rapidx_username'),
+                     "system_name" => "rapidx_4M",
+                 ];
+                 DB::commit();
+                 $this->emailInterface->sendEmail($emailData);
+                 return response()->json(['isSuccess' => 'true']);
             }
             //Get Current Status
             $pmiInternalApprovalCurrent->update([
@@ -409,25 +439,34 @@ class CommonController extends Controller
            ->limit(1)
            ->get(['id','approval_status']);
             if ( count($pmiInternalApproval) === 0){
-                $enviromentConditions = [
+                $categoryConditions = [
                     'ecrs_id' => $ecrsId,
                 ];
                 if($ecr[0]->internal_external === "External"){
-                    $enviromentValidated = [
+                    $categoryRequestValidated = [
                         'status' => 'EXDISPO',
                         'approval_status' => 'EXDISPO',
                     ];
                 }
                 if($ecr[0]->internal_external === "Internal"){
-                    $enviromentValidated = [
+                    $categoryRequestValidated = [
                         'status' => 'OK',
                         'approval_status' => 'OK',
                     ];
                 }
-                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
+                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
+                   //Send APPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = 'issinfoservice@pricon.ph';
+                $from_name = "4M Change Control Management System";
+                $subject = "APPROVED: MACHINE (4M CMS)";
+                $header = "Your MACHINE 4M  has been APPROVED";
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
             }
             //Update next approval
             if ( count($pmiInternalApproval) != 0){
+
                 $pmiInternalApprovalValidated = [
                     'status' => 'PEN',
                 ];
@@ -436,15 +475,38 @@ class CommonController extends Controller
                 ];
                 $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
                 //Update the ECR Approval Status
-                $enviromentConditions = [
+                $categoryConditions = [
                     'ecrs_id' => $ecrsId,
                 ];
-                $enviromentValidated = [
+                $categoryRequestValidated = [
                     'approval_status' => $pmiInternalApproval[0]->approval_status,
                 ];
-                $this->resourceInterface->updateConditions($currentModel,$enviromentConditions,$enviromentValidated);
-            }
+                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
 
+                 //Send APPROVED Email to Requestor
+                 $to = $currentApproval['email'] ?? '';
+                 $from = $createdByEmail['email'] ?? '';
+                 $from_name = "4M Change Control Management System";
+                 $subject = "FOR PMI Internal APPROVAL:" .$ecr[0]->category. " 4M";
+                 $header = "Please see the" .$ecr[0]->category. ' 4Mfor your approval.';
+                 $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
+            }
+            $emailData = [
+                "to" =>$to,
+                "cc" =>"",
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                "from" => $from,
+                "from_name" => $from_name ?? "4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
             DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {

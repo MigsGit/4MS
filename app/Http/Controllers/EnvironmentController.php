@@ -35,6 +35,7 @@ class EnvironmentController extends Controller
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
 
             $ecr->whereNull('deleted_at');
+
             if( $adminAccess === 'null' || blank($adminAccess) || $adminAccess === 'pmi' ){
                 $ecr->whereHas('pmi_approvals_pending', function ($query) {
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
@@ -47,6 +48,7 @@ class EnvironmentController extends Controller
             if( $adminAccess === 'all') {
                 $ecr->get();
             }
+
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 $result = "";
@@ -69,10 +71,10 @@ class EnvironmentController extends Controller
                 return $result;
             })
             ->addColumn('get_status',function ($row) use($request){
+                $result = '';
                 $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
                 $approvalStatus = $row->environment->approval_status;
                 $getApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
-                $result = '';
                 $result .= '<center>';
                 // $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
@@ -82,7 +84,9 @@ class EnvironmentController extends Controller
                 return $result;
             })
             ->addColumn('get_details',function ($row) use($request){
-                $date = Carbon::parse($row->machine->created_at); //String to Object Date conversion
+                $result = '';
+
+                $date = Carbon::parse($row->environment->created_at); //String to Object Date conversion
 
                 // Number of working days to add
                 $daysToAdd = 14;
@@ -94,7 +98,6 @@ class EnvironmentController extends Controller
                     }
                 }
 
-                $result = '';
                 $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
                 $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
                 $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
@@ -108,9 +111,7 @@ class EnvironmentController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                if($request->category  === 'Environment'){
-                    $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'><i class='fa-solid fa-file-pdf'></i></a>";
-                }
+                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3 btn-get-ecr-id' ecr-id='".$row->id."' id='btnViewEnvironmentRef'><i class='fa-solid fa-file-pdf'></i></a>";
                 $result .= '</center>';
                 return $result;
             })

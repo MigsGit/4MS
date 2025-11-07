@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function(){
     });
 
     Route::controller(CommonController::class)->group(function (): void {
-        Route::get('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
+        Route::post('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::post('save_special_inspection', 'saveSpecialInspection')->name('save_special_inspection');
         Route::post('save_external_disposition', 'saveExternalDisposition')->name('save_external_disposition');
 
