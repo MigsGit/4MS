@@ -128,7 +128,7 @@ class MachineController extends Controller
             ->first();
 
             $machineCurrent = Machine::findOrFail($selectedId);
-            $ecrDetails= Ecr::where('id',$machineCurrent->ecrs_id)->get(['id','approval_status','status','category','ecr_no','created_by']);
+            $ecrDetails= Ecr::where('id',$machineCurrent->ecrs_id)->get();
 
             $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by ?? '');
 

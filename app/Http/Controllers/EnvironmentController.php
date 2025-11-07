@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Ecr;
 use App\Models\Environment;
 use Illuminate\Http\Request;
+use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
@@ -16,9 +17,15 @@ class EnvironmentController extends Controller
 {
     protected $resourceInterface;
     protected $commonInterface;
-    public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
+    protected $emailInterface;
+    public function __construct(
+        ResourceInterface $resourceInterface,
+        CommonInterface $commonInterface,
+        EmailInterface $emailInterface
+    ) {
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
+        $this->emailInterface = $emailInterface;
     }
     public function loadEcrEnvironmentByStatus(Request $request){
         try {

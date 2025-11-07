@@ -12,6 +12,7 @@ use App\Models\ManChecklist;
 use Illuminate\Http\Request;
 use App\Http\Requests\ManRequest;
 use App\Models\SpecialInspection;
+use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Http\Controllers\Controller;
@@ -22,9 +23,15 @@ class ManController extends Controller
 {
     protected $resourceInterface;
     protected $commonInterface;
-    public function __construct(ResourceInterface $resourceInterface,CommonInterface $commonInterface) {
+    protected $emailInterface;
+    public function __construct(
+        ResourceInterface $resourceInterface,
+        CommonInterface $commonInterface,
+        EmailInterface $emailInterface
+    ) {
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
+        $this->emailInterface = $emailInterface;
     }
     public function saveMan(Request $request,ManRequest $manRequest){
         try {
@@ -105,17 +112,18 @@ class ManController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
-            $selectedId = $request->selectedId;
+            $ecrsId = $request->selectedId; //ECRS ID
             //Get Current Ecr Approval is equal to Current Session
-            $manApprovalCurrent = ManApproval::where('ecrs_id',$selectedId)
+            $manApprovalCurrent = ManApproval::where('ecrs_id',$ecrsId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
-
+            $manCurrent = Man::where('ecrs_id',$ecrsId)->first();
+            $ecrDetails= Ecr::where('id',$manCurrent->ecrs_id)->get();
+            $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by ?? '');
             if($manApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
-
             //Update the man Approval Status
             $manApprovalCurrent->update([
                 'status' => $request->status,
@@ -123,58 +131,95 @@ class ManController extends Controller
             ]);
             if($request->status === 'APP'){
                 if($manApprovalCurrent->approval_status === 'RUP'){
-                    $isManRequirementsComplete = $this->isManRequirementsComplete($selectedId);
+                    $isManRequirementsComplete = $this->isManRequirementsComplete($ecrsId);
                     if(  $isManRequirementsComplete['isSuccess'] === 'false'){
                         return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
                     }
                 }
                 if($manApprovalCurrent->approval_status === 'TRNR'){
-                    $isManRequirementsComplete = $this->isTrainerManRequirementsComplete($selectedId);
+                    $isManRequirementsComplete = $this->isTrainerManRequirementsComplete($ecrsId);
                     if(  $isManRequirementsComplete['isSuccess'] === 'false'){
                         return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
                     }
                 }
                 if($manApprovalCurrent->approval_status === 'LQCSUP'){
-                    $isManRequirementsComplete = $this->isLqcManRequirementsComplete($selectedId);
+                    $isManRequirementsComplete = $this->isLqcManRequirementsComplete($ecrsId);
                     if(  $isManRequirementsComplete['isSuccess'] === 'false'){
                         return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
                     }
                 }
                 if($manApprovalCurrent->approval_status === 'CHCK'){
-                    $isManRequirementsComplete = $this->isChecklistManRequirementsComplete($selectedId);
+                    $isManRequirementsComplete = $this->isChecklistManRequirementsComplete($ecrsId);
                     if(  $isManRequirementsComplete['isSuccess'] === 'false'){
                         return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
                     }
                 }
             }
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-            $manApproval = ManApproval::where('ecrs_id',$selectedId)
+            $manApproval = ManApproval::where('ecrs_id',$ecrsId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','-')
             ->limit(1)
-            ->get(['id','approval_status']);
+            ->get();
             //DISAPPROVED ECR
             if($request->status === "DIS"){
                 $conditions = [
-                    'id' => $selectedId,
+                    'ecrs_id' => $ecrsId,
                 ];
                 $requestValidated = [
                     'status' => 'DIS',
                     'approval_status' => 'DIS', //Repeat the status
                 ];
                 $this->resourceInterface->updateConditions(Man::class,$conditions,$requestValidated);
+                //Send DISAPPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = $currentSession;
+                $from_name = "4M Change Control Management System";
+                $subject = "DISAPPROVED: MAN (4M CMS)";
+                $header = "Your MAN 4M has been DISAPPROVED";
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($ecrsId,$header);
+                //Array Send Email
+                $emailData = [
+                    "to" =>$to,
+                    "cc" =>"",
+                    "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                    "from" => $from,
+                    "from_name" => $from_name ?? "4M Change Control Management System",
+                    "subject" =>$subject,
+                    "message" =>  $msg,
+                    "attachment_filename" => "",
+                    "attachment" => "",
+                    "send_date_time" => now(),
+                    "date_time_sent" => "",
+                    "date_created" => now(),
+                    "created_by" => session('rapidx_username'),
+                    "system_name" => "rapidx_4M",
+                ];
+                DB::commit();
+                $this->emailInterface->sendEmail($emailData);
+                return response()->json(['isSuccess' => 'true']);
             }
             if ( count($manApproval) === 0){
-                    $manConditions = [
-                        'ecrs_id' => $selectedId,
-                    ];
-                    $manValidated = [
-                        'status' => 'PMIAPP',
-                        'approval_status' => 'PB',
-                    ];
-                    $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
+                $manConditions = [
+                    'ecrs_id' => $ecrsId,
+                ];
+                $manValidated = [
+                    'status' => 'PMIAPP',
+                    'approval_status' => 'PB',
+                ];
+                $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
+                    //Send APPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = 'issinfoservice@pricon.ph';
+                $from_name = "4M Change Control Management System";
+                $subject = "APPROVED: MACHINE (4M CMS)";
+                $header = "Your MACHINE 4M  has been APPROVED";
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($manCurrent->ecrs_id,$header);
             }
             if ( count($manApproval) != 0){
+                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($manApproval[0]->rapidx_user_id);
                 $manApprovalValidated = [
                     'status' => 'PEN',
                 ];
@@ -184,16 +229,39 @@ class ManController extends Controller
                 $this->resourceInterface->updateConditions(ManApproval::class,$manApprovalConditions,$manApprovalValidated);
                 //Update the ECR Approval Status
                 $manConditions = [
-                    'ecrs_id' => $selectedId,
+                    'ecrs_id' => $ecrsId,
                 ];
                 $manValidated = [
                     'status' => 'FORAPP',
                     'approval_status' => $manApproval[0]->approval_status,
                 ];
                 $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
-            }
 
+                //Send Approval Email
+                $to = $currentApproval['email'] ?? '';
+                $from = $createdByEmail['email'] ?? '';
+                $subject = "FOR APPROVAL: MAN (4M)";
+                $from_name = "4M Change Control Management System";
+                $msg = $this->emailInterface->ecrEmailMsgByCategory($ecrsId,'MAN');
+            }
+            $emailData = [
+                "to" =>$to,
+                "cc" =>"",
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                "from" => $from,
+                "from_name" => $from_name ?? "4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
             DB::commit();
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

@@ -349,7 +349,6 @@ class CommonController extends Controller
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
-            $currentApproval = $this->emailInterface->getEmailByRapidxUserId($pmiInternalApprovalCurrent->rapidx_user_id);
 
             if($pmiInternalApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
@@ -437,7 +436,7 @@ class CommonController extends Controller
            ->whereNotNull('rapidx_user_id')
            ->where('status','-')
            ->limit(1)
-           ->get(['id','approval_status']);
+           ->get();
             if ( count($pmiInternalApproval) === 0){
                 $categoryConditions = [
                     'ecrs_id' => $ecrsId,
@@ -466,6 +465,7 @@ class CommonController extends Controller
             }
             //Update next approval
             if ( count($pmiInternalApproval) != 0){
+                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($pmiInternalApproval->rapidx_user_id);
 
                 $pmiInternalApprovalValidated = [
                     'status' => 'PEN',
