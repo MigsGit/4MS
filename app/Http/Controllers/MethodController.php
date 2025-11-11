@@ -756,7 +756,7 @@ class MethodController extends Controller
                    $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_after);
                     $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
                     $filePathWithEcrsId = $methodRefByEcrsId[0]->file_path."/".$methodsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
-                    return  $filePath = "app/public/".$filePathWithEcrsId."";
+                    $filePath = "app/public/".$filePathWithEcrsId."";
                 }
                 // $this->commonInterface->viewImageFile($filePath);
                 $path = storage_path($filePath);

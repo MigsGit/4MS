@@ -345,7 +345,7 @@ class CommonController extends Controller
             DB::beginTransaction();
             $ecrsId = $request->ecrsId;
             //Get Current Ecr Approval is equal to Current Session
-            $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
+           $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
@@ -432,7 +432,7 @@ class CommonController extends Controller
                 'remarks' => $request->remarks,
             ]);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-           $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)
+            $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)
            ->whereNotNull('rapidx_user_id')
            ->where('status','-')
            ->limit(1)
@@ -465,7 +465,7 @@ class CommonController extends Controller
             }
             //Update next approval
             if ( count($pmiInternalApproval) != 0){
-                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($pmiInternalApproval->rapidx_user_id);
+                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($pmiInternalApproval[0]->rapidx_user_id);
 
                 $pmiInternalApprovalValidated = [
                     'status' => 'PEN',
@@ -508,6 +508,7 @@ class CommonController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

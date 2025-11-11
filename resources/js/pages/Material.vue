@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-4">Material 1x</h4>
+        <h4 class="mt-4">Material</h4>
         <div class="card">
             <div class="card-header">
                 <h5>Filter</h5>

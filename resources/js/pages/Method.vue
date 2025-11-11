@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid px-4">
-        <h4 class="mt-4">Methods</h4>
+        <h4 class="mt-4">Method</h4>
         <div class="row">
             <div class="col-md-3 offset-md-4">
                 <Multiselect
@@ -239,7 +239,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3"  v-show="isModal === 'View' && currentStatus != 'PMIAPP'">
+            <div class="row mt-3"  v-show="isModal === 'View'">
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMachineApproverSummary" aria-expanded="true" aria-controls="collapseMachineApproverSummary">
@@ -995,15 +995,14 @@
                         selectedMethodsId.value = methodsId;
                         isModal.value = 'View';
                         currentStatus.value = methodStatus;
+                        getCurrentApprover(methodApproverParams);
+                        tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
 
                         if( methodStatus === 'PMIAPP' || methodStatus === 'OK'){
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
-                        if( methodStatus != 'PMIAPP'){
-                            getCurrentApprover(methodApproverParams);
-                        }
-                        tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
+
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         //Load ECR Requirement by Category and Ecrs Id
                         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();

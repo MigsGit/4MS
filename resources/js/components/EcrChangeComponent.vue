@@ -32,7 +32,7 @@
                                          <textarea v-show="isSelectReadonly" v-model="frmEcrReasonRow.descriptionOfChangeView" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" :disabled="isSelectReadonly">
                                         </textarea>
 
-                                        <Multiselect v-show="isSelectReadonly ===false"
+                                        <Multiselect v-show="isSelectReadonly === false"
                                             v-model="frmEcrReasonRow.descriptionOfChange"
                                             :options="optDescriptionOfChange"
                                             placeholder="Select an option"

@@ -307,6 +307,8 @@ export default function useEcr(){
             frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
             frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
             frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
+            frmEcrReasonRows.value[0].descriptionOfChangeView = ecrDetails.dropdown_master_detail_description_of_change.dropdown_masters_details;
+            frmEcrReasonRows.value[0].reasonOfChangeView = ecrDetails.dropdown_master_detail_reason_of_change.dropdown_masters_details;
         });
     }
     const saveEcrDetails = async () => {
