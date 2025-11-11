@@ -181,6 +181,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks</span>
+                        <textarea v-model="frmEcr.remarks" class="form-control form-control-lg" aria-describedby="addon-wrapping" row="5">
+                        </textarea>
+                    </div>
+                </div>
+
                   <!-- Others Disposition -->
                   <div class="card mb-2 d-none">
                         <h5 class="mb-0">
@@ -1565,6 +1573,7 @@
                     ["device_name", frmEcr.value.deviceName],
                     ["customer_ec_no", frmEcr.value.customerEcNo],
                     ["date_of_request", frmEcr.value.dateOfRequest],
+                    ["remarks", frmEcr.value.remarks],
                 ].forEach(([key, value]) =>
                     formData.append(key, value)
                 );

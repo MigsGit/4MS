@@ -136,6 +136,7 @@ class EcrController extends Controller
                 }
                 $ecrRequest['status'] = 'IA';
                 $ecrRequest['approval_status'] = 'OTRB';
+                $ecrRequest['remarks'] = $request->remarks ?? NULL;
                 // $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
                 $this->resourceInterface->updateConditions(Ecr::class,$ecrConditions,$ecrRequest);
                 $currenErcId = $ecrsId;
@@ -143,6 +144,7 @@ class EcrController extends Controller
                 $ecrRequest['created_at'] = now();
                 $ecrRequest['ecr_no'] = $generatedControlNumber['currentCtrlNo'];
                 $ecrRequest['created_by'] = session('rapidx_user_id');
+                $ecrRequest['remarks'] = $request->remarks ?? NULL;
 
                 $ecr =  $this->resourceInterface->create(Ecr::class,$ecrRequest);
                 $currenErcId = $ecr['data_id'];
@@ -297,7 +299,7 @@ class EcrController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            $this->emailInterface->sendEmail($emailData);
+            // $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -1050,18 +1052,6 @@ class EcrController extends Controller
                 'approvalStatus' => $approvalStatus,
             ];
        } catch (Exception $e) {
-           throw $e;
-       }
-   }
-   public function index(Request $request){
-       return 'true' ;
-       try {
-           date_default_timezone_set('Asia/Manila');
-           DB::beginTransaction();
-           DB::commit();
-           return response()->json(['is_success' => 'true']);
-       } catch (Exception $e) {
-           DB::rollback();
            throw $e;
        }
    }

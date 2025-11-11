@@ -50,6 +50,7 @@ export default function useEcr(){
         customerEcNo: '',
         dateOfRequest: '',
         approvalRemarks: '',
+        remarks: '',
     });
     const frmEcrDetails = ref({
         ecrDetailsId: '',
@@ -194,6 +195,7 @@ export default function useEcr(){
             frmEcr.value.customerEcNo = ecr.customer_ec_no;
             frmEcr.value.dateOfRequest = ecr.date_of_request;
             frmEcr.value.approvalStatus = ecr.approval_status;
+            frmEcr.value.remarks = ecr.remarks;
             //Multiselect
             frmEcrReasonRows.value = [];
             frmEcrQadRows.value = [];
