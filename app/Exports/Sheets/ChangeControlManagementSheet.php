@@ -38,9 +38,16 @@ WithEvents
  */
     public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
     {
+        $imageEsigPath = '../RapidX_E-Signature/'.$imagePath;
         // Get the full storage path of the image
-        $imageStoragePath = Storage::path($imagePath.'.png');
+        $imageStoragePath = $imageEsigPath.'.png';
+        // $defaultSignature = Storage::path($imagePath.'.png'); $imageEsigPath
 
+        if( !file_exists($imageStoragePath) ){
+            echo  'Signature not found: Please as the HR for the E-Signature then Please file a ticket to http://rapidx/iss_service_request/my_tickets';
+
+            exit;
+        }
         // Resize the image
         $image = Image::make($imageStoragePath)->resize($width, $height);
         $tempPath = storage_path("app/temp_resized_image_".$tempPathExt.".png");
@@ -60,13 +67,42 @@ WithEvents
         $pmiApprovalCollection = collect($ecrsDetails->pmi_approvals)->groupBy('approval_status')->toArray();
         $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
         return [
-            AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
+            // AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
+            AfterSheet::class => function (AfterSheet $event)  {
+
+                // =================== DATA COLLECTION ======================== //
+                $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
+                $pmiApprovalCollection = collect($ecrsDetails->pmi_approvals)->groupBy('approval_status')->toArray();
+                $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
+                $approvalsGroupByMethod = $ecrsDetails->method->method_approvals  ?? NULL;
+                $approvalsGroupByMachine = $ecrsDetails->machine->machine_approvals ?? NULL;
+                // $approvalsGroupByMaterial = $ecrsDetails->material->method_approvals;
+                if(filled($approvalsGroupByMethod)){
+                    $approvalsGroupBy = $approvalsGroupByMethod;
+                }else if(filled($approvalsGroupByMachine)){
+                    $approvalsGroupBy = $approvalsGroupByMachine;
+                }else{
+                    echo  'No Data Found! Please file a ticket to http://rapidx/iss_service_request/my_tickets';
+                    exit;
+                }
+                // =========================================== //
                 $sheet = $event->sheet->getDelegate();
-                 // =========================================== //
+                $approvalsGroupBy->groupBy('approval_status')->toArray();
 
                 // === Column Widths
-                foreach (range('A', 'L') as $col) {
+                foreach (range('G', 'L') as $col) {
                     $sheet->getColumnDimension($col)->setWidth(9.45);
+                }
+                foreach (range('A', 'F') as $col) {
+                    $sheet->getColumnDimension($col)->setWidth(20);
+                }
+                $colRange = ['C','F'];
+                foreach ($colRange as $col) {
+                    $sheet->getColumnDimension($col)->setWidth(46);
+                }
+                $colRange = ['I'];
+                foreach ($colRange as $col) {
+                    $sheet->getColumnDimension($col)->setWidth(20);
                 }
 
                 // === Apply Styles to all cells used
@@ -151,16 +187,22 @@ WithEvents
                 // ======= Insert Before and After Image ========
                 // Retrieve the image path
                 $filteredDocumentNameBefore = explode(' | ',$categoryDetails->filtered_document_name_before);
-                $storageImageDirBefore = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/before/';
+                $storageImageDirBefore= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/before/');
                 if(file_exists($storageImageDirBefore) ){
+                    // echo json_encode($storageImageDirBefore);
+                    // exit;
                     $startBeforeImageCol = "A";
                     $startBeforeImageRow = "22";
                     foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
-                        $imagePathBefore[]= Storage::path($storageImageDirBefore.$valueBefore);
+                       $valueBefore;
+                        $imagePathBefore[]= $storageImageDirBefore.$valueBefore;
                     }
+
                     foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
                             // Resize the image (optional, requires Intervention Image package)
-                            $image = Image::make($imagePathBeforeValue)->resize(150, 300); // Resize to 300x300 pixels
+                            // echo json_encode($imagePathBefore);
+                            // exit;
+                            $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
                             $tempPath = storage_path("app/temp_resized_image_$key.jpg");
                             $image->save($tempPath);
 
@@ -194,20 +236,18 @@ WithEvents
                     }
                 }
 
-
-
                 $filteredDocumentNameAfter = explode(' | ',$categoryDetails->filtered_document_name_after);
-                $storageImageDirAfter = 'public/'.$categoryDetails->file_path.'/'.$ecrsDetails->id.'/after/';
+                $storageImageDirAfter= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/after/');
                 if(file_exists($storageImageDirBefore) ){
                     $startAfterImageCol = "D";
                     $startAfterImageRow = "22";
                     foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
-                        $imagePathAfter[]= Storage::path($storageImageDirAfter.$valueAfter);
+                        $imagePathAfter[]= $storageImageDirAfter.$valueAfter;
                     }
 
                     foreach ($imagePathAfter as $index => $imagePathAfterValue) {
                             // Resize the image (optional, requires Intervention Image package)
-                            $image = Image::make($imagePathAfterValue)->resize(150, 300); // Resize to 300x300 pixels
+                            $image = Image::make($imagePathAfterValue)->resize(600,600); // Resize to 300x300 pixels
                             $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
                             $image->save($tempPath);
 
@@ -273,10 +313,21 @@ WithEvents
                 $sheet->setCellValue('G21', 'REASON FOR APPLICATION');
                 $sheet->setCellValue('G26', 'Prepared by:');
 
-                $imageEsigPath = 'public/e_signatures/';
                 // === Insert thre E-Signature Prepared By
                 $this->insertEsignatureImageIntoSheet(
-                    $imageEsigPath.$ecrsDetails->rapidx_user_created_by->employee_number,
+                    $ecrsDetails->rapidx_user_created_by->employee_number,
+                    "H26",
+                    50,
+                    50,
+                    $sheet,
+                    'prepared_by'
+                );
+
+                $sheet->setCellValue('H27', $ecrsDetails->rapidx_user_created_by->name);
+
+                // === Insert thre E-Signature Prepared By
+                $this->insertEsignatureImageIntoSheet(
+                    $ecrsDetails->rapidx_user_created_by->employee_number,
                     "H26",
                     50,
                     50,
@@ -340,7 +391,80 @@ WithEvents
                     $sheet->setCellValue("K" . $startRowsSectionHead, $label);
                     $startRowsSectionHead+=4;
                 }
+                //=== If the Approval is filled - Insert Name & Signature
+                if(filled($approvalsGroupBy)){
+                    $rowsApprovalsGroupByAssessedby = [
+                        'PRDNAB',
+                        'PRDNCB',
+                        'PPCAB',
+                        'PPCCB',
+                        'MENGAB',
+                        'MENGCB',
+                        'PENGAB',
+                        'PENGCB',
+                        'LQCAB',
+                        'LQCCB',
+                    ];
+                    $startRowsAssessedby= 30;
+                    $startRowsApprovedby= 32;
+                    $startRowsApprovedbySignature= 31;
+                    $startRowsApprovedbyRemarks = 31;
+                    foreach ($rowsApprovalsGroupByAssessedby as $index => $label) {
+                        $approvalStatus = $approvalsGroupBy[$index]->approval_status;
+                        if(str_contains($approvalStatus, 'AB'))
+                        {
+                            if($label == $approvalsGroupBy[$index]->approval_status){
+                                $assessedBy = $approvalsGroupBy[$index]->rapidx_user->name ?? "N/A";
+                                if($assessedBy != "N/A"){
+                                    $this->insertEsignatureImageIntoSheet(
+                                        $approvalsGroupBy[$index]->rapidx_user->employee_number,
+                                        "J" . $startRowsAssessedby,
+                                        50,
+                                        50,
+                                        $sheet,
+                                        'prepared_by_'.$index
+                                    );
+                                }
 
+                                $sheet->setCellValue("J" . $startRowsAssessedby, $assessedBy);
+                                $startRowsAssessedby+=4;
+                            }
+                        }
+                        if(str_contains($approvalStatus, 'CB'))
+                        {
+                            if($label == $approvalsGroupBy[$index]->approval_status){
+                                $assessedBy = $approvalsGroupBy[$index]->rapidx_user->name ?? "N/A";
+                                $sheet->setCellValue("J" . $startRowsApprovedby, $assessedBy);
+                                $startRowsApprovedby+=4;
+                            }
+                        }
+                        if(str_contains($approvalStatus, 'CB'))
+                        {
+                            if($label == $approvalsGroupBy[$index]->approval_status){
+                                $assessedBy = $approvalsGroupBy[$index]->rapidx_user->name ?? "N/A";
+                                if($assessedBy != "N/A"){
+                                    $this->insertEsignatureImageIntoSheet(
+                                        $approvalsGroupBy[$index]->rapidx_user->employee_number,
+                                        "K" . $startRowsApprovedbySignature,
+                                        50,
+                                        50,
+                                        $sheet,
+                                        'prepared_by_'.$index
+                                    );
+                                }
+                                $startRowsApprovedbySignature+=4;
+                            }
+                        }
+                        if(str_contains($approvalStatus, 'CB'))
+                        {
+                            if($label == $approvalsGroupBy[$index]->approval_status){
+                                $remarks = $approvalsGroupBy[$index]->remarks ?? "N/A";
+                                $sheet->setCellValue("A" . $startRowsApprovedbyRemarks, $remarks);
+                                $startRowsApprovedbyRemarks+=4;
+                            }
+                        }
+                    }
+                }
                 // === Approval Section
                 $sheet->setCellValue('A50', 'PMI Approval');
                 $sheet->setCellValue('B53', 'QC Head');
@@ -348,18 +472,24 @@ WithEvents
                 $sheet->setCellValue('H53', 'QAD Head');
                 // === Approval Data
                 $startExtQcCol = "B";
-                foreach ($pmiApprovalCollection['EXQC'] as $key => $extenalQcValue) {
-                    $this->insertEsignatureImageIntoSheet(
-                        $imageEsigPath.$extenalQcValue['rapidx_user']['employee_number'],
-                        $startExtQcCol."51",
-                        50,
-                        50,
-                        $sheet,
-                        'qc_head'.$key
-                    );
-                    $sheet->setCellValue($startExtQcCol.'52', $extenalQcValue['rapidx_user']['name']);
-                    $startExtQcCol++; //Adjust the Column
+                // echo json_encode($pmiApprovalCollection);
+                // exit;
+                $externalQC = $pmiApprovalCollection['EXQC'] ?? null;
+                if(filled($externalQC)){
+                    foreach ($pmiApprovalCollection['EXQC'] as $key => $extenalQcValue) {
+                        $this->insertEsignatureImageIntoSheet(
+                            $extenalQcValue['rapidx_user']['employee_number'],
+                            $startExtQcCol."51",
+                            50,
+                            50,
+                            $sheet,
+                            'qc_head'.$key
+                        );
+                        $sheet->setCellValue($startExtQcCol.'52', $extenalQcValue['rapidx_user']['name']);
+                        $startExtQcCol++; //Adjust the Column
+                    }
                 }
+
                 // === YEC Approval Section
                 $sheet->setCellValue('A56', 'YEC Approval?');
                 $sheet->setCellValue('C56', '☐ Need');

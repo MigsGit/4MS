@@ -785,26 +785,27 @@ class MethodController extends Controller
             $externalDispoConditions = [
                 'ecrs_id' => $request->ecrsId,
             ];
-            $externalDispoData = $this->resourceInterface->readCustomEloquent(ExternalDisposition::class,[],[],$externalDispoConditions);
-            $externalDispoEcrsId = $externalDispoData
-            ->get([
-                'id',
-                'ecrs_id',
-                'original_filename',
-            ]);
+            // $externalDispoData = $this->resourceInterface->readCustomEloquent(ExternalDisposition::class,[],[],$externalDispoConditions);
+            // return  $externalDispoEcrsId = $externalDispoData
+            // ->get([
+            //     'id',
+            //     'ecrs_id',
+            //     'original_filename',
+            // ]);
             if ( filled($methodRefByEcrsId) ){
                 $arrMethodRefResponse = [
                     'originalFilenameBefore'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_before),
                     'originalFilenameAfter'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_after),
                     'methodsId'=> encrypt($methodRefByEcrsId[0]->id),
+                    'ecrsId'=> encrypt($methodRefByEcrsId[0]->ecrs_id),
                 ];
             }
-            if ( filled($externalDispoEcrsId) ){
-                $arrExternalDispoResponse = [
-                    'originalFilenameExternalDisposition'=> explode(' | ',$externalDispoEcrsId[0]->original_filename),
-                    'ecrsId'=> encrypt($externalDispoEcrsId[0]->ecrs_id),
-                ];
-            }
+            // if ( filled($externalDispoEcrsId) ){
+            //     $arrExternalDispoResponse = [
+            //         'originalFilenameExternalDisposition'=> explode(' | ',$externalDispoEcrsId[0]->original_filename),
+            //         'ecrsId'=> encrypt($externalDispoEcrsId[0]->ecrs_id),
+            //     ];
+            // }
             return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse??[],$arrExternalDispoResponse??[])]);
 
         } catch (Exception $e) {

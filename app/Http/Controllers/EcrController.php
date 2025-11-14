@@ -299,7 +299,7 @@ class EcrController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
