@@ -581,6 +581,8 @@ class CommonController extends Controller
             [
                 'rapidx_user_created_by',
                 'method',
+                'method.method_approvals',
+                'method.method_approvals.rapidx_user',
                 'pmi_approvals',
                 'pmi_approvals.rapidx_user',
                 'machine',
@@ -600,6 +602,7 @@ class CommonController extends Controller
                 # code...
                 break;
         }
+
         $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
             return [
                 'ecrDetails'=> $ecrDetailsRow,
@@ -607,10 +610,9 @@ class CommonController extends Controller
             ];
         });
 
-
         return Excel::download(
             new ExternalCcmExport($ecrsCategoryDetailsCollection),
-            $iqc_dropdown_category_section . "_4M.xlsx"
+            "EXTERNAL CHANGE CONTROL APPLICATION REPORT.xlsx"
         );
     }
     public function saveExternalDisposition(Request $request){
