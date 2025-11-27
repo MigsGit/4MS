@@ -24,7 +24,7 @@ class EcrRequirementFileRequest extends FormRequest
     public function rules()
     {
         return [
-            'ecrRequirementFile.*' => 'required|file|mimes:pdf|max:2048',
+            'ecrRequirementFile.*' => 'required|file|mimes:pdf',
             'ecrsId' => 'required',
             'ecrRequirementId' => 'required',
         ];

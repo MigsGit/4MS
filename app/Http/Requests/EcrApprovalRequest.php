@@ -27,8 +27,8 @@ class EcrApprovalRequest extends FormRequest
             'requested_by' => ['required', 'array'],
             'requested_by.0' => ['required', 'integer', 'min:1'], // index 0 must be = 1
 
-            'technical_evaluation' => ['required', 'array'],
-            'technical_evaluation.0' => ['required', 'integer', 'min:1'],
+            // 'technical_evaluation' => ['required', 'array'],
+            // 'technical_evaluation.0' => ['required', 'integer', 'min:1'],
 
             // 'reviewed_by' => ['required', 'array'],
             // 'reviewed_by.0' => ['required', 'integer', 'min:1'],

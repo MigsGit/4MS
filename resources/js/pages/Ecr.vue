@@ -34,6 +34,9 @@
                             width="100%" cellspacing="0"
                             class="table mt-2"
                             ref="tblEcr"
+                            :searching="true"
+                            :ordering="true"
+                            :processing="true"
                             :columns="tblEcrColumns"
                             ajax="api/load_ecr?status=IA,DIS,QA"
                             :options="{
@@ -53,6 +56,8 @@
                                     <th style=""width="10%">Status</th>
                                     <th style=""width="10%">Attachment</th>
                                     <th style=""width="10%">ECR Ctrl No.</th>
+                                    <th style=""width="10%">Part Code.</th>
+                                    <th style=""width="10%">Partname.</th>
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
@@ -73,6 +78,7 @@
                                 width="100%" cellspacing="0"
                                 class="table mt-2"
                                 ref="tblEcrQa"
+                                :searching="true"
                                 :columns="tblEcrColumns"
                                 ajax="api/load_ecr?status=QA"
                                 :options="{
@@ -92,6 +98,8 @@
                                         <th style=""width="10%">Status</th>
                                         <th style=""width="10%">Attachment</th>
                                         <th style=""width="10%">ECR Ctrl No.</th>
+                                        <th style=""width="10%">Part Code.</th>
+                                         <th style=""width="10%">Partname.</th>
                                         <th style=""width="25%">Details</th>
                                         <th style=""width="10%">Category</th>
                                         <th style=""width="10%">Section</th>
@@ -280,7 +288,7 @@
                             </button>
                         </h5>
                     <div id="collapse2" class="collapse show" data-bs-parent="#accordionMain">
-                        <div class="card-body shadow">
+                        <div class="card-body shadow overflow-auto">
                             <div class="row">
                                 <div class="col-12">
                                     <button @click="btnAddEcrOtherDispoRows()"  type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Add Validator</button>
@@ -354,7 +362,7 @@
                             </button>
                         </h5>
                     <div id="collapse3" class="collapse show" data-bs-parent="#accordionMain">
-                        <div class="card-body shadow">
+                        <div class="card-body shadow overflow-auto">
                             <div class="row">
                                 <!-- style="height: 200px;-->
                                 <div class="col-12">
@@ -1129,7 +1137,7 @@
                     });
                 }
             }
-        } ,
+        },
         {   data: 'get_status'} ,
         {   data: 'get_attachment',
             orderable: false,
@@ -1150,9 +1158,14 @@
                     });
                 }
             }
-        } ,
+        },
         {   data: 'ecr_no'} ,
-        {   data: 'get_details'} ,
+        {   data: 'part_no'} ,
+        {   data: 'part_name'} ,
+        {
+            data: 'get_details',
+
+        } ,
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,

@@ -194,7 +194,7 @@ class EcrController extends Controller
                             'rapidx_user_id' => $userId == 0 ? NULL : $userId,
                             'approval_status' => $approval_status,
                             'counter' => $ecrApprovalRequestCtr++,
-                            'remarks' => $request->remarks,
+                            // 'remarks' => $request->remarks,
                             'created_at' => now(),
                         ];
                     });
@@ -223,7 +223,7 @@ class EcrController extends Controller
                         'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
                         'approval_status' => $approval_status,
                         'counter' => $pmiApprovalRequestCtr++,
-                        'remarks' => $request->remarks,
+                        // 'remarks' => $request->remarks,
                         'created_at' => now(),
                     ];
                 });
@@ -262,7 +262,7 @@ class EcrController extends Controller
                             'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
                             'approval_status' => $approval_status,
                             'counter' => $pmiApprovalRequestCtr++,
-                            'remarks' => $request->remarks,
+                            // 'remarks' => $request->remarks,
                             'created_at' => now(),
                         ];
                     });
@@ -311,7 +311,6 @@ class EcrController extends Controller
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
             $ecrsId = $request->ecrs_id;
-
             //Get Current Ecr Approval is equal to Current Session
             $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$ecrsId)
             ->whereNotNull('rapidx_user_id')
@@ -386,6 +385,42 @@ class EcrController extends Controller
                 $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
+             //Update APPROVED and Next PENDING Approval
+            if ( count($ecrApproval) != 0 ){
+                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($ecrApproval[0]->rapidx_user_id);
+
+                $ecrApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $ecrApprovalConditions = [
+                    'id' => $ecrApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
+
+                //Update the ECR Approval Status
+                $EcrConditions = [
+                    'id' => $request->ecrs_id,
+                ];
+                $ecrValidated = [
+                    'approval_status' => $ecrApproval[0]->approval_status,
+                ];
+                //Change QA Status
+                if (str_contains($ecrApproval[0]->approval_status, 'QA')) {
+                    $ecrValidated = [
+                        'approval_status' => $ecrApproval[0]->approval_status,
+                        'status' => 'QA',
+                    ];
+                }
+                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
+                //Send Approval Email
+                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
+                //Send For Approval Email to Next Approver
+                $to = $ecrCurrentApproval['email'] ?? '';
+                $from = $requestedBy['email'] ?? '';
+                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
+                $from_name = "4M Change Control Management System";
+            }
+
             //If the ECR is Approved, Save the ECR Details by Category
             if ( count($ecrApproval) === 0){
 
@@ -429,40 +464,7 @@ class EcrController extends Controller
                 ];
             }
 
-            if ( count($ecrApproval) != 0 ){
-                $ecrCurrentApproval = $this->emailInterface->getEmailByRapidxUserId($ecrApproval[0]->rapidx_user_id);
 
-                $ecrApprovalValidated = [
-                    'status' => 'PEN',
-                ];
-                $ecrApprovalConditions = [
-                    'id' => $ecrApproval[0]->id,
-                ];
-                $this->resourceInterface->updateConditions(EcrApproval::class,$ecrApprovalConditions,$ecrApprovalValidated);
-
-                //Update the ECR Approval Status
-                $EcrConditions = [
-                    'id' => $request->ecrs_id,
-                ];
-                $ecrValidated = [
-                    'approval_status' => $ecrApproval[0]->approval_status,
-                ];
-                //Change QA Status
-                if (str_contains($ecrApproval[0]->approval_status, 'QA')) {
-                    $ecrValidated = [
-                        'approval_status' => $ecrApproval[0]->approval_status,
-                        'status' => 'QA',
-                    ];
-                }
-                $this->resourceInterface->updateConditions(Ecr::class,$EcrConditions,$ecrValidated);
-                //Send Approval Email
-                $msg = $this->emailInterface->ecrEmailMsg($ecrsId);
-                //Send For Approval Email to Next Approver
-                $to = $ecrCurrentApproval['email'] ?? '';
-                $from = $requestedBy['email'] ?? '';
-                $subject = "FOR APPROVAL: Engineering Change Request (ECR)";
-                $from_name = "4M Change Control Management System";
-            }
             $emailData = [
                 "to" =>$to,
                 "cc" =>"",
@@ -597,17 +599,32 @@ class EcrController extends Controller
                         $daysToAdd--;
                     }
                 }
+                $html = '';
+                $html .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
+                // $html .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
+                // $html .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
+                $html .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
+                $html .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
+                $html .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
+                $html .= '<p class="card-text"><strong>Target Completion:</strong> ' . $date->toDateString() . '</p>';
+                $html .= '<p class="card-text"><strong>Created By:</strong> ' . ($row->rapidx_user_created_by->name ?? '') . '</p>';
 
-                $result = '';
-                $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
-                $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
-                $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
-                $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
-                $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
-                $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
-                $result .= '<p class="card-text"><strong>Target Completion:</strong> ' .$date->toDateString(). '</p>';
-                $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
-                return $result;
+                // Prepare plain text content for search
+                $text = '';
+                $text .= 'Customer Name: ' . $row->customer_name . ' ';
+                $text .= 'Part Number: ' . $row->part_no . ' ';
+                $text .= 'Part Name: ' . $row->part_name . ' ';
+                $text .= 'Device Code: ' . $row->device_name . ' ';
+                $text .= 'Product Line: ' . $row->product_line . ' ';
+                $text .= 'Date of Request: ' . $row->date_of_request . ' ';
+                $text .= 'Target Completion: ' . $date->toDateString() . ' ';
+                $text .= 'Created By: ' . ($row->rapidx_user_created_by->name ?? '') . ' ';
+                return $html;
+                // Return both HTML and text formats
+                return [
+                    'html' => $html,
+                    'text' => $text
+                ];
             })
             ->addColumn('get_attachment',function ($row) use ($request){
                 $status = $row->status ?? "";
