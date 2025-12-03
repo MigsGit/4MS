@@ -466,9 +466,9 @@
                     <thead>
 
                         <tr>
-                            <!-- <th scope="col">
+                            <th scope="col">
                                 Internal Material
-                            </th> -->
+                            </th>
                             <th scope="col">
                                 External Material
                             </th>
@@ -476,11 +476,11 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <!-- <td>
+                            <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
                                     Download Internal Machine
                                 </a>
-                            </td> -->
+                            </td>
                             <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsId)">
                                     Download External Machine

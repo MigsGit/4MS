@@ -61,7 +61,7 @@
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
-                                    <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">4M Status</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -1168,7 +1168,7 @@
         } ,
         {   data: 'category'} ,
         {   data: 'section'} ,
-        {   data: 'customer_ec_no'} ,
+        {   data: 'get_4m_status'} ,
     ];
     const tblEcrRequirementsColumns = [
         {   data: 'requirement'} ,

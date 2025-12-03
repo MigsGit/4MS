@@ -217,10 +217,48 @@ class CommonService implements CommonInterface
                      $bgStatus = 'badge rounded-pill bg-danger';
                      break;
                 case 'OK':
-                    $status = 'APPROVED';
+                    $status = 'ECR APPROVED';
                     $bgStatus = 'badge rounded-pill bg-success';
                     break;
                  default:
+                     $status = '';
+                     $bgStatus = '';
+                     break;
+             }
+             return [
+                 'status' => $status,
+                 'bgStatus' => $bgStatus,
+                 'current_status' => $current_status,
+             ];
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getStatus4m($current_status){
+
+        try {
+             switch ($current_status) {
+                 case 'RUP':
+                     $status = '4M FOR UPDATE';
+                     $bgStatus = 'badge rounded-pill bg-primary';
+                     break;
+                 case 'FORAPP':
+                     $status = '4M FOR APPROVAL';
+                     $bgStatus = 'badge rounded-pill bg-info';
+                     break;
+                 case 'DIS':
+                     $status = '4M DISAPPROVED';
+                     $bgStatus = 'badge rounded-pill bg-danger';
+                     break;
+                case 'PMIAPP':
+                    $status = '4M PMI Approval ';
+                    $bgStatus = 'badge rounded-pill bg-warning';
+                    break;
+                case 'OK':
+                    $status = '4M APPROVED';
+                    $bgStatus = 'badge rounded-pill bg-success';
+                    break;
+                default:
                      $status = '';
                      $bgStatus = '';
                      break;
@@ -301,7 +339,6 @@ class CommonService implements CommonInterface
             throw $e;
         }
     }
-
     public function getFilteredSection($department){
         try {
             if ( Str::contains($department, "LQC")) {
