@@ -516,7 +516,7 @@ class EcrController extends Controller
             $data = [];
             $relations = [
                 'ecr_approval_pending',
-                'rapidx_user_created_by'
+                'rapidx_user_created_by',
             ];
             $conditions = [];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);

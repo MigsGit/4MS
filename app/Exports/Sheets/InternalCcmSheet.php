@@ -4,7 +4,7 @@ namespace App\Exports\Sheets;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 
-class InternalMaterialSheet implements FromCollection
+class InternalCcmSheet implements FromCollection
 {
     /**
     * @return \Illuminate\Support\Collection
