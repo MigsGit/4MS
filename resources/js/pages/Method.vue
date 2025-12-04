@@ -477,13 +477,13 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
-                                    Download Internal Machine
+                                <a href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
+                                    Download Internal Export
                                 </a>
                             </td>
                             <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsId)">
-                                    Download External Machine
+                                    Download External Export
                                 </a>
                             </td>
                         </tr>
@@ -1176,6 +1176,13 @@
             frmElement[key] = '';
         }
     };
+    const btnLinkDownloadInternal = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId
+        }
+        var queryString = $.param(params);
+        window.location.href="api/download_internal_excel_by_ecrs_id?" + queryString;
+    }
     const btnLinkDownloadExternal = async (selectedEcrsId) => {
         let params = {
             selectedId : selectedEcrsId,

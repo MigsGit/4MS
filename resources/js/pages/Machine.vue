@@ -37,7 +37,7 @@
                                 <tr>
                                     <th style=""width="5%">Action</th>
                                     <th style=""width="10%">Status</th>
-                                    <!-- <th style=""width="10%">Attachment</th> -->
+                                    <th style=""width="10%">Attachment</th>
                                     <th style=""width="20%">ECR Ctrl No.</th>
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
@@ -490,9 +490,9 @@
                     <thead>
 
                         <tr>
-                            <!-- <th scope="col">
+                            <th scope="col">
                                 Internal Machine
-                            </th> -->
+                            </th>
                             <th scope="col">
                                 External Machine
                             </th>
@@ -500,11 +500,11 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <!-- <td>
+                            <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
                                     Download Internal Machine
                                 </a>
-                            </td> -->
+                            </td>
                             <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternalMachine(selectedEcrsId)">
                                     Download External Machine
@@ -513,7 +513,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table">
+                <!-- <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -523,7 +523,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- v-for -->
                         <tr v-for="(arrOriginalFilenameExternalDisposition, index) in arrOriginalFilenameExternalDispositions" :key="arrOriginalFilenameExternalDisposition.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
@@ -533,7 +532,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </table> -->
             </div>
         </template>
         <template #footer>
@@ -1034,21 +1033,21 @@
             }
         } ,
         {   data: 'get_status'} ,
-        // {   data: 'get_attachment',
-        //     orderable: false,
-        //     searchable: false,
-        //     createdCell(cell){
-        //         let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
-        //         if(btnViewMachineRef != null){
-        //             btnViewMachineRef.addEventListener('click',function(){
-        //                 let machinesId = this.getAttribute('machine-id');
-        //                 let ecrsId = this.getAttribute('ecrs-id');
-        //                 selectedEcrsId.value = ecrsId;
-        //                 getMachineRefById(machinesId);
-        //             });
-        //         }
-        //     }
-        // } ,
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
+                if(btnViewMachineRef != null){
+                    btnViewMachineRef.addEventListener('click',function(){
+                        let machinesId = this.getAttribute('machine-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
+                        getMachineRefById(machinesId);
+                    });
+                }
+            }
+        } ,
         {   data: 'ecr_no'} ,
         {   data: 'get_details'} ,
         {   data: 'category'} ,
@@ -1222,7 +1221,7 @@
             ecrsId : selectedEcrsId
         }
         var queryString = $.param(params);
-        window.location.href="api/download_internal_machine?" + queryString;
+        window.location.href="api/download_internal_excel_by_ecrs_id?" + queryString;
     }
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;

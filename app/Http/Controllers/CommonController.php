@@ -612,7 +612,50 @@ class CommonController extends Controller
 
         return Excel::download(
             new ExternalCcmExport($ecrsCategoryDetailsCollection),
-            "EXTERNAL CHANGE CONTROL APPLICATION REPORT.xlsx"
+            "EXTERNAL - CHANGE CONTROL APPLICATION REPORT.xlsx"
+        );
+    }
+    public function downloadInternalExcelByEcrsId(Request $request){
+        $iqc_dropdown_category_section = 'TS';
+        $ecrsId = decrypt($request->ecrsId);
+        $getEcrById = $this->resourceInterface->readWithRelationsConditions(
+            Ecr::class,
+            [],
+            [
+                'rapidx_user_created_by',
+                'method',
+                'method.method_approvals',
+                'method.method_approvals.rapidx_user',
+                'pmi_approvals',
+                'pmi_approvals.rapidx_user',
+                'machine',
+            ],
+            [
+                'id' => $ecrsId
+            ]
+        );
+        switch ($getEcrById[0]->category) {
+            case 'Method':
+                $detailsByCategory = $getEcrById[0]->method;
+                break;
+            case 'Machine':
+                $detailsByCategory = $getEcrById[0]->machine;
+                break;
+            default:
+                # code...
+                break;
+        }
+
+        $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
+            return [
+                'ecrDetails'=> $ecrDetailsRow,
+                'detailsByCategory'=> $detailsByCategory
+            ];
+        });
+
+        return Excel::download(
+            new ExternalCcmExport($ecrsCategoryDetailsCollection),
+            "INTERNAL - CHANGE CONTROL APPLICATION REPORT.xlsx"
         );
     }
     public function saveExternalDisposition(Request $request){

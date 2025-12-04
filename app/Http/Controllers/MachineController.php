@@ -561,7 +561,6 @@ class MachineController extends Controller
 
             $iqc_dropdown_category_section = 'TS';
             $test = 'test';
-
             return Excel::download(
                 new InternalMachineExport($test),
                 $iqc_dropdown_category_section . "4M.xlsx"

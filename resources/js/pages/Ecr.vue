@@ -53,7 +53,7 @@
                             <thead>
                                 <tr>
                                     <th style=""width="5%">Action</th>
-                                    <th style=""width="10%">Status</th>
+                                    <th style=""width="10%">Ecr Status</th>
                                     <th style=""width="10%">Attachment</th>
                                     <th style=""width="10%">ECR Ctrl No.</th>
                                     <th style=""width="10%">Part Code.</th>
@@ -95,7 +95,7 @@
                                 <thead>
                                     <tr>
                                         <th style=""width="5%">Action</th>
-                                        <th style=""width="10%">Status</th>
+                                        <th style=""width="10%">Ecr Status</th>
                                         <th style=""width="10%">Attachment</th>
                                         <th style=""width="10%">ECR Ctrl No.</th>
                                         <th style=""width="10%">Part Code.</th>
