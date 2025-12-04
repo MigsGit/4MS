@@ -11,6 +11,7 @@ interface CommonInterface
     public function viewPdfFile($pdfPath);
     public function viewImageFile($filePath);
     public function getPmiApprovalStatus($approvalStatus);
+    public function getStatus4m($status);
     public function getEcrStatus($status);
     public function getEcrApprovalStatus($approvalStatus);
     public function getRapidxUserDeptByDeptId($departmentId);

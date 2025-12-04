@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function(){
         Route::get('view_external_disposition', 'viewExternalDisposition')->name('view_external_disposition');
 
         Route::get('get_approval_count_by_rapidx_user_id', 'getApprovalCountByRapidxUserId')->name('get_approval_count_by_rapidx_user_id');
+        Route::get('download_internal_excel_by_ecrs_id', 'downloadInternalExcelByEcrsId')->name('download_internal_excel_by_ecrs_id');
     });
 
     Route::controller(SettingsController::class)->group(function () {
@@ -129,7 +130,6 @@ Route::middleware('auth')->group(function(){
         Route::get('load_machine_approver_summary_id', 'loadMachineApproverSummaryId')->name('load_machine_approver_summary_id');
         Route::get('get_machine_ref_by_id', 'getMachineRefById')->name('get_machine_ref_by_id');
         Route::get('view_machine_ref', 'viewMachineRef')->name('view_machine_ref');
-        Route::get('download_internal_machine', 'downloadInternalMachine')->name('download_internal_machine');
     });
 
     Route::controller(MethodController::class)->group(function () {

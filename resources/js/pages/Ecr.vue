@@ -53,7 +53,7 @@
                             <thead>
                                 <tr>
                                     <th style=""width="5%">Action</th>
-                                    <th style=""width="10%">Status</th>
+                                    <th style=""width="10%">Ecr Status</th>
                                     <th style=""width="10%">Attachment</th>
                                     <th style=""width="10%">ECR Ctrl No.</th>
                                     <th style=""width="10%">Part Code.</th>
@@ -61,7 +61,7 @@
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
-                                    <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">4M Status</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -95,7 +95,7 @@
                                 <thead>
                                     <tr>
                                         <th style=""width="5%">Action</th>
-                                        <th style=""width="10%">Status</th>
+                                        <th style=""width="10%">Ecr Status</th>
                                         <th style=""width="10%">Attachment</th>
                                         <th style=""width="10%">ECR Ctrl No.</th>
                                         <th style=""width="10%">Part Code.</th>
@@ -1168,7 +1168,7 @@
         } ,
         {   data: 'category'} ,
         {   data: 'section'} ,
-        {   data: 'customer_ec_no'} ,
+        {   data: 'get_4m_status'} ,
     ];
     const tblEcrRequirementsColumns = [
         {   data: 'requirement'} ,

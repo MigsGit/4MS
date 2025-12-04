@@ -517,6 +517,11 @@ class EcrController extends Controller
             $relations = [
                 'ecr_approval_pending',
                 'rapidx_user_created_by',
+                'man_detail',
+                'environment',
+                'material',
+                'machine',
+                'method',
             ];
             $conditions = [];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
@@ -568,26 +573,26 @@ class EcrController extends Controller
                 return $result;
             })
             ->addColumn('get_status',function ($row): string{
-                // return $row->status;
-                $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
-
-                $getStatus = $this->commonInterface->getEcrStatus($row->status);
-                $getApprovalStatus = $this->commonInterface->getEcrApprovalStatus($row->approval_status);
                 $result = '';
+                $current4mStatus = '';
+                $ecrStatus =  $row->status;
+                $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
+                // $current4mStatus;
+                $getStatus = $this->commonInterface->getEcrStatus($ecrStatus);
+                $getApprovalStatus = $this->commonInterface->getEcrApprovalStatus($row->approval_status);
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
                 if($row->status === 'OK'){
                    return  $result .= '';
                 }
-                if($row->status != 'DIS'){
+                if($ecrStatus != 'DIS'){
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 }
-
                 $result .= '</center>';
                 $result .= '</br>';
                 return $result;
-                })->addColumn('get_details',function ($row) use($request) {
+            })->addColumn('get_details',function ($row) use($request) {
                 $date = Carbon::parse($row->date_of_request); //String to Object Date conversion
 
                 // Number of working days to add
@@ -634,11 +639,40 @@ class EcrController extends Controller
                 $result .= '</center>';
                 return $result;
             })
+            ->addColumn('get_4m_status',function ($row): string{
+                $result = '';
+                $current4mStatus = '';
+                $ecrStatus =  $row->status;
+                $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
+                if($row->man_detail != null){
+                    $status4m = $row->man_detail->status;
+                }
+                if($row->material != null){
+                    $status4m = $row->material->status;
+                }
+                if($row->machine != null){
+                    $status4m = $row->machine->status;
+                }
+                if($row->method != null){
+                    $status4m = $row->method->status;
+                }
+                if($row->environment != null){
+                    $status4m = $row->environment->status;
+                }
+                if($ecrStatus === 'OK'){
+                   $current4mStatus = $this->commonInterface->getStatus4m($status4m);
+                   return $result .= '<span class="'.$current4mStatus['bgStatus'].'"> '.$current4mStatus['status'].' : '.$row->category.' </span>';
+                }
+                $result .= '</center>';
+                $result .= '</br>';
+                return $result;
+            })
             ->rawColumns([
                 'get_actions',
                 'get_status',
                 'get_attachment',
-                'get_details'
+                'get_details',
+                'get_4m_status',
             ])
             ->make(true);
         } catch (Exception $e) {
