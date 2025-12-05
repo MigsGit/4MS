@@ -1,8 +1,7 @@
 <?php
 namespace App\Services;
-use setasign\Fpdi\Fpdi; //composer require tecnickcom/tcpdf //composer require setasign/fpdi-tcpdf
-// use setasign\Fpdi\Tcpdf\Fpdi;
 use App\Models\RapidxUser;
+// use setasign\Fpdi\Tcpdf\Fpdi;
 use App\Models\RapidMailer;
 use Illuminate\Support\Str;
 use App\Models\RapidAutoMailer;
@@ -10,6 +9,8 @@ use App\Interfaces\FileInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
+use setasign\Fpdi\Fpdi; //composer require tecnickcom/tcpdf //composer require setasign/fpdi-tcpdf
 
 
 class CommonService implements CommonInterface
@@ -121,6 +122,7 @@ class CommonService implements CommonInterface
     public function viewPdfFile($pdfPath){
 
         try {
+           
             $pageCount = $this->fpdi->setSourceFile($pdfPath);
             //Read all page using page count
             for ($i=1; $i <= $pageCount; $i++) {

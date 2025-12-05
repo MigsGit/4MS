@@ -1259,7 +1259,7 @@
         machineRefAfter.value.forEach((file, index) => {
             formData.append('machineRefAfter[]', file);
         });
-        axiosSaveData(formData,'api/save_machine',(response) =>{
+        axiosSaveDataImgFile(formData,'api/save_machine',(response) =>{
             console.log(response);
         });
     }

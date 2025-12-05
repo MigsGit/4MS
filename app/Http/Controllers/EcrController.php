@@ -30,6 +30,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\EcrFileRequest;
 use App\Interfaces\ResourceInterface;
 use App\Http\Requests\EcrDetailRequest;
+use Illuminate\Support\Facades\Response;
 use App\Http\Requests\EcrApprovalRequest;
 use App\Http\Requests\PmiApprovalRequest;
 use App\Models\ClassificationRequirement;
@@ -1272,6 +1273,10 @@ class EcrController extends Controller
             if (!file_exists($pdfPath)) {
                 abort(404, 'PDF not found.');
             }
+            $headers = array(
+                'Content-Type: application/pdf',
+              );
+            return Response::download($pdfPath, 'filename.pdf', $headers);
             // To read the ENCRYPTED PDF,you can simply serve the PDF file to the browser and let the browser's built-in PDF viewer handle it.
             return response()->file($pdfPath);
 
@@ -1317,6 +1322,10 @@ class EcrController extends Controller
                 $filePathWithEcrsId = $ecrRefByEcrsId[0]->file_path."/".$ecrsId."/".$selectedFilteredDocumentName;
                 $path = "app/public/ecr/".$ecrRefByEcrsId[0]->category."/".$filePathWithEcrsId;
                 $pdfPath = storage_path($path);
+                // $headers = array(
+                //     'Content-Type: application/pdf',
+                //   );
+                // return Response::download($pdfPath, 'filename.pdf', $headers);
                 $this->commonInterface->viewPdfFile($pdfPath);
             }
         } catch (Exception $e) {

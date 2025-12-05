@@ -31,7 +31,6 @@ class PdfService
         $pageCount = $this->fpdi->setSourceFile($filePath);
         return $pageCount;
     }
-
     /**
      * Convert a specific PDF page to an image and get its dimensions.
      *
@@ -200,6 +199,5 @@ class PdfService
         $this->fpdi->Output();
     }
     private function getApproverOrdinates(){
-
     }
 }

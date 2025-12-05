@@ -1256,7 +1256,7 @@
         methodRefAfter.value.forEach((file, index) => {
             formData.append('methodRefAfter[]', file);
         });
-        axiosSaveData(formData,'api/save_method',(response) =>{
+        axiosSaveDataImgFile(formData,'api/save_method',(response) =>{
             console.log(response);
             modal.SaveMethod.hide();
             tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
