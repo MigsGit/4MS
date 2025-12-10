@@ -122,7 +122,7 @@ class CommonService implements CommonInterface
     public function viewPdfFile($pdfPath){
 
         try {
-           
+
             $pageCount = $this->fpdi->setSourceFile($pdfPath);
             //Read all page using page count
             for ($i=1; $i <= $pageCount; $i++) {
@@ -222,6 +222,10 @@ class CommonService implements CommonInterface
                     $status = 'ECR APPROVED';
                     $bgStatus = 'badge rounded-pill bg-success';
                     break;
+                case 'CAN':
+                    $status = 'CANCELLED';
+                    $bgStatus = 'badge rounded-pill bg-danger';
+                    break;
                  default:
                      $status = '';
                      $bgStatus = '';
@@ -259,6 +263,10 @@ class CommonService implements CommonInterface
                 case 'OK':
                     $status = '4M APPROVED';
                     $bgStatus = 'badge rounded-pill bg-success';
+                    break;
+                case 'CAN':
+                    $status = 'CANCELLED';
+                    $bgStatus = 'badge rounded-pill bg-danger';
                     break;
                 default:
                      $status = '';

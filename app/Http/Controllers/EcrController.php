@@ -528,8 +528,8 @@ class EcrController extends Controller
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
 
             if( $adminAccess === 'null' || blank($adminAccess) ){
-                $ecr->whereIn('status',$status)
-                ->whereHas('ecr_approval',function($query) use ($request,$status){
+                // $ecr->whereIn('status',$status);
+                $ecr->whereHas('ecr_approval',function($query) use ($request,$status){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('status','PEN');
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
@@ -537,12 +537,12 @@ class EcrController extends Controller
             }
             if( $adminAccess === 'created'){
                 $status =  array_merge($status,['OK']);
-                $ecr->whereIn('status',$status)
-                ->where('created_by' , session('rapidx_user_id'));
+                // $ecr->whereIn('status',$status);
+                $ecr->where('created_by' , session('rapidx_user_id'));
             }
             if( $adminAccess === 'all') {
                 $status =  array_merge($status,['OK']);
-                $ecr->whereIn('status',$status);
+                // $ecr->whereIn('status',$status);
             }
             $ecr->whereNull('deleted_at');
             $ecr->orderBy('id','DESC');
@@ -584,11 +584,11 @@ class EcrController extends Controller
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
-                if($row->status === 'OK'){
-                   return  $result .= '';
-                }
-                if($ecrStatus != 'DIS'){
+                if($ecrStatus === 'IA' || $ecrStatus === 'QA'){
                     $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
+                if($ecrStatus === 'CAN' || $ecrStatus === 'DIS' ||$ecrStatus === 'OK'){
+                    $result .= '';
                 }
                 $result .= '</center>';
                 $result .= '</br>';
