@@ -113,19 +113,6 @@ WithEvents
                         'wrapText' => true,
                     ],
                 ]);
-                // === Apply Styles to all cells used
-                // $sheet->getStyle('A1:G40')->applyFromArray([
-                //     'borders' => [
-                //         'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                //     ],
-                //     'alignment' => [
-                //         'vertical' => Alignment::VERTICAL_CENTER,
-                //         'horizontal' => Alignment::HORIZONTAL_LEFT,
-                //         'wrapText' => true,
-                //     ],
-                // ]);
-
-
                 // === Bold for header
                 $sheet->getStyle('A1:A3')->getFont()->setBold(true);
 
@@ -170,7 +157,7 @@ WithEvents
                 $sheet->setCellValue('A14', '4M Change / 1E');
                 $categoryCol = "B";
                 $categoryRow = "14";
-                // === SECTION DATA
+                 // === 4M CATEGORY SECTION
                 $isCategory = $ecrsDetails->category ?? "";
                 $category = [
                     $isCategory === "Man" ? '☑ Man' :'☐ Man',
@@ -211,16 +198,12 @@ WithEvents
 
                             // Merge cells to accommodate the image
                             $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                            // $sheet->mergeCells("$startBeforeImageCol$currentRow:$endColumn" . ($currentRow + 1));
 
                             // Dynamically adjust column widths and row heights
                             $imageWidth = $image->width();
                             $imageHeight = $image->height();
 
                             $columnWidth = $imageWidth / 9.5; // Approximation for column width
-                            // $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
-                            // $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
-                            // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
                             $rowHeight = $imageHeight / 1.5; // Approximation for row height
                             $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
@@ -256,16 +239,12 @@ WithEvents
 
                             // Merge cells to accommodate the image
                             $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                            // $sheet->mergeCells("$startAfterImageCol$currentRow:$endColumn" . ($currentRow + 1));
 
                             // Dynamically adjust column widths and row heights
                             $imageWidth = $image->width();
                             $imageHeight = $image->height();
 
                             $columnWidth = $imageWidth / 10.5; // Approximation for column width
-                            // $sheet->getColumnDimension($startAfterImageCol)->setWidth($columnWidth);
-                            // $sheet->getColumnDimension(chr(ord($startAfterImageCol) + 1))->setWidth($columnWidth);
-                            // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
                             $rowHeight = $imageHeight / 1.5; // Approximation for row height
                             $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);

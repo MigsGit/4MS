@@ -140,31 +140,40 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     ],
                 ]);
                 $sheet->getRowDimension(2)->setRowHeight(25);
-                // echo 'ECR NO.:'.' '. $ecrCollection->ecr_no;
-                // exit;
+
                 // === Section Headers Styling ===
                 $sectionHeaders = [
-                    'A3' => 'INFORMATION',
+                    'A3' => '1 INFORMATION',
                     'F3' => 'ECR NO.:'.' '. $ecrCollection->ecr_no,
-                    'A9' => 'DESCRIPTION OF CHANGE',
-                    'A16' => 'REASON OF CHANGE',
-                    'A25' => 'REQUESTED BY',
-                    'A29' => 'REVIEWED BY / ENGG. SECTION HEAD',
-                    'A40' => 'AGREED BY',
+                    'A9' => '2. 4M CATEGORY',
+                    'A21' => '3. DESCRIPTION OF CHANGE',
+                    'A33' => '4. REASON OF CHANGE',
+                    'A42' => '5. REQUESTED BY',
+                    'A46' => '6. TECHNICAL EVALUATION / ENGINEERING',
+                    'A56' => '7. DOCUMENT REVISION',
+                    'A62' => '8. AGREED BY',
+                    'A67' => '9. PMI APPROVAL',
+                    'A73' => '10. CUSTOMER APPROVAL',
+                    'A80' => '11.  FINAL DISPOSITION',
                 ];
                 $sectionHeadersEndRow = [
                     '3',
                     '3',
                     '9',
-                    '16',
-                    '25',
-                    '29',
-                    '40',
+                    '21',
+                    '33',
+                    '42',
+                    '46',
+                    '56',
+                    '62',
+                    '67',
+                    '73',
+                    '80',
                 ];
                 $sectionHeadersCount = 0;
                 foreach ($sectionHeaders as $cell => $value) {
                     $sheet->setCellValue($cell, $value);
-                    $sheet->getStyle("{$cell}:H".$sectionHeadersEndRow[$sectionHeadersCount])->applyFromArray([
+                    $sheet->getStyle("{$cell}:I".$sectionHeadersEndRow[$sectionHeadersCount])->applyFromArray([
                         'font' => [
                             'bold' => true,
                             'color' => ['rgb' => '0000FF'], // Blue text for headers
@@ -188,6 +197,51 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     $sectionHeadersCount++;
                 }
 
+                // === 4M CATEGORY SECTION
+                $categoryCol = "A";
+                $categoryRow = "11";
+                $isCategory = $ecrCollection->category ?? "";
+                $category = [
+                    $isCategory === "Man" ? '☑ Man' :'☐ Man',
+                    $isCategory === "Machine" ? '☑ Machine/Tools' :'☐ Machine/Tools',
+                    $isCategory === "Material" ? '☑ Material' :'☐ Material',
+                    $isCategory === "Method" ? '☑ Method' :'☐ Method',
+                    $isCategory === "Environment" ? '☑ Environment' :'☐ Environment',
+                ];
+                for ($i=0; $i < count($category); $i++) {
+                    $sheet->setCellValue($categoryCol. $categoryRow, $category
+                    [$i]);
+                    $sheet->getStyle("".$categoryCol.$categoryRow."")->applyFromArray([
+
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+                    $categoryRow+=2;
+                }
+                // exit;
+                // === 4M CATEGORY DETAILS SECTION
+                $categoryDetailsCol = "B";
+                $categoryDetailsRow = "12";
+                $categoryDetails= "Kindly refer to PMI Change Control Procedure (PPS-I01-018) for 4M change factor categories.";
+                for ($i=0; $i < count($category); $i++) {
+                    $sheet->setCellValue($categoryDetailsCol. $categoryDetailsRow, $categoryDetails);
+                    $sheet->getStyle("".$categoryDetailsCol.$categoryDetailsRow."")->applyFromArray([
+                        'font' => [
+                            'italic' => true,
+                            'size' => 8,
+                            'name' => 'Arial',
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+
+                    ]);
+                    $categoryDetailsRow+=2;
+
+                }
                 // === Section Information Content ===
                 $sectionContents = [
                     'A4' => 'Customer Name:',
@@ -213,28 +267,46 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 }
                 // === Approvers By Content ===
                 $approverContents = [
-                    'A26' => 'Department',
-                    'B26' => 'Name',
-                    'D26' => 'Title',
-                    'E26' => 'Signature',
-                    'F26' => 'Date',
-                    'G26' => 'Remarks',
-                    // === Reviewed By / Section Head Content ===
-                    'C30' => 'APPROVED',
-                    'F30' => 'NOT APPROVED',
-                    'A36' => 'Department',
-                    'B36' => 'Name',
-                    'D36' => 'Title',
-                    'E36' => 'Signature',
-                    'F36' => 'Date',
-                    'G36' => 'Remarks',
-                    // === QA Content ===
-                    'A41' => 'Department',
-                    'B41' => 'Name',
-                    'D41' => 'Title',
-                    'E41' => 'Signature',
-                    'F41' => 'Date',
-                    'G41' => 'Remarks',
+                    // === 5.  REQUESTED BY ===
+                    'A43' => 'Department',
+                    'C43' => 'Name',
+                    'E43' => 'Title',
+                    'F43' => 'Signature',
+                    'H43' => 'Date',
+                    'I43' => 'Remarks',
+                    // === 6.  TECHNICAL EVALUATION / ENGINEERING ===
+                    'D47' => 'APPROVED',
+                    'H47' => 'NOT APPROVED',
+                    'A51' => 'Department',
+                    'C51' => 'Name',
+                    'E51' => 'Title',
+                    'F51' => 'Signature',
+                    'H51' => 'Date',
+                    'I51' => 'Remarks',
+                    // === 7.  Document Revision ==
+                    'A57' => 'Document Number',
+                    'E57' => 'Rev. #',
+                    'F57' => 'Person In-Charge',
+                    'I57' => 'Revision Due Date',
+                    // === 8.  AGREED BY ===
+                    'A63' => 'Department',
+                    'C63' => 'Name',
+                    'E63' => 'Title',
+                    'F63' => 'Signature',
+                    'H63' => 'Date',
+                    'I63' => 'Remarks',
+                    // === 9.  PMI APPROVAL ===
+                    'B71' => 'Prepared by:',
+                    'E71' => 'Checked by: ',
+                    'H71' => 'Approved by:',
+                    // === 10. CUSTOMER APPROVAL ===
+                    'D75' => 'NEED',
+                    'H75' => 'NO NEED',
+                    'A78' => 'Prepared by:',
+                    'H78' => 'Checked by: ',
+                    // === 11.  FINAL DISPOSITION ===
+                    'D82' => 'ACCEPT',
+                    'H82' => 'REJECT',
 
                 ];
 
@@ -247,7 +319,8 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                         ],
                     ]);
                 }
-                $sheet->getStyle("B30")->applyFromArray([
+
+                $sheet->getStyle("C47")->applyFromArray([
                     'fill' => [
                         'fillType' => 'solid',
                         'startColor' => ['rgb' => '000000' ], // White background
@@ -273,13 +346,10 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                         $sheet->setCellValue($cell, $value);
                     }
                      //Ecr Collection Exist
-                     /**
-                        ecrApprovalsCollection
-                        ecrDetailsCollection
-                      */
+
                     if(filled($ecrDetailsCollection)) {
-                        $startRowDocCollection = 10;
-                        $startRowRocCollection = 17;
+                        $startRowDocCollection = 23;
+                        $startRowRocCollection = 34;
                         $startColumnEcrDetailsCollection = 'A';
                         foreach ($ecrDetailsCollection as $index => $value) {
                             $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
@@ -293,10 +363,10 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     }
 
 
-                    if(filled($ecrApprovalsCollection)) {
-                        $startRowRequestedByApprovalsCollection = 27;
-                        $startRowOtherApprovalsCollection = 37;
-                        $startRowQaApprovalCollection = 42;
+                    if(filled($ecrApprovalsCollection)) { //nmodify
+                        $startRowRequestedByApprovalsCollection = 44;
+                        $startRowOtherApprovalsCollection = 52;
+                        $startRowQaApprovalCollection = 64;
                         // $startColumnOtherApprovalsCollection = 'A';
                         foreach ($ecrApprovalsCollection as $index => $value) {
                             $approvalStatus = $value->approval_status ?? "";
@@ -378,59 +448,47 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 // === Specific Merged Cells ===
                 $mergeCells = [
                     'A3:E3',
-                    'F3:H3',
-                    'A9:H9',
-                    'A16:H16',
-                    'A25:H25',
-                    'A29:H29',
-                    'A40:H40',
-
-                    'B26:C26',
-                    'B27:C27',
-                    'B28:C28',
-
-                    'G26:H26',
-                    'G27:H27',
-                    'G28:H28',
-                    'G28:H28',
-
-                    'B36:C36',
-                    'B37:C37',
-                    'B38:C38',
-                    'B39:C39',
-
-                    'G36:H36',
-                    'G37:H37',
-                    'G38:H38',
-                    'G39:H39',
-
-                    'B41:C41',
-                    'B42:C42',
-                    'B43:C43',
-                    'B44:C44',
-
-                    'G41:H41',
-                    'G42:H42',
-                    'G43:H43',
-                    'G44:H44',
+                    'F3:I3',
+                    'A9:I9',
+                    // INFORMATION
+                    'G4:H4',
+                    // HEADER
+                    'A21:I21',
+                    'A33:I33',
+                    'A42:I42',
+                    'A46:I46',
+                    'A56:I56',
+                    'A62:I62',
+                    'A67:I67',
+                    'A73:I73',
+                    'A80:I80',
+                    // 5.  REQUESTED BY
+                    'A43:B43',
+                    'C43:D43',
+                    'F43:G43',
+                    'I43:I43',
+                    // 6.  TECHNICAL EVALUATION / ENGINEERING
+                    'A51:B51',
+                    'C51:D51',
+                    'F51:G51',
+                    'I51:I51',
+                    // 7.  Document Revision
+                    'A57:D57',
+                    'F57:H57',
+                    'I57:I57',
+                    // 8.  AGREED BY
+                    'A63:B63',
+                    'C63:D63',
+                    'F63:G63',
+                    // 8.  AGREED BY
+                    'A77:B77',
+                    'H77:I77',
                 ];
 
                 foreach ($mergeCells as $range) {
                     $sheet->mergeCells($range);
                 }
 
-                // === Column Widths ===
-                $columnWidths = [
-                    'A' => 0,
-                    'C' => 20,
-                    'D' => 20,
-                    'E' => 10,
-                    'F' => 30,
-                    'G' => 30,
-                ];
-                foreach ($columnWidths as $col => $width) {
-                    $sheet->getColumnDimension($col)->setWidth($width);
-                }
 
                 // ===Row Heights for form look ===
                 $customRowHeights = [
@@ -451,12 +509,16 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 // exit;
                 // === Apply borders to specific cells ===
                 $allThinBorder = [
-                    "A26:H26",
-                    "C36:H36",
-                    "D41:H41",
-                    'A26:H28',
-                    'A36:H39',
-                    'A41:H44',
+                    "A43:I43",
+                    "C47",
+                    "G47",
+                    "A51:I51",
+                    'A57:I57',
+                    'A63:I63',
+                    'C75',
+                    'G75',
+                    'C82',
+                    'G82',
                 ];
                 foreach ($allThinBorder as $key => $allThinBorderValue) {
                     $sheet->getStyle($allThinBorderValue)
@@ -477,7 +539,14 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
 
 
                 $bottomThinBorder = [
-                    "A4:H4",
+                    "A4:I4",
+                    "B70",
+                    // 9. PMI APPROVAL
+                    "E70",
+                    "H70",
+                    //10. CUSTOMER APPROVAL
+                    "A77:B77",
+                    "H77:I77",
                 ];
 
                 foreach ($rightThinBorder as $key => $rightThinBorderValue) {
@@ -503,14 +572,14 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
 
                 //THICK BORDERS
                 $rightThickBorder = [
-                    "H2:H44",
+                    "I2:I84",
                 ];
                 $leftThickBorder = [
-                    "A2:A44",
+                    "A2:I84",
                 ];
                 $topThickBorder = [
-                    "A2:H2",
-                    "A45:H45",
+                    "A2:I2",
+                    "A85:I85",
                 ];
                 foreach ($rightThickBorder as $key => $rightThickBorderValue) {
                     $sheet->getStyle($rightThickBorderValue)
@@ -550,6 +619,24 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 $sheet->getStyle("G5:G8")->applyFromArray([
                     'alignment' => ['horizontal' => 'left'],
                 ]);
+
+                // === Column Widths ===
+                $columnWidths = [
+                    'A' => -100,
+                    'B' => 35,
+                    'C' => 6,
+                    'D' => 35,
+                    'E' => 35,
+                    'F' => 35,
+                    'G' => 6,
+                    'H' => 35,
+                    'I' => 35,
+                    'J' => 20,
+                ];
+                foreach ($columnWidths as $col => $width) {
+                    $sheet->getColumnDimension($col)->setWidth($width);
+                }
+
 
             },
         ];
