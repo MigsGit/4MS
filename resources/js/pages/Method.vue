@@ -855,7 +855,7 @@
     import useCommon from '../../js/composables/common.js';
     DataTable.use(DataTablesCore);
 
-    const { axiosSaveData } = useForm(); // Call the useForm function
+    const { axiosSaveData,axiosSaveDataImgFile } = useForm(); // Call the useForm function
     const {
         modalEcr,
         ecrVar,

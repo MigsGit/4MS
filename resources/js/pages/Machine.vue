@@ -873,7 +873,8 @@
     // aobeguico CN ENGG
     // aatamolang TS ENGG
     // jmfaraon PPD ENGG
-    const { axiosSaveData } = useForm(); // Call the useForm function
+    const { axiosSaveData,axiosSaveDataImgFile } = useForm(); // Call the useForm function
+
     const {
         modalEcr,
         ecrVar,

@@ -4,6 +4,7 @@ namespace App\Exports\Sheets;
 
 use Carbon\Carbon;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Color;
@@ -240,8 +241,98 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
 
                     ]);
                     $categoryDetailsRow+=2;
-
                 }
+
+                 // ======= Insert Before and After Image ========
+                // Retrieve the image path
+                $filteredDocumentNameBefore = explode(' | ',$ecrCollection->filtered_document_name_before);
+                // echo 'public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/';
+
+               $storageImageDirBefore= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/');
+                if(file_exists($storageImageDirBefore) ){
+
+                    $startBeforeImageCol = "A";
+                    $startBeforeImageRow = "24";
+                    foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
+                        $imagePathBefore[]= $storageImageDirBefore.$valueBefore;
+                    }
+                    echo json_encode($storageImageDirBefore);
+                    exit;
+                    foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
+                            // Resize the image (optional, requires Intervention Image package)
+
+                            $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
+                            $tempPath = storage_path("app/temp_resized_image_$key.jpg");
+                            $image->save($tempPath);
+                            echo json_encode($image);
+                            exit;
+                            // Calculate the cell coordinates dynamically
+                            $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
+
+                            // Merge cells to accommodate the image
+                            $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+
+                            // Dynamically adjust column widths and row heights
+                            $imageWidth = $image->width();
+                            $imageHeight = $image->height();
+
+                            $columnWidth = $imageWidth / 9.5; // Approximation for column width
+
+                            $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                            $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                            $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+
+                            // Insert the image into the merged cells
+                            $drawing = new Drawing();
+                            $drawing->setName("Image $key");
+                            $drawing->setDescription("Image $key");
+                            $drawing->setPath($tempPath); // Path to the resized image
+                            $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                            $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                    }
+                }
+
+                $filteredDocumentNameAfter = explode(' | ',$ecrCollection->filtered_document_name_after);
+                $storageImageDirAfter= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/after/');
+                if(file_exists($storageImageDirBefore) ){
+                    $startAfterImageCol = "E";
+                    $startAfterImageRow = "24";
+                    foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
+                        $imagePathAfter[]= $storageImageDirAfter.$valueAfter;
+                    }
+
+                    foreach ($imagePathAfter as $index => $imagePathAfterValue) {
+                            // Resize the image (optional, requires Intervention Image package)
+                            $image = Image::make($imagePathAfterValue)->resize(600,600); // Resize to 300x300 pixels
+                            $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
+                            $image->save($tempPath);
+
+                            // Calculate the cell coordinates dynamically
+                            $currentRow = $startAfterImageRow + ($index*1); // Move down 5 rows for each image
+
+                            // Merge cells to accommodate the image
+                            $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+
+                            // Dynamically adjust column widths and row heights
+                            $imageWidth = $image->width();
+                            $imageHeight = $image->height();
+
+                            $columnWidth = $imageWidth / 10.5; // Approximation for column width
+
+                            $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                            $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                            $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+
+                            // Insert the image into the merged cells
+                            $drawing = new Drawing();
+                            $drawing->setName("Image $index");
+                            $drawing->setDescription("Image $index");
+                            $drawing->setPath($tempPath); // Path to the resized image
+                            $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                            $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                    }
+                }
+
                 // === Section Information Content ===
                 $sectionContents = [
                     'A4' => 'Customer Name:',
