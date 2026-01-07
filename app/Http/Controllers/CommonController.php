@@ -605,11 +605,13 @@ class CommonController extends Controller
                 # code...
                 break;
         }
+        $beforeAfterFileStorage =  BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->get();
 
-        $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
+        $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory,$beforeAfterFileStorage){
             return [
                 'ecrDetails'=> $ecrDetailsRow,
-                'detailsByCategory'=> $detailsByCategory
+                'detailsByCategory'=> $detailsByCategory,
+                'beforeAfterFileStorage'=> $beforeAfterFileStorage
             ];
         });
 
