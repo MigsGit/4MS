@@ -626,7 +626,7 @@ class CommonController extends Controller
         [
 
             'before_after_file_storage',
-            'pmi_approvals',
+            'pmi_approvals.rapidx_user',
             'ecr_approvals.rapidx_user',
             'ecr_details.dropdown_master_detail_description_of_change',
             'ecr_details.dropdown_master_detail_reason_of_change',
