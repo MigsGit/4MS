@@ -733,12 +733,13 @@ class MethodController extends Controller
     }
     public function viewMethodRef(Request $request){ //nmodify
         try {
+            // return '$request->methodsId';
             $methodsId = decrypt($request->methodsId);
             $conditions = [
                 'id' => $methodsId,
             ];
            $data = $this->resourceInterface->readCustomEloquent(Method::class,[],[],$conditions);
-          $methodRefByEcrsId = $data
+            $methodRefByEcrsId = $data
             ->get([
                 'filtered_document_name_before',
                 'filtered_document_name_after',

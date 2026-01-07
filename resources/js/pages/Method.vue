@@ -477,7 +477,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
+                                <a href="#" class="link-primary d-none" @click="btnLinkDownloadInternal(selectedEcrsId)">
                                     Download Internal Export
                                 </a>
                             </td>
@@ -855,7 +855,8 @@
     import useCommon from '../../js/composables/common.js';
     DataTable.use(DataTablesCore);
 
-    const { axiosSaveData } = useForm(); // Call the useForm function
+    const { axiosSaveData,axiosSaveDataImgFile } = useForm(); // Call the useForm function
+
     const {
         modalEcr,
         ecrVar,

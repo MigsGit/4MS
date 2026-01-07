@@ -501,7 +501,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
+                                <a href="#" class="link-primary d-none" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
                                     Download Internal Machine
                                 </a>
                             </td>
@@ -873,7 +873,7 @@
     // aobeguico CN ENGG
     // aatamolang TS ENGG
     // jmfaraon PPD ENGG
-    const { axiosSaveData } = useForm(); // Call the useForm function
+    const { axiosSaveData,axiosSaveDataImgFile } = useForm(); // Call the useForm function
     const {
         modalEcr,
         ecrVar,
@@ -1040,9 +1040,11 @@
                 let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
                 if(btnViewMachineRef != null){
                     btnViewMachineRef.addEventListener('click',function(){
+                        let machinesIdEncrypted = this.getAttribute('selected-machines-id-encrypted');
                         let machinesId = this.getAttribute('machine-id');
                         let ecrsId = this.getAttribute('ecrs-id');
                         selectedEcrsId.value = ecrsId;
+                        selectedMachinesIdEncrypted.value = machinesIdEncrypted;
                         getMachineRefById(machinesId);
                     });
                 }
@@ -1203,7 +1205,6 @@
             arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
             arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
             arrOriginalFilenameExternalDispositions.value = data.originalFilenameExternalDisposition;
-            selectedMachinesIdEncrypted.value = machinesId;
             selectedEcrsId.value = data.ecrsId;
             modal.ViewMachineRef.show();
         });
