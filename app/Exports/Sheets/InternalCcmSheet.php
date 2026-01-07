@@ -106,6 +106,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
             AfterSheet::class => function(AfterSheet $event) {
                 $requestedByDeptCollection = $this->ecr['requestedByDeptCollection'];
                 $ecrCollection = $this->ecr['ecrCollection'];
+                $beforeAfterFileStorage = $this->ecr['beforeAfterFileStorage'][0];
                 $ecrApprovalsCollection = $ecrCollection->ecr_approvals;
                 $ecrDetailsCollection = $ecrCollection->ecr_details;
                 $sheet = $event->sheet->getDelegate();
@@ -245,10 +246,12 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
 
                  // ======= Insert Before and After Image ========
                 // Retrieve the image path
-                $filteredDocumentNameBefore = explode(' | ',$ecrCollection->filtered_document_name_before);
-                // echo 'public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/';
+               $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
+            //    echo json_encode($filteredDocumentNameBefore); //\\rapidx\RapidX Systems\4M1x\storage\app\public\method\16\after\0_lost_of_key.jpg
 
-               $storageImageDirBefore= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/');
+
+                // echo 'public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/';
+                $storageImageDirBefore= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/');
                 if(file_exists($storageImageDirBefore) ){
 
                     $startBeforeImageCol = "A";
@@ -256,16 +259,13 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
                         $imagePathBefore[]= $storageImageDirBefore.$valueBefore;
                     }
-                    echo json_encode($storageImageDirBefore);
-                    exit;
+
                     foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
                             // Resize the image (optional, requires Intervention Image package)
-
                             $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
                             $tempPath = storage_path("app/temp_resized_image_$key.jpg");
                             $image->save($tempPath);
-                            echo json_encode($image);
-                            exit;
+
                             // Calculate the cell coordinates dynamically
                             $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
 
@@ -284,15 +284,21 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
 
                             // Insert the image into the merged cells
                             $drawing = new Drawing();
+
                             $drawing->setName("Image $key");
+
                             $drawing->setDescription("Image $key");
                             $drawing->setPath($tempPath); // Path to the resized image
+
                             $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
+
                             $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
                     }
+
                 }
 
-                $filteredDocumentNameAfter = explode(' | ',$ecrCollection->filtered_document_name_after);
+                $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
                 $storageImageDirAfter= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/after/');
                 if(file_exists($storageImageDirBefore) ){
                     $startAfterImageCol = "E";
@@ -330,7 +336,9 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                             $drawing->setPath($tempPath); // Path to the resized image
                             $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
                             $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
                     }
+
                 }
 
                 // === Section Information Content ===

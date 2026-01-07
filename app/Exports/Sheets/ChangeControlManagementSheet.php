@@ -200,8 +200,6 @@ WithEvents
 
                     foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
                             // Resize the image (optional, requires Intervention Image package)
-                            echo json_encode($imagePathBefore);
-                            exit;
                             $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
                             $tempPath = storage_path("app/temp_resized_image_$key.jpg");
                             $image->save($tempPath);
@@ -239,7 +237,7 @@ WithEvents
                 $filteredDocumentNameAfter = explode(' | ',$categoryDetails->filtered_document_name_after);
                 $storageImageDirAfter= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/after/');
                 if(file_exists($storageImageDirBefore) ){
-                    $startAfterImageCol = "D";
+                    $startAfterImageCol = "F";
                     $startAfterImageRow = "22";
                     foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
                         $imagePathAfter[]= $storageImageDirAfter.$valueAfter;

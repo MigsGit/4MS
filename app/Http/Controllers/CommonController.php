@@ -31,6 +31,7 @@ use App\Interfaces\CommonInterface;
 use App\Models\ExternalDisposition;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
+use App\Models\BeforeAfterFileStorage;
 use App\Http\Requests\SpecialInspectionRequest;
 
 
@@ -621,9 +622,10 @@ class CommonController extends Controller
         $iqc_dropdown_category_section = 'TS';
         $ecrsId = decrypt($request->ecrsId);
 
-        $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
+       $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
         [
 
+            'before_after_file_storage',
             'ecr_approvals.rapidx_user',
             'ecr_details.dropdown_master_detail_description_of_change',
             'ecr_details.dropdown_master_detail_reason_of_change',
@@ -642,10 +644,10 @@ class CommonController extends Controller
         }, 'ecr_approvals.rapidx_user']); // eager load user
 
         $ecrDetails = $ecr->get();
-
+        $beforeAfterFileStorage =  BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->get();
         // return  $ecrDetails = $ecr->get();
         $ecrCollection = collect($ecrDetails)
-        ->flatMap(function ($ecrCollectionRow){
+        ->flatMap(function ($ecrCollectionRow) use($beforeAfterFileStorage){
             $ecrApprovals = $ecrCollectionRow->ecr_approvals ?? '';
             //Get the Department / Section of the user
             $requestedByDeptCollection = collect($ecrApprovals)->map(function ($ecrApprovalsRow){
@@ -657,6 +659,7 @@ class CommonController extends Controller
             return [
                 'requestedByDeptCollection' => $requestedByDeptCollection,
                 'ecrCollection' => $ecrCollectionRow,
+                'beforeAfterFileStorage' => $beforeAfterFileStorage,
             ];
         });
 

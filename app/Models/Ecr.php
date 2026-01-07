@@ -7,6 +7,7 @@ use App\Models\Material;
 use App\Models\EcrApproval;
 use App\Models\Environment;
 use App\Models\PmiApproval;
+use App\Models\BeforeAfterFileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -24,6 +25,10 @@ class Ecr extends Model
     public function ecr_details()
     {
         return $this->hasMany(EcrDetail::class, 'ecrs_id', 'id')->whereNull('deleted_at');
+    }
+    public function before_after_file_storage()
+    {
+        return $this->hasOne(BeforeAfterFileStorage::class, 'ecrs_id', 'ecrs_id')->whereNull('deleted_at');
     }
     public function ecr_approvals()
     {
