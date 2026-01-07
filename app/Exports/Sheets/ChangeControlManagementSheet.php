@@ -199,7 +199,8 @@ WithEvents
                     }
 
                     foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
-                            // Resize the image (optional, requires Intervention Image package)
+                        // Resize the image (optional, requires Intervention Image package)
+                        if(file_exists($imagePathBeforeValue)){
                             $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
                             $tempPath = storage_path("app/temp_resized_image_$key.jpg");
                             $image->save($tempPath);
@@ -209,16 +210,13 @@ WithEvents
 
                             // Merge cells to accommodate the image
                             $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                            // $sheet->mergeCells("$startBeforeImageCol$currentRow:$endColumn" . ($currentRow + 1));
 
                             // Dynamically adjust column widths and row heights
                             $imageWidth = $image->width();
                             $imageHeight = $image->height();
 
                             $columnWidth = $imageWidth / 9.5; // Approximation for column width
-                            // $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
-                            // $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
-                            // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
+
 
                             $rowHeight = $imageHeight / 1.5; // Approximation for row height
                             $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
@@ -231,6 +229,7 @@ WithEvents
                             $drawing->setPath($tempPath); // Path to the resized image
                             $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
                             $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                        }
                     }
                 }
 
@@ -244,7 +243,8 @@ WithEvents
                     }
 
                     foreach ($imagePathAfter as $index => $imagePathAfterValue) {
-                            // Resize the image (optional, requires Intervention Image package)
+                        // Resize the image (optional, requires Intervention Image package)
+                        if(file_exists($imagePathAfterValue)){
                             $image = Image::make($imagePathAfterValue)->resize(600,600); // Resize to 300x300 pixels
                             $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
                             $image->save($tempPath);
@@ -254,16 +254,14 @@ WithEvents
 
                             // Merge cells to accommodate the image
                             $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                            // $sheet->mergeCells("$startAfterImageCol$currentRow:$endColumn" . ($currentRow + 1));
+                        
 
                             // Dynamically adjust column widths and row heights
                             $imageWidth = $image->width();
                             $imageHeight = $image->height();
 
                             $columnWidth = $imageWidth / 10.5; // Approximation for column width
-                            // $sheet->getColumnDimension($startAfterImageCol)->setWidth($columnWidth);
-                            // $sheet->getColumnDimension(chr(ord($startAfterImageCol) + 1))->setWidth($columnWidth);
-                            // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
+
 
                             $rowHeight = $imageHeight / 1.5; // Approximation for row height
                             $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
@@ -276,6 +274,7 @@ WithEvents
                             $drawing->setPath($tempPath); // Path to the resized image
                             $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
                             $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                        }
                     }
                 }
 
