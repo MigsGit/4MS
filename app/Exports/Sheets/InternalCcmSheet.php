@@ -127,7 +127,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 ]);
                 // === Header Title ===
                 $sheet->mergeCells('A2:I2');
-                $sheet->setCellValue('A2', 'ENGINEERING CHANGE REQUEST');
+                $sheet->setCellValue('A2', '4M CHANGE CONTROL MANAGEMENT');
                 $sheet->getStyle('A2')->applyFromArray([
                     'font' => [
                         'bold' => true,
@@ -487,8 +487,6 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                                 $sheet->setCellValue("I{$startRowQaApprovalCollection}", $remarks);
                                   // === E-signature Images
                                 // $imageEsigPath = 'public/e_signatures/';
-
-
                                 $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
                                 $this->insertEsignatureImageIntoSheet(
                                     $imageEsigWithEmpNumberPath,
@@ -498,7 +496,12 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                                     $sheet,
                                     'ecr_qa'.$index
                                 );
-
+                                $sheet->getStyle("A{$startRowQaApprovalCollection}:I{$startRowQaApprovalCollection}")->applyFromArray([
+                                    'alignment' => [
+                                        'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                        'vertical' => Alignment::VERTICAL_CENTER,
+                                    ],
+                                ]);
                                 $startRowQaApprovalCollection++;
                             }else{
                                 if (str_contains($approvalStatus, 'OTRB')) {
@@ -519,6 +522,12 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                                         $sheet,
                                         'ecr_requestedby'.$index
                                     );
+                                    $sheet->getStyle("A{$startRowRequestedByApprovalsCollection}:I{$startRowRequestedByApprovalsCollection}")->applyFromArray([
+                                        'alignment' => [
+                                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                            'vertical' => Alignment::VERTICAL_CENTER,
+                                        ],
+                                    ]);
                                     $startRowRequestedByApprovalsCollection++;
                                 }
                                 if ( !str_contains($approvalStatus, 'OTRB')) {
@@ -538,6 +547,12 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                                           $sheet,
                                           'ecr_engg'.$index
                                       );
+                                    $sheet->getStyle("A{$startRowOtherApprovalsCollection}:I{$startRowOtherApprovalsCollection}")->applyFromArray([
+                                        'alignment' => [
+                                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                            'vertical' => Alignment::VERTICAL_CENTER,
+                                        ],
+                                    ]);
                                     $startRowOtherApprovalsCollection++;
                                 }
                             }
@@ -786,8 +801,8 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     'E' => 35,
                     'F' => 35,
                     'G' => 6,
-                    'H' => 23,
-                    'I' => 35,
+                    'H' => 30,
+                    'I' => 30,
                     'J' => 20,
                 ];
                 foreach ($columnWidths as $col => $width) {

@@ -63,9 +63,6 @@ WithEvents
     }
     public function registerEvents(): array
     {
-        $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
-        $pmiApprovalCollection = collect($ecrsDetails->pmi_approvals)->groupBy('approval_status')->toArray();
-        $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
         return [
             // AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
             AfterSheet::class => function (AfterSheet $event)  {
@@ -254,7 +251,7 @@ WithEvents
 
                             // Merge cells to accommodate the image
                             $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                        
+
 
                             // Dynamically adjust column widths and row heights
                             $imageWidth = $image->width();
@@ -469,11 +466,41 @@ WithEvents
                 $sheet->setCellValue('H53', 'QAD Head');
                 // === Approval Data
                 $startExtQcCol = "B";
-                // echo json_encode($pmiApprovalCollection);
-                // exit;
                 $externalQC = $pmiApprovalCollection['EXQC'] ?? null;
                 if(filled($externalQC)){
-                    foreach ($pmiApprovalCollection['EXQC'] as $key => $extenalQcValue) {
+                    foreach ($externalQC as $key => $extenalQcValue) {
+                        $this->insertEsignatureImageIntoSheet(
+                            $extenalQcValue['rapidx_user']['employee_number'],
+                            $startExtQcCol."51",
+                            50,
+                            50,
+                            $sheet,
+                            'qc_head'.$key
+                        );
+                        $sheet->setCellValue($startExtQcCol.'52', $extenalQcValue['rapidx_user']['name']);
+                        $startExtQcCol++; //Adjust the Column
+                    }
+                }
+                $startExtQcCol = "E";
+                $externalQC = $pmiApprovalCollection['EXOH'] ?? null;
+                if(filled($externalQC)){
+                    foreach ($externalQC as $key => $extenalQcValue) {
+                        $this->insertEsignatureImageIntoSheet(
+                            $extenalQcValue['rapidx_user']['employee_number'],
+                            $startExtQcCol."51",
+                            50,
+                            50,
+                            $sheet,
+                            'qc_head'.$key
+                        );
+                        $sheet->setCellValue($startExtQcCol.'52', $extenalQcValue['rapidx_user']['name']);
+                        $startExtQcCol++; //Adjust the Column
+                    }
+                }
+                $startExtQcCol = "H";
+                $externalQC = $pmiApprovalCollection['EXQA'] ?? null;
+                if(filled($externalQC)){
+                    foreach ($externalQC as $key => $extenalQcValue) {
                         $this->insertEsignatureImageIntoSheet(
                             $extenalQcValue['rapidx_user']['employee_number'],
                             $startExtQcCol."51",
