@@ -106,6 +106,9 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
             AfterSheet::class => function(AfterSheet $event) {
                 $requestedByDeptCollection = $this->ecr['requestedByDeptCollection'];
                 $ecrCollection = $this->ecr['ecrCollection'];
+                $pmiApprovalCollection = collect($ecrCollection['pmi_approvals'])->groupBy('approval_status')->toArray();
+                echo json_encode($pmiApprovalCollection);
+                exit;
                 $beforeAfterFileStorage = $this->ecr['beforeAfterFileStorage'][0];
                 $ecrApprovalsCollection = $ecrCollection->ecr_approvals;
                 $ecrDetailsCollection = $ecrCollection->ecr_details;
@@ -123,7 +126,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     ],
                 ]);
                 // === Header Title ===
-                $sheet->mergeCells('A2:H2');
+                $sheet->mergeCells('A2:I2');
                 $sheet->setCellValue('A2', 'ENGINEERING CHANGE REQUEST');
                 $sheet->getStyle('A2')->applyFromArray([
                     'font' => [
@@ -477,11 +480,11 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                             $remarks = $requestedByDeptCollection[$index]['remarks'] ?? "N/A";
                             if (str_contains($approvalStatus, 'QA')) {
                                 $sheet->setCellValue("A{$startRowQaApprovalCollection}", $division);
-                                $sheet->setCellValue("B{$startRowQaApprovalCollection}", $ecrApprover);
-                                $sheet->setCellValue("D{$startRowQaApprovalCollection}",$this->getEcrApprovalStatus($approvalStatus));
+                                $sheet->setCellValue("C{$startRowQaApprovalCollection}", $ecrApprover);
+                                $sheet->setCellValue("E{$startRowQaApprovalCollection}",$this->getEcrApprovalStatus($approvalStatus));
                                 // $sheet->setCellValue("E{$startRowQaApprovalCollection}", 'Signature');
-                                $sheet->setCellValue("F{$startRowQaApprovalCollection}", $approvedDate);
-                                $sheet->setCellValue("G{$startRowQaApprovalCollection}", $remarks);
+                                $sheet->setCellValue("H{$startRowQaApprovalCollection}", $approvedDate);
+                                $sheet->setCellValue("I{$startRowQaApprovalCollection}", $remarks);
                                   // === E-signature Images
                                 // $imageEsigPath = 'public/e_signatures/';
 
@@ -489,7 +492,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                                 $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
                                 $this->insertEsignatureImageIntoSheet(
                                     $imageEsigWithEmpNumberPath,
-                                    "E".$startRowQaApprovalCollection,
+                                    "F".$startRowQaApprovalCollection,
                                     50,
                                     50,
                                     $sheet,
@@ -499,17 +502,17 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                             }else{
                                 if (str_contains($approvalStatus, 'OTRB')) {
                                     $sheet->setCellValue("A{$startRowRequestedByApprovalsCollection}", $division);
-                                    $sheet->setCellValue("B{$startRowRequestedByApprovalsCollection}", $ecrApprover);
-                                    $sheet->setCellValue("D{$startRowRequestedByApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
-                                    $sheet->setCellValue("F{$startRowRequestedByApprovalsCollection}", $approvedDate);
-                                    $sheet->setCellValue("G{$startRowOtherApprovalsCollection}", $remarks);
+                                    $sheet->setCellValue("C{$startRowRequestedByApprovalsCollection}", $ecrApprover);
+                                    $sheet->setCellValue("E{$startRowRequestedByApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
+                                    $sheet->setCellValue("H{$startRowRequestedByApprovalsCollection}", $approvedDate);
+                                    $sheet->setCellValue("I{$startRowOtherApprovalsCollection}", $remarks);
                                     // === Insert e-signature
                                     // $imageEsigPath = 'public/e_signatures/';
 
                                     $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
                                     $this->insertEsignatureImageIntoSheet(
                                         $imageEsigWithEmpNumberPath,
-                                        "E".$startRowRequestedByApprovalsCollection,
+                                        "F".$startRowRequestedByApprovalsCollection,
                                         50,
                                         50,
                                         $sheet,
@@ -519,19 +522,16 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                                 }
                                 if ( !str_contains($approvalStatus, 'OTRB')) {
                                     $sheet->setCellValue("A{$startRowOtherApprovalsCollection}", $division);
-                                    $sheet->setCellValue("B{$startRowOtherApprovalsCollection}", $ecrApprover);
-                                    $sheet->setCellValue("D{$startRowOtherApprovalsCollection}", $approvalStatus);
-                                    $sheet->setCellValue("D{$startRowOtherApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
-                                    // $sheet->setCellValue("E{$startRowOtherApprovalsCollection}", 'Signature');
-                                    $sheet->setCellValue("F{$startRowOtherApprovalsCollection}", $approvedDate);
-                                    $sheet->setCellValue("G{$startRowOtherApprovalsCollection}", $remarks);
+                                    $sheet->setCellValue("C{$startRowOtherApprovalsCollection}", $ecrApprover);
+                                    $sheet->setCellValue("E{$startRowOtherApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
+                                    $sheet->setCellValue("H{$startRowOtherApprovalsCollection}", $approvedDate);
+                                    $sheet->setCellValue("I{$startRowOtherApprovalsCollection}", $remarks);
                                       // === Insert e-signature
-                                    //   $imageEsigPath = 'public/e_signatures/';
 
                                       $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
                                       $this->insertEsignatureImageIntoSheet(
                                           $imageEsigWithEmpNumberPath,
-                                          "E".$startRowOtherApprovalsCollection,
+                                          "F".$startRowOtherApprovalsCollection,
                                           50,
                                           50,
                                           $sheet,
