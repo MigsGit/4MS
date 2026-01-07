@@ -2,38 +2,44 @@
 
 namespace App\Exports\Sheets;
 
+use Carbon\Carbon;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Events\AfterSheet;
-use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
-class InternalCcmSheet implements FromArray,
-WithEvents
+class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNullComparison
 {
 
-    protected $ecrsCategoryDetailsCollection;
+    protected $ecr;
 
-    public function __construct($ecrsCategoryDetailsCollection)
-    {
-        $this->ecrsCategoryDetailsCollection = $ecrsCategoryDetailsCollection;
-    }
-    public function array(): array
-    {
-        return [[]];
-    }
     /**
- * Inserts an image into the Excel sheet.
- *
- * @param string $imagePath Path to the image in storage.
- * @param string $coordinates Cell coordinates where the image will be placed.
- * @param int $width Width to resize the image.
- * @param int $height Height to resize the image.
- * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet Worksheet object.
- */
+     * @return \Illuminate\Support\Collection
+     */
+    public function __construct($ecr) {
+        $this->ecr = $ecr;
+    }
+
+    public function collection()
+    {
+        return $this->ecr;
+    }
+
+    /**
+     * @return string
+     */
+    public function title(): string
+    {
+        return 'ECR Data';
+    }
+
     public function insertEsignatureImageIntoSheet($imagePath, $coordinates, $width, $height, $sheet,$tempPathExt=null)
     {
         $imageEsigPath = '../RapidX_E-Signature/'.$imagePath;
@@ -59,117 +65,147 @@ WithEvents
         $drawing->setCoordinates($coordinates); // Cell coordinates
         $drawing->setWorksheet($sheet); // Attach the image to the worksheet
     }
+    public function getEcrApprovalStatus($approvalStatus){
+        try {
+             switch ($approvalStatus) {
+                 case 'OTRB':
+                     $approvalStatus = 'Requested by:';
+                     break;
+                 case 'OTTE':
+                     $approvalStatus = 'Technical Engg:';
+                     break;
+                 case 'OTRVB':
+                     $approvalStatus = 'Reviewed By:';
+                     break;
+                 case 'QACB':
+                     $approvalStatus = 'QA Engineer';
+                     break;
+                 case 'QAIN':
+                     $approvalStatus = 'QA Manager';
+                     break;
+                 case 'QAEX':
+                     $approvalStatus = 'QMS Head';
+                     break;
+                 default:
+                     $approvalStatus = '';
+                     break;
+             }
+             return  $approvalStatus;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * @return array
+     */
     public function registerEvents(): array
     {
-        $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
-        $pmiApprovalCollection = collect($ecrsDetails->pmi_approvals)->groupBy('approval_status')->toArray();
-        $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
+        date_default_timezone_set('Asia/Manila');
         return [
-            // AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
-            AfterSheet::class => function (AfterSheet $event)  {
-
-                // =================== DATA COLLECTION ======================== //
-                $ecrsDetails = $this->ecrsCategoryDetailsCollection['ecrDetails'];
-                $pmiApprovalCollection = collect($ecrsDetails->pmi_approvals)->groupBy('approval_status')->toArray();
-                $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
-                $approvalsGroupByMethod = $ecrsDetails->method->method_approvals  ?? NULL;
-                $approvalsGroupByMachine = $ecrsDetails->machine->machine_approvals ?? NULL;
-                // $approvalsGroupByMaterial = $ecrsDetails->material->method_approvals;
-                if(filled($approvalsGroupByMethod)){
-                    $approvalsGroupBy = $approvalsGroupByMethod;
-                }else if(filled($approvalsGroupByMachine)){
-                    $approvalsGroupBy = $approvalsGroupByMachine;
-                }else{
-                    echo  'No Data Found! Please file a ticket to http://rapidx/iss_service_request/my_tickets';
-                    exit;
-                }
-                // =========================================== //
+            AfterSheet::class => function(AfterSheet $event) {
+                $requestedByDeptCollection = $this->ecr['requestedByDeptCollection'];
+                $ecrCollection = $this->ecr['ecrCollection'];
+                $pmiApprovalCollection = collect($ecrCollection['pmi_approvals'])->groupBy('approval_status')->toArray();
+                // echo json_encode($pmiApprovalCollection);
+                // exit;
+                $beforeAfterFileStorage = $this->ecr['beforeAfterFileStorage'][0];
+                $ecrApprovalsCollection = $ecrCollection->ecr_approvals;
+                $ecrDetailsCollection = $ecrCollection->ecr_details;
                 $sheet = $event->sheet->getDelegate();
-                $approvalsGroupBy->groupBy('approval_status')->toArray();
 
-                // === Column Widths
-                foreach (range('G', 'L') as $col) {
-                    $sheet->getColumnDimension($col)->setWidth(9.45);
-                }
-                foreach (range('A', 'F') as $col) {
-                    $sheet->getColumnDimension($col)->setWidth(20);
-                }
-                $colRange = ['C','F'];
-                foreach ($colRange as $col) {
-                    $sheet->getColumnDimension($col)->setWidth(46);
-                }
-                $colRange = ['I'];
-                foreach ($colRange as $col) {
-                    $sheet->getColumnDimension($col)->setWidth(20);
-                }
-
-                // === Apply Styles to all cells used
-                $sheet->getStyle('A59:G59')->applyFromArray([
-                    'alignment' => [
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                        'horizontal' => Alignment::HORIZONTAL_LEFT,
+                // === Alignment for input cells ===
+                $sheet->getStyle("A1:AA100")->applyFromArray([
+                    // 'font' => ['bold' => true, 'size' => 12,'name'=> 'Arial'],
+                    'font' => ['size' => 12,'name'=> 'Arial'],
+                    'alignment' => ['horizontal' => 'center'],
+                    'fill' => [
+                        'fillType' => 'solid',
+                        'startColor' => ['argb' => Color::COLOR_WHITE], // White background
                         'wrapText' => true,
                     ],
                 ]);
-                // === Apply Styles to all cells used
-                // $sheet->getStyle('A1:G40')->applyFromArray([
-                //     'borders' => [
-                //         'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                //     ],
-                //     'alignment' => [
-                //         'vertical' => Alignment::VERTICAL_CENTER,
-                //         'horizontal' => Alignment::HORIZONTAL_LEFT,
-                //         'wrapText' => true,
-                //     ],
-                // ]);
+                // === Header Title ===
+                $sheet->mergeCells('A2:I2');
+                $sheet->setCellValue('A2', '4M CHANGE CONTROL MANAGEMENT');
+                $sheet->getStyle('A2')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'size' => 20,
+                        'name' => 'Arial',
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => 'solid',
+                        'startColor' => ['rgb' => 'D3D3D3' ], // White background
+                        'wrapText' => true,
+                    ],
+                ]);
+                $sheet->getRowDimension(2)->setRowHeight(25);
 
-
-                // === Bold for header
-                $sheet->getStyle('A1:A3')->getFont()->setBold(true);
-
-                // Optional Row Heights
-                for ($i = 1; $i <= 70; $i++) {
-                    $sheet->getRowDimension($i)->setRowHeight(16.50);
-                }
-                for ($j = 59; $j <= 59; $j++) {
-                    $sheet->getRowDimension($j)->setRowHeight( 33.5);
-                }
-                // === HEADER
-                $sheet->setCellValue('A1', 'PRICON MICROELECTRONICS, INC.');
-                $sheet->setCellValue('A2', 'OPERATIONS DIVISION');
-                $sheet->setCellValue('C3', 'CHANGE CONTROL APPLICATION REPORT');
-                $sheet->setCellValue('K1', 'PPS-101-018');
-                $sheet->setCellValue('J4', 'Control Number');
-                $sheet->setCellValue('J5', $ecrsDetails->ecr_no);
-                // === SECTION INFO
-                $sheet->setCellValue('A6', 'SECTION NAME');
-                $sheet->setCellValue('A7', 'PRODUCT LINE');
-                $sheet->setCellValue('A8', 'DEVICE NAME');
-                $sheet->setCellValue('A9', 'PART NAME');
-                $sheet->setCellValue('A10', 'PART CODE');
-                $sheet->setCellValue('A11', 'CUSTOMER');
-                $sheet->setCellValue('A12', 'DATE OF APPLICATION');
-                $sectionCol = "C";
-                $startSectionRow = "6";
-                // === SECTION DATA
-                $section = [
-                    $ecrsDetails->section,
-                    $ecrsDetails->product_line,
-                    $ecrsDetails->device_name,
-                    $ecrsDetails->part_name,
-                    $ecrsDetails->part_no,
-                    $ecrsDetails->customer_name,
-                    $ecrsDetails->date_of_request,
+                // === Section Headers Styling ===
+                $sectionHeaders = [
+                    'A3' => '1 INFORMATION',
+                    'F3' => 'ECR NO.:'.' '. $ecrCollection->ecr_no,
+                    'A9' => '2. 4M CATEGORY',
+                    'A21' => '3. DESCRIPTION OF CHANGE',
+                    'A33' => '4. REASON OF CHANGE',
+                    'A42' => '5. REQUESTED BY',
+                    'A46' => '6. TECHNICAL EVALUATION / ENGINEERING',
+                    'A56' => '7. DOCUMENT REVISION',
+                    'A62' => '8. AGREED BY',
+                    'A67' => '9. PMI APPROVAL',
+                    'A73' => '10. CUSTOMER APPROVAL',
+                    'A80' => '11.  FINAL DISPOSITION',
                 ];
-                foreach ($section as $index => $label) {
-                    $sheet->setCellValue($sectionCol . ($startSectionRow + $index), $label);
+                $sectionHeadersEndRow = [
+                    '3',
+                    '3',
+                    '9',
+                    '21',
+                    '33',
+                    '42',
+                    '46',
+                    '56',
+                    '62',
+                    '67',
+                    '73',
+                    '80',
+                ];
+                $sectionHeadersCount = 0;
+                foreach ($sectionHeaders as $cell => $value) {
+                    $sheet->setCellValue($cell, $value);
+                    $sheet->getStyle("{$cell}:I".$sectionHeadersEndRow[$sectionHeadersCount])->applyFromArray([
+                        'font' => [
+                            'bold' => true,
+                            'color' => ['rgb' => '0000FF'], // Blue text for headers
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                        'fill' => [
+                            'fillType' => 'solid',
+                            'startColor' => ['rgb' => 'D3D3D3' ], // White background
+                            'wrapText' => true,
+                        ],
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '000000'],
+                            ],
+                        ],
+                    ]);
+                    $sectionHeadersCount++;
                 }
-                // === 4M CHANGE & DOCUMENTS
-                $sheet->setCellValue('A14', '4M Change / 1E');
-                $categoryCol = "B";
-                $categoryRow = "14";
-                // === SECTION DATA
-                $isCategory = $ecrsDetails->category ?? "";
+
+                // === 4M CATEGORY SECTION
+                $categoryCol = "A";
+                $categoryRow = "11";
+                $isCategory = $ecrCollection->category ?? "";
                 $category = [
                     $isCategory === "Man" ? '☑ Man' :'☐ Man',
                     $isCategory === "Machine" ? '☑ Machine/Tools' :'☐ Machine/Tools',
@@ -178,28 +214,57 @@ WithEvents
                     $isCategory === "Environment" ? '☑ Environment' :'☐ Environment',
                 ];
                 for ($i=0; $i < count($category); $i++) {
-                    $sheet->setCellValue($categoryCol. $categoryRow, $category[$i]); $categoryCol++;
-                }
-                $sheet->setCellValue('G6', 'Document Affected');
+                    $sheet->setCellValue($categoryCol. $categoryRow, $category
+                    [$i]);
+                    $sheet->getStyle("".$categoryCol.$categoryRow."")->applyFromArray([
 
-                // ======= Insert Before and After Image ========
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+                    $categoryRow+=2;
+                }
+                // exit;
+                // === 4M CATEGORY DETAILS SECTION
+                $categoryDetailsCol = "B";
+                $categoryDetailsRow = "12";
+                $categoryDetails= "Kindly refer to PMI Change Control Procedure (PPS-I01-018) for 4M change factor categories.";
+                for ($i=0; $i < count($category); $i++) {
+                    $sheet->setCellValue($categoryDetailsCol. $categoryDetailsRow, $categoryDetails);
+                    $sheet->getStyle("".$categoryDetailsCol.$categoryDetailsRow."")->applyFromArray([
+                        'font' => [
+                            'italic' => true,
+                            'size' => 8,
+                            'name' => 'Arial',
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+
+                    ]);
+                    $categoryDetailsRow+=2;
+                }
+
+                 // ======= Insert Before and After Image ========
                 // Retrieve the image path
-                $filteredDocumentNameBefore = explode(' | ',$categoryDetails->filtered_document_name_before);
-                $storageImageDirBefore= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/before/');
+               $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
+            //    echo json_encode($filteredDocumentNameBefore); //\\rapidx\RapidX Systems\4M1x\storage\app\public\method\16\after\0_lost_of_key.jpg
+
+
+                // echo 'public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/';
+                $storageImageDirBefore= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/');
                 if(file_exists($storageImageDirBefore) ){
-                    // echo json_encode($storageImageDirBefore);
-                    // exit;
+
                     $startBeforeImageCol = "A";
-                    $startBeforeImageRow = "22";
+                    $startBeforeImageRow = "24";
                     foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
-                       $valueBefore;
                         $imagePathBefore[]= $storageImageDirBefore.$valueBefore;
                     }
 
                     foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
                             // Resize the image (optional, requires Intervention Image package)
-                            // echo json_encode($imagePathBefore);
-                            // exit;
                             $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
                             $tempPath = storage_path("app/temp_resized_image_$key.jpg");
                             $image->save($tempPath);
@@ -209,16 +274,12 @@ WithEvents
 
                             // Merge cells to accommodate the image
                             $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                            // $sheet->mergeCells("$startBeforeImageCol$currentRow:$endColumn" . ($currentRow + 1));
 
                             // Dynamically adjust column widths and row heights
                             $imageWidth = $image->width();
                             $imageHeight = $image->height();
 
                             $columnWidth = $imageWidth / 9.5; // Approximation for column width
-                            // $sheet->getColumnDimension($startBeforeImageCol)->setWidth($columnWidth);
-                            // $sheet->getColumnDimension(chr(ord($startBeforeImageCol) + 1))->setWidth($columnWidth);
-                            // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
                             $rowHeight = $imageHeight / 1.5; // Approximation for row height
                             $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
@@ -226,19 +287,25 @@ WithEvents
 
                             // Insert the image into the merged cells
                             $drawing = new Drawing();
+
                             $drawing->setName("Image $key");
+
                             $drawing->setDescription("Image $key");
                             $drawing->setPath($tempPath); // Path to the resized image
+
                             $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
+
                             $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
                     }
+
                 }
 
-                $filteredDocumentNameAfter = explode(' | ',$categoryDetails->filtered_document_name_after);
-                $storageImageDirAfter= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/after/');
+                $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
+                $storageImageDirAfter= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/after/');
                 if(file_exists($storageImageDirBefore) ){
-                    $startAfterImageCol = "D";
-                    $startAfterImageRow = "22";
+                    $startAfterImageCol = "E";
+                    $startAfterImageRow = "24";
                     foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
                         $imagePathAfter[]= $storageImageDirAfter.$valueAfter;
                     }
@@ -254,16 +321,12 @@ WithEvents
 
                             // Merge cells to accommodate the image
                             $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-                            // $sheet->mergeCells("$startAfterImageCol$currentRow:$endColumn" . ($currentRow + 1));
 
                             // Dynamically adjust column widths and row heights
                             $imageWidth = $image->width();
                             $imageHeight = $image->height();
 
                             $columnWidth = $imageWidth / 10.5; // Approximation for column width
-                            // $sheet->getColumnDimension($startAfterImageCol)->setWidth($columnWidth);
-                            // $sheet->getColumnDimension(chr(ord($startAfterImageCol) + 1))->setWidth($columnWidth);
-                            // $sheet->getColumnDimension($endColumn)->setWidth($columnWidth);
 
                             $rowHeight = $imageHeight / 1.5; // Approximation for row height
                             $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
@@ -276,355 +339,478 @@ WithEvents
                             $drawing->setPath($tempPath); // Path to the resized image
                             $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
                             $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
                     }
+
                 }
 
-                // === Document Type
-                $docTypes = [
-                    '☐ QC Process Flow Chart',
-                    '☐ Packaging Specification',
-                    '☐ Part/Product Specification',
-                    '☐ Assembly Drawing',
-                    '☐ SG / Assembly Manual',
+                // === Section Information Content ===
+                $sectionContents = [
+                    'A4' => 'Customer Name:',
+                    'A5' => 'Part Name:',
+                    'A6' => 'Product Line:',
+                    'A7' => 'Department:',
+                    'A8' => 'Section:',
+                    'F4' => 'Internal/External:',
+                    'F5' => 'Part Number:',
+                    'F6' => 'Device Name:',
+                    'F7' => '4M Change Number:',
+                    'F8' => 'Date of Request:',
                 ];
-                $docTypesCol = "G";
-                $docTypesRow = 8;
-                $sheet->setCellValue($docTypesCol.$docTypesRow, '☐ Others (pls. specify)');
-                foreach ($docTypes as $index => $label) {
-                   $sheet->setCellValue($docTypesCol . ($docTypesRow + $index), $label);
+
+                foreach ($sectionContents as $cell => $value) {
+                    $sheet->setCellValue($cell, $value);
+                    $sheet->getStyle($cell)->applyFromArray([
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
                 }
+                // === Approvers By Content ===
+                $approverContents = [
+                    // === 5.  REQUESTED BY ===
+                    'A43' => 'Department',
+                    'C43' => 'Name',
+                    'E43' => 'Title',
+                    'F43' => 'Signature',
+                    'H43' => 'Date',
+                    'I43' => 'Remarks',
+                    // === 6.  TECHNICAL EVALUATION / ENGINEERING ===
+                    'D47' => 'APPROVED',
+                    'H47' => 'NOT APPROVED',
+                    'A51' => 'Department',
+                    'C51' => 'Name',
+                    'E51' => 'Title',
+                    'F51' => 'Signature',
+                    'H51' => 'Date',
+                    'I51' => 'Remarks',
+                    // === 7.  Document Revision ==
+                    'A57' => 'Document Number',
+                    'E57' => 'Rev. #',
+                    'F57' => 'Person In-Charge',
+                    'I57' => 'Revision Due Date',
+                    // === 8.  AGREED BY ===
+                    'A63' => 'Department',
+                    'C63' => 'Name',
+                    'E63' => 'Title',
+                    'F63' => 'Signature',
+                    'H63' => 'Date',
+                    'I63' => 'Remarks',
+                    // === 9.  PMI APPROVAL ===
+                    'A71' => 'Prepared by:',
+                    'E71' => 'Checked by: ',
+                    'H71' => 'Approved by:',
+                    // === 10. CUSTOMER APPROVAL ===
+                    'D75' => 'NEED',
+                    'H75' => 'NO NEED',
+                    'A78' => 'Prepared by:',
+                    'H78' => 'Checked by: ',
+                    // === 11.  FINAL DISPOSITION ===
+                    'D82' => 'ACCEPT',
+                    'H82' => 'REJECT',
 
-                // === Target Date and Attachment
-                $sheet->setCellValue('G14', 'Target date of implementation:');
-                $sheet->setCellValue('G15', 'With attachment:');
-                $sheet->setCellValue('J15', '☐ Yes');
-                $sheet->setCellValue('K15', '☐ No');
-                $sheet->setCellValue('G16', 'Title of attachment:');
-                $sheet->setCellValue('G19', 'Actual Sample Attached:');
-                $sheet->setCellValue('J19', '☐ Yes');
-                $sheet->setCellValue('K19', 'Qty: ______ pcs.');
-                $sheet->setCellValue('J20', '☐ No');
-
-                // === BEFORE/AFTER
-                $sheet->setCellValue('A21', 'BEFORE');
-                $sheet->setCellValue('D21', 'AFTER');
-                $sheet->setCellValue('G21', 'REASON FOR APPLICATION');
-                $sheet->setCellValue('G26', 'Prepared by:');
-
-                // === Insert thre E-Signature Prepared By
-                $this->insertEsignatureImageIntoSheet(
-                    $ecrsDetails->rapidx_user_created_by->employee_number,
-                    "H26",
-                    50,
-                    50,
-                    $sheet,
-                    'prepared_by'
-                );
-
-                $sheet->setCellValue('H27', $ecrsDetails->rapidx_user_created_by->name);
-
-                // === Insert thre E-Signature Prepared By
-                $this->insertEsignatureImageIntoSheet(
-                    $ecrsDetails->rapidx_user_created_by->employee_number,
-                    "H26",
-                    50,
-                    50,
-                    $sheet,
-                    'prepared_by'
-                );
-                $sheet->setCellValue('H27', $ecrsDetails->rapidx_user_created_by->name);
-
-                // exit();
-                $sheet->setCellValue('J26', 'Checked by:');
-                $sheet->setCellValue('A29', '4M / 1E CHANGE ASSESSMENT');
-                // === 4M Assessment
-                $rowsEffects = [
-                    'Effect on Man (By Production)',
-                    'Effect on Machine/Tools',
-                    'Effect on Method/Environment',
-                    'Effect on Materials',
-                    'Line QC Remarks',
-                    'PMI Approval',
                 ];
-                $startRowsEffects = 30;
-                foreach ($rowsEffects as $i => $label) {
-                    $sheet->setCellValue("A" . $startRowsEffects, $label);
-                    // $sheet->setCellValue("D" . ($start + $i), 'Assessed by:');
-                    // $sheet->setCellValue("F" . ($start + $i), 'Checked by: Section Head');
-                    $startRowsEffects+=4;
+
+                foreach ($approverContents as $cell => $value) {
+                    $sheet->setCellValue($cell, $value);
+                    $sheet->getStyle($cell)->applyFromArray([
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
                 }
-                $rowsAssessedby = [
-                    'Assessed by',
-                    'Assessed by',
-                    'Assessed by',
-                    'Assessed by',
-                    'Assessed by',
-                ];
-                $startRowsAssessedby= 30;
-                foreach ($rowsAssessedby as $i => $label) {
-                    $sheet->setCellValue("I" . $startRowsAssessedby, $label);
-                    $startRowsAssessedby+=4;
-                }
-                $rowsCheckedby = [
-                    'Checked by',
-                    'Checked by',
-                    'Checked by',
-                    'Checked by',
-                    'Checked by',
-                ];
-                $startRowsCheckedby= 32;
-                foreach ($rowsCheckedby as $i => $label) {
-                    $sheet->setCellValue("I" . $startRowsCheckedby, $label);
-                    $startRowsCheckedby+=4;
-                }
-                $rowsSectionHead = [
-                    'Section Head',
-                    'Section Head',
-                    'Section Head',
-                    'Section Head',
-                    'Section Head',
-                ];
-                $startRowsSectionHead= 33;
-                foreach ($rowsSectionHead as $i => $label) {
-                    $sheet->setCellValue("K" . $startRowsSectionHead, $label);
-                    $startRowsSectionHead+=4;
-                }
-                //=== If the Approval is filled - Insert Name & Signature
-                if(filled($approvalsGroupBy)){
-                    $rowsApprovalsGroupByAssessedby = [
-                        'PRDNAB',
-                        'PRDNCB',
-                        'PPCAB',
-                        'PPCCB',
-                        'MENGAB',
-                        'MENGCB',
-                        'PENGAB',
-                        'PENGCB',
-                        'LQCAB',
-                        'LQCCB',
+
+                $sheet->getStyle("C47")->applyFromArray([
+                    'fill' => [
+                        'fillType' => 'solid',
+                        'startColor' => ['rgb' => '000000' ], // White background
+                        'wrapText' => true,
+                    ],
+                ]);
+                //Ecr Collection Exist
+                if(filled($ecrCollection)) {
+                    $ecrCollectionContent = [
+                        'B4' => $ecrCollection->customer_name,
+                        'B5' => $ecrCollection->part_name,
+                        'B6' => $ecrCollection->product_line,
+                        'B7' => $ecrCollection->section,
+                        'B8' => $ecrCollection->customer_name,
+
+                        'G4' => $ecrCollection->internal_external,
+                        'G5' => $ecrCollection->part_no,
+                        'G6' =>  $ecrCollection->device_name,
+                        'G7' =>  $ecrCollection->ecr_no,
+                        'G8' =>  $ecrCollection->date_of_request,
                     ];
-                    $startRowsAssessedby= 30;
-                    $startRowsApprovedby= 32;
-                    $startRowsApprovedbySignature= 31;
-                    $startRowsApprovedbyRemarks = 31;
-                    foreach ($rowsApprovalsGroupByAssessedby as $index => $label) {
-                        $approvalStatus = $approvalsGroupBy[$index]->approval_status;
-                        if(str_contains($approvalStatus, 'AB'))
-                        {
-                            if($label == $approvalsGroupBy[$index]->approval_status){
-                                $assessedBy = $approvalsGroupBy[$index]->rapidx_user->name ?? "N/A";
-                                if($assessedBy != "N/A"){
-                                    $this->insertEsignatureImageIntoSheet(
-                                        $approvalsGroupBy[$index]->rapidx_user->employee_number,
-                                        "J" . $startRowsAssessedby,
-                                        50,
-                                        50,
-                                        $sheet,
-                                        'prepared_by_'.$index
-                                    );
-                                }
+                    foreach ($ecrCollectionContent as $cell => $value) {
+                        $sheet->setCellValue($cell, $value);
+                    }
+                     //Ecr Collection Exist
 
-                                $sheet->setCellValue("J" . $startRowsAssessedby, $assessedBy);
-                                $startRowsAssessedby+=4;
-                            }
+                    if(filled($ecrDetailsCollection)) {
+                        $startRowDocCollection = 23;
+                        $startRowRocCollection = 34;
+                        $startColumnEcrDetailsCollection = 'A';
+                        foreach ($ecrDetailsCollection as $index => $value) {
+                            $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
+                            $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details;
+                            $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowDocCollection}", $descriptionOfChange);
+                            $startRowDocCollection++;
+
+                            $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowRocCollection}", $reasonOfChange);
+                            $startRowRocCollection++;
                         }
-                        if(str_contains($approvalStatus, 'CB'))
-                        {
-                            if($label == $approvalsGroupBy[$index]->approval_status){
-                                $assessedBy = $approvalsGroupBy[$index]->rapidx_user->name ?? "N/A";
-                                $sheet->setCellValue("J" . $startRowsApprovedby, $assessedBy);
-                                $startRowsApprovedby+=4;
-                            }
-                        }
-                        if(str_contains($approvalStatus, 'CB'))
-                        {
-                            if($label == $approvalsGroupBy[$index]->approval_status){
-                                $assessedBy = $approvalsGroupBy[$index]->rapidx_user->name ?? "N/A";
-                                if($assessedBy != "N/A"){
+                    }
+
+
+                    if(filled($ecrApprovalsCollection)) { //nmodify
+                        $startRowRequestedByApprovalsCollection = 44;
+                        $startRowOtherApprovalsCollection = 52;
+                        $startRowQaApprovalCollection = 64;
+                        // $startColumnOtherApprovalsCollection = 'A';
+                        foreach ($ecrApprovalsCollection as $index => $value) {
+                            $approvalStatus = $value->approval_status ?? "";
+                            $ecrApprover = $value->rapidx_user->name ?? "";
+                            // date('Y-m-d',$value->rapidx_user->created_at) ?? "";
+                            $approvedDate = Carbon::parse($value->created_at)->format('m-d-Y') ?? "";
+                            $division = $requestedByDeptCollection[$index]['division'] ?? "";
+                            $filteredSection = $requestedByDeptCollection[$index]['filteredSection'] ?? "";
+                            $remarks = $requestedByDeptCollection[$index]['remarks'] ?? "N/A";
+                            if (str_contains($approvalStatus, 'QA')) {
+                                $sheet->setCellValue("A{$startRowQaApprovalCollection}", $division);
+                                $sheet->setCellValue("C{$startRowQaApprovalCollection}", $ecrApprover);
+                                $sheet->setCellValue("E{$startRowQaApprovalCollection}",$this->getEcrApprovalStatus($approvalStatus));
+                                // $sheet->setCellValue("E{$startRowQaApprovalCollection}", 'Signature');
+                                $sheet->setCellValue("H{$startRowQaApprovalCollection}", $approvedDate);
+                                $sheet->setCellValue("I{$startRowQaApprovalCollection}", $remarks);
+                                  // === E-signature Images
+                                // $imageEsigPath = 'public/e_signatures/';
+                                $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
+                                $this->insertEsignatureImageIntoSheet(
+                                    $imageEsigWithEmpNumberPath,
+                                    "F".$startRowQaApprovalCollection,
+                                    50,
+                                    50,
+                                    $sheet,
+                                    'ecr_qa'.$index
+                                );
+                                $sheet->getStyle("A{$startRowQaApprovalCollection}:I{$startRowQaApprovalCollection}")->applyFromArray([
+                                    'alignment' => [
+                                        'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                        'vertical' => Alignment::VERTICAL_CENTER,
+                                    ],
+                                ]);
+                                $startRowQaApprovalCollection++;
+                            }else{
+                                if (str_contains($approvalStatus, 'OTRB')) {
+                                    $sheet->setCellValue("A{$startRowRequestedByApprovalsCollection}", $division);
+                                    $sheet->setCellValue("C{$startRowRequestedByApprovalsCollection}", $ecrApprover);
+                                    $sheet->setCellValue("E{$startRowRequestedByApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
+                                    $sheet->setCellValue("H{$startRowRequestedByApprovalsCollection}", $approvedDate);
+                                    $sheet->setCellValue("I{$startRowOtherApprovalsCollection}", $remarks);
+                                    // === Insert e-signature
+                                    // $imageEsigPath = 'public/e_signatures/';
+
+                                    $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
                                     $this->insertEsignatureImageIntoSheet(
-                                        $approvalsGroupBy[$index]->rapidx_user->employee_number,
-                                        "K" . $startRowsApprovedbySignature,
+                                        $imageEsigWithEmpNumberPath,
+                                        "F".$startRowRequestedByApprovalsCollection,
                                         50,
                                         50,
                                         $sheet,
-                                        'prepared_by_'.$index
+                                        'ecr_requestedby'.$index
                                     );
+                                    $sheet->getStyle("A{$startRowRequestedByApprovalsCollection}:I{$startRowRequestedByApprovalsCollection}")->applyFromArray([
+                                        'alignment' => [
+                                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                            'vertical' => Alignment::VERTICAL_CENTER,
+                                        ],
+                                    ]);
+                                    $startRowRequestedByApprovalsCollection++;
                                 }
-                                $startRowsApprovedbySignature+=4;
-                            }
-                        }
-                        if(str_contains($approvalStatus, 'CB'))
-                        {
-                            if($label == $approvalsGroupBy[$index]->approval_status){
-                                $remarks = $approvalsGroupBy[$index]->remarks ?? "N/A";
-                                $sheet->setCellValue("A" . $startRowsApprovedbyRemarks, $remarks);
-                                $startRowsApprovedbyRemarks+=4;
+                                if ( !str_contains($approvalStatus, 'OTRB')) {
+                                    $sheet->setCellValue("A{$startRowOtherApprovalsCollection}", $division);
+                                    $sheet->setCellValue("C{$startRowOtherApprovalsCollection}", $ecrApprover);
+                                    $sheet->setCellValue("E{$startRowOtherApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
+                                    $sheet->setCellValue("H{$startRowOtherApprovalsCollection}", $approvedDate);
+                                    $sheet->setCellValue("I{$startRowOtherApprovalsCollection}", $remarks);
+                                      // === Insert e-signature
+
+                                      $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
+                                      $this->insertEsignatureImageIntoSheet(
+                                          $imageEsigWithEmpNumberPath,
+                                          "F".$startRowOtherApprovalsCollection,
+                                          50,
+                                          50,
+                                          $sheet,
+                                          'ecr_engg'.$index
+                                      );
+                                    $sheet->getStyle("A{$startRowOtherApprovalsCollection}:I{$startRowOtherApprovalsCollection}")->applyFromArray([
+                                        'alignment' => [
+                                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                            'vertical' => Alignment::VERTICAL_CENTER,
+                                        ],
+                                    ]);
+                                    $startRowOtherApprovalsCollection++;
+                                }
                             }
                         }
                     }
                 }
-                // === Approval Section
-                $sheet->setCellValue('A50', 'PMI Approval');
-                $sheet->setCellValue('B53', 'QC Head');
-                $sheet->setCellValue('E53', 'Operations Head');
-                $sheet->setCellValue('H53', 'QAD Head');
-                // === Approval Data
-                $startExtQcCol = "B";
-                // echo json_encode($pmiApprovalCollection);
-                // exit;
-                $externalQC = $pmiApprovalCollection['EXQC'] ?? null;
-                if(filled($externalQC)){
-                    foreach ($pmiApprovalCollection['EXQC'] as $key => $extenalQcValue) {
+
+
+                // ==== PMI APPROVAL ====
+                $internalPbCol = "A";
+                $internalPb = $pmiApprovalCollection['PB'] ?? null;
+                if(filled($internalPb)){
+                    foreach ($internalPb as $key => $internalPbValue) {
                         $this->insertEsignatureImageIntoSheet(
-                            $extenalQcValue['rapidx_user']['employee_number'],
-                            $startExtQcCol."51",
+                            $internalPbValue['rapidx_user']['employee_number'],
+                            $internalPbCol."69",
                             50,
                             50,
                             $sheet,
-                            'qc_head'.$key
+                            'pb_head'.$key
                         );
-                        $sheet->setCellValue($startExtQcCol.'52', $extenalQcValue['rapidx_user']['name']);
-                        $startExtQcCol++; //Adjust the Column
+
+                        $sheet->setCellValue($internalPbCol.'70', $internalPbValue['rapidx_user']['name']);
+                        $internalPbCol++; //Adjust the Column
+                    }
+                }
+                $startInternalCbCol = "E";
+                $internalCb = $pmiApprovalCollection['CB'] ?? null;
+                if(filled($internalCb)){
+                    foreach ($internalCb as $key => $internalCbValue) {
+
+                        $this->insertEsignatureImageIntoSheet(
+                            $internalCbValue['rapidx_user']['employee_number'],
+                            $startInternalCbCol."69",
+                            50,
+                            50,
+                            $sheet,
+                            'cb_head'.$key
+                        );
+
+                        $sheet->setCellValue($startInternalCbCol.'70', $internalCbValue['rapidx_user']['name']);
+                        $startInternalCbCol++; //Adjust the Column
                     }
                 }
 
-                // === YEC Approval Section
-                $sheet->setCellValue('A56', 'YEC Approval?');
-                $sheet->setCellValue('C56', '☐ Need');
-                $sheet->setCellValue('C58', '☐ No Need');
-                $sheet->setCellValue('I55', 'Final Disposition:');
-                $sheet->setCellValue('J57', '☐ Accept');
-                $sheet->setCellValue('J58', '☐ Reject');
-                $sheet->setCellValue('I59', 'REMARKS:');
+                $startInternalAbCol = "H";
+                $internalAb = $pmiApprovalCollection['AB'] ?? null;
+                if(filled($internalAb)){
+                    foreach ($internalAb as $key => $internalAbValue) {
 
+                        $this->insertEsignatureImageIntoSheet(
+                            $internalAbValue['rapidx_user']['employee_number'],
+                            $startInternalAbCol."69",
+                            50,
+                            50,
+                            $sheet,
+                            'ab_head'.$key
+                        );
 
-                // === NOTE Column
-                $sheet->setCellValue('A59', '**Note: If  YEC approval is necessary, PMI shall implement 4M change after the receipt of  YECs  Process
-                    Change Application approval sheet.
-                    If no need YEC approval, PMI can implement the  4M change immediately with PMI heads approval
-                ');
-                // === Conditional Section
-                $sheet->setCellValue('A62', 'USE THIS PORTION IF DISPOSITION IS ACCEPTED WITH CONDITION');
-                $sheet->setCellValue('A63', 'Action/s Required');
-                $sheet->setCellValue('C63', 'Target Date');
-                $sheet->setCellValue('E63', 'In-Charge');
-                $sheet->setCellValue('G63', 'Result');
-                $sheet->setCellValue('I68', 'QAD SIGNATURE');
+                        $sheet->setCellValue($startInternalAbCol.'70', $internalAbValue['rapidx_user']['name']);
+                        $startInternalAbCol++; //Adjust the Column
+                    }
+                }
 
 
                 // === Specific Merged Cells ===
                 $mergeCells = [
-                    'J4:L4',
-                    'J5:L5',
-                    'A1:F1',
-                    'A2:F2',
-                    'C3:I4',
-                    'K1:L1',
-                    'J4:L4',
-                    'G6:L6',
-
-                    'A21:C21',
-                    'D21:F21',
-                    'G21:L21',
-                    'A29:L29',
-                    'A59:G59',
-
-                    'A62:H62',
-                    'A63:B64',
-                    'C63:D64',
-                    'E63:F64',
-                    'G63:H64',
+                    'A3:E3',
+                    'F3:I3',
+                    'A9:I9',
+                    // INFORMATION
+                    'G4:H4',
+                    // HEADER
+                    'A21:I21',
+                    'A33:I33',
+                    'A42:I42',
+                    'A46:I46',
+                    'A56:I56',
+                    'A62:I62',
+                    'A67:I67',
+                    'A73:I73',
+                    'A80:I80',
+                    // 5.  REQUESTED BY
+                    'A43:B43',
+                    'C43:D43',
+                    'F43:G43',
+                    'I43:I43',
+                    // 6.  TECHNICAL EVALUATION / ENGINEERING
+                    'A51:B51',
+                    'C51:D51',
+                    'F51:G51',
+                    'I51:I51',
+                    // 7.  Document Revision
+                    'A57:D57',
+                    'F57:H57',
+                    'I57:I57',
+                    // 8.  AGREED BY
+                    'A63:B63',
+                    'C63:D63',
+                    'F63:G63',
+                    // 8.  AGREED BY
+                    'A77:B77',
+                    'H77:I77',
                 ];
 
                 foreach ($mergeCells as $range) {
                     $sheet->mergeCells($range);
                 }
 
-                //Style
-                $arrCenterColumn = [
-                    'C3',
-                    'G6',
-                    'J4',
-                    'J5',
-                    'J5',
-                    'A62',
-                    'A63',
-                    'C63',
-                    'E63',
-                    'G63',
+
+                // ===Row Heights for form look ===
+                $customRowHeights = [
+                    4 => 20,
+                    9 => 20,
+                    16 => 20,
+                    25 => 20,
+                    29 => 20,
+                    40 => 20,
                 ];
-                foreach ($arrCenterColumn as $centerColumn) {
-                    $sheet->getStyle($centerColumn)->applyFromArray([
-                        'alignment' => [
-                            'horizontal' => 'center',
-                            'vertical' => 'center'
-                        ],
-                    ]);
+                foreach ($customRowHeights as $row => $height) {
+                    $sheet->getRowDimension($row)->setRowHeight($height);
                 }
 
 
-
-
-                $arrOutlineThin = [
-                    'J4:L4',
-                    'J5:L5',
-
-                    'A6:F13',
-                    'G6:L13',
-
-                    'A14:F20',
-                    'G14:L20',
-
-                    'A21:C28',
-                    'D21:F28',
-                    'G21:L28',
-
-                    'A29:L29',
-
-                    //APPROVAL
-                    'A30:L33',
-                    'A34:L37',
-                    'A38:L41',
-                    'A42:L45',
-                    'A46:L49',
-                    'A50:L54',
-
-                    //YEC APPROVAL
-                    'A55:H61',
-                    'I55:L58',
-                    // REMARKS / FINAL DISPO
-                    'A62:H62',
-                    'A63:L69',
-
-                    //ACTION TABLE
-                    'A63:H64',
-                    'A63:B69',
-                    'C63:D69',
-                    'E63:F69',
-                    'G63:H69',
-                    //QA
-                    'I68:L69',
+                // Set border for range
+                // echo 'true';
+                // exit;
+                // === Apply borders to specific cells ===
+                $allThinBorder = [
+                    "A43:I43",
+                    "C47",
+                    "G47",
+                    "A51:I51",
+                    'A57:I57',
+                    'A63:I63',
+                    'C75',
+                    'G75',
+                    'C82',
+                    'G82',
                 ];
-                foreach ($arrOutlineThin as $outlineThin) {
-                    $sheet->getStyle($outlineThin)
+                foreach ($allThinBorder as $key => $allThinBorderValue) {
+                    $sheet->getStyle($allThinBorderValue)
                     ->applyFromArray([
                         'borders' => [
-                            'outline' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                            ],
+                        ],
+                    ]);
+                }
+                // === THIN BORDERS
+                $rightThinBorder = [
+                    "A5:A8",
+                    "E5:E8",
+                    "F5:F8",
+                ];
+
+
+                $bottomThinBorder = [
+                    "A4:I4",
+                    "A70",
+                    // 9. PMI APPROVAL
+                    "E70",
+                    "H70",
+                    //10. CUSTOMER APPROVAL
+                    "A77:B77",
+                    "H77:I77",
+                ];
+
+                foreach ($rightThinBorder as $key => $rightThinBorderValue) {
+                    $sheet->getStyle($rightThinBorderValue)
+                    ->applyFromArray([
+                        'borders' => [
+                            'right' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                            ],
+                        ],
+                    ]);
+                }
+                foreach ($bottomThinBorder as $key => $bottomThinBorderValue) {
+                    $sheet->getStyle($bottomThinBorderValue)
+                    ->applyFromArray([
+                        'borders' => [
+                            'bottom' => [
                                 'borderStyle' => Border::BORDER_THIN,
                             ],
                         ],
                     ]);
                 }
 
-                $sheet->getStyle('A1:L69')
-                ->applyFromArray([
-                    'borders' => [
-                        'outline' => [
-                            'borderStyle' => Border::BORDER_THICK,
+                //THICK BORDERS
+                $rightThickBorder = [
+                    "I2:I84",
+                ];
+                $leftThickBorder = [
+                    "A2:I84",
+                ];
+                $topThickBorder = [
+                    "A2:I2",
+                    "A85:I85",
+                ];
+                foreach ($rightThickBorder as $key => $rightThickBorderValue) {
+                    $sheet->getStyle($rightThickBorderValue)
+                    ->applyFromArray([
+                        'borders' => [
+                            'right' => [
+                                'borderStyle' => Border::BORDER_THICK,
+                            ],
                         ],
-                    ],
+                    ]);
+                }
+                foreach ($leftThickBorder as $key => $leftThickBorderValue) {
+                    $sheet->getStyle($leftThickBorderValue)
+                    ->applyFromArray([
+                        'borders' => [
+                            'left' => [
+                                'borderStyle' => Border::BORDER_THICK,
+                            ],
+                        ],
+                    ]);
+                }
+                foreach ($topThickBorder as $key => $topThickBorderValue) {
+                    $sheet->getStyle($topThickBorderValue)
+                    ->applyFromArray([
+                        'borders' => [
+                            'top' => [
+                                'borderStyle' => Border::BORDER_THICK,
+                            ],
+                        ],
+                    ]);
+                }
+
+                $sheet->getStyle("B5:B8")->applyFromArray([
+                    'alignment' => ['horizontal' => 'left'],
                 ]);
-            }
+
+                $sheet->getStyle("G5:G8")->applyFromArray([
+                    'alignment' => ['horizontal' => 'left'],
+                ]);
+
+                // === Column Widths ===
+                $columnWidths = [
+                    'B' => 13,
+                    'C' => 6,
+                    'D' => 35,
+                    'E' => 35,
+                    'F' => 35,
+                    'G' => 6,
+                    'H' => 30,
+                    'I' => 30,
+                    'J' => 20,
+                ];
+                foreach ($columnWidths as $col => $width) {
+                    $sheet->getColumnDimension($col)->setWidth($width);
+                }
+
+
+            },
         ];
     }
 }

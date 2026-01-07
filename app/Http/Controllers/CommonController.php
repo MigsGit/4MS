@@ -11,6 +11,7 @@ use App\Models\Method;
 use App\Models\Machine;
 use App\Models\Material;
 use App\Models\ManDetail;
+use App\Exports\EcrExport;
 use App\Models\RapidxUser;
 use App\Models\EcrApproval;
 use App\Models\Environment;
@@ -23,12 +24,14 @@ use App\Models\MachineApproval;
 use App\Models\MaterialApproval;
 use App\Models\SpecialInspection;
 use App\Exports\ExternalCcmExport;
+use App\Exports\InternalCcmExport;
 use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
 use App\Models\ExternalDisposition;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
+use App\Models\BeforeAfterFileStorage;
 use App\Http\Requests\SpecialInspectionRequest;
 
 
@@ -618,45 +621,52 @@ class CommonController extends Controller
     public function downloadInternalExcelByEcrsId(Request $request){
         $iqc_dropdown_category_section = 'TS';
         $ecrsId = decrypt($request->ecrsId);
-        $getEcrById = $this->resourceInterface->readWithRelationsConditions(
-            Ecr::class,
-            [],
-            [
-                'rapidx_user_created_by',
-                'method',
-                'method.method_approvals',
-                'method.method_approvals.rapidx_user',
-                'pmi_approvals',
-                'pmi_approvals.rapidx_user',
-                'machine',
-            ],
-            [
-                'id' => $ecrsId
-            ]
-        );
-        switch ($getEcrById[0]->category) {
-            case 'Method':
-                $detailsByCategory = $getEcrById[0]->method;
-                break;
-            case 'Machine':
-                $detailsByCategory = $getEcrById[0]->machine;
-                break;
-            default:
-                # code...
-                break;
-        }
 
-        $ecrsCategoryDetailsCollection = collect($getEcrById)->flatMap(function ($ecrDetailsRow) use ($detailsByCategory){
+       $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
+        [
+
+            'before_after_file_storage',
+            'pmi_approvals.rapidx_user',
+            'ecr_approvals.rapidx_user',
+            'ecr_details.dropdown_master_detail_description_of_change',
+            'ecr_details.dropdown_master_detail_reason_of_change',
+        ],
+        [
+            'id'=> $ecrsId
+        ]);
+        // $ecr->whereNotNull('rapidx_user_id');
+        $ecr->whereHas('ecr_approvals',function($query) use ($request){
+                $query->where('status','APP');
+                $query->whereNotNull('rapidx_user_id');
+        })
+        ->with(['ecr_approvals' => function($query) {
+            $query->where('status', 'APP')
+                  ->whereNotNull('rapidx_user_id');
+        }, 'ecr_approvals.rapidx_user']); // eager load user
+
+        $ecrDetails = $ecr->get();
+        $beforeAfterFileStorage =  BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->get();
+        // return  $ecrDetails = $ecr->get();
+        $ecrCollection = collect($ecrDetails)
+        ->flatMap(function ($ecrCollectionRow) use($beforeAfterFileStorage){
+            $ecrApprovals = $ecrCollectionRow->ecr_approvals ?? '';
+            //Get the Department / Section of the user
+            $requestedByDeptCollection = collect($ecrApprovals)->map(function ($ecrApprovalsRow){
+                $departmentId = $ecrApprovalsRow->rapidx_user->department_id ?? '';
+                return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
+
+            }); //removed the NULL Value
+            // })->filter()->all(); //removed the NULL Value
             return [
-                'ecrDetails'=> $ecrDetailsRow,
-                'detailsByCategory'=> $detailsByCategory
+                'requestedByDeptCollection' => $requestedByDeptCollection,
+                'ecrCollection' => $ecrCollectionRow,
+                'beforeAfterFileStorage' => $beforeAfterFileStorage,
+
+                // 'beforeAfterFileStorage' => $beforeAfterFileStorage,
             ];
         });
 
-        return Excel::download(
-            new ExternalCcmExport($ecrsCategoryDetailsCollection),
-            "INTERNAL - CHANGE CONTROL APPLICATION REPORT.xlsx"
-        );
+        return Excel::download(new InternalCcmExport($ecrCollection),"Internal Export.xlsx");
     }
     public function saveExternalDisposition(Request $request){
         try {

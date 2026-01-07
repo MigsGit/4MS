@@ -14,6 +14,7 @@ use App\Interfaces\CommonInterface;
 use App\Models\ExternalDisposition;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ResourceInterface;
+use App\Models\BeforeAfterFileStorage;
 use App\Http\Requests\MethodFileRequest;
 use App\Http\Requests\MethodApprovalRequest;
 
@@ -31,29 +32,37 @@ class MethodController extends Controller
         $this->commonInterface = $commonInterface;
         $this->emailInterface = $emailInterface;
     }
-    public function saveMethod(Request $request, MethodFileRequest $methodFileRequest,MethodApprovalRequest $machineApprovalRequest){
+    public function saveMethod(Request $request, MethodFileRequest $methodFileRequest,MethodApprovalRequest $machineApprovalRequest){ // Transfer File from Method ID into ECR Id -nchange
+        // Create Table, Insert Storage Id to Method, Machine,etc. , Save in Storage , Save Id Storage
         try {
             DB::beginTransaction();
             $methodRequestValidated = [];
+            $fileRequestValidated = [];
             $ecrsId = $methodFileRequest->ecrsId;
             $methodsId = $methodFileRequest->methodsId;
 
             if($methodFileRequest->hasfile('methodRefBefore') && $methodFileRequest->hasfile('methodRefAfter')){
-               $arrUploadFile = $this->commonInterface->uploadFileImg($methodFileRequest->methodRefBefore,$methodFileRequest->methodRefAfter,$methodsId,'method');
+               $arrUploadFile = $this->commonInterface->uploadFileImg($methodFileRequest->methodRefBefore,$methodFileRequest->methodRefAfter,$ecrsId,'method'); //nchange
                 $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
                 $impFilteredDocumentNameBefore = implode(' | ',$arrUploadFile['arr_filtered_document_name_before']);
                 $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
                 $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
 
-                $methodRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
-                $methodRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
-                $methodRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
-                $methodRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
-
+                //nchange
+                $fileRequestValidated['ecrs_id'] = $ecrsId;
+                $fileRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
+                $fileRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
+                $fileRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
+                $fileRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
+                BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->delete();
+                $beforeAfterFileStorageId =$this->resourceInterface->create(BeforeAfterFileStorage::class,$fileRequestValidated);
             }
             $conditions = [
                 'id' =>  $methodsId
             ];
+
+            //nchange
+            $methodRequestValidated['before_after_file_storages_id'] =  $beforeAfterFileStorageId['data_id'];
             $this->resourceInterface->updateConditions(Method::class,$conditions,$methodRequestValidated);
             $arrMachineApprovalRequest = [
                 'PRDNAB'  => $request->prdnAssessedBy,
@@ -137,7 +146,7 @@ class MethodController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            $this->emailInterface->sendEmail($emailData);
+            // $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -579,9 +588,9 @@ class MethodController extends Controller
                     $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
-                if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
+                // if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-                }
+                // }
                 if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')  || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id')  ){
                     $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }

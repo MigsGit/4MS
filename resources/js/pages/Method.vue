@@ -856,7 +856,6 @@
     DataTable.use(DataTablesCore);
 
     const { axiosSaveData,axiosSaveDataImgFile } = useForm(); // Call the useForm function
-
     const {
         modalEcr,
         ecrVar,
