@@ -48,7 +48,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
         // $defaultSignature = Storage::path($imagePath.'.png'); $imageEsigPath
 
         if( !file_exists($imageStoragePath) ){
-            echo  'Signature not found: Please as the HR for the E-Signature then Please file a ticket to http://rapidx/iss_service_request/my_tickets';
+            echo  ''.$imageStoragePath.'Signature not found: Please as the HR for the E-Signature then Please file a ticket to http://rapidx/iss_service_request/my_tickets';
 
             exit;
         }

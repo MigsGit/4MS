@@ -65,7 +65,7 @@
                                 </tr>
                             </thead>
                         </DataTable>
-                    </div>
+                        </div>
                     </div>
                 </div>
                 <div v-show="commonVar.rapidxUserDeptGroup ==='ISS' || commonVar.rapidxUserDeptGroup ==='QA'" class="tab-pane fade" id="menu2" role="tabpanel" aria-labelledby="menu1-tab">
@@ -196,7 +196,45 @@
                         </textarea>
                     </div>
                 </div>
-
+                <!-- Document Revision -->
+                <!-- <div class="container-fluid px-4">
+                    <button type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create Document</button>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item active">Engineering Change Request</li>
+                    </ol>
+                    <div class="table-responsive">
+                    <DataTable
+                        width="100%" cellspacing="0"
+                        class="table mt-2"
+                        ref="tblDocuments"
+                        :searching="true"
+                        :ordering="true"
+                        :processing="true"
+                        :ajax="api/load_ecr_documents"
+                        :columns="tblEcrDocumentsColumns"
+                        :options="{
+                            serverSide: true, //Serverside true will load the network
+                            columnDefs:[
+                                {orderable:false,target:[0]}
+                            ],
+                            language: {
+                                zeroRecords: 'No data available',
+                                emptyTable: 'No data available'
+                            }
+                        }"
+                    >
+                        <thead>
+                            <tr>
+                                <th style=""width="5%">Action</th>
+                                <th style=""width="10%">Document Number</th>
+                                <th style=""width="10%">Rev. #</th>
+                                <th style=""width="10%">Date</th>
+                                <th style=""width="10%">Remarks</th>
+                            </tr>
+                        </thead>
+                    </DataTable>
+                    </div>
+                </div> -->
                   <!-- Others Disposition -->
                   <div class="card mb-2 d-none">
                         <h5 class="mb-0">
@@ -1169,6 +1207,13 @@
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'get_4m_status'} ,
+    ];
+
+    const tblEcrDocumentsColumns = [
+        {   data: 'getAction'} ,
+        {   data: 'rev'} ,
+        {   data: 'date'} ,
+        {   data: 'remarks'} ,
     ];
     const tblEcrRequirementsColumns = [
         {   data: 'requirement'} ,

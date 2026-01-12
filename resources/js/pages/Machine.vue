@@ -1041,7 +1041,8 @@
                 let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
                 if(btnViewMachineRef != null){
                     btnViewMachineRef.addEventListener('click',function(){
-                        let machinesId = this.getAttribute('machine-id');
+                        let machinesId = this.getAttribute('machines-id');
+
                         let ecrsId = this.getAttribute('ecrs-id');
                         selectedEcrsId.value = ecrsId;
                         getMachineRefById(machinesId);
@@ -1204,7 +1205,6 @@
             arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
             arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
             arrOriginalFilenameExternalDispositions.value = data.originalFilenameExternalDisposition;
-            selectedMachinesIdEncrypted.value = machinesId;
             selectedEcrsId.value = data.ecrsId;
             modal.ViewMachineRef.show();
         });

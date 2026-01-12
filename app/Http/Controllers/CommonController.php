@@ -748,9 +748,9 @@ class CommonController extends Controller
             'file_path',
         ]);
         if(count($externalDispositionByEcrsId) != 0){
-            $arrFilteredDocumentName = explode(' | ' ,$externalDispositionByEcrsId[0]->filtered_document_name);
+            $arrFilteredDocumentName = explode(' | ' ,$externalDispositionByEcrsId->filtered_document_name);
             $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
-            $filePathWithEcrsId = $externalDispositionByEcrsId[0]->file_path."/".$ecrsId."/".$selectedFilteredDocumentName;
+            $filePathWithEcrsId = $externalDispositionByEcrsId->file_path."/".$ecrsId."/".$selectedFilteredDocumentName;
             $pdfPath = storage_path("app/public/".$filePathWithEcrsId."");
             $this->commonInterface->viewPdfFile($pdfPath);
         }
@@ -925,6 +925,75 @@ class CommonController extends Controller
                 'pendingEnvironment' => $pendingEnvironment,
                 'approvedEnvironment' => $approvedEnvironment,
             ]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function getBeforeAfterRefByEcrsId(Request $request){
+        try {
+            $conditions = [
+                'ecrs_id' => decrypt($request->ecrsId)
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(BeforeAfterFileStorage::class,[
+                'ecrs_id',
+                'original_filename_before',
+                'original_filename_after',
+            ],[],$conditions);
+            $beforeAfterRefByEcrsId = $data
+            ->first();
+            if ( filled($beforeAfterRefByEcrsId) ){
+                $arrMethodRefResponse = [
+                    'originalFilenameBefore'=> explode(' | ',$beforeAfterRefByEcrsId->original_filename_before),
+                    'originalFilenameAfter'=> explode(' | ',$beforeAfterRefByEcrsId->original_filename_after),
+                    'methodsId'=> encrypt($beforeAfterRefByEcrsId->id),
+                    'ecrsId'=> encrypt($beforeAfterRefByEcrsId->ecrs_id),
+                ];
+                return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse??[],$arrExternalDispoResponse??[])]);
+            }
+
+            return response()->json(['is_success' => 'false']);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function viewBeforeAfterRefByEcrsId(Request $request){ //nmodify
+        try {
+            $data = $this->resourceInterface->readCustomEloquent(BeforeAfterFileStorage::class,[
+                'ecrs_id',
+                'original_filename_before',
+                'filtered_document_name_before',
+                'original_filename_after',
+                'filtered_document_name_after',
+                'file_path',
+            ],[],[
+                'ecrs_id' => decrypt($request->ecrsId),
+            ]);
+            $beforeAfterRefByEcrsId = $data
+            ->first();
+
+            if( filled($beforeAfterRefByEcrsId) ){
+                $ecrsId = $beforeAfterRefByEcrsId->ecrs_id;
+                if ($request->imageType === "before"){
+                   $beforeAfterRefByEcrsId->filtered_document_name_before;
+                   $arrFilteredDocumentName = explode(' | ' ,$beforeAfterRefByEcrsId->filtered_document_name_before);
+                   $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                   $filePathWithEcrsId = $beforeAfterRefByEcrsId->file_path."/".$ecrsId."/".$request->imageType."/".$selectedFilteredDocumentName;
+                   $filePath = "app/public/".$filePathWithEcrsId."";
+                }
+                if ($request->imageType === "after"){
+                   $arrFilteredDocumentName = explode(' | ' ,$beforeAfterRefByEcrsId->filtered_document_name_after);
+                    $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                    $filePathWithEcrsId = $beforeAfterRefByEcrsId->file_path."/".$ecrsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
+                    $filePath = "app/public/".$filePathWithEcrsId."";
+                }
+                // $this->commonInterface->viewImageFile($filePath);
+                  $path = storage_path($filePath);
+                if (!file_exists($path)) {
+                    abort(404, 'Image not found');
+                }
+                return response()->file($path);
+            }
         } catch (Exception $e) {
             throw $e;
         }
