@@ -197,7 +197,7 @@
                     </div>
                 </div>
                 <!-- Document Revision -->
-                <!-- <div class="container-fluid px-4">
+                <div class="container-fluid px-4">
                     <button type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create Document</button>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item active">Engineering Change Request</li>
@@ -210,7 +210,7 @@
                         :searching="true"
                         :ordering="true"
                         :processing="true"
-                        :ajax="api/load_ecr_documents"
+                        ajax="api/load_ecr_documents"
                         :columns="tblEcrDocumentsColumns"
                         :options="{
                             serverSide: true, //Serverside true will load the network
@@ -225,16 +225,16 @@
                     >
                         <thead>
                             <tr>
-                                <th style=""width="5%">Action</th>
+                                <th style=""width="5%">#</th>
                                 <th style=""width="10%">Document Number</th>
                                 <th style=""width="10%">Rev. #</th>
+                                <th style=""width="10%">PersonInCharge</th>
                                 <th style=""width="10%">Date</th>
-                                <th style=""width="10%">Remarks</th>
                             </tr>
                         </thead>
                     </DataTable>
                     </div>
-                </div> -->
+                </div>
                   <!-- Others Disposition -->
                   <div class="card mb-2 d-none">
                         <h5 class="mb-0">
@@ -1113,6 +1113,7 @@
     const tblEcrQa = ref(null);
     const tblEcrApproverSummary = ref(null);
     const tblEcrOthersRequirements = ref(null);
+    const tblDocuments = ref(null);
 
 
     const btnEcrApproved = ref(null);
@@ -1149,6 +1150,9 @@
                         tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+currentEcrsId.value).draw();
                         tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+currentEcrsId.value).draw();
                         tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+currentEcrsId.value).draw();
+
+                        tblDocuments.value.dt.ajax.url("api/load_ecr_documents?ecrsId="+currentEcrsId.value).draw();
+
                     });
                 }
                 if(btnViewEcrId !=null){
@@ -1208,12 +1212,12 @@
         {   data: 'section'} ,
         {   data: 'get_4m_status'} ,
     ];
-
     const tblEcrDocumentsColumns = [
-        {   data: 'getAction'} ,
-        {   data: 'rev'} ,
-        {   data: 'date'} ,
-        {   data: 'remarks'} ,
+        {   data: 'get_count'} ,
+        {   data: 'document_number'} ,
+        {   data: 'revision_no'} ,
+        {   data: 'get_person_in_charge'} ,
+        {   data: 'revision_due_date'} ,
     ];
     const tblEcrRequirementsColumns = [
         {   data: 'requirement'} ,
@@ -1592,8 +1596,9 @@
         );
         axiosSaveData(formData,'api/save_ecr_approval', (response) =>{
             tblEcrApproverSummary.value.dt.draw();
-            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA").load();
-            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").load();
+            tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA").draw();
+            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").draw();
+            
             modal.EcrApproval.hide();
             modalEcr.SaveEcr.hide();
         });

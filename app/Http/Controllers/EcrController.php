@@ -18,6 +18,7 @@ use App\Models\ManApproval;
 use App\Models\PmiApproval;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\DocumentDetail;
 use App\Models\DropdownMaster;
 use App\Models\EcrRequirement;
 use App\Http\Requests\EcrRequest;
@@ -511,7 +512,49 @@ class EcrController extends Controller
         }
     }
     public function loadEcrDocuments(Request $request){
-        return [];
+       $documentDetail =  $this->resourceInterface->readWithRelationsConditionsActive(DocumentDetail::class,[],[],[]);
+
+       return DataTables($documentDetail)
+            ->addColumn('get_count',function ($row) use(&$ctr){
+                $ctr++;
+                $result = '';
+                $result .= $ctr;
+                $result .= '</br>';
+                return $result;
+            })
+            ->addColumn('get_person_in_charge',function ($row){
+                return $result = '';
+
+                switch ($row->status) {
+                    case 'PEN':
+                        $status = 'PENDING';
+                        $bgColor = 'badge rounded-pill bg-warning';
+                        break;
+                    case 'APP':
+                        $status = 'APPROVED - '.$row->updated_at;
+                        // $status = 'APPROVED";
+                        $bgColor = 'badge rounded-pill bg-success';
+                        break;
+                    case 'DIS':
+                        $status = 'DISAPPROVED';
+                        $bgColor = 'badge rounded-pill bg-danger';
+                        break;
+                    default:
+                        $status = '---';
+                        $bgColor = '';
+                        break;
+                }
+
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span class="'.$bgColor.'"> '.$status.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_person_in_charge','get_count'])
+            ->make(true);
+       
     }
     public function loadEcr(Request $request){
         try {
@@ -561,9 +604,9 @@ class EcrController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
+                // if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
-                }
+                // }
                 if($row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
                 }
