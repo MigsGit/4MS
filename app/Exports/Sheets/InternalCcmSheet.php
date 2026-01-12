@@ -48,7 +48,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
         // $defaultSignature = Storage::path($imagePath.'.png'); $imageEsigPath
 
         if( !file_exists($imageStoragePath) ){
-            echo  'Signature not found: Please as the HR for the E-Signature then Please file a ticket to http://rapidx/iss_service_request/my_tickets';
+            echo  ''.$imageStoragePath.'Signature not found: Please as the HR for the E-Signature then Please file a ticket to http://rapidx/iss_service_request/my_tickets';
 
             exit;
         }
@@ -249,11 +249,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
 
                  // ======= Insert Before and After Image ========
                 // Retrieve the image path
-               $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
-            //    echo json_encode($filteredDocumentNameBefore); //\\rapidx\RapidX Systems\4M1x\storage\app\public\method\16\after\0_lost_of_key.jpg
-
-
-                // echo 'public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/';
+                $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
                 $storageImageDirBefore= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/');
                 if(file_exists($storageImageDirBefore) ){
 

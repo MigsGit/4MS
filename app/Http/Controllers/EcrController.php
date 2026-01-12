@@ -510,6 +510,9 @@ class EcrController extends Controller
              throw $e;
         }
     }
+    public function loadEcrDocuments(Request $request){
+        return [];
+    }
     public function loadEcr(Request $request){
         try {
             $status = explode(',',$request->status) ?? "";

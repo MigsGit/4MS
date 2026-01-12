@@ -15,4 +15,5 @@ interface CommonInterface
     public function getEcrStatus($status);
     public function getEcrApprovalStatus($approvalStatus);
     public function getRapidxUserDeptByDeptId($departmentId);
+    public function saveBeforeAfterFileStorage(array $departmentId);
 }

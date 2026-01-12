@@ -36,8 +36,8 @@ class MethodController extends Controller
         // Create Table, Insert Storage Id to Method, Machine,etc. , Save in Storage , Save Id Storage
         try {
             DB::beginTransaction();
-            $methodRequestValidated = [];
             $fileRequestValidated = [];
+            $methodRequestValidated = [];
             $ecrsId = $methodFileRequest->ecrsId;
             $methodsId = $methodFileRequest->methodsId;
 
@@ -48,21 +48,22 @@ class MethodController extends Controller
                 $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
                 $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
 
-                //nchange
-                $fileRequestValidated['ecrs_id'] = $ecrsId;
-                $fileRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
-                $fileRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
-                $fileRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
-                $fileRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
-                BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->delete();
                 $beforeAfterFileStorageId =$this->resourceInterface->create(BeforeAfterFileStorage::class,$fileRequestValidated);
+                $fileRequestValidated = [
+                    'ecrs_id' => $ecrsId,
+                    'original_filename_before' => $impOriginalFilenameBefore,
+                    'filtered_document_name_before' => $impFilteredDocumentNameBefore,
+                    'original_filename_after' => $impOriginalFilenameAfter,
+                    'filtered_document_name_after' => $impFilteredDocumentNameAfter,
+                    'file_path' => 'method',
+                ];
+                $this->commonInterface->saveBeforeAfterFileStorage($fileRequestValidated);
             }
             $conditions = [
                 'id' =>  $methodsId
             ];
 
-            //nchange
-            $methodRequestValidated['before_after_file_storages_id'] =  $beforeAfterFileStorageId['data_id'];
+
             $this->resourceInterface->updateConditions(Method::class,$conditions,$methodRequestValidated);
             $arrMachineApprovalRequest = [
                 'PRDNAB'  => $request->prdnAssessedBy,
@@ -630,7 +631,7 @@ class MethodController extends Controller
                 $methodStatus = $row->method->status ?? "";
                 $result = '';
                 $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" methods-id="'.$row->method->id.'" selected-ecrs-id-encrypted = "'.encrypt($row->id).'"  ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })
@@ -736,88 +737,6 @@ class MethodController extends Controller
             })
             ->rawColumns(['get_count','get_status','get_approver_name','get_role'])
             ->make(true);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function viewMethodRef(Request $request){ //nmodify
-        try {
-            // return '$request->methodsId';
-            $methodsId = decrypt($request->methodsId);
-            $conditions = [
-                'id' => $methodsId,
-            ];
-           $data = $this->resourceInterface->readCustomEloquent(Method::class,[],[],$conditions);
-            $methodRefByEcrsId = $data
-            ->get([
-                'filtered_document_name_before',
-                'filtered_document_name_after',
-                'file_path',
-            ]);
-
-            if( filled($methodRefByEcrsId) ){
-                if ($request->imageType === "before"){
-                    $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_before);
-                    $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
-                    $filePathWithEcrsId = $methodRefByEcrsId[0]->file_path."/".$methodsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
-                    $filePath = "app/public/".$filePathWithEcrsId."";
-                }
-                if ($request->imageType === "after"){
-                   $arrFilteredDocumentName = explode(' | ' ,$methodRefByEcrsId[0]->filtered_document_name_after);
-                    $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
-                    $filePathWithEcrsId = $methodRefByEcrsId[0]->file_path."/".$methodsId."/". "$request->imageType"."/".$selectedFilteredDocumentName;
-                    $filePath = "app/public/".$filePathWithEcrsId."";
-                }
-                // $this->commonInterface->viewImageFile($filePath);
-                $path = storage_path($filePath);
-                if (!file_exists($path)) {
-                    abort(404, 'Image not found');
-                }
-                return response()->file($path);
-            }
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-    public function getMethodRefById(Request $request){
-        try {
-            $conditions = [
-                'id' => $request->methodsId,
-            ];
-            $data = $this->resourceInterface->readCustomEloquent(Method::class,[],[],$conditions);
-            $methodRefByEcrsId = $data
-            ->get([
-                'id',
-                'ecrs_id',
-                'original_filename_before',
-                'original_filename_after',
-            ]);
-            $externalDispoConditions = [
-                'ecrs_id' => $request->ecrsId,
-            ];
-            // $externalDispoData = $this->resourceInterface->readCustomEloquent(ExternalDisposition::class,[],[],$externalDispoConditions);
-            // return  $externalDispoEcrsId = $externalDispoData
-            // ->get([
-            //     'id',
-            //     'ecrs_id',
-            //     'original_filename',
-            // ]);
-            if ( filled($methodRefByEcrsId) ){
-                $arrMethodRefResponse = [
-                    'originalFilenameBefore'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_before),
-                    'originalFilenameAfter'=> explode(' | ',$methodRefByEcrsId[0]->original_filename_after),
-                    'methodsId'=> encrypt($methodRefByEcrsId[0]->id),
-                    'ecrsId'=> encrypt($methodRefByEcrsId[0]->ecrs_id),
-                ];
-            }
-            // if ( filled($externalDispoEcrsId) ){
-            //     $arrExternalDispoResponse = [
-            //         'originalFilenameExternalDisposition'=> explode(' | ',$externalDispoEcrsId[0]->original_filename),
-            //         'ecrsId'=> encrypt($externalDispoEcrsId[0]->ecrs_id),
-            //     ];
-            // }
-            return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse??[],$arrExternalDispoResponse??[])]);
-
         } catch (Exception $e) {
             throw $e;
         }

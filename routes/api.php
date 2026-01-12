@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function(){
 
         Route::get('generate_control_number', 'generateControlNumber')->name('generate_control_number');
         Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
+        Route::get('load_ecr_documents', 'loadEcrDocuments')->name('load_ecr_documents');
         Route::get('load_ecr', 'loadEcr')->name('load_ecr');
         Route::get('load_ecr_details_by_ecr_id', 'loadEcrDetailsByEcrId')->name('load_ecr_details_by_ecr_id');
         Route::get('load_ecr_requirements', 'loadEcrRequirements')->name('load_ecr_requirements');
@@ -77,6 +78,10 @@ Route::middleware('auth')->group(function(){
 
         Route::get('get_approval_count_by_rapidx_user_id', 'getApprovalCountByRapidxUserId')->name('get_approval_count_by_rapidx_user_id');
         Route::get('download_internal_excel_by_ecrs_id', 'downloadInternalExcelByEcrsId')->name('download_internal_excel_by_ecrs_id');
+
+        Route::get('get_before_after_ref_by_ecrs_id', 'getBeforeAfterRefByEcrsId')->name('get_before_after_ref_by_ecrs_id');
+        Route::get('view_before_after_ref_by_ecrs_id', 'viewBeforeAfterRefByEcrsId')->name('view_before_after_ref_by_ecrs_id');
+
     });
 
     Route::controller(SettingsController::class)->group(function () {
@@ -137,8 +142,8 @@ Route::middleware('auth')->group(function(){
 
         Route::get('load_method_ecr_by_status', 'loadMethodEcrByStatus')->name('load_method_ecr_by_status');
         Route::get('load_method_approver_summary_material_id', 'loadMethodApproverSummaryMaterialId')->name('load_method_approver_summary_material_id');
-        Route::get('get_method_ref_by_id', 'getMethodRefById')->name('get_method_ref_by_id');
-        Route::get('view_method_ref', 'viewMethodRef')->name('view_method_ref');
+        // Route::get('get_method_ref_by_id', 'getMethodRefById')->name('get_method_ref_by_id');
+
         Route::get('save_method_approval', 'saveMethodApproval')->name('save_method_approval');
     });
 

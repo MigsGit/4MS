@@ -458,7 +458,7 @@
                         <tr v-for="(arrOriginalFilenameBefore, index) in arrOriginalFilenamesBefore" :key="arrOriginalFilenameBefore.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="#" class="link-primary" ref="aViewMaterialRefBefore" @click="btnLinkViewMachineRefBefore(selectedMachinesIdEncrypted,index)">
+                                <a href="#" class="link-primary" ref="aViewMaterialRefBefore" @click="btnLinkViewRefBefore(selectedEcrsIdEncrypted,index)">
                                     {{ arrOriginalFilenameBefore }}
                                 </a>
                             </td>
@@ -479,14 +479,14 @@
                         <tr v-for="(arrOriginalFilenameAfter, index) in arrOriginalFilenamesAfter" :key="arrOriginalFilenameAfter.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="#" class="link-primary" ref="aViewMaterialRefAfter" @click="btnLinkViewMachineRefAfter(selectedMachinesIdEncrypted,index)">
+                                <a href="#" class="link-primary" ref="aViewMaterialRefAfter" @click="btnLinkViewRefAfter(selectedEcrsIdEncrypted,index)">
                                     {{ arrOriginalFilenameAfter }}
                                 </a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <table class="table">
+                <table v-show="currentStatus === 'OK'" class="table">
                     <thead>
 
                         <tr>
@@ -940,7 +940,7 @@
     const machineRefBefore = ref(null);
     const machineRefAfter = ref(null);
     const selectedEcrsId = ref(null);
-    const selectedMachinesIdEncrypted = ref(null);
+    const selectedEcrsIdEncrypted = ref(null);
     const selectedMachinesId = ref(null);
     const selectedAdminAccess = ref(null);
     const tblEcrByStatus = ref(null);
@@ -1040,12 +1040,11 @@
                 let btnViewMachineRef = cell.querySelector('#btnViewMachineRef');
                 if(btnViewMachineRef != null){
                     btnViewMachineRef.addEventListener('click',function(){
-                        let machinesIdEncrypted = this.getAttribute('selected-machines-id-encrypted');
-                        let machinesId = this.getAttribute('machine-id');
+                        let ecrsIdEcrypted = this.getAttribute('selected-ecrs-id-encrypted');
                         let ecrsId = this.getAttribute('ecrs-id');
                         selectedEcrsId.value = ecrsId;
-                        selectedMachinesIdEncrypted.value = machinesIdEncrypted;
-                        getMachineRefById(machinesId);
+                        selectedEcrsIdEncrypted.value = ecrsIdEcrypted;
+                        getBeforeAfterRefByEcrsId(ecrsIdEcrypted);
                     });
                 }
             }
@@ -1194,28 +1193,26 @@
         frmSpecialInspection.value.ecrsId = selectedEcrsId;
         modal.SaveSpecialInspection.show();
     }
-    const getMachineRefById = async (machinesId) => {
+    const getBeforeAfterRefByEcrsId = async (machinesId) => {
         let apiParams = {
-            machinesId : machinesId,
-            ecrsId : selectedEcrsId.value
+            ecrsId : selectedEcrsIdEncrypted.value,
         }
-        axiosFetchData(apiParams,'api/get_machine_ref_by_id',function(response){
+        axiosFetchData(apiParams,'api/get_before_after_ref_by_ecrs_id',function(response){
             let data = response.data[0];
-            let machinesId = data.machinesId;
+            let ecrsId = data.ecrsId;
             arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
             arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
             arrOriginalFilenameExternalDispositions.value = data.originalFilenameExternalDisposition;
-            selectedEcrsId.value = data.ecrsId;
+            selectedEcrsId.value = ecrsId;
             modal.ViewMachineRef.show();
         });
     }
-    const btnLinkViewMachineRefBefore = async (selectedMachinesIdEncrypted,index) => { //TODO: View Image
-        console.log('selectedMachinesIdEncrypted',selectedMachinesIdEncrypted);
-        console.log('index',index);
-        window.open(`api/view_machine_ref?machinesId=${selectedMachinesIdEncrypted} && index=${index} && imageType=before`, '_blank');
+
+    const btnLinkViewRefBefore = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
+        window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEncrypted} && index=${index} && imageType=before`, '_blank');
     }
-    const btnLinkViewMachineRefAfter = async (selectedMachinesIdEncrypted,index) => { //TODO: View Image
-        window.open(`api/view_machine_ref?machinesId=${selectedMachinesIdEncrypted} && index=${index} && imageType=after`, '_blank');
+    const btnLinkViewRefAfter = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
+        window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEncrypted} && index=${index} && imageType=after`, '_blank');
     }
     const btnLinkDownloadInternalMachine = async (selectedEcrsId) => {
         let params = {

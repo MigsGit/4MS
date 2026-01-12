@@ -434,7 +434,7 @@
                         <tr v-for="(arrOriginalFilenameBefore, index) in arrOriginalFilenamesBefore" :key="arrOriginalFilenameBefore.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="#" class="link-primary" ref="aViewMethodRefBefore" @click="btnLinkViewMethodRefBefore(selectedMethodsId,index)">
+                                <a href="#" class="link-primary" ref="aViewMethodRefBefore" @click="btnLinkViewRefBefore(selectedEcrsIdEcrypted,index)">
                                     {{ arrOriginalFilenameBefore }}
                                 </a>
                             </td>
@@ -455,7 +455,7 @@
                         <tr v-for="(arrOriginalFilenameAfter, index) in arrOriginalFilenamesAfter" :key="arrOriginalFilenameAfter.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="#" class="link-primary" ref="aViewMethodRefAfter" @click="btnLinkViewMethodRefAfter(selectedMethodsId,index)">
+                                <a href="#" class="link-primary" ref="aViewMethodRefAfter" @click="btnLinkViewRefAfter(selectedEcrsIdEcrypted,index)">
                                     {{ arrOriginalFilenameAfter }}
                                 </a>
                             </td>
@@ -477,7 +477,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a href="#" class="link-primary d-none" @click="btnLinkDownloadInternal(selectedEcrsId)">
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
                                     Download Internal Export
                                 </a>
                             </td>
@@ -934,6 +934,7 @@
     const selectedAdminAccess = ref(null);
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
+    const selectedEcrsIdEcrypted = ref(null);
 
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
@@ -1032,12 +1033,13 @@
                 let btnViewMethodRef = cell.querySelector('#btnViewMethodRef');
                 if(btnViewMethodRef != null){
                     btnViewMethodRef.addEventListener('click',function(){
-                        let methodsId = this.getAttribute('methods-id');
                         let ecrsId = this.getAttribute('ecrs-id');
                         let methodStatus = this.getAttribute('method-status');
+                        let ecrsIdEcrypted = this.getAttribute('selected-ecrs-id-encrypted');
+                        selectedEcrsIdEcrypted.value = ecrsIdEcrypted;
                         currentStatus.value = methodStatus;
                         selectedEcrsId.value = ecrsId;
-                        getMethodRefByEcrsId(methodsId);
+                        getBeforeAfterRefByEcrsId(selectedEcrsIdEcrypted);
                     });
                 }
             }
@@ -1194,30 +1196,26 @@
         isApprovedDisappproved.value = decision;
         modal.Approval.show();
     }
-    const btnLinkViewMethodRefBefore = async (selectedMethodsId,index) => {
-        console.log('selectedMethodsId',selectedMethodsId);
-        console.log('index',index);
-        window.open(`api/view_method_ref?methodsId=${selectedMethodsId} && index=${index} && imageType=before`, '_blank');
+    const btnLinkViewRefBefore = async (selectedEcrsIdEcrypted,index) => {
+        console.log('selectedMethodsId',selectedEcrsIdEcrypted);
+        window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEcrypted} && index=${index} && imageType=before`, '_blank');
     }
-    const btnLinkViewMethodRefAfter = async (selectedMethodsId,index) => {
-        window.open(`api/view_method_ref?methodsId=${selectedMethodsId} && index=${index} && imageType=after`, '_blank');
+    const btnLinkViewRefAfter = async (selectedEcrsIdEcrypted,index) => {
+        window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEcrypted} && index=${index} && imageType=after`, '_blank');
     }
-    const getMethodRefByEcrsId = async (methodsId) => {
+    const getBeforeAfterRefByEcrsId = async (selectedEcrsIdEcrypted) => {
         let apiParams = {
-            methodsId : methodsId,
-            ecrsId : selectedEcrsId.value,
+            ecrsId : selectedEcrsIdEcrypted.value,
         }
-        axiosFetchData(apiParams,'api/get_method_ref_by_id',function(response){
-
+        axiosFetchData(apiParams,'api/get_before_after_ref_by_ecrs_id',function(response){
             let data = response.data[0];
-            let methodsId = data.methodsId;
             let ecrsId = data.ecrsId;
             arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
             arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
             arrOriginalFilenameExternalDispositions.value = data.originalFilenameExternalDisposition;
-            selectedMethodsId.value = methodsId;
             selectedEcrsId.value = ecrsId;
             modal.ViewMethodRef.show();
+
         });
     }
     const btnAddSpecialInspection = async () => {

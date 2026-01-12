@@ -64,7 +64,7 @@ WithEvents
     public function registerEvents(): array
     {
         return [
-            // AfterSheet::class => function (AfterSheet $event) use($ecrsDetails,$categoryDetails,$pmiApprovalCollection) {
+
             AfterSheet::class => function (AfterSheet $event)  {
 
                 // =================== DATA COLLECTION ======================== //
@@ -73,6 +73,9 @@ WithEvents
                 $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
                 $approvalsGroupByMethod = $ecrsDetails->method->method_approvals  ?? NULL;
                 $approvalsGroupByMachine = $ecrsDetails->machine->machine_approvals ?? NULL;
+                $beforeAfterFileStorage = $this->ecrsCategoryDetailsCollection['beforeAfterFileStorage'][0];
+                // echo json_encode($beforeAfterFileStorage);
+                // exit;
                 // $approvalsGroupByMaterial = $ecrsDetails->material->method_approvals;
                 if(filled($approvalsGroupByMethod)){
                     $approvalsGroupBy = $approvalsGroupByMethod;
@@ -183,11 +186,11 @@ WithEvents
 
                 // ======= Insert Before and After Image ========
                 // Retrieve the image path
-                $filteredDocumentNameBefore = explode(' | ',$categoryDetails->filtered_document_name_before);
-                $storageImageDirBefore= Storage::path('public/'.  $categoryDetails->file_path.'/'.$categoryDetails->id.'/before/');
+                $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
+                $storageImageDirBefore= Storage::path('public/'.strtolower($ecrsDetails->category).'/'.$ecrsDetails->id.'/before/');
+
                 if(file_exists($storageImageDirBefore) ){
-                    // echo json_encode($storageImageDirBefore);
-                    // exit;
+
                     $startBeforeImageCol = "A";
                     $startBeforeImageRow = "22";
                     foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
@@ -197,6 +200,8 @@ WithEvents
 
                     foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
                         // Resize the image (optional, requires Intervention Image package)
+                        echo json_encode($imagePathBeforeValue);
+                        exit;
                         if(file_exists($imagePathBeforeValue)){
                             $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
                             $tempPath = storage_path("app/temp_resized_image_$key.jpg");
@@ -230,7 +235,7 @@ WithEvents
                     }
                 }
 
-                $filteredDocumentNameAfter = explode(' | ',$categoryDetails->filtered_document_name_after);
+                $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
                 $storageImageDirAfter= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/after/');
                 if(file_exists($storageImageDirBefore) ){
                     $startAfterImageCol = "F";
