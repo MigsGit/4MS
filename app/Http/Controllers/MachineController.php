@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Interfaces\ResourceInterface;
 use App\Exports\InternalMachineExport;
+use App\Models\BeforeAfterFileStorage;
 use App\Http\Requests\MachineFileRequest;
 use App\Http\Requests\MachineApprovalRequest;
 
@@ -35,23 +36,28 @@ class MachineController extends Controller
     public function saveMachine(Request $request, MachineFileRequest $machineFileRequest,MachineApprovalRequest $machineApprovalRequest){
         try {
             DB::beginTransaction();
+            $fileRequestValidated = [];
             $machineRequestValidated = [];
             $ecrsId = $machineFileRequest->ecrsId;
             $machinesId = $machineFileRequest->machinesId;
             if($machineFileRequest->hasfile('machineRefBefore') && $machineFileRequest->hasfile('machineRefAfter')){
-               $arrUploadFile = $this->commonInterface->uploadFileImg($machineFileRequest->machineRefBefore,$machineFileRequest->machineRefAfter,$machinesId,'machine');
+               $arrUploadFile = $this->commonInterface->uploadFileImg($machineFileRequest->machineRefBefore,$machineFileRequest->machineRefAfter,$ecrsId,'machine');
                 $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
                 $impFilteredDocumentNameBefore = implode(' | ',$arrUploadFile['arr_filtered_document_name_before']);
                 $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
                 $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
-
-                $machineRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
-                $machineRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
-                $machineRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
-                $machineRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
+             
+                $fileRequestValidated = [
+                    'ecrs_id' => $ecrsId,
+                    'original_filename_before' => $impOriginalFilenameBefore,
+                    'filtered_document_name_before' => $impFilteredDocumentNameBefore,
+                    'original_filename_after' => $impOriginalFilenameAfter,
+                    'filtered_document_name_after' => $impFilteredDocumentNameAfter,
+                    'file_path' => 'machine',
+                ];
+                $this->commonInterface->saveBeforeAfterFileStorage($fileRequestValidated);
 
             }
-            // return $machineRequestValidated;
             $conditions = [
                 'id' =>  $machinesId
             ];
@@ -437,7 +443,7 @@ class MachineController extends Controller
                 $machineStatus = $row->machine->status ?? "";
                 $result = '';
                 $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" selected-machines-id-encrypted = "'.encrypt($row->machine->id).'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" selected-ecrs-id-encrypted = "'.encrypt($row->id).'"  ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })

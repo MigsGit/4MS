@@ -477,7 +477,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
                                     Download Internal Export
                                 </a>
                             </td>
@@ -1033,7 +1033,6 @@
                 let btnViewMethodRef = cell.querySelector('#btnViewMethodRef');
                 if(btnViewMethodRef != null){
                     btnViewMethodRef.addEventListener('click',function(){
-                        let methodsId = this.getAttribute('methods-id');
                         let ecrsId = this.getAttribute('ecrs-id');
                         let methodStatus = this.getAttribute('method-status');
                         let ecrsIdEcrypted = this.getAttribute('selected-ecrs-id-encrypted');
@@ -1197,28 +1196,26 @@
         isApprovedDisappproved.value = decision;
         modal.Approval.show();
     }
-    const btnLinkViewRefBefore = async (selectedMethodsId,index) => {
-        console.log('selectedMethodsId',selectedMethodsId);
-        console.log('index',index);
-        window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedMethodsId} && index=${index} && imageType=before`, '_blank');
+    const btnLinkViewRefBefore = async (selectedEcrsIdEcrypted,index) => {
+        console.log('selectedMethodsId',selectedEcrsIdEcrypted);
+        window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEcrypted} && index=${index} && imageType=before`, '_blank');
     }
-    const btnLinkViewRefAfter = async (selectedMethodsId,index) => {
-        window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedMethodsId} && index=${index} && imageType=after`, '_blank');
+    const btnLinkViewRefAfter = async (selectedEcrsIdEcrypted,index) => {
+        window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEcrypted} && index=${index} && imageType=after`, '_blank');
     }
     const getBeforeAfterRefByEcrsId = async (selectedEcrsIdEcrypted) => {
         let apiParams = {
             ecrsId : selectedEcrsIdEcrypted.value,
         }
         axiosFetchData(apiParams,'api/get_before_after_ref_by_ecrs_id',function(response){
-
             let data = response.data[0];
-            let methodsId = data.methodsId;
             let ecrsId = data.ecrsId;
             arrOriginalFilenamesBefore.value = data.originalFilenameBefore;
             arrOriginalFilenamesAfter.value = data.originalFilenameAfter;
             arrOriginalFilenameExternalDispositions.value = data.originalFilenameExternalDisposition;
             selectedEcrsId.value = ecrsId;
             modal.ViewMethodRef.show();
+
         });
     }
     const btnAddSpecialInspection = async () => {
@@ -1237,7 +1234,7 @@
         //Append form data
         [
             ["ecrsId", selectedEcrsId.value],
-            ["methodsId", methodsId.value],
+            ["methodsId", selectedMethodsId.value],
             ["prdnAssessedBy", frmMethod.value.prdnAssessedBy],
             ["prdnCheckedBy", frmMethod.value.prdnCheckedBy],
             ["ppcAssessedBy", frmMethod.value.ppcAssessedBy],

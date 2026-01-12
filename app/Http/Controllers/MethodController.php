@@ -36,8 +36,8 @@ class MethodController extends Controller
         // Create Table, Insert Storage Id to Method, Machine,etc. , Save in Storage , Save Id Storage
         try {
             DB::beginTransaction();
-            $methodRequestValidated = [];
             $fileRequestValidated = [];
+            $methodRequestValidated = [];
             $ecrsId = $methodFileRequest->ecrsId;
             $methodsId = $methodFileRequest->methodsId;
 
@@ -48,14 +48,16 @@ class MethodController extends Controller
                 $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
                 $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
 
-                //nchange
-                $fileRequestValidated['ecrs_id'] = $ecrsId;
-                $fileRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
-                $fileRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
-                $fileRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
-                $fileRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
-                BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->delete();
                 $beforeAfterFileStorageId =$this->resourceInterface->create(BeforeAfterFileStorage::class,$fileRequestValidated);
+                $fileRequestValidated = [
+                    'ecrs_id' => $ecrsId,
+                    'original_filename_before' => $impOriginalFilenameBefore,
+                    'filtered_document_name_before' => $impFilteredDocumentNameBefore,
+                    'original_filename_after' => $impOriginalFilenameAfter,
+                    'filtered_document_name_after' => $impFilteredDocumentNameAfter,
+                    'file_path' => 'method',
+                ];
+                $this->commonInterface->saveBeforeAfterFileStorage($fileRequestValidated);
             }
             $conditions = [
                 'id' =>  $methodsId

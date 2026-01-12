@@ -946,20 +946,17 @@ class CommonController extends Controller
                 $arrMethodRefResponse = [
                     'originalFilenameBefore'=> explode(' | ',$beforeAfterRefByEcrsId->original_filename_before),
                     'originalFilenameAfter'=> explode(' | ',$beforeAfterRefByEcrsId->original_filename_after),
-                    'methodsId'=> encrypt($beforeAfterRefByEcrsId->id),
                     'ecrsId'=> encrypt($beforeAfterRefByEcrsId->ecrs_id),
                 ];
-                return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse??[],$arrExternalDispoResponse??[])]);
             }
-
-            return response()->json(['is_success' => 'false']);
+            return response()->json(['isSuccess' => 'true' ,array_merge($arrMethodRefResponse??[],$arrExternalDispoResponse??[])]);
         } catch (Exception $e) {
             throw $e;
         }
     }
     public function viewBeforeAfterRefByEcrsId(Request $request){ //nmodify
         try {
-            $data = $this->resourceInterface->readCustomEloquent(BeforeAfterFileStorage::class,[
+         $data = $this->resourceInterface->readCustomEloquent(BeforeAfterFileStorage::class,[
                 'ecrs_id',
                 'original_filename_before',
                 'filtered_document_name_before',
@@ -969,7 +966,7 @@ class CommonController extends Controller
             ],[],[
                 'ecrs_id' => decrypt($request->ecrsId),
             ]);
-            $beforeAfterRefByEcrsId = $data
+           $beforeAfterRefByEcrsId = $data
             ->first();
 
             if( filled($beforeAfterRefByEcrsId) ){

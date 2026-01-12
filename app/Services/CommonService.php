@@ -8,6 +8,8 @@ use App\Models\RapidAutoMailer;
 use App\Interfaces\FileInterface;
 use Illuminate\Support\Facades\DB;
 use App\Interfaces\CommonInterface;
+use App\Interfaces\ResourceInterface;
+use App\Models\BeforeAfterFileStorage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use setasign\Fpdi\Fpdi; //composer require tecnickcom/tcpdf //composer require setasign/fpdi-tcpdf
@@ -15,9 +17,11 @@ use setasign\Fpdi\Fpdi; //composer require tecnickcom/tcpdf //composer require s
 
 class CommonService implements CommonInterface
 {
+    protected $resourceInterface;
     protected $fileInterface;
     protected $fpdi;
-    public function __construct(FileInterface $fileInterface,Fpdi $fpdi) {
+    public function __construct(FileInterface $fileInterface,Fpdi $fpdi,ResourceInterface $resourceInterface) {
+        $this->resourceInterface = $resourceInterface;
         $this->fileInterface = $fileInterface;
         $this->fpdi = $fpdi;
     }
@@ -364,6 +368,14 @@ class CommonService implements CommonInterface
                 $filteredSection = "???";
             }
             return $filteredSection;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function saveBeforeAfterFileStorage(array $fileRequestValidated){
+        try {
+            BeforeAfterFileStorage::where('ecrs_id',$fileRequestValidated['ecrs_id'])->delete();
+            $beforeAfterFileStorageId =$this->resourceInterface->create(BeforeAfterFileStorage::class,$fileRequestValidated);
         } catch (Exception $e) {
             throw $e;
         }
