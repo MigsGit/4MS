@@ -200,7 +200,7 @@
                 <div class="container-fluid px-4">
                     <button type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create Document</button>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Engineering Change Request</li>
+                        <li class="breadcrumb-item active">Document Details</li>
                     </ol>
                     <div class="table-responsive">
                     <DataTable
@@ -225,7 +225,7 @@
                     >
                         <thead>
                             <tr>
-                                <th style=""width="5%">#</th>
+                                <th style=""width="5%"> <font-awesome-icon class="fa-cog" icon="fas fa-save" /></th>
                                 <th style=""width="10%">Document Number</th>
                                 <th style=""width="10%">Rev. #</th>
                                 <th style=""width="10%">PersonInCharge</th>
@@ -490,8 +490,6 @@
                                                         :searchable="true"
                                                         :options="ecrVar.preparedBy"
                                                         :disabled="isSelectReadonly"
-
-
                                                     />
 
                                                 </td>
@@ -1040,6 +1038,50 @@
         <template #footer>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Document Details" ref="modalSaveEcrDocument" @add-event="frmSaveEcrDocument()">
+        <template #body>
+            <div class="row">
+                <div class="input flex-nowrap mb-2 input-group-sm">
+                    <input  v-model="frmEcrDocument.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
+                </div>
+                <div class="input flex-nowrap mb-2 input-group-sm">
+                    <input  v-model="frmEcrDocument.id" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Document No:</span>
+                        <input v-model="frmEcrDocument.documentNo" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Person In Charge: {{ isSelectReadonly }}</span>
+                        <Multiselect
+                            v-model="frmEcrDocument.personInCharge"
+                            :close-on-select="true"
+                            :searchable="true"
+                            :options="ecrVar.preparedBy"
+                            :disabled="isSelectReadonly"
+                        />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Rev No:</span>
+                        <input v-model="frmEcrDocument.revisionNo" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Date:</span>
+                        <input v-model="frmEcrDocument.date" type="date" class="form-control" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -1065,6 +1107,7 @@
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
         frmEcrPmiExternalApproverRows,
+        frmEcrDocument,
         tblEcrManRequirements,
         tblEcrMatRequirements,
         tblEcrMachineRequirements,
@@ -1083,6 +1126,7 @@
         getEcrById,
         addEcrReasonRows,
         removeEcrReasonRows,
+        getEcrDocumentById,
     } = useEcr();
     const {
         getRapidxUserByIdOpt,
@@ -1105,6 +1149,7 @@
     const modalEcrRequirements = ref(null);
     const modalEcrApproval = ref(null);
     const modalViewEcrRef = ref(null);
+    const modalSaveEcrDocument = ref(null);
     const isSelectReadonly = ref(null);
     const currentStatus = ref(null);
     const selectedEcrsIdEncrypted = ref(null);
@@ -1114,8 +1159,6 @@
     const tblEcrApproverSummary = ref(null);
     const tblEcrOthersRequirements = ref(null);
     const tblDocuments = ref(null);
-
-
     const btnEcrApproved = ref(null);
     const btnEcrDisapproved = ref(null);
     const isApproved = ref(null);
@@ -1213,7 +1256,23 @@
         {   data: 'get_4m_status'} ,
     ];
     const tblEcrDocumentsColumns = [
-        {   data: 'get_count'} ,
+        {   data: 'get_actions',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnGetEcrDocumentsId = cell.querySelector('#btnGetEcrDocumentsId');
+                if(btnGetEcrDocumentsId !=null){
+                    btnGetEcrDocumentsId.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let ecrDocumentParams = {
+                            ecrsId : ecrsId
+                        }
+                        getEcrDocumentById(ecrDocumentParams);
+
+                    });
+                }
+            }
+        } ,
         {   data: 'document_number'} ,
         {   data: 'revision_no'} ,
         {   data: 'get_person_in_charge'} ,
@@ -1259,6 +1318,7 @@
 
         modalEcr.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modalEcr.SaveEcrDocument = new Modal(modalSaveEcrDocument.value.modalRef,{ keyboard: false });
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
         modal.ViewEcrRef = new Modal(modalViewEcrRef.value.modalRef,{ keyboard: false });
         modalSaveEcr.value.modalRef.addEventListener('hidden.bs.modal', event => {
@@ -1598,7 +1658,7 @@
             tblEcrApproverSummary.value.dt.draw();
             tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA").draw();
             tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").draw();
-            
+
             modal.EcrApproval.hide();
             modalEcr.SaveEcr.hide();
         });
