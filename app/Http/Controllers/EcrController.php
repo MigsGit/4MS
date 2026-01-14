@@ -36,6 +36,7 @@ use App\Http\Requests\EcrApprovalRequest;
 use App\Http\Requests\PmiApprovalRequest;
 use App\Models\ClassificationRequirement;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\DocumentDetailRequest;
 use App\Http\Requests\EcrRequirementFileRequest;
 use App\Http\Requests\PmiExternalApprovalRequest;
 
@@ -509,6 +510,28 @@ class EcrController extends Controller
              return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
              throw $e;
+        }
+    }
+    public function saveEcrDocument(Request $request,DocumentDetailRequest $documentDetailRequest){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $ecrDocumentsId = $request->id;
+
+            if( isset($ecrDocumentsId) ){ //Edit
+                $documentDetailRequestValidated =  $documentDetailRequest->validated();
+                $this->resourceInterface->updateConditions(DocumentDetail::class,[
+                    'id' => $ecrDocumentsId
+                ],$documentDetailRequestValidated);
+            }else{
+                $documentDetailRequestValidated =  $documentDetailRequest->validated();
+                $this->resourceInterface->create(DocumentDetail::class,$documentDetailRequestValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
         }
     }
     public function loadEcrDocuments(Request $request){

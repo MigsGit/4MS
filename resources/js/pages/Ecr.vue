@@ -198,7 +198,7 @@
                 </div>
                 <!-- Document Revision -->
                 <div class="container-fluid px-4">
-                    <button type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create Document</button>
+                    <button @click="btnSaveEcrDocument" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create Document</button>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item active">Document Details</li>
                     </ol>
@@ -1195,7 +1195,7 @@
                         tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+currentEcrsId.value).draw();
 
                         tblDocuments.value.dt.ajax.url("api/load_ecr_documents?ecrsId="+currentEcrsId.value).draw();
-
+                        frmEcrDocument.value.ecrsId =  ecrsId;
                     });
                 }
                 if(btnViewEcrId !=null){
@@ -1314,8 +1314,6 @@
     onMounted( async ()=>{
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js class
-
-
         modalEcr.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modalEcr.SaveEcrDocument = new Modal(modalSaveEcrDocument.value.modalRef,{ keyboard: false });
@@ -1599,6 +1597,10 @@
             tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+currentEcrsId.value).draw();
         });
     }
+    const btnSaveEcrDocument = async () => {
+        modalEcr.SaveEcrDocument.show();
+        frmEcrDocument.value.id = '';
+    }
     const btnAddEcrOtherDispoRows = async () => {
         frmEcrOtherDispoRows.value.push({
             requestedBy: '0',
@@ -1765,5 +1767,17 @@
         })
 
     }
-
+    const frmSaveEcrDocument = async () => {
+        let formData =  new FormData();
+        formData.append('id',frmEcrDocument.value.id);
+        formData.append('ecrs_id',frmEcrDocument.value.ecrsId);
+        formData.append('document_number',frmEcrDocument.value.documentNo);
+        formData.append('person_in_charge',frmEcrDocument.value.personInCharge);
+        formData.append('revision_no',frmEcrDocument.value.revisionNo);
+        formData.append('revision_due_date',frmEcrDocument.value.date);
+        axiosSaveData(formData,'api/save_ecr_document', (response) =>{
+            modalEcr.SaveEcrDocument.hide();
+            tblDocuments.value.dt.draw();
+        });
+    }
 </script>
