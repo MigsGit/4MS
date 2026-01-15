@@ -225,10 +225,10 @@
                     >
                         <thead>
                             <tr>
-                                <th style=""width="5%"> <font-awesome-icon class="fa-cog" icon="fas fa-save" /></th>
-                                <th style=""width="10%">Document Number</th>
+                                <th style=""width="5%"> <font-awesome-icon icon="fas fa-cog" /></th>
+                                <th style=""width="10%">Document No.</th>
                                 <th style=""width="10%">Rev. #</th>
-                                <th style=""width="10%">PersonInCharge</th>
+                                <th style=""width="10%">Person In Charge</th>
                                 <th style=""width="10%">Date</th>
                             </tr>
                         </thead>

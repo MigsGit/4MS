@@ -477,12 +477,12 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
                                     Download Internal Export
                                 </a>
                             </td>
                             <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsId)">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
                             </td>
@@ -1187,7 +1187,7 @@
     }
     const btnLinkDownloadExternal = async (selectedEcrsId) => {
         let params = {
-            selectedId : selectedEcrsId,
+            ecrsId : selectedEcrsId,
         };
         var queryString = $.param(params);
         window.location.href="api/download_excel_by_ecrs_id?" + queryString;

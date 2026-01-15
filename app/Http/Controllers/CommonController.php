@@ -624,7 +624,7 @@ class CommonController extends Controller
         $iqc_dropdown_category_section = 'TS';
         $ecrsId = decrypt($request->ecrsId);
 
-       $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
+        $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
         [
 
             'before_after_file_storage',
@@ -632,6 +632,7 @@ class CommonController extends Controller
             'ecr_approvals.rapidx_user',
             'ecr_details.dropdown_master_detail_description_of_change',
             'ecr_details.dropdown_master_detail_reason_of_change',
+            'document_details.rapidx_user_person_in_charge',
         ],
         [
             'id'=> $ecrsId

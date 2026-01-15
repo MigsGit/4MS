@@ -112,6 +112,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 $beforeAfterFileStorage = $this->ecr['beforeAfterFileStorage'][0];
                 $ecrApprovalsCollection = $ecrCollection->ecr_approvals;
                 $ecrDetailsCollection = $ecrCollection->ecr_details;
+                $documentDetails = $ecrCollection->document_details;
                 $sheet = $event->sheet->getDelegate();
 
                 // === Alignment for input cells ===
@@ -442,6 +443,12 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     ];
                     foreach ($ecrCollectionContent as $cell => $value) {
                         $sheet->setCellValue($cell, $value);
+                        $sheet->getStyle($cell)->applyFromArray([
+                            'alignment' => [
+                                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                'vertical' => Alignment::VERTICAL_CENTER,
+                            ],
+                        ]);
                     }
                      //Ecr Collection Exist
 
@@ -461,7 +468,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     }
 
 
-                    if(filled($ecrApprovalsCollection)) { //nmodify
+                    if(filled($ecrApprovalsCollection)) {
                         $startRowRequestedByApprovalsCollection = 44;
                         $startRowOtherApprovalsCollection = 52;
                         $startRowQaApprovalCollection = 64;
@@ -556,6 +563,32 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     }
                 }
 
+                // 5.  DOCUMENT REVISION
+                if(filled($documentDetails)){
+                    $startRowDocDetailsCollection = 58;
+                    // echo ($documentDetails);
+                    // exit;
+                    $startColumnDocDetailsCollection = [
+                        'A',
+                        'E',
+                        'F',
+                        'I',
+                    ];
+                    foreach ($documentDetails as $key => $documentDetailsValue) {
+                        $sheet->setCellValue("{$startColumnDocDetailsCollection[0]}{$startRowDocDetailsCollection}", $documentDetailsValue['document_number']);
+                        $sheet->setCellValue("{$startColumnDocDetailsCollection[1]}{$startRowDocDetailsCollection}", $documentDetailsValue['revision_no']);
+                        $sheet->setCellValue("{$startColumnDocDetailsCollection[2]}{$startRowDocDetailsCollection}", $documentDetailsValue['rapidx_user_person_in_charge']['name']);
+                        $sheet->setCellValue("{$startColumnDocDetailsCollection[3]}{$startRowDocDetailsCollection}", $documentDetailsValue['revision_due_date']);
+
+                        $sheet->getStyle("A{$startRowDocDetailsCollection}:I{$startRowDocDetailsCollection}")->applyFromArray([
+                            'alignment' => [
+                                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                'vertical' => Alignment::VERTICAL_CENTER,
+                            ],
+                        ]);
+                        $startRowDocDetailsCollection++;
+                    }
+                }
 
                 // ==== PMI APPROVAL ====
                 $internalPbCol = "A";
@@ -636,6 +669,15 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     'C43:D43',
                     'F43:G43',
                     'I43:I43',
+                    // 5.  Document Revision
+                    "A58:D58",
+                    "A59:D59",
+                    "A60:D60",
+                    "A61:D61",
+                    "F58:H58",
+                    "F59:H59",
+                    "F60:H60",
+                    "F61:H61",
                     // 6.  TECHNICAL EVALUATION / ENGINEERING
                     'A51:B51',
                     'C51:D51',
@@ -649,7 +691,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     'A63:B63',
                     'C63:D63',
                     'F63:G63',
-                    // 8.  AGREED BY
+                    // 8.  PMI APROVAL BY
                     'A77:B77',
                     'H77:I77',
                 ];
@@ -676,11 +718,41 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 // Set border for range
                 // echo 'true';
                 // exit;
+                $allThinBorderMergeRow = [
+                    "44",
+                    "45",
+
+                    "52",
+                    "53",
+                    "54",
+                    "55",
+
+                    "64",
+                    "65",
+                    "66",
+                ];
+
+                foreach ($allThinBorderMergeRow as $key => $allThinBorderMergeRowValue) {
+                    $sheet->mergeCells("A{$allThinBorderMergeRowValue}:B{$allThinBorderMergeRowValue}");
+                    $sheet->mergeCells("C{$allThinBorderMergeRowValue}:D{$allThinBorderMergeRowValue}");
+                    $sheet->mergeCells("F{$allThinBorderMergeRowValue}:G{$allThinBorderMergeRowValue}");
+
+                    $sheet->getStyle("A{$allThinBorderMergeRowValue}:I{$allThinBorderMergeRowValue}")
+                    ->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                            ],
+                        ],
+                    ]);
+                }
+
                 // === Apply borders to specific cells ===
                 $allThinBorder = [
                     "A43:I43",
                     "C47",
                     "G47",
+                    // 6, 10 , 11 SECTION
                     "A51:I51",
                     'A57:I57',
                     'A63:I63',
@@ -688,7 +760,10 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     'G75',
                     'C82',
                     'G82',
+                    //=== 7. DOCUMENT REVISION
+                    "A58:I61",
                 ];
+
                 foreach ($allThinBorder as $key => $allThinBorderValue) {
                     $sheet->getStyle($allThinBorderValue)
                     ->applyFromArray([
@@ -701,14 +776,15 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 }
                 // === THIN BORDERS
                 $rightThinBorder = [
-                    "A5:A8",
-                    "E5:E8",
-                    "F5:F8",
+                    "A4:A8",
+                    "E4:E8",
+                    "F4:F8",
+
                 ];
 
 
                 $bottomThinBorder = [
-                    "A4:I4",
+                    // "A4:I4",
                     "A70",
                     // 9. PMI APPROVAL
                     "E70",
