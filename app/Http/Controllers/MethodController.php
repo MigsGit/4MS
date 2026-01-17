@@ -154,92 +154,6 @@ class MethodController extends Controller
             throw $e;
         }
     }
-    public function saveMethodTest(Request $request, MethodFileRequest $methodFileRequest){
-        try {
-            DB::beginTransaction();
-            $methodRequestValidated = [];
-            $ecrsId = $methodFileRequest->ecrsId;
-            $methodsId = $methodFileRequest->methodsId;
-
-            if($methodFileRequest->hasfile('methodRefBefore') && $methodFileRequest->hasfile('methodRefAfter')){
-               $arrUploadFile = $this->commonInterface->uploadFileImg($methodFileRequest->methodRefBefore,$methodFileRequest->methodRefAfter,$methodsId,'method');
-                $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
-                $impFilteredDocumentNameBefore = implode(' | ',$arrUploadFile['arr_filtered_document_name_before']);
-                $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
-                $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
-
-                $methodRequestValidated['original_filename_before'] = $impOriginalFilenameBefore;
-                $methodRequestValidated['filtered_document_name_before'] = $impFilteredDocumentNameBefore;
-                $methodRequestValidated['original_filename_after'] = $impOriginalFilenameAfter;
-                $methodRequestValidated['filtered_document_name_after'] = $impFilteredDocumentNameAfter;
-
-            }
-            $conditions = [
-                'id' =>  $methodsId
-            ];
-            $this->resourceInterface->updateConditions(Method::class,$conditions,$methodRequestValidated);
-            $arrMachineApprovalRequest = [
-                'PRDNAB'  => $request->prdnAssessedBy,
-                'PRDNCB'  => $request->prdnCheckedBy,
-                'PPCAB'   => $request->ppcAssessedBy,
-                'PPCCB'   => $request->ppcCheckedBy,
-                'MENGAB'  => $request->proEnggAssessedBy,
-                'MENGCB'  => $request->proEnggCheckedBy,
-                'PENGAB'  => $request->mainEnggAssessedBy,
-                'PENGCB'  => $request->mainEnggCheckedBy,
-                'LQCAB'   => $request->qcAssessedBy,
-                'LQCCB'   => $request->qcCheckedBy,
-            ];
-
-           $methodApprovalValidated = collect($arrMachineApprovalRequest)->flatMap(function ($users,$approvalStatus) use ($request,$ecrsId){
-                return collect($users)->map(function ($userId) use ($request,$approvalStatus,&$ecrsId){
-                    return [
-                        'ecrs_id' => $ecrsId,
-                        'methods_id' => $request->methodsId,
-                        'rapidx_user_id' => $userId == 0 ? NULL : $userId,
-                        'approval_status' => $approvalStatus,
-                        'created_at' => now(),
-                    ];
-                });
-
-            })->toArray();
-            MethodApproval::where('methods_id',$methodsId)->delete();
-            MethodApproval::insert($methodApprovalValidated);
-            $methodApproval =  MethodApproval::whereNotNull('rapidx_user_id')
-            ->whereNull('deleted_at')
-            ->where('methods_id', $methodsId)
-            ->first();
-            if ($methodApproval) {
-                $methodApproval->update(['status' => 'PEN']);
-                Method::where('id', $methodsId)->first()
-                ->update([
-                    'approval_status' => $methodApproval->approval_status,
-                    'status' => 'FORAPP', //FOR APPROVAL
-                ]);
-            }
-            //Reset the PMI Approval
-            /*
-                PmiApproval::whereNotNull('rapidx_user_id')
-                ->where('ecrs_id', $currentEcrsId)
-                ->update([
-                    'status' => '-',
-                    'remarks' => '',
-                ]);
-                //Update Pending PMI Approval
-                $firstPmiApproval =  PmiApproval::whereNotNull('rapidx_user_id')
-                ->where('ecrs_id', $currentEcrsId)
-                ->first();
-                if ($firstPmiApproval) {
-                    $firstPmiApproval->update(['status' => 'PEN']);
-                }
-            */
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
 
     public function saveMethodApprovalTest1(Request $request){
         try {
@@ -583,18 +497,24 @@ class MethodController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 // $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                if($methodStatus === "EXDISPO" || $methodStatus === "OK"){
+                if( $methodStatus === "OK"){
                     //Upload External Disposition
                     // $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'"id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
                     $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
+                // if($methodStatus === 'EXDISPO' && session('rapidx_department_id') === 22){
+                if($methodStatus === 'EXDISPO'){
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-plus"></i> &nbsp;Add Disposition</button></li>';
                     return $result;
                 }
                 // if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 // }
                 if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')  || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id')  ){
-                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
+
 
                 $result .= '</ul>';
                 $result .= '</div>';

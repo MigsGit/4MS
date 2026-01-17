@@ -839,6 +839,46 @@
         <template #footer>
         </template>
     </ModalComponent>
+    <ModalComponent @add-event="saveDisposition" icon="fa-plus" modalDialog="modal-dialog modal-md" title="Add DispositionReferences" ref="modalSaveDisposition">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">EcrId:</span>
+                        <input @change="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Upload File:</span>
+                        <input @change="changeSaveDispositionFile" multiple type="file" accept=".xlsx" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Status:</span>
+                        <Multiselect
+                            placeholder="-Select an Option-"
+                            v-model="frmSaveDisposition.status"
+                            :close-on-select="true"
+                            :searchable="true"
+                            :options="commonVar.optDisposition"
+                        />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                            <input v-model="frmSaveDisposition.remarks" type="text" class="form-control form-control-lg">
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -854,7 +894,6 @@
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
     DataTable.use(DataTablesCore);
-
     const { axiosSaveData,axiosSaveDataImgFile } = useForm(); // Call the useForm function
     const {
         modalEcr,
@@ -908,6 +947,8 @@
         changeExternalDisposition,
         btnLinkViewExternalDisposition,
         getCategoryAdminAccessOpt,
+        frmSaveDisposition,
+        commonSaveDisposition,
     } = useCommon();
     const {
         getRapidxUserByIdOpt,
@@ -935,9 +976,11 @@
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
     const selectedEcrsIdEcrypted = ref(null);
-
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
+    const modalSaveDisposition = ref(null);
+
+    const dispositionFile = ref(null);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -947,6 +990,7 @@
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 let btnViewMethodById = cell.querySelector('#btnViewMethodById');
                 let btnViewDispotionById = cell.querySelector('#btnViewDispotionById');
+                let btnSaveDisposition = cell.querySelector('#btnSaveDisposition');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
@@ -1021,6 +1065,13 @@
                         let ecrsId = this.getAttribute('ecrs-id');
                         selectedEcrsId.value = ecrsId;
                         modal.ExternalDisposition.show();
+                    });
+                }
+                if(btnSaveDisposition != null){
+                    btnSaveDisposition.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        frmSaveDisposition.value.ecrsId =ecrsId;
+                        modal.SaveDisposition.show();
                     });
                 }
             }
@@ -1139,6 +1190,7 @@
         selectedVal:0,
     };
     onMounted( async ()=>{
+        modal.SaveDisposition = new Modal(modalSaveDisposition.value.modalRef,{ keyboard: false });
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         modal.ViewMethodRef = new Modal(modalViewMethodRef.value.modalRef,{ keyboard: false });
@@ -1228,6 +1280,9 @@
     const changeMethodRefAfter = async (event) => {
         methodRefAfter.value =  Array.from(event.target.files);
     }
+    const changeSaveDispositionFile = async (event) => {
+        dispositionFile.value =  Array.from(event.target.files);
+    }
     const saveMethod = async () => {
         let formData = new FormData();
 
@@ -1297,6 +1352,18 @@
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
             modal.ExternalDisposition.hide();
             tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
+        });
+    }
+    const saveDisposition = async () => {
+        let formData = new FormData();
+        dispositionFile.value.forEach((file, index) => {
+            formData.append('dispositionFile[]', file);
+        });
+        formData.append("ecrsId", selectedEcrsId.value);
+        formData.append("status", frmSaveDisposition.value.status);
+        formData.append("remarks", frmSaveDisposition.value.remarks);
+        axiosSaveData(formData,'api/save_disposition',(response) =>{
+            modal.frmSaveDisposition.hide();
         });
     }
 </script>

@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function(){
     Route::controller(CommonController::class)->group(function (): void {
         Route::post('save_special_inspection', 'saveSpecialInspection')->name('save_special_inspection');
         Route::post('save_external_disposition', 'saveExternalDisposition')->name('save_external_disposition');
+        Route::post('save_disposition', 'saveDisposition')->name('save_disposition');
 
         Route::get('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::get('test_email', 'testEmail')->name('test_email'); //test function

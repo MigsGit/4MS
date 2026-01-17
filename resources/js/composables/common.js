@@ -48,6 +48,11 @@ export default function useCommon(){
             {"value":"N/A","label":"N/A"},
             {"value":"R","label":"REQUIRED"},
             {"value":"NR","label":"NOT REQUIRED"},
+        ],
+        optDisposition : [
+            {"value":"","label":"-Select an option-"},
+            {"value":"accept","label":"ACCEPT"},
+            {"value":"reject","label":"REJECT"},
         ]
     });
     //Ref State
@@ -66,6 +71,12 @@ export default function useCommon(){
         inspectionDate : "",
         inspector : "",
         lqcSectionHead : "",
+        remarks : "",
+    });
+    const frmSaveDisposition = ref({
+        ecrId : "",
+        file : "",
+        status : "",
         remarks : "",
     });
     //Params
@@ -232,6 +243,19 @@ export default function useCommon(){
         }
     };
 
+    const commonSaveDisposition = async () => {
+        let formData = new FormData();
+        dispositionFile.value.forEach((file, index) => {
+            formData.append('dispositionFile[]', file);
+        });
+        formData.append("ecrsId", selectedEcrsId.value);
+        formData.append("status", frmSaveDisposition.value.status);
+        formData.append("remarks", frmSaveDisposition.value.remarks);
+        axiosSaveData(formData,'api/save_disposition',(response) =>{
+            modal.frmSaveDisposition.hide();
+        });
+    }
+
     return {
         rapidxUserDeptGroup,
         modal,
@@ -251,7 +275,9 @@ export default function useCommon(){
         getAdminAccessOpt,
         getCategoryAdminAccessOpt,
         resetEcrForm,
+        commonSaveDisposition,
         frmSpecialInspection,
+        frmSaveDisposition,
     }
 
 }
