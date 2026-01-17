@@ -342,7 +342,7 @@ class CommonController extends Controller
             throw $e;
         }
     }
-    public function savePmiInternalApproval(Request $request){ //internal_external
+    public function savePmiInternalApproval(Request $request){
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();

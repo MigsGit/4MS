@@ -1385,8 +1385,9 @@ class EcrController extends Controller
    }
    public function getEcrDocumentById(Request $request){
        try {
-           $documentDetail =  $this->resourceInterface->readCustomEloquent(DocumentDetail::class,[],[],[])->first();
-
+           $documentDetail =  $this->resourceInterface->readCustomEloquent(DocumentDetail::class,[],[],[
+            'id' => $request->ecrsId
+           ])->first();
            return response()->json(['isSuccess' => 'true', 'documentDetail' => $documentDetail]);
        } catch (Exception $e) {
            throw $e;
