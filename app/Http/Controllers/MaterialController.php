@@ -400,12 +400,19 @@ class MaterialController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
+
+                if($materialStatus === 'EXDISPO' || $materialStatus === "OK"){
+                    $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" method-status= "'.$materialStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
                 if($materialStatus === "RUP" || $materialStatus === "DIS" ){
                     if( $row->created_by === session('rapidx_user_id')){
                         $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     }
                 }
-                $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+
+
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';
@@ -415,7 +422,7 @@ class MaterialController extends Controller
                 //TODO: Read Approval Status, Tab Based on Department
                 $materialStatus = $row->material->status ?? "";
                 $currentApprover = $row->material->material_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $getStatus = $this->getStatus($materialStatus);
+                $getStatus = $this->commonInterface->getStatus4m($materialStatus);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';

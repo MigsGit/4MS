@@ -889,7 +889,7 @@
                         <input v-model="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg">
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 d-none">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Upload File:</span>
                         <input @change="changeExternalDisposition" multiple type="file" accept=".xlsx" class="form-control form-control-lg" aria-describedby="addon-wrapping">
@@ -978,7 +978,6 @@
     const {
         modal,
         commonVar,
-        externalDisposition,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
@@ -990,6 +989,7 @@
         getCurrentPmiInternalApprover,
         getCategoryAdminAccessOpt,
 
+        externalDisposition,
         changeExternalDisposition,
         btnLinkViewExternalDisposition,
         getDisposition,

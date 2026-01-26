@@ -393,16 +393,13 @@ class MachineController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 // $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                if($machineStatus === "OK"){
+                if($machineStatus === 'EXDISPO' || $machineStatus === "OK"){
                     //Upload External Disposition
-                    // $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
-                if($machineStatus === 'EXDISPO'){
-                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" method-status= "'.$machineStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                    return $result;
-                }
+
                 if($row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }

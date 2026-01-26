@@ -498,17 +498,17 @@ class MethodController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 // $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                if( $methodStatus === "OK"){
+                if($methodStatus === 'EXDISPO' || $methodStatus === "OK"){
                     //Upload External Disposition
-                    // $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'"id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
                 // if($methodStatus === 'EXDISPO' && session('rapidx_department_id') === 22){
-                if($methodStatus === 'EXDISPO'){
-                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                    return $result;
-                }
+                // if($methodStatus === 'EXDISPO'){
+                //     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
+                //     return $result;
+                // }
                 // if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 // }

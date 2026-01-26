@@ -835,7 +835,7 @@
                         <input v-model="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg">
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 d-none">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Upload File:</span>
                         <input @change="changeExternalDisposition" multiple type="file" accept=".xlsx" class="form-control form-control-lg" aria-describedby="addon-wrapping">
@@ -920,7 +920,6 @@
     const {
         modal,
         commonVar,
-        externalDisposition,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
@@ -930,6 +929,8 @@
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+
+        externalDisposition,
         changeExternalDisposition,
         btnLinkViewExternalDisposition,
         getCategoryAdminAccessOpt,
@@ -1054,17 +1055,17 @@
                         modal.ExternalDisposition.show();
                     });
                 }
-                // if(btnSaveDisposition != null){
-                //     btnSaveDisposition.addEventListener('click',function(){
-                //         let ecrsId = this.getAttribute('ecrs-id');
-                //         frmSaveDisposition.value.ecrsId =ecrsId;
-                //         let dispositionParams = {
-                //             ecrsId : ecrsId
-                //         }
-                //         getDisposition(dispositionParams);
-                //         modal.SaveDisposition.show();
-                //     });
-                // }
+                if(btnSaveDisposition != null){
+                    btnSaveDisposition.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        frmSaveDisposition.value.ecrsId =ecrsId;
+                        let dispositionParams = {
+                            ecrsId : ecrsId
+                        }
+                        getDisposition(dispositionParams);
+                        modal.SaveDisposition.show();
+                    });
+                }
             }
         } ,
         {   data: 'get_status'} ,
@@ -1332,7 +1333,6 @@
             modal.SaveMethod.hide();
         });
     }
-
     const saveDisposition = async () => {
         let formData = new FormData();
         if(externalDisposition.value.length > 0){
