@@ -64,7 +64,6 @@ Route::middleware('auth')->group(function(){
     Route::controller(CommonController::class)->group(function (): void {
         Route::post('save_special_inspection', 'saveSpecialInspection')->name('save_special_inspection');
         Route::post('save_external_disposition', 'saveExternalDisposition')->name('save_external_disposition');
-        Route::post('save_disposition', 'saveDisposition')->name('save_disposition');
 
         Route::get('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
         Route::get('test_email', 'testEmail')->name('test_email'); //test function
@@ -83,6 +82,7 @@ Route::middleware('auth')->group(function(){
 
         Route::get('get_before_after_ref_by_ecrs_id', 'getBeforeAfterRefByEcrsId')->name('get_before_after_ref_by_ecrs_id');
         Route::get('view_before_after_ref_by_ecrs_id', 'viewBeforeAfterRefByEcrsId')->name('view_before_after_ref_by_ecrs_id');
+        Route::get('get_disposition', 'getDisposition')->name('get_disposition');
 
     });
 

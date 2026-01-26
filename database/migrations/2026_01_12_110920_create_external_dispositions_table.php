@@ -19,6 +19,8 @@ class CreateExternalDispositionsTable extends Migration
             $table->longText('filtered_document_name')->nullable();
             $table->longText('original_filename')->nullable();
             $table->string('file_path');
+            $table->longText('remarks')->nullable();
+            $table->unsignedBigInteger('updated_by')->comment('Rapidx User Id');
             $table->timestamps();
             $table->softDeletes();
         });

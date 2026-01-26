@@ -19,12 +19,13 @@
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Method Table</li>
                         </ol>
+                        <!-- ajax="api/load_method_ecr_by_status?category=Method" -->
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
                             ref="tblEcrByStatus"
                             :columns="tblEcrByStatusColumns"
-                            ajax="api/load_method_ecr_by_status?category=Method"
+                            ajax='api/load_method_ecr_by_status?category=Method && adminAccess=all',
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -839,13 +840,13 @@
         <template #footer>
         </template>
     </ModalComponent>
-    <ModalComponent @add-event="saveDisposition" icon="fa-plus" modalDialog="modal-dialog modal-md" title="Add DispositionReferences" ref="modalSaveDisposition">
+    <ModalComponent @add-event="saveDisposition" icon="fa-plus" modalDialog="modal-dialog modal-lg" title="Add DispositionReferences" ref="modalSaveDisposition">
         <template #body>
             <div class="row mt-3">
                 <div class="col-md-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">EcrId:</span>
-                        <input @change="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg">
+                        <input v-model="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg">
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -949,6 +950,7 @@
         getCategoryAdminAccessOpt,
         frmSaveDisposition,
         commonSaveDisposition,
+        getDisposition,
     } = useCommon();
     const {
         getRapidxUserByIdOpt,
@@ -980,7 +982,7 @@
     const modalViewEcrRequirementRef = ref(null);
     const modalSaveDisposition = ref(null);
 
-    const dispositionFile = ref(null);
+    const dispositionFile = ref([]);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -1071,6 +1073,10 @@
                     btnSaveDisposition.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
                         frmSaveDisposition.value.ecrsId =ecrsId;
+                        let dispositionParams = {
+                            ecrsId : ecrsId
+                        }
+                        getDisposition(dispositionParams);
                         modal.SaveDisposition.show();
                     });
                 }
@@ -1342,28 +1348,31 @@
             modal.SaveMethod.hide();
         });
     }
-    const saveExternalDisposition = async () => {
-        let formData = new FormData();
-        externalDisposition.value.forEach((file, index) => {
-            formData.append('externalDisposition[]', file);
-        });
-        formData.append("ecrsId", selectedEcrsId.value);
+    // const saveExternalDisposition = async () => {
+    //     let formData = new FormData();
+    //     externalDisposition.value.forEach((file, index) => {
+    //         formData.append('externalDisposition[]', file);
+    //     });
+    //     formData.append("ecrsId", selectedEcrsId.value);
 
-        axiosSaveData(formData,'api/save_external_disposition',(response) =>{
-            modal.ExternalDisposition.hide();
-            tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
-        });
-    }
+    //     axiosSaveData(formData,'api/save_external_disposition',(response) =>{
+    //         modal.ExternalDisposition.hide();
+    //         tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
+    //     });
+    // }
     const saveDisposition = async () => {
         let formData = new FormData();
-        dispositionFile.value.forEach((file, index) => {
-            formData.append('dispositionFile[]', file);
-        });
-        formData.append("ecrsId", selectedEcrsId.value);
+        if(dispositionFile.value.length > 0){
+            dispositionFile.value.forEach((file, index) => {
+                formData.append('externalDisposition[]', file);
+            });
+        }
+        formData.append("ecrsId",frmSaveDisposition.value.ecrsId);
         formData.append("status", frmSaveDisposition.value.status);
         formData.append("remarks", frmSaveDisposition.value.remarks);
-        axiosSaveData(formData,'api/save_disposition',(response) =>{
-            modal.frmSaveDisposition.hide();
+        axiosSaveData(formData,'api/save_external_disposition',(response) =>{
+            modal.SaveDisposition.hide();
+            tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }
 </script>

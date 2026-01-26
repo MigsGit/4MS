@@ -53,6 +53,35 @@ class CommonService implements CommonInterface
             throw $th;
         }
     }
+    public function excelFileUpload(array $params)
+    {
+        try {
+            // return $params;
+            $currentPath= 'public/'.$params['path'].'/'.$params['ecrsId'];
+            // $newFolderPath= 'public/'.$params['path'].'/'.$params['ecrsId'].'_'.time();
+            if (Storage::exists($currentPath)) {
+                Storage::deleteDirectory($currentPath);
+                // Storage::move($currentPath, $newFolderPath); //change file name if exist
+            }
+            $arr_filtered_filename = [];
+            $arr_original_filename = [];
+            foreach ($params['txtDocuReference'] as $key => $file) { //$request->file('txt_docu_reference')
+                $original_filename = $file->getClientOriginalName(); //'/etc#hosts/@Álix Ãxel likes - beer?!.pdf';
+                $filtered_filename = $key.'_'.$this->fileInterface->Slug($original_filename, '_', '.');	 // _etc_hosts_alix_axel_likes_beer.pdf //Interface
+
+                // $file->storeAs($folderPath, $filtered_filename, 'public'); // 'storage' disk is used for storing files // not active
+                // Storage::putFileAs($currentPath, $file, $filtered_filename);//change file to storage //active
+                $arr_original_filename[] =$original_filename;
+                $arr_filtered_filename[] =$filtered_filename;
+            }
+            return [
+                'arr_filtered_document_name' => $arr_filtered_filename,
+                'arr_original_filename' => $arr_original_filename,
+            ];
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
     public function uploadFile($txtDocuReference,$id,$path) // $request->txt_docu_reference
     {
         try {
@@ -269,7 +298,15 @@ class CommonService implements CommonInterface
                     $bgStatus = 'badge rounded-pill bg-success';
                     break;
                 case 'CAN':
-                    $status = 'CANCELLED';
+                    $status = '4M CANCELLED';
+                    $bgStatus = 'badge rounded-pill bg-danger';
+                    break;
+                case 'EXDISPO':
+                    $status = '4M Waiting for External Disposition';
+                    $bgStatus = 'badge rounded-pill bg-warning';
+                    break;
+                case 'EXDISAPP':
+                    $status = '4M External Disapproved';
                     $bgStatus = 'badge rounded-pill bg-danger';
                     break;
                 default:

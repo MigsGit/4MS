@@ -74,7 +74,7 @@ export default function useCommon(){
         remarks : "",
     });
     const frmSaveDisposition = ref({
-        ecrId : "",
+        ecrsId : "",
         file : "",
         status : "",
         remarks : "",
@@ -255,6 +255,23 @@ export default function useCommon(){
             modal.frmSaveDisposition.hide();
         });
     }
+    const getDisposition = async (params) => {
+        let apiParams = {
+            ecrsId : params.ecrsId
+        }
+        frmSaveDisposition.value.ecrsId = params.ecrsId;
+        axiosFetchData(apiParams,'api/get_disposition',function(response){
+            let data = response.data.externalDisposition;
+            if(response.data.isSuccess === 'true'){
+                frmSaveDisposition.value.status = data.status;
+                frmSaveDisposition.value.remarks = data.remarks;
+                return;
+            }
+            frmSaveDisposition.value.status =  '';
+            frmSaveDisposition.value.remarks = '';
+        });
+    }
+
 
     return {
         rapidxUserDeptGroup,
@@ -276,6 +293,7 @@ export default function useCommon(){
         getCategoryAdminAccessOpt,
         resetEcrForm,
         commonSaveDisposition,
+        getDisposition,
         frmSpecialInspection,
         frmSaveDisposition,
     }

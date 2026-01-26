@@ -20,4 +20,5 @@ class FileService implements FileInterface
 		}
 		return $string;
 	}
+    
 }

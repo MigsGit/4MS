@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use App\Models\MethodApproval;
 use App\Models\MachineApproval;
 use App\Models\MaterialApproval;
+use App\Interfaces\FileInterface;
 use App\Models\SpecialInspection;
 use App\Exports\ExternalCcmExport;
 use App\Exports\InternalCcmExport;
@@ -67,61 +68,6 @@ class CommonController extends Controller
                 $specialInspectionRequestValidated['created_by'] = session('rapidx_user_id');
                 $this->resourceInterface->create(SpecialInspection::class,$specialInspectionRequestValidated);
             }
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
-    public function saveDisposition(Request $request){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-            $dispositionRequestValidated = [];
-            $ecrsId = 5;
-            // $ecrsId = $request->ecrsId;
-            $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],[],['id' => $ecrsId])->first(['category']);
-            if( isset($ecrsId)){ //Edit
-                $conditions = [
-                    'ecrs_id' => $ecrsId
-                ];
-                $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
-                // $this->resourceInterface->updateConditions(ExternalDisposition::class,$conditions,$dispositionRequestValidated);
-            }else{ //Add
-                $dispositionRequestValidated['ecrs_id'] = $ecrsId;
-                $dispositionRequestValidated['created_at'] = now();
-                $dispositionRequestValidated['created_by'] = session('rapidx_user_id');
-                $this->resourceInterface->create(ExternalDisposition::class,$dispositionRequestValidated);
-            }
-            switch ($ecr->category) {
-                case 'Man':
-                    $currentModel = Man::class;
-                    break;
-                case 'Material':
-                    $currentModel = Material::class;
-                    break;
-                case 'Machine':
-                    $currentModel = Machine::class;
-                    break;
-                case 'Method':
-                    $currentModel = Method::class;
-                    break;
-                case 'Environment':
-                    $currentModel = Environment::class;
-                    break;
-                default:
-                    return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
-                    break;
-            }
-            return $ecrsId; // TODO Save External Dispo File
-            $this->resourceInterface->updateConditions($currentModel,[
-                'ecrs_id' => $ecrsId
-            ],[
-                'status' => $request->status === 'accept' ? 'OK' : 'REJECTED' ,
-            ]);
-            // DB::commit();
-            return response()->json(['is_success' => 'true']);
             DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
@@ -734,59 +680,65 @@ class CommonController extends Controller
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
             $ecrsId = $request->ecrsId;
+            $dispositionStatus = $request->status;
             $ecr = Ecr::find($ecrsId,['category']);
+            switch ($ecr->category) {
+                case 'Man':
+                    $model = ManDetail::class;
+                    break;
+                case 'Material':
+                    $model = Material::class;
+                    break;
+                case 'Machine':
+                    $model = Machine::class;
+                    break;
+                case 'Method':
+                    $model = Method::class;
+                    break;
+                case 'Environment':
+                    $model = Environment::class;
+                    break;
+                default:
+                    return response()->json(['isSuccess' => 'false','Invalid Category'],500);
+                    break;
+            }
             if($request->hasfile('externalDisposition') ){
-                switch ($ecr->category) {
-                    case 'Man':
-                        $path = 'external_disposition/man';
-                        $model = ManDetail::class;
-                        break;
-                    case 'Material':
-                        $path = 'external_disposition/material';
-                        $model = Material::class;
-                        break;
-                    case 'Machine':
-                        $path = 'external_disposition/machine';
-                        $model = Machine::class;
-                        break;
-                    case 'Method':
-                        $path = 'external_disposition/method';
-                        $model = Method::class;
-                        break;
-                    case 'Environment':
-                        $path = 'external_disposition/environment';
-                        $model = Environment::class;
-                        break;
-                    default:
-                        return response()->json(['isSuccess' => 'false','Invalid Category'],500);
-                        break;
-                }
-               $arrUploadFile = $this->commonInterface->uploadFile($request->externalDisposition,$ecrsId,$path);
+                $excelFileParams = [
+                   'txtDocuReference' => $request->externalDisposition,
+                   'ecrsId' => $ecrsId,
+                   'path' =>  'external_disposition/'.$ecr->category
+                ];
+                $arrUploadFile = $this->commonInterface->excelFileUpload($excelFileParams);
                 $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
                 $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
-
-                $conditions = [
-                   'ecrs_id' =>  $ecrsId
-                ];
                 $externalDispositionValidated['original_filename'] = $impOriginalFilename;
                 $externalDispositionValidated['filtered_document_name'] = $impFilteredDocumentName;
                 $externalDispositionValidated['filtered_document_name'] = $impFilteredDocumentName;
-                $externalDispositionValidated['file_path'] = $path;
-
-                $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)
-                ->whereNull('deleted_at')
-                ->count();
-                if($externalDisposition === 0 ){
-                    $externalDispositionValidated['ecrs_id'] = $ecrsId;
-                    $externalDispositionValidated['created_at'] = now();
-                    $this->resourceInterface->create(ExternalDisposition::class,$externalDispositionValidated);
-                }else{
-                    $this->resourceInterface->updateConditions(ExternalDisposition::class,$conditions,$externalDispositionValidated);
-                }
-                $ecrRequestValidated['status'] = 'OK';
-                $ecrRequestValidated['approval_status'] = 'OK';
-                $this->resourceInterface->updateConditions($model,$conditions,$ecrRequestValidated);
+                $externalDispositionValidated['file_path'] = $ecr->category;
             }
+            $externalDispositionValidated['status'] = $dispositionStatus;
+            $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)
+            ->whereNull('deleted_at')
+            ->count();
+            if($externalDisposition === 0 ){
+                $dispositionRequestValidated['ecrs_id'] = $ecrsId;
+                $dispositionRequestValidated['created_at'] = now();
+                $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
+                $this->resourceInterface->create(ExternalDisposition::class,$externalDispositionValidated);
+            }else{
+                $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
+                $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
+                $this->resourceInterface->updateConditions(ExternalDisposition::class,[
+                    'ecrs_id' =>  $ecrsId
+                 ],$externalDispositionValidated);
+            }
+            // Save External Dispo File
+            $this->resourceInterface->updateConditions($model,[
+                'ecrs_id' => $ecrsId
+            ],[
+                'status' => $dispositionStatus === 'accept' ? 'OK' : 'EXDISAPP',
+                'approval_status' =>  $dispositionStatus === 'accept' ? 'OK' : 'EXDISAPP',
+            ]);
             DB::commit();
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
@@ -1049,6 +1001,19 @@ class CommonController extends Controller
                 }
                 return response()->file($path);
             }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getDisposition(Request $request){
+        try {
+            $externalDisposition = $this->resourceInterface->readCustomEloquent(ExternalDisposition::class,[],[],[
+                'ecrs_id' => $request->ecrsId
+            ])->first();
+            return response()->json([
+                'isSuccess' => 'true',
+                'externalDisposition' => $externalDisposition ?? [],
+            ]);
         } catch (Exception $e) {
             throw $e;
         }

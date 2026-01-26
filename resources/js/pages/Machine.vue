@@ -1196,7 +1196,7 @@
     }
     const getBeforeAfterRefByEcrsId = async (machinesId) => {
         let apiParams = {
-            ecrsId : selectedEcrsIdEncrypted.value, 
+            ecrsId : selectedEcrsIdEncrypted.value,
         }
         axiosFetchData(apiParams,'api/get_before_after_ref_by_ecrs_id',function(response){
             let data = response.data[0];
@@ -1208,7 +1208,7 @@
             modal.ViewMachineRef.show();
         });
     }
-    
+
     const btnLinkViewRefBefore = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
         window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEncrypted} && index=${index} && imageType=before`, '_blank');
     }
@@ -1298,7 +1298,7 @@
         });
         formData.append("ecrsId", selectedEcrsId.value);
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
-            modal.ExternalDisposition.hide();
+            modal.saveExternalDisposition.hide();
             tblEcrByStatus.value.dt.ajax.url("api/load_ecr_machine_by_status?category=Machine"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }

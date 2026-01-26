@@ -37,7 +37,6 @@ class PdfCustomService implements PdfCustomInterface
         $pageCount = $this->fpdi->setSourceFile($filePath);
         return $pageCount;
     }
-
     /**
      * Convert a specific PDF page to an image and get its dimensions.
      *
@@ -114,7 +113,6 @@ class PdfCustomService implements PdfCustomInterface
             'height' => $height,
         ];
     }
-
      /**
      * Insert an image at specific coordinates on a PDF page.
      *

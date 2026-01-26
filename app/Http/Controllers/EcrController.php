@@ -706,7 +706,7 @@ class EcrController extends Controller
                     $status4m = $row->machine->status;
                 }
                 if($row->method != null){
-                    $status4m = $row->method->status;
+                   $status4m = $row->method->status;
                 }
                 if($row->environment != null){
                     $status4m = $row->environment->status;

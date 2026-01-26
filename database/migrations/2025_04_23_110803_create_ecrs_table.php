@@ -30,8 +30,8 @@ class CreateEcrsTable extends Migration
             $table->string('section'); //dropdown or session
             $table->string('customer_ec_no');
             $table->date('date_of_request');
-            $table->unsignedBigInteger('created_by')->unique()->comment('Rapidx User Id');
-            $table->unsignedBigInteger('updated_by')->unique()->comment('Rapidx User Id');
+            $table->unsignedBigInteger('created_by')->comment('Rapidx User Id');
+            $table->unsignedBigInteger('updated_by')->comment('Rapidx User Id');
             $table->timestamps();
             $table->softDeletes();
         });

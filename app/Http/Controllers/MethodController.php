@@ -436,6 +436,7 @@ class MethodController extends Controller
     }
     public function loadMethodEcrByStatus(Request $request){
         try {
+            // return 'true';
             $adminAccess = $request->adminAccess;
             $data = [];
             $relations = [
@@ -505,7 +506,7 @@ class MethodController extends Controller
                 }
                 // if($methodStatus === 'EXDISPO' && session('rapidx_department_id') === 22){
                 if($methodStatus === 'EXDISPO'){
-                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-plus"></i> &nbsp;Add Disposition</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     return $result;
                 }
                 // if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
