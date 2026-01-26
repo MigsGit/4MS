@@ -59,7 +59,7 @@ export default function useCommon(){
     const tblSpecialInspection = ref(null);
     const modalSaveSpecialInspection = ref(null);
     const modalExternalDisposition = ref(null);
-    const externalDisposition  = ref(null);
+    const externalDisposition  = ref([]);
 
     const frmSpecialInspection = ref({
         productDetail : "",
@@ -277,24 +277,26 @@ export default function useCommon(){
         rapidxUserDeptGroup,
         modal,
         commonVar,
-        externalDisposition,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
-        modalExternalDisposition,
         specialInsQcInspectorParams,
         specialInsLqcParams,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        changeExternalDisposition,
-        btnLinkViewExternalDisposition,
         getAdminAccessOpt,
         getCategoryAdminAccessOpt,
         resetEcrForm,
-        commonSaveDisposition,
-        getDisposition,
         frmSpecialInspection,
+
+        externalDisposition,
+        modalExternalDisposition,
+
+        changeExternalDisposition,
+        btnLinkViewExternalDisposition,
+        getDisposition,
+        commonSaveDisposition,
         frmSaveDisposition,
     }
 

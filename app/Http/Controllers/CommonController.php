@@ -679,7 +679,7 @@ class CommonController extends Controller
         try {
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
-            $ecrsId = $request->ecrsId;
+           return  $ecrsId = $request->ecrsId;
             $dispositionStatus = $request->status;
             $ecr = Ecr::find($ecrsId,['category']);
             switch ($ecr->category) {

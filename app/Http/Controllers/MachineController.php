@@ -46,7 +46,7 @@ class MachineController extends Controller
                 $impFilteredDocumentNameBefore = implode(' | ',$arrUploadFile['arr_filtered_document_name_before']);
                 $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
                 $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
-             
+
                 $fileRequestValidated = [
                     'ecrs_id' => $ecrsId,
                     'original_filename_before' => $impOriginalFilenameBefore,
@@ -393,10 +393,14 @@ class MachineController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 // $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                if($machineStatus === "EXDISPO" || $machineStatus === "OK"){
+                if($machineStatus === "OK"){
                     //Upload External Disposition
                     // $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnViewDispotionById"><i class="fa-solid fa-file"></i> &nbsp;Upload Disposition</button></li>';
                     $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
+                if($machineStatus === 'EXDISPO'){
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" method-status= "'.$machineStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     return $result;
                 }
                 if($row->created_by === session('rapidx_user_id')){

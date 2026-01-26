@@ -533,21 +533,7 @@
             <button @click = "saveApproval(selectedMethodsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload External Disposition" ref="modalExternalDisposition" @add-event="saveExternalDisposition()">
-        <template #body>
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <input @change="changeExternalDisposition" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
-                    </div>
-                </div>
-            </div>
-        </template>
-        <template #footer>
-            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
-        </template>
-    </ModalComponent>
+
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
             <div class="row mt-3 man" v-show="isEmptyTblEcrManRequirements">
@@ -852,7 +838,7 @@
                 <div class="col-md-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Upload File:</span>
-                        <input @change="changeSaveDispositionFile" multiple type="file" accept=".xlsx" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input @change="changeExternalDisposition" multiple type="file" accept=".xlsx" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -938,7 +924,6 @@
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
-        modalExternalDisposition,
         specialInsQcInspectorParams,
         specialInsLqcParams,
         frmSpecialInspection,
@@ -1069,17 +1054,17 @@
                         modal.ExternalDisposition.show();
                     });
                 }
-                if(btnSaveDisposition != null){
-                    btnSaveDisposition.addEventListener('click',function(){
-                        let ecrsId = this.getAttribute('ecrs-id');
-                        frmSaveDisposition.value.ecrsId =ecrsId;
-                        let dispositionParams = {
-                            ecrsId : ecrsId
-                        }
-                        getDisposition(dispositionParams);
-                        modal.SaveDisposition.show();
-                    });
-                }
+                // if(btnSaveDisposition != null){
+                //     btnSaveDisposition.addEventListener('click',function(){
+                //         let ecrsId = this.getAttribute('ecrs-id');
+                //         frmSaveDisposition.value.ecrsId =ecrsId;
+                //         let dispositionParams = {
+                //             ecrsId : ecrsId
+                //         }
+                //         getDisposition(dispositionParams);
+                //         modal.SaveDisposition.show();
+                //     });
+                // }
             }
         } ,
         {   data: 'get_status'} ,
@@ -1213,7 +1198,6 @@
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             frmSpecialInspection.value.ecrsId;
         });
-        modal.ExternalDisposition = new Modal(modalExternalDisposition.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -1348,28 +1332,19 @@
             modal.SaveMethod.hide();
         });
     }
-    // const saveExternalDisposition = async () => {
-    //     let formData = new FormData();
-    //     externalDisposition.value.forEach((file, index) => {
-    //         formData.append('externalDisposition[]', file);
-    //     });
-    //     formData.append("ecrsId", selectedEcrsId.value);
 
-    //     axiosSaveData(formData,'api/save_external_disposition',(response) =>{
-    //         modal.ExternalDisposition.hide();
-    //         tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
-    //     });
-    // }
     const saveDisposition = async () => {
         let formData = new FormData();
-        if(dispositionFile.value.length > 0){
-            dispositionFile.value.forEach((file, index) => {
+        if(externalDisposition.value.length > 0){
+            externalDisposition.value.forEach((file, index) => {
                 formData.append('externalDisposition[]', file);
             });
         }
         formData.append("ecrsId",frmSaveDisposition.value.ecrsId);
         formData.append("status", frmSaveDisposition.value.status);
         formData.append("remarks", frmSaveDisposition.value.remarks);
+
+
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
             modal.SaveDisposition.hide();
             tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
