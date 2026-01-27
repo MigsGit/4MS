@@ -1545,7 +1545,7 @@
 
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
             modal.SaveDisposition.hide();
-            tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
+            tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw();
         });
     }
 </script>

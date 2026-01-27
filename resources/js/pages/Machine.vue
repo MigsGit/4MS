@@ -1342,7 +1342,8 @@
             formData.append('machineRefAfter[]', file);
         });
         axiosSaveDataImgFile(formData,'api/save_machine',(response) =>{
-            console.log(response);
+            tblEcrByStatus.value.dt.ajax.url("api/load_ecr_machine_by_status?category=Machine"+"&& adminAccess="+selectedAdminAccess.value).draw();
+
         });
     }
     const saveApproval = async (selectedId,selectedEcrsId,remarks,isApprovedDisappproved,approvalType = null) => {
@@ -1386,7 +1387,7 @@
 
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
             modal.SaveDisposition.hide();
-            tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
+            tblEcrByStatus.value.dt.ajax.url("api/load_ecr_machine_by_status?category=Machine"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }
 </script>
