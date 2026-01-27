@@ -498,7 +498,11 @@ class MethodController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 // $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                if($methodStatus === 'EXDISPO' || $methodStatus === "OK"){
+                if($methodStatus === "OK"){
+                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
+                if($methodStatus === 'EXDISPO'){
                     //Upload External Disposition
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
@@ -526,7 +530,7 @@ class MethodController extends Controller
             ->addColumn('get_status',function ($row) use($request){
                 $methodStatus = $row->method->status ?? "";
                 $currentApprover = $row->method->method_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $getStatus = $this->getStatus($methodStatus);
+                $getStatus = $this->commonInterface->getStatus4m($methodStatus);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';

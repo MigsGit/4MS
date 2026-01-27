@@ -1225,9 +1225,9 @@
         getCurrentPmiInternalApprover,
         getCategoryAdminAccessOpt,
 
+        // btnLinkViewExternalDisposition,
         externalDisposition,
         changeExternalDisposition,
-        // btnLinkViewExternalDisposition,
         frmSaveDisposition,
         commonSaveDisposition,
         getDisposition,

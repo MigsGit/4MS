@@ -869,7 +869,7 @@
 </template>
 
 <script setup>
-   import {ref , onMounted,reactive, toRef} from 'vue';
+    import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import ModalSpecialInspectionComponent from '../components/ModalSpecialInspectionComponent.vue';

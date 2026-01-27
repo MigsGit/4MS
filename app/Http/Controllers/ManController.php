@@ -326,6 +326,12 @@ class ManController extends Controller
             $result .= '    Action';
             $result .= '</button>';
             $result .= '<ul class="dropdown-menu">';
+            if($manDetailStatus === 'EXDISPO'){
+                //Upload External Disposition
+                $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                return $result;
+            }
             if($row->man_detail->status === "RUP" || $row->man_detail->status === "PMIAPP" || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
                 $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
             }
@@ -344,7 +350,7 @@ class ManController extends Controller
         ->addColumn('get_status',function ($row) use($request){
             $manDetailStatus = $row->man_detail->status ?? '';
             $currentApprover = $row->man_detail->man_approvals_pending[0]['rapidx_user']['name'] ?? '';
-            $getStatus = $this->getStatus($manDetailStatus);
+            $getStatus = $this->commonInterface->getStatus4m($manDetailStatus);
             $result = '';
             $result .= '<center>';
             $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';

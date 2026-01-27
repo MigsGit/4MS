@@ -401,7 +401,11 @@ class MaterialController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
 
-                if($materialStatus === 'EXDISPO' || $materialStatus === "OK"){
+                if($materialStatus === "OK"){
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
+                if($materialStatus === 'EXDISPO'){
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" method-status= "'.$materialStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;

@@ -393,9 +393,13 @@ class MachineController extends Controller
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
                 // $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                if($machineStatus === 'EXDISPO' || $machineStatus === "OK"){
+                if($machineStatus === "OK"){
+                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
+                if($machineStatus === 'EXDISPO'){
                     //Upload External Disposition
-                    $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
@@ -407,9 +411,6 @@ class MachineController extends Controller
                 || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
                     $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
-
-
-
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';
@@ -418,7 +419,7 @@ class MachineController extends Controller
             ->addColumn('get_status',function ($row) use($request){
                 $machineStatus = $row->machine->status ?? "";
                 $currentApprover = $row->machine->machine_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $getStatus = $this->getStatus($machineStatus);
+                $getStatus = $this->commonInterface->getStatus4m($machineStatus);
                 $result = '';
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
