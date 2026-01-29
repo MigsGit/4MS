@@ -67,7 +67,7 @@ class EnvironmentController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($statusEnvironment === 'EXDISPO'){
+                if($statusEnvironment === 'EXDISPO' || $statusEnvironment === 'EXDISAPP' || $statusEnvironment === 'OK'){
                     //Upload External Disposition
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     $result .= '<li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';

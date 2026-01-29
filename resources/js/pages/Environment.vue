@@ -27,7 +27,7 @@
                                     class="table mt-2"
                                     ref="tblEcrByStatus"
                                     :columns="tblEcrByStatusColumns"
-                                    ajax="api/load_ecr_environment_by_status?category=Environment"
+                                    ajax="api/load_ecr_environment_by_status?category=Environment && adminAccess=all"
                                     :options="{
                                         serverSide: true, //Serverside true will load the network
                                         columnDefs:[
@@ -562,10 +562,10 @@
     <ModalComponent @add-event="saveDisposition" icon="fa-plus" modalDialog="modal-dialog modal-lg" title="Add DispositionReferences" ref="modalSaveDisposition">
         <template #body>
             <div class="row mt-3">
-                <div class="col-md-6">
+                <div class="col-md-6 d-none">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">EcrId:</span>
-                        <input v-model="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg">
+                        <input v-model="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg" readonly>
                     </div>
                 </div>
                 <div class="col-md-6 d-none">

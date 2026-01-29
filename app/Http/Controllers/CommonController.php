@@ -251,6 +251,77 @@ class CommonController extends Controller
             throw $e;
         }
     }
+    public function saveExternalDisposition(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $ecrsId = $request->ecrsId;
+            $dispositionStatus = $request->status;
+            $ecr = Ecr::find($ecrsId,['category']);
+            switch ($ecr->category) {
+                case 'Man':
+                    $model = Man::class;
+                    break;
+                case 'Material':
+                    $model = Material::class;
+                    break;
+                case 'Machine':
+                    $model = Machine::class;
+                    break;
+                case 'Method':
+                    $model = Method::class;
+                    break;
+                case 'Environment':
+                    $model = Environment::class;
+                    break;
+                default:
+                    return response()->json(['isSuccess' => 'false','Invalid Category'],500);
+                    break;
+            }
+            if($request->hasfile('externalDisposition') ){
+                $excelFileParams = [
+                   'txtDocuReference' => $request->externalDisposition,
+                   'ecrsId' => $ecrsId,
+                   'path' =>  'external_disposition/'.$ecr->category
+                ];
+                $arrUploadFile = $this->commonInterface->excelFileUpload($excelFileParams);
+                $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
+                $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
+                $dispositionRequestValidated['original_filename'] = $impOriginalFilename;
+                $dispositionRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $dispositionRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $dispositionRequestValidated['file_path'] = $ecr->category;
+            }
+            $dispositionRequestValidated['status'] = $dispositionStatus;
+            $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
+            $dispositionRequestValidated['remarks'] = $request->remarks;
+
+            $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)
+            ->whereNull('deleted_at')
+            ->count();
+            if($externalDisposition === 0 ){
+                $dispositionRequestValidated['ecrs_id'] = $ecrsId;
+                $dispositionRequestValidated['created_at'] = now();
+                $this->resourceInterface->create(ExternalDisposition::class,$dispositionRequestValidated);
+            }else{
+                $this->resourceInterface->updateConditions(ExternalDisposition::class,[
+                    'ecrs_id' =>  $ecrsId
+                 ],$dispositionRequestValidated);
+            }
+            // Save External Dispo File
+            $this->resourceInterface->updateConditions($model,[
+                'ecrs_id' => $ecrsId
+            ],[
+                'status' => $dispositionStatus === 'accept' ? 'OK' : 'EXDISAPP',
+                'approval_status' =>  $dispositionStatus === 'accept' ? 'OK' : 'EXDISAPP',
+            ]);
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
     public function loadSpecialInspectionByEcrId(Request $request){
         try {
             $ecrsId = $request->ecrsId ?? "";
@@ -544,8 +615,6 @@ class CommonController extends Controller
             throw $e;
         }
     }
-
-
     public function getApprovalStatus($approval_status){
         try {
              switch ($approval_status) {
@@ -675,79 +744,10 @@ class CommonController extends Controller
 
         return Excel::download(new InternalCcmExport($ecrCollection),"Internal Export.xlsx");
     }
-    public function saveExternalDisposition(Request $request){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-           return  $ecrsId = $request->ecrsId;
-            $dispositionStatus = $request->status;
-            $ecr = Ecr::find($ecrsId,['category']);
-            switch ($ecr->category) {
-                case 'Man':
-                    $model = ManDetail::class;
-                    break;
-                case 'Material':
-                    $model = Material::class;
-                    break;
-                case 'Machine':
-                    $model = Machine::class;
-                    break;
-                case 'Method':
-                    $model = Method::class;
-                    break;
-                case 'Environment':
-                    $model = Environment::class;
-                    break;
-                default:
-                    return response()->json(['isSuccess' => 'false','Invalid Category'],500);
-                    break;
-            }
-            if($request->hasfile('externalDisposition') ){
-                $excelFileParams = [
-                   'txtDocuReference' => $request->externalDisposition,
-                   'ecrsId' => $ecrsId,
-                   'path' =>  'external_disposition/'.$ecr->category
-                ];
-                $arrUploadFile = $this->commonInterface->excelFileUpload($excelFileParams);
-                $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
-                $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
-                $externalDispositionValidated['original_filename'] = $impOriginalFilename;
-                $externalDispositionValidated['filtered_document_name'] = $impFilteredDocumentName;
-                $externalDispositionValidated['filtered_document_name'] = $impFilteredDocumentName;
-                $externalDispositionValidated['file_path'] = $ecr->category;
-            }
-            $externalDispositionValidated['status'] = $dispositionStatus;
-            $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)
-            ->whereNull('deleted_at')
-            ->count();
-            if($externalDisposition === 0 ){
-                $dispositionRequestValidated['ecrs_id'] = $ecrsId;
-                $dispositionRequestValidated['created_at'] = now();
-                $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
-                $this->resourceInterface->create(ExternalDisposition::class,$externalDispositionValidated);
-            }else{
-                $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
-                $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
-                $this->resourceInterface->updateConditions(ExternalDisposition::class,[
-                    'ecrs_id' =>  $ecrsId
-                 ],$externalDispositionValidated);
-            }
-            // Save External Dispo File
-            $this->resourceInterface->updateConditions($model,[
-                'ecrs_id' => $ecrsId
-            ],[
-                'status' => $dispositionStatus === 'accept' ? 'OK' : 'EXDISAPP',
-                'approval_status' =>  $dispositionStatus === 'accept' ? 'OK' : 'EXDISAPP',
-            ]);
-            DB::commit();
-            return response()->json(['isSuccess' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
+
     public function viewExternalDisposition(Request $request){
-        $ecrsId = decrypt($request->ecrsId);
+        return $ecrsId = decrypt($request->ecrsId);
+       //TODO : Read the ECR First the get the category eg. external_disposition/Method
         $conditions = [
             'ecrs_id' => $ecrsId,
         ];
@@ -756,7 +756,6 @@ class CommonController extends Controller
         ->whereNull('deleted_at')
         ->get([
             'filtered_document_name',
-            'file_path',
         ]);
         if(count($externalDispositionByEcrsId) != 0){
             $arrFilteredDocumentName = explode(' | ' ,$externalDispositionByEcrsId->filtered_document_name);

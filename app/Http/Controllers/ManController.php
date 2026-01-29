@@ -326,7 +326,7 @@ class ManController extends Controller
             $result .= '    Action';
             $result .= '</button>';
             $result .= '<ul class="dropdown-menu">';
-            if($manDetailStatus === 'EXDISPO'){
+            if($manDetailStatus === 'EXDISPO' || $manDetailStatus === 'EXDISAPP' || $manDetailStatus === 'OK'){
                 //Upload External Disposition
                 $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                 $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
