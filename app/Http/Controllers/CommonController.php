@@ -706,6 +706,18 @@ class CommonController extends Controller
             'ecr_details.dropdown_master_detail_description_of_change',
             'ecr_details.dropdown_master_detail_reason_of_change',
             'document_details.rapidx_user_person_in_charge',
+
+            // 4M Relationship
+            'man_detail.man_detail_approvals.rapidx_user',
+            'material.material_approvals.rapidx_user',
+            'machine.machine_approvals.rapidx_user',
+            'method.method_approvals.rapidx_user',
+            'environment.environment_approvals.rapidx_user',
+            // 'method',
+            // 'man_detail',
+            // 'material',
+            // 'machine',
+            // 'environment',
         ],
         [
             'id'=> $ecrsId
@@ -730,15 +742,23 @@ class CommonController extends Controller
             $requestedByDeptCollection = collect($ecrApprovals)->map(function ($ecrApprovalsRow){
                 $departmentId = $ecrApprovalsRow->rapidx_user->department_id ?? '';
                 return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
-
             }); //removed the NULL Value
+
+            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->method->method_approvals ?? $ecrCollectionRow->environment->environment_approvals ?? 'NOEXISTS';
+            if($detailsFourMCollection != 'NOEXISTS'){
+                $detailsFourMApprovalByDeptCollection = collect($detailsFourMCollection)->map(function ($detailsFourMRow){
+                   $departmentId = $detailsFourMRow->rapidx_user->department_id ?? '';
+                   return  $approvalByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
+                }); //removed the NULL Value
+            }
             // })->filter()->all(); //removed the NULL Value
             return [
+                'detailsFourMApprovalByDeptCollection' => $detailsFourMApprovalByDeptCollection ?? [],
                 'requestedByDeptCollection' => $requestedByDeptCollection,
                 'ecrCollection' => $ecrCollectionRow,
                 'beforeAfterFileStorage' => $beforeAfterFileStorage,
+                'detailsFourMCollection' => $detailsFourMCollection,
 
-                // 'beforeAfterFileStorage' => $beforeAfterFileStorage,
             ];
         });
 
