@@ -1040,7 +1040,7 @@
     </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Document Details" ref="modalSaveEcrDocument" @add-event="frmSaveEcrDocument()">
         <template #body>
-            <div class="row">
+            <div class="row  d-none">
                 <div class="input flex-nowrap mb-2 input-group-sm">
                     <input  v-model="frmEcrDocument.ecrsId" type="text" class="form-control form-control" aria-describedby="addon-wrapping" readonly>
                 </div>

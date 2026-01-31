@@ -535,9 +535,11 @@ class EcrController extends Controller
         }
     }
     public function loadEcrDocuments(Request $request){
-        $documentDetail =  $this->resourceInterface->readWithRelationsConditionsActive(DocumentDetail::class,[],[
-        'rapidx_user_person_in_charge'
-       ],[]);
+       $documentDetail =  $this->resourceInterface->readWithRelationsConditionsActive(DocumentDetail::class,[],[
+            'rapidx_user_person_in_charge'
+        ],[
+            'ecrs_id' => $request->ecrsId
+        ]);
 
        return DataTables($documentDetail)
             ->addColumn('get_actions',function ($row) use ($request){
