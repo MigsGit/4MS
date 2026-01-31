@@ -318,6 +318,9 @@ class ManController extends Controller
 
         return DataTables($ecr)
         ->addColumn('get_actions',function ($row) use ($request){
+            $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";
+            $currentApprover = $row->man_detail->man_approvals_pending[0]['rapidx_user']['id'] ?? '';
+
             $manDetailStatus = $row->man_detail->status ?? '';
             $result = "";
             $result .= '<center>';
@@ -329,10 +332,10 @@ class ManController extends Controller
             if($manDetailStatus === 'EXDISPO' || $manDetailStatus === 'EXDISAPP' || $manDetailStatus === 'OK'){
                 //Upload External Disposition
                 $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                // $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 return $result;
             }
-            if($row->man_detail->status === "RUP" || $row->man_detail->status === "PMIAPP" || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
+            if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id') || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
                 $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
             }
             if($manDetailStatus === "RUP" && $row->created_by === session('rapidx_user_id')){

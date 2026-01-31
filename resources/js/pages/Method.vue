@@ -25,7 +25,7 @@
                             class="table mt-2"
                             ref="tblEcrByStatus"
                             :columns="tblEcrByStatusColumns"
-                            ajax='api/load_method_ecr_by_status?category=Method && adminAccess=all',
+                            ajax='api/load_method_ecr_by_status?category=Method',
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[

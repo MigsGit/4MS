@@ -393,6 +393,9 @@ class MaterialController extends Controller
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 $materialStatus = $row->material->status ?? "";
+                $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";
+                $currentApprover = $row->material->material_approvals_pending[0]['rapidx_user']['id'] ?? '';
+
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -402,6 +405,12 @@ class MaterialController extends Controller
                 $result .= '<ul class="dropdown-menu">';
                 if($materialStatus === 'EXDISPO' || $materialStatus === 'EXDISAPP' || $materialStatus === 'OK'){
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" method-status= "'.$materialStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
+                    // $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
+
+                if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id') || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
+
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
