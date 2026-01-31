@@ -48,13 +48,18 @@ export default function useCommon(){
             {"value":"N/A","label":"N/A"},
             {"value":"R","label":"REQUIRED"},
             {"value":"NR","label":"NOT REQUIRED"},
+        ],
+        optDisposition : [
+            {"value":"","label":"-Select an option-"},
+            {"value":"accept","label":"ACCEPT"},
+            {"value":"reject","label":"REJECT"},
         ]
     });
     //Ref State
     const tblSpecialInspection = ref(null);
     const modalSaveSpecialInspection = ref(null);
     const modalExternalDisposition = ref(null);
-    const externalDisposition  = ref(null);
+    const externalDisposition  = ref([]);
 
     const frmSpecialInspection = ref({
         productDetail : "",
@@ -66,6 +71,12 @@ export default function useCommon(){
         inspectionDate : "",
         inspector : "",
         lqcSectionHead : "",
+        remarks : "",
+    });
+    const frmSaveDisposition = ref({
+        ecrsId : "",
+        file : "",
+        status : "",
         remarks : "",
     });
     //Params
@@ -232,26 +243,61 @@ export default function useCommon(){
         }
     };
 
+    const commonSaveDisposition = async () => {
+        let formData = new FormData();
+        dispositionFile.value.forEach((file, index) => {
+            formData.append('dispositionFile[]', file);
+        });
+        formData.append("ecrsId", selectedEcrsId.value);
+        formData.append("status", frmSaveDisposition.value.status);
+        formData.append("remarks", frmSaveDisposition.value.remarks);
+        axiosSaveData(formData,'api/save_disposition',(response) =>{
+            modal.frmSaveDisposition.hide();
+        });
+    }
+    const getDisposition = async (params) => {
+        let apiParams = {
+            ecrsId : params.ecrsId
+        }
+        frmSaveDisposition.value.ecrsId = params.ecrsId;
+        axiosFetchData(apiParams,'api/get_disposition',function(response){
+            let data = response.data.externalDisposition;
+            if(response.data.isSuccess === 'true'){
+                frmSaveDisposition.value.status = data.status;
+                frmSaveDisposition.value.remarks = data.remarks;
+                return;
+            }
+            frmSaveDisposition.value.status =  '';
+            frmSaveDisposition.value.remarks = '';
+        });
+    }
+
+
     return {
         rapidxUserDeptGroup,
         modal,
         commonVar,
-        externalDisposition,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
-        modalExternalDisposition,
         specialInsQcInspectorParams,
         specialInsLqcParams,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        changeExternalDisposition,
-        btnLinkViewExternalDisposition,
         getAdminAccessOpt,
         getCategoryAdminAccessOpt,
         resetEcrForm,
         frmSpecialInspection,
+
+        externalDisposition,
+        modalExternalDisposition,
+
+        changeExternalDisposition,
+        btnLinkViewExternalDisposition,
+        getDisposition,
+        commonSaveDisposition,
+        frmSaveDisposition,
     }
 
 }

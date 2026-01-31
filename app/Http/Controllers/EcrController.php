@@ -18,6 +18,7 @@ use App\Models\ManApproval;
 use App\Models\PmiApproval;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\DocumentDetail;
 use App\Models\DropdownMaster;
 use App\Models\EcrRequirement;
 use App\Http\Requests\EcrRequest;
@@ -35,6 +36,7 @@ use App\Http\Requests\EcrApprovalRequest;
 use App\Http\Requests\PmiApprovalRequest;
 use App\Models\ClassificationRequirement;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\DocumentDetailRequest;
 use App\Http\Requests\EcrRequirementFileRequest;
 use App\Http\Requests\PmiExternalApprovalRequest;
 
@@ -510,8 +512,54 @@ class EcrController extends Controller
              throw $e;
         }
     }
+    public function saveEcrDocument(Request $request,DocumentDetailRequest $documentDetailRequest){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $ecrDocumentsId = $request->id;
+
+            if( isset($ecrDocumentsId) ){ //Edit
+                $documentDetailRequestValidated =  $documentDetailRequest->validated();
+                $this->resourceInterface->updateConditions(DocumentDetail::class,[
+                    'id' => $ecrDocumentsId
+                ],$documentDetailRequestValidated);
+            }else{
+                $documentDetailRequestValidated =  $documentDetailRequest->validated();
+                $this->resourceInterface->create(DocumentDetail::class,$documentDetailRequestValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
     public function loadEcrDocuments(Request $request){
-        return [];
+        $documentDetail =  $this->resourceInterface->readWithRelationsConditionsActive(DocumentDetail::class,[],[
+        'rapidx_user_person_in_charge'
+       ],[]);
+
+       return DataTables($documentDetail)
+            ->addColumn('get_actions',function ($row) use ($request){
+                $result = '';
+                $result .= '<center>';
+                $result .= '<button class="btn btn-sm btn-outline-primary" type="button" ecrs-id="'.$row->id.'" id="btnGetEcrDocumentsId"><i class="fa-solid fa-eye"></i></button>';
+                $result .= '</center>';
+                return $result;
+            })
+            ->addColumn('get_person_in_charge',function ($row){
+                $personInCharge = $row->rapidx_user_person_in_charge->name ?? '';
+                // $personInCharge = $row;
+                $result = '';
+                $result .= '<center>';
+                $result .= '<span> '.$personInCharge.' </span>';
+                $result .= '<br>';
+                $result .= '</br>';
+                return $result;
+            })
+            ->rawColumns(['get_person_in_charge','get_actions'])
+            ->make(true);
+
     }
     public function loadEcr(Request $request){
         try {
@@ -561,9 +609,9 @@ class EcrController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
+                // if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
-                }
+                // }
                 if($row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
                 }
@@ -658,7 +706,7 @@ class EcrController extends Controller
                     $status4m = $row->machine->status;
                 }
                 if($row->method != null){
-                    $status4m = $row->method->status;
+                   $status4m = $row->method->status;
                 }
                 if($row->environment != null){
                     $status4m = $row->environment->status;
@@ -1336,7 +1384,16 @@ class EcrController extends Controller
             throw $e;
         }
    }
-
+   public function getEcrDocumentById(Request $request){
+       try {
+           $documentDetail =  $this->resourceInterface->readCustomEloquent(DocumentDetail::class,[],[],[
+            'id' => $request->ecrsId
+           ])->first();
+           return response()->json(['isSuccess' => 'true', 'documentDetail' => $documentDetail]);
+       } catch (Exception $e) {
+           throw $e;
+       }
+   }
 
 
 }

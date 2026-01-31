@@ -52,6 +52,14 @@ export default function useEcr(){
         approvalRemarks: '',
         remarks: '',
     });
+    const frmEcrDocument = ref({
+        id: '',
+        documentNo: '',
+        personInCharge: '',
+        revNo: '',
+        date: '',
+
+    });
     const frmEcrDetails = ref({
         ecrDetailsId: '',
         ecrsId: '',
@@ -486,6 +494,23 @@ export default function useEcr(){
         modalEcr.EcrRequirements.show();
 
     }
+    const getEcrDocumentById = async (params) => {
+        let apiParams = {
+            ecrsId : params.ecrsId
+        }
+        axiosFetchData(apiParams,'api/get_ecr_document_by_id',function(response){
+            let data = response.data;
+            console.log(data.documentDetail);
+
+            frmEcrDocument.value.id = data.documentDetail.id;
+            frmEcrDocument.value.ecrsId = data.documentDetail.ecrs_id;
+            frmEcrDocument.value.documentNo = data.documentDetail.document_number;
+            frmEcrDocument.value.personInCharge = data.documentDetail.person_in_charge;
+            frmEcrDocument.value.revisionNo = data.documentDetail.revision_no;
+            frmEcrDocument.value.date = data.documentDetail.revision_due_date;
+            modalEcr.SaveEcrDocument.show();
+        });
+    }
 
     return {
         modalEcr,
@@ -497,19 +522,11 @@ export default function useEcr(){
         frmEcrOtherDispoRows,
         frmEcrPmiApproverRows,
         frmEcrPmiExternalApproverRows,
+        frmEcrDocument,
         descriptionOfChangeParams,
         reasonOfChangeParams,
         typeOfPartParams,
         tblEcrDetails,
-        resetArrEcrRows,
-        getDropdownMasterByOpt,
-        axiosFetchData,
-        getEcrById,
-        addEcrReasonRows,
-        removeEcrReasonRows,
-        getEcrDetailsId,
-        saveEcrDetails,
-
         selectedEcrRequirementsIdEncrypted,
         arrEcrRequirementOriginalFilenames,
         tblEcrRequirementsColumns,
@@ -519,16 +536,25 @@ export default function useEcr(){
         tblEcrMethodRequirements,
         tblEcrEnvironmentRequirements,
         tblEcrOthersRequirements,
-
         isEmptyTblEcrManRequirements,
         isEmptyTblEcrMaterialRequirements,
         isEmptyTblEcrMachineRequirements,
         isEmptyTblEcrMethodRequirements,
         isEmptyTblEcrEnvironmentRequirements,
         isEmptyTblEcrOthersRequirements,
+
+        resetArrEcrRows,
+        getDropdownMasterByOpt,
+        axiosFetchData,
+        getEcrById,
+        addEcrReasonRows,
+        removeEcrReasonRows,
+        getEcrDetailsId,
+        saveEcrDetails,
         uploadFiles,
         getEcrRequirementRefById,
         btnLinkViewEcrRequirementRef,
         btnEcrRequirement,
+        getEcrDocumentById,
     };
 }

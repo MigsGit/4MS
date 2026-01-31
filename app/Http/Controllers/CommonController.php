@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use App\Models\MethodApproval;
 use App\Models\MachineApproval;
 use App\Models\MaterialApproval;
+use App\Interfaces\FileInterface;
 use App\Models\SpecialInspection;
 use App\Exports\ExternalCcmExport;
 use App\Exports\InternalCcmExport;
@@ -48,6 +49,278 @@ class CommonController extends Controller
         $this->resourceInterface = $resourceInterface;
         $this->commonInterface = $commonInterface;
         $this->emailInterface = $emailInterface;
+    }
+
+    public function saveSpecialInspection(SpecialInspectionRequest $specialInspectionRequest){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            if( isset($specialInspectionRequest->special_inspections_id)){ //Edit
+                $specialInspectionRequestValidated = $specialInspectionRequest->validated();
+                $conditions = [
+                    'id' => $specialInspectionRequest->special_inspections_id
+                ];
+                $specialInspectionRequestValidated['updated_by'] = session('rapidx_user_id');
+                $this->resourceInterface->updateConditions(SpecialInspection::class,$conditions,$specialInspectionRequestValidated);
+            }else{ //Add
+                $specialInspectionRequestValidated = $specialInspectionRequest->validated();
+                $specialInspectionRequestValidated['created_at'] = now();
+                $specialInspectionRequestValidated['created_by'] = session('rapidx_user_id');
+                $this->resourceInterface->create(SpecialInspection::class,$specialInspectionRequestValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function savePmiInternalApproval(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $ecrsId = $request->ecrsId;
+            //Get Current Ecr Approval is equal to Current Session
+           $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
+            ->whereNotNull('rapidx_user_id')
+            ->where('status','PEN')
+            ->first();
+
+            if($pmiInternalApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
+                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
+            }
+            //Get the ECR Category
+            $ecr = Ecr::where('id',$ecrsId)
+            ->whereNull('deleted_at')
+            ->limit(1)
+            ->get();
+            $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecr[0]->created_by ?? '');
+
+            $isCategory = $ecr[0]->category;
+            switch ($isCategory) {
+                case 'Man':
+                    $currentModel = Man::class;
+                    break;
+                case 'Material':
+                    $currentModel = Material::class;
+                    break;
+                case 'Machine':
+                    $currentModel = Machine::class;
+                    break;
+                case 'Method':
+                    $currentModel = Method::class;
+                    break;
+                case 'Environment':
+                    $currentModel = Environment::class;
+                    $isEnvironmentRefFileExist = Environment::where('ecrs_id',$ecrsId)
+                    ->whereNotNull('original_filename')
+                    ->count();
+                    if ( $isEnvironmentRefFileExist === 0){
+                        return response()->json(['isSuccess' => 'false','msg' => 'Please upload Environment Reference File !'],500);
+                    }
+                    break;
+                default:
+                    return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
+                    break;
+            }
+            //DISAPPROVED ECR
+            if($request->status === "DIS"){
+                $categoryConditions = [
+                    'ecrs_id' => $ecrsId,
+                ];
+                $categoryRequestValidated = [
+                    'status' => 'DIS',
+                    'approval_status' => 'PB',
+                ];
+                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
+                 //Send DISAPPROVED Email to Requestor
+                 $to = $requestedBy['email'] ?? '';
+                 $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                 $from = $currentSession;
+                 $from_name = "4M Change Control Management System";
+                 $subject = "DISAPPROVED: " .$ecr[0]->category. " (4M CMS)";
+                 $header = "Your " .$ecr[0]->category. " 4M has been DISAPPROVED";
+                 $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
+                 //Array Send Email
+                $emailData = [
+                     "to" =>$to,
+                     "cc" =>"",
+                     "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                     "from" => $from,
+                     "from_name" => $from_name ?? "4M Change Control Management System",
+                     "subject" =>$subject,
+                     "message" =>  $msg,
+                     "attachment_filename" => "",
+                     "attachment" => "",
+                     "send_date_time" => now(),
+                     "date_time_sent" => "",
+                     "date_created" => now(),
+                     "created_by" => session('rapidx_username'),
+                     "system_name" => "rapidx_4M",
+                 ];
+                 DB::commit();
+                 $this->emailInterface->sendEmail($emailData);
+                 return response()->json(['isSuccess' => 'true']);
+            }
+            //Get Current Status
+            $pmiInternalApprovalCurrent->update([
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+            ]);
+            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+            $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)
+           ->whereNotNull('rapidx_user_id')
+           ->where('status','-')
+           ->limit(1)
+           ->get();
+            if ( count($pmiInternalApproval) === 0){
+                $categoryConditions = [
+                    'ecrs_id' => $ecrsId,
+                ];
+                if($ecr[0]->internal_external === "External"){
+                    $categoryRequestValidated = [
+                        'status' => 'EXDISPO',
+                        'approval_status' => 'EXDISPO',
+                    ];
+                }
+                if($ecr[0]->internal_external === "Internal"){
+                    $categoryRequestValidated = [
+                        'status' => 'OK',
+                        'approval_status' => 'OK',
+                    ];
+                }
+                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
+                   //Send APPROVED Email to Requestor
+                $to = $requestedBy['email'] ?? '';
+                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                $from = 'issinfoservice@pricon.ph';
+                $from_name = "4M Change Control Management System";
+                $subject = "APPROVED: MACHINE (4M CMS)";
+                $header = "Your MACHINE 4M  has been APPROVED";
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
+            }
+            //Update next approval
+            if ( count($pmiInternalApproval) != 0){
+                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($pmiInternalApproval[0]->rapidx_user_id);
+
+                $pmiInternalApprovalValidated = [
+                    'status' => 'PEN',
+                ];
+                $pmiInternalApprovalConditions = [
+                    'id' => $pmiInternalApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
+                //Update the ECR Approval Status
+                $categoryConditions = [
+                    'ecrs_id' => $ecrsId,
+                ];
+                $categoryRequestValidated = [
+                    'approval_status' => $pmiInternalApproval[0]->approval_status,
+                ];
+                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
+
+                 //Send APPROVED Email to Requestor
+                 $to = $currentApproval['email'] ?? '';
+                 $from = $createdByEmail['email'] ?? '';
+                 $from_name = "4M Change Control Management System";
+                 $subject = "FOR PMI Internal APPROVAL:" .$ecr[0]->category. " 4M";
+                 $header = "Please see the" .$ecr[0]->category. ' 4Mfor your approval.';
+                 $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
+            }
+            $emailData = [
+                "to" =>$to,
+                "cc" =>"",
+                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                "from" => $from,
+                "from_name" => $from_name ?? "4M Change Control Management System",
+                "subject" =>$subject,
+                "message" =>  $msg,
+                "attachment_filename" => "",
+                "attachment" => "",
+                "send_date_time" => now(),
+                "date_time_sent" => "",
+                "date_created" => now(),
+                "created_by" => session('rapidx_username'),
+                "system_name" => "rapidx_4M",
+            ];
+            DB::commit();
+            $this->emailInterface->sendEmail($emailData);
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+    public function saveExternalDisposition(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            $ecrsId = $request->ecrsId;
+            $dispositionStatus = $request->status;
+            $ecr = Ecr::find($ecrsId,['category']);
+            switch ($ecr->category) {
+                case 'Man':
+                    $model = Man::class;
+                    break;
+                case 'Material':
+                    $model = Material::class;
+                    break;
+                case 'Machine':
+                    $model = Machine::class;
+                    break;
+                case 'Method':
+                    $model = Method::class;
+                    break;
+                case 'Environment':
+                    $model = Environment::class;
+                    break;
+                default:
+                    return response()->json(['isSuccess' => 'false','Invalid Category'],500);
+                    break;
+            }
+            if($request->hasfile('externalDisposition') ){
+                $excelFileParams = [
+                   'txtDocuReference' => $request->externalDisposition,
+                   'ecrsId' => $ecrsId,
+                   'path' =>  'external_disposition/'.$ecr->category
+                ];
+                $arrUploadFile = $this->commonInterface->excelFileUpload($excelFileParams);
+                $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
+                $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
+                $dispositionRequestValidated['original_filename'] = $impOriginalFilename;
+                $dispositionRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $dispositionRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $dispositionRequestValidated['file_path'] = $ecr->category;
+            }
+            $dispositionRequestValidated['status'] = $dispositionStatus;
+            $dispositionRequestValidated['updated_by'] = session('rapidx_user_id');
+            $dispositionRequestValidated['remarks'] = $request->remarks;
+
+            $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)
+            ->whereNull('deleted_at')
+            ->count();
+            if($externalDisposition === 0 ){
+                $dispositionRequestValidated['ecrs_id'] = $ecrsId;
+                $dispositionRequestValidated['created_at'] = now();
+                $this->resourceInterface->create(ExternalDisposition::class,$dispositionRequestValidated);
+            }else{
+                $this->resourceInterface->updateConditions(ExternalDisposition::class,[
+                    'ecrs_id' =>  $ecrsId
+                 ],$dispositionRequestValidated);
+            }
+            // Save External Dispo File
+            $this->resourceInterface->updateConditions($model,[
+                'ecrs_id' => $ecrsId
+            ],[
+                'status' => $dispositionStatus === 'accept' ? 'OK' : 'EXDISAPP',
+                'approval_status' =>  $dispositionStatus === 'accept' ? 'OK' : 'EXDISAPP',
+            ]);
+            DB::commit();
+            return response()->json(['isSuccess' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
     public function loadSpecialInspectionByEcrId(Request $request){
         try {
@@ -342,206 +615,6 @@ class CommonController extends Controller
             throw $e;
         }
     }
-    public function savePmiInternalApproval(Request $request){ //internal_external
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-            $ecrsId = $request->ecrsId;
-            //Get Current Ecr Approval is equal to Current Session
-           $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
-            ->whereNotNull('rapidx_user_id')
-            ->where('status','PEN')
-            ->first();
-
-            if($pmiInternalApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
-                return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
-            }
-            //Get the ECR Category
-            $ecr = Ecr::where('id',$ecrsId)
-            ->whereNull('deleted_at')
-            ->limit(1)
-            ->get();
-            $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecr[0]->created_by ?? '');
-
-            $isCategory = $ecr[0]->category;
-            switch ($isCategory) {
-                case 'Man':
-                    $currentModel = Man::class;
-                    break;
-                case 'Material':
-                    $currentModel = Material::class;
-                    break;
-                case 'Machine':
-                    $currentModel = Machine::class;
-                    break;
-                case 'Method':
-                    $currentModel = Method::class;
-                    break;
-                case 'Environment':
-                    $currentModel = Environment::class;
-                    $isEnvironmentRefFileExist = Environment::where('ecrs_id',$ecrsId)
-                    ->whereNotNull('original_filename')
-                    ->count();
-                    if ( $isEnvironmentRefFileExist === 0){
-                        return response()->json(['isSuccess' => 'false','msg' => 'Please upload Environment Reference File !'],500);
-                    }
-                    break;
-                default:
-                    return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
-                    break;
-            }
-            //DISAPPROVED ECR
-            if($request->status === "DIS"){
-                $categoryConditions = [
-                    'ecrs_id' => $ecrsId,
-                ];
-                $categoryRequestValidated = [
-                    'status' => 'DIS',
-                    'approval_status' => 'PB',
-                ];
-                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
-                 //Send DISAPPROVED Email to Requestor
-                 $to = $requestedBy['email'] ?? '';
-                 $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
-                 $from = $currentSession;
-                 $from_name = "4M Change Control Management System";
-                 $subject = "DISAPPROVED: " .$ecr[0]->category. " (4M CMS)";
-                 $header = "Your " .$ecr[0]->category. " 4M has been DISAPPROVED";
-                 $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
-                 //Array Send Email
-                $emailData = [
-                     "to" =>$to,
-                     "cc" =>"",
-                     "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
-                     "from" => $from,
-                     "from_name" => $from_name ?? "4M Change Control Management System",
-                     "subject" =>$subject,
-                     "message" =>  $msg,
-                     "attachment_filename" => "",
-                     "attachment" => "",
-                     "send_date_time" => now(),
-                     "date_time_sent" => "",
-                     "date_created" => now(),
-                     "created_by" => session('rapidx_username'),
-                     "system_name" => "rapidx_4M",
-                 ];
-                 DB::commit();
-                 $this->emailInterface->sendEmail($emailData);
-                 return response()->json(['isSuccess' => 'true']);
-            }
-            //Get Current Status
-            $pmiInternalApprovalCurrent->update([
-                'status' => $request->status,
-                'remarks' => $request->remarks,
-            ]);
-            //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-            $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)
-           ->whereNotNull('rapidx_user_id')
-           ->where('status','-')
-           ->limit(1)
-           ->get();
-            if ( count($pmiInternalApproval) === 0){
-                $categoryConditions = [
-                    'ecrs_id' => $ecrsId,
-                ];
-                if($ecr[0]->internal_external === "External"){
-                    $categoryRequestValidated = [
-                        'status' => 'EXDISPO',
-                        'approval_status' => 'EXDISPO',
-                    ];
-                }
-                if($ecr[0]->internal_external === "Internal"){
-                    $categoryRequestValidated = [
-                        'status' => 'OK',
-                        'approval_status' => 'OK',
-                    ];
-                }
-                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
-                   //Send APPROVED Email to Requestor
-                $to = $requestedBy['email'] ?? '';
-                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
-                $from = 'issinfoservice@pricon.ph';
-                $from_name = "4M Change Control Management System";
-                $subject = "APPROVED: MACHINE (4M CMS)";
-                $header = "Your MACHINE 4M  has been APPROVED";
-                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
-            }
-            //Update next approval
-            if ( count($pmiInternalApproval) != 0){
-                $currentApproval = $this->emailInterface->getEmailByRapidxUserId($pmiInternalApproval[0]->rapidx_user_id);
-
-                $pmiInternalApprovalValidated = [
-                    'status' => 'PEN',
-                ];
-                $pmiInternalApprovalConditions = [
-                    'id' => $pmiInternalApproval[0]->id,
-                ];
-                $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
-                //Update the ECR Approval Status
-                $categoryConditions = [
-                    'ecrs_id' => $ecrsId,
-                ];
-                $categoryRequestValidated = [
-                    'approval_status' => $pmiInternalApproval[0]->approval_status,
-                ];
-                $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
-
-                 //Send APPROVED Email to Requestor
-                 $to = $currentApproval['email'] ?? '';
-                 $from = $createdByEmail['email'] ?? '';
-                 $from_name = "4M Change Control Management System";
-                 $subject = "FOR PMI Internal APPROVAL:" .$ecr[0]->category. " 4M";
-                 $header = "Please see the" .$ecr[0]->category. ' 4Mfor your approval.';
-                 $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
-            }
-            $emailData = [
-                "to" =>$to,
-                "cc" =>"",
-                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
-                "from" => $from,
-                "from_name" => $from_name ?? "4M Change Control Management System",
-                "subject" =>$subject,
-                "message" =>  $msg,
-                "attachment_filename" => "",
-                "attachment" => "",
-                "send_date_time" => now(),
-                "date_time_sent" => "",
-                "date_created" => now(),
-                "created_by" => session('rapidx_username'),
-                "system_name" => "rapidx_4M",
-            ];
-            DB::commit();
-            $this->emailInterface->sendEmail($emailData);
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
-    public function saveSpecialInspection(SpecialInspectionRequest $specialInspectionRequest){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-            if( isset($specialInspectionRequest->special_inspections_id)){ //Edit
-                $specialInspectionRequestValidated = $specialInspectionRequest->validated();
-                $conditions = [
-                    'id' => $specialInspectionRequest->special_inspections_id
-                ];
-                $specialInspectionRequestValidated['updated_by'] = session('rapidx_user_id');
-                $this->resourceInterface->updateConditions(SpecialInspection::class,$conditions,$specialInspectionRequestValidated);
-            }else{ //Add
-                $specialInspectionRequestValidated = $specialInspectionRequest->validated();
-                $specialInspectionRequestValidated['created_at'] = now();
-                $specialInspectionRequestValidated['created_by'] = session('rapidx_user_id');
-                $this->resourceInterface->create(SpecialInspection::class,$specialInspectionRequestValidated);
-            }
-            DB::commit();
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
     public function getApprovalStatus($approval_status){
         try {
              switch ($approval_status) {
@@ -624,7 +697,7 @@ class CommonController extends Controller
         $iqc_dropdown_category_section = 'TS';
         $ecrsId = decrypt($request->ecrsId);
 
-       $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
+        $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,[],
         [
 
             'before_after_file_storage',
@@ -632,6 +705,19 @@ class CommonController extends Controller
             'ecr_approvals.rapidx_user',
             'ecr_details.dropdown_master_detail_description_of_change',
             'ecr_details.dropdown_master_detail_reason_of_change',
+            'document_details.rapidx_user_person_in_charge',
+
+            // 4M Relationship
+            'man_detail.man_detail_approvals.rapidx_user',
+            'material.material_approvals.rapidx_user',
+            'machine.machine_approvals.rapidx_user',
+            'method.method_approvals.rapidx_user',
+            'environment.environment_approvals.rapidx_user',
+            // 'method',
+            // 'man_detail',
+            // 'material',
+            // 'machine',
+            // 'environment',
         ],
         [
             'id'=> $ecrsId
@@ -656,87 +742,32 @@ class CommonController extends Controller
             $requestedByDeptCollection = collect($ecrApprovals)->map(function ($ecrApprovalsRow){
                 $departmentId = $ecrApprovalsRow->rapidx_user->department_id ?? '';
                 return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
-
             }); //removed the NULL Value
+
+            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->method->method_approvals ?? $ecrCollectionRow->environment->environment_approvals ?? 'NOEXISTS';
+            if($detailsFourMCollection != 'NOEXISTS'){
+                $detailsFourMApprovalByDeptCollection = collect($detailsFourMCollection)->map(function ($detailsFourMRow){
+                   $departmentId = $detailsFourMRow->rapidx_user->department_id ?? '';
+                   return  $approvalByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
+                }); //removed the NULL Value
+            }
             // })->filter()->all(); //removed the NULL Value
             return [
+                'detailsFourMApprovalByDeptCollection' => $detailsFourMApprovalByDeptCollection ?? [],
                 'requestedByDeptCollection' => $requestedByDeptCollection,
                 'ecrCollection' => $ecrCollectionRow,
                 'beforeAfterFileStorage' => $beforeAfterFileStorage,
+                'detailsFourMCollection' => $detailsFourMCollection,
 
-                // 'beforeAfterFileStorage' => $beforeAfterFileStorage,
             ];
         });
 
         return Excel::download(new InternalCcmExport($ecrCollection),"Internal Export.xlsx");
     }
-    public function saveExternalDisposition(Request $request){
-        try {
-            date_default_timezone_set('Asia/Manila');
-            DB::beginTransaction();
-            $ecrsId = $request->ecrsId;
-            $ecr = Ecr::find($ecrsId,['category']);
-            if($request->hasfile('externalDisposition') ){
-                switch ($ecr->category) {
-                    case 'Man':
-                        $path = 'external_disposition/man';
-                        $model = ManDetail::class;
-                        break;
-                    case 'Material':
-                        $path = 'external_disposition/material';
-                        $model = Material::class;
-                        break;
-                    case 'Machine':
-                        $path = 'external_disposition/machine';
-                        $model = Machine::class;
-                        break;
-                    case 'Method':
-                        $path = 'external_disposition/method';
-                        $model = Method::class;
-                        break;
-                    case 'Environment':
-                        $path = 'external_disposition/environment';
-                        $model = Environment::class;
-                        break;
-                    default:
-                        return response()->json(['isSuccess' => 'false','Invalid Category'],500);
-                        break;
-                }
-               $arrUploadFile = $this->commonInterface->uploadFile($request->externalDisposition,$ecrsId,$path);
-                $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
-                $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
 
-                $conditions = [
-                   'ecrs_id' =>  $ecrsId
-                ];
-                $externalDispositionValidated['original_filename'] = $impOriginalFilename;
-                $externalDispositionValidated['filtered_document_name'] = $impFilteredDocumentName;
-                $externalDispositionValidated['filtered_document_name'] = $impFilteredDocumentName;
-                $externalDispositionValidated['file_path'] = $path;
-
-                $externalDisposition = ExternalDisposition::where('ecrs_id',$ecrsId)
-                ->whereNull('deleted_at')
-                ->count();
-                if($externalDisposition === 0 ){
-                    $externalDispositionValidated['ecrs_id'] = $ecrsId;
-                    $externalDispositionValidated['created_at'] = now();
-                    $this->resourceInterface->create(ExternalDisposition::class,$externalDispositionValidated);
-                }else{
-                    $this->resourceInterface->updateConditions(ExternalDisposition::class,$conditions,$externalDispositionValidated);
-                }
-                $ecrRequestValidated['status'] = 'OK';
-                $ecrRequestValidated['approval_status'] = 'OK';
-                $this->resourceInterface->updateConditions($model,$conditions,$ecrRequestValidated);
-            }
-            DB::commit();
-            return response()->json(['isSuccess' => 'true']);
-        } catch (Exception $e) {
-            DB::rollback();
-            throw $e;
-        }
-    }
     public function viewExternalDisposition(Request $request){
-        $ecrsId = decrypt($request->ecrsId);
+        return $ecrsId = decrypt($request->ecrsId);
+       //TODO : Read the ECR First the get the category eg. external_disposition/Method
         $conditions = [
             'ecrs_id' => $ecrsId,
         ];
@@ -745,7 +776,6 @@ class CommonController extends Controller
         ->whereNull('deleted_at')
         ->get([
             'filtered_document_name',
-            'file_path',
         ]);
         if(count($externalDispositionByEcrsId) != 0){
             $arrFilteredDocumentName = explode(' | ' ,$externalDispositionByEcrsId->filtered_document_name);
@@ -929,7 +959,6 @@ class CommonController extends Controller
             throw $e;
         }
     }
-
     public function getBeforeAfterRefByEcrsId(Request $request){
         try {
             $conditions = [
@@ -991,6 +1020,19 @@ class CommonController extends Controller
                 }
                 return response()->file($path);
             }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getDisposition(Request $request){
+        try {
+            $externalDisposition = $this->resourceInterface->readCustomEloquent(ExternalDisposition::class,[],[],[
+                'ecrs_id' => $request->ecrsId
+            ])->first();
+            return response()->json([
+                'isSuccess' => 'true',
+                'externalDisposition' => $externalDisposition ?? [],
+            ]);
         } catch (Exception $e) {
             throw $e;
         }

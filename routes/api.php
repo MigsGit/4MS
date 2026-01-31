@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function(){
         Route::post('save_ecr_details', 'saveEcrDetails')->name('save_ecr_details');
         Route::post('save_ecr_approval', 'saveEcrApproval')->name('save_ecr_approval');
         Route::post('upload_ecr_requirement_ref', 'uploadEcrRequirementRef')->name('upload_ecr_requirement_ref');
+        Route::post('save_ecr_document', 'saveEcrDocument')->name('save_ecr_document');
 
         Route::get('generate_control_number', 'generateControlNumber')->name('generate_control_number');
         Route::get('get_dropdown_master_by_opt', 'getDropdownMasterByOpt')->name('get_dropdown_master_by_opt');
@@ -52,12 +53,12 @@ Route::middleware('auth')->group(function(){
         Route::get('get_ecr_details_id', 'getEcrDetailsId')->name('get_ecr_details_id');
         Route::get('ecr_req_decision_change', 'ecrReqDecisionChange')->name('ecr_req_decision_change');
         Route::get('load_ecr_approval_summary', 'loadEcrApprovalSummary')->name('load_ecr_approval_summary');
-
         Route::get('get_ecr_requirement_ref_by_id', 'getEcrRequirementRefById')->name('get_ecr_requirement_ref_by_id');
         Route::get('view_ecr_requirement_ref', 'viewEcrRequirementRef')->name('view_ecr_requirement_ref');
         Route::get('download_ecr_excel_by_ecrs_id', 'downloadEcrExcelByEcrsId')->name('download_ecr_excel_by_ecrs_id');
         Route::get('get_ecr_ref_download', 'getEcrRefDownload')->name('get_ecr_ref_download');
         Route::get('view_ecr_ref', 'viewEcrRef')->name('view_ecr_ref');
+        Route::get('get_ecr_document_by_id', 'getEcrDocumentById')->name('get_ecr_document_by_id');
     });
 
     Route::controller(CommonController::class)->group(function (): void {
@@ -81,6 +82,7 @@ Route::middleware('auth')->group(function(){
 
         Route::get('get_before_after_ref_by_ecrs_id', 'getBeforeAfterRefByEcrsId')->name('get_before_after_ref_by_ecrs_id');
         Route::get('view_before_after_ref_by_ecrs_id', 'viewBeforeAfterRefByEcrsId')->name('view_before_after_ref_by_ecrs_id');
+        Route::get('get_disposition', 'getDisposition')->name('get_disposition');
 
     });
 

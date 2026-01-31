@@ -58,6 +58,8 @@ class EnvironmentController extends Controller
 
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
+                $approvalStatus = $row->approval_status;
+                $statusEnvironment = $row->environment->status;
                 $result = "";
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
@@ -65,13 +67,19 @@ class EnvironmentController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                if($row->approval_status === "PB" && $row->created_by === session('rapidx_user_id')){
+                if($statusEnvironment === 'EXDISPO' || $statusEnvironment === 'EXDISAPP' || $statusEnvironment === 'OK'){
+                    //Upload External Disposition
+                    $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
+                    // $result .= '<li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    return $result;
+                }
+                if($approvalStatus === "PB" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadEnvironmentRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
-                // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
+                if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                // }
+                }
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';
@@ -80,10 +88,12 @@ class EnvironmentController extends Controller
             ->addColumn('get_status',function ($row) use($request){
                 $result = '';
                 $currentApprover = $row->pmi_approvals_pending[0]['rapidx_user']['name'] ?? '';
-                $approvalStatus = $row->environment->approval_status;
-                $getApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatus);
+                $approvalStatusEnvironment = $row->environment->approval_status;
+                $statusEnvironment = $row->environment->status;
+                $getStatus = $this->commonInterface->getStatus4m($statusEnvironment);
+                $getApprovalStatus = $this->commonInterface->getPmiApprovalStatus($approvalStatusEnvironment);
                 $result .= '<center>';
-                // $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
+                $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
                 $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
                 $result .= '</center>';

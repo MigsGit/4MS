@@ -31,7 +31,7 @@
                             class="table mt-2"
                             ref="tblEcrByCategoryStatus"
                             :columns="tblEcrByCategoryStatusColumns"
-                            ajax="api/load_ecr_material_by_status?category=Material"
+                            ajax="api/load_ecr_material_by_status?category=Material && adminAccess=all"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -1115,6 +1115,46 @@
         <template #footer>
         </template>
     </ModalComponent>
+    <ModalComponent @add-event="saveDisposition" icon="fa-plus" modalDialog="modal-dialog modal-lg" title="Add DispositionReferences" ref="modalSaveDisposition">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-6 d-none">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">EcrId:</span>
+                        <input v-model="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6 d-none">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Upload File:</span>
+                        <input @change="changeExternalDisposition" multiple type="file" accept=".xlsx" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Status:</span>
+                        <Multiselect
+                            placeholder="-Select an Option-"
+                            v-model="frmSaveDisposition.status"
+                            :close-on-select="true"
+                            :searchable="true"
+                            :options="commonVar.optDisposition"
+                        />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                            <input v-model="frmSaveDisposition.remarks" type="text" class="form-control form-control-lg">
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 <script setup>
     import {ref , onMounted,reactive, toRef} from 'vue';
@@ -1184,6 +1224,13 @@
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         getCategoryAdminAccessOpt,
+
+        // btnLinkViewExternalDisposition,
+        externalDisposition,
+        changeExternalDisposition,
+        frmSaveDisposition,
+        commonSaveDisposition,
+        getDisposition,
     } = useCommon();
 
     const modalSaveEcrDetail = ref(null);
@@ -1211,6 +1258,7 @@
     //Ecr Req
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
+    const modalSaveDisposition = ref(null);
 
     //Columns
      const tblEcrByCategoryStatusColumns = [
@@ -1221,6 +1269,7 @@
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 let btnDownloadMaterialRef = cell.querySelector('#btnDownloadMaterialRef');
                 let btnViewMaterialById = cell.querySelector('#btnViewMaterialById');
+                let btnSaveDisposition = cell.querySelector('#btnSaveDisposition');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
@@ -1292,6 +1341,17 @@
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
+                    });
+                }
+                if(btnSaveDisposition != null){
+                    btnSaveDisposition.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        frmSaveDisposition.value.ecrsId =ecrsId;
+                        let dispositionParams = {
+                            ecrsId : ecrsId
+                        }
+                        getDisposition(dispositionParams);
+                        modal.SaveDisposition.show();
                     });
                 }
             }
@@ -1505,6 +1565,7 @@
     };
 
     onMounted( async ()=>{
+        modal.SaveDisposition = new Modal(modalSaveDisposition.value.modalRef,{ keyboard: false });
         modal.SaveMaterial = new Modal(modalSaveMaterial.value.modalRef,{ keyboard: false });
         modal.UploadMaterialRef = new Modal(modalUploadMaterialRef.value.modalRef,{ keyboard: false });
         modal.ViewMaterialRef = new Modal(modalViewMaterialRef.value.modalRef,{ keyboard: false });
@@ -1858,6 +1919,23 @@
 
         axiosSaveData(formData,'api/upload_material_ref',(response) =>{
             console.log(response);
+        });
+    }
+    const saveDisposition = async () => {
+        let formData = new FormData();
+        if(externalDisposition.value.length > 0){
+            externalDisposition.value.forEach((file, index) => {
+                formData.append('externalDisposition[]', file);
+            });
+        }
+        formData.append("ecrsId",frmSaveDisposition.value.ecrsId);
+        formData.append("status", frmSaveDisposition.value.status);
+        formData.append("remarks", frmSaveDisposition.value.remarks);
+
+
+        axiosSaveData(formData,'api/save_external_disposition',(response) =>{
+            modal.SaveDisposition.hide();
+            tblEcrByCategoryStatus.value.dt.ajax.url("api/load_ecr_material_by_status?category=Material"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }
 </script>

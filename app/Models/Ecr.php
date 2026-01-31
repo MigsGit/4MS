@@ -71,5 +71,10 @@ class Ecr extends Model
     {
         return $this->hasOne(Method::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
+    public function document_details()
+    {
+        return $this->hasMany(DocumentDetail::class, 'ecrs_id', 'id')->whereNull('deleted_at');
+    }
+
 
 }

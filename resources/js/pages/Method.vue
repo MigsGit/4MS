@@ -19,12 +19,13 @@
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Method Table</li>
                         </ol>
+                        <!-- ajax="api/load_method_ecr_by_status?category=Method" -->
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
                             ref="tblEcrByStatus"
                             :columns="tblEcrByStatusColumns"
-                            ajax="api/load_method_ecr_by_status?category=Method"
+                            ajax='api/load_method_ecr_by_status?category=Method',
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -477,12 +478,12 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
                                     Download Internal Export
                                 </a>
                             </td>
                             <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsId)">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
                             </td>
@@ -532,21 +533,7 @@
             <button @click = "saveApproval(selectedMethodsId,selectedEcrsId,approvalRemarks,isApprovedDisappproved,currentStatus)" type="button" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
-    <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload External Disposition" ref="modalExternalDisposition" @add-event="saveExternalDisposition()">
-        <template #body>
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="input-group flex-nowrap mb-2 input-group-sm">
-                        <input @change="changeExternalDisposition" multiple type="file" accept=".pdf" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
-                    </div>
-                </div>
-            </div>
-        </template>
-        <template #footer>
-            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
-        </template>
-    </ModalComponent>
+
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-xl" title="ECR Requirements" ref="modalEcrRequirements">
         <template #body>
             <div class="row mt-3 man" v-show="isEmptyTblEcrManRequirements">
@@ -839,10 +826,50 @@
         <template #footer>
         </template>
     </ModalComponent>
+    <ModalComponent @add-event="saveDisposition" icon="fa-plus" modalDialog="modal-dialog modal-lg" title="Add DispositionReferences" ref="modalSaveDisposition">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-6 d-none">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">EcrId:</span>
+                        <input v-model="frmSaveDisposition.ecrsId" type="text" class="form-control form-control-lg" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6 d-none">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Upload File:</span>
+                        <input @change="changeExternalDisposition" multiple type="file" accept=".xlsx" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Status:</span>
+                        <Multiselect
+                            placeholder="-Select an Option-"
+                            v-model="frmSaveDisposition.status"
+                            :close-on-select="true"
+                            :searchable="true"
+                            :options="commonVar.optDisposition"
+                        />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <span class="input-group-text" id="addon-wrapping">Remarks:</span>
+                            <input v-model="frmSaveDisposition.remarks" type="text" class="form-control form-control-lg">
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
-   import {ref , onMounted,reactive, toRef} from 'vue';
+    import {ref , onMounted,reactive, toRef} from 'vue';
     import ModalComponent from '../../js/components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import ModalSpecialInspectionComponent from '../components/ModalSpecialInspectionComponent.vue';
@@ -854,7 +881,6 @@
     import DataTablesCore from 'datatables.net-bs5';
     import useCommon from '../../js/composables/common.js';
     DataTable.use(DataTablesCore);
-
     const { axiosSaveData,axiosSaveDataImgFile } = useForm(); // Call the useForm function
     const {
         modalEcr,
@@ -894,20 +920,23 @@
     const {
         modal,
         commonVar,
-        externalDisposition,
         tblSpecialInspection,
         tblSpecialInspectionColumns,
         modalSaveSpecialInspection,
-        modalExternalDisposition,
         specialInsQcInspectorParams,
         specialInsLqcParams,
         frmSpecialInspection,
         saveSpecialInspection,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
+
+        externalDisposition,
         changeExternalDisposition,
         btnLinkViewExternalDisposition,
         getCategoryAdminAccessOpt,
+        frmSaveDisposition,
+        commonSaveDisposition,
+        getDisposition,
     } = useCommon();
     const {
         getRapidxUserByIdOpt,
@@ -935,9 +964,11 @@
     const methodRefBefore = ref(null);
     const methodRefAfter = ref(null);
     const selectedEcrsIdEcrypted = ref(null);
-
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
+    const modalSaveDisposition = ref(null);
+
+    const dispositionFile = ref([]);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -947,6 +978,7 @@
                 let btnGetEcrId = cell.querySelector('#btnGetEcrId');
                 let btnViewMethodById = cell.querySelector('#btnViewMethodById');
                 let btnViewDispotionById = cell.querySelector('#btnViewDispotionById');
+                let btnSaveDisposition = cell.querySelector('#btnSaveDisposition');
                 if(btnGetEcrId != null){
                     btnGetEcrId.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
@@ -1021,6 +1053,17 @@
                         let ecrsId = this.getAttribute('ecrs-id');
                         selectedEcrsId.value = ecrsId;
                         modal.ExternalDisposition.show();
+                    });
+                }
+                if(btnSaveDisposition != null){
+                    btnSaveDisposition.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        frmSaveDisposition.value.ecrsId =ecrsId;
+                        let dispositionParams = {
+                            ecrsId : ecrsId
+                        }
+                        getDisposition(dispositionParams);
+                        modal.SaveDisposition.show();
                     });
                 }
             }
@@ -1139,6 +1182,7 @@
         selectedVal:0,
     };
     onMounted( async ()=>{
+        modal.SaveDisposition = new Modal(modalSaveDisposition.value.modalRef,{ keyboard: false });
         modal.SaveMethod = new Modal(modalSaveMethod.value.modalRef,{ keyboard: false });
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         modal.ViewMethodRef = new Modal(modalViewMethodRef.value.modalRef,{ keyboard: false });
@@ -1155,7 +1199,6 @@
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             frmSpecialInspection.value.ecrsId;
         });
-        modal.ExternalDisposition = new Modal(modalExternalDisposition.value.modalRef,{ keyboard: false });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
         await getDropdownMasterByOpt(typeOfPartParams);
@@ -1187,7 +1230,7 @@
     }
     const btnLinkDownloadExternal = async (selectedEcrsId) => {
         let params = {
-            selectedId : selectedEcrsId,
+            ecrsId : selectedEcrsId,
         };
         var queryString = $.param(params);
         window.location.href="api/download_excel_by_ecrs_id?" + queryString;
@@ -1227,6 +1270,9 @@
     }
     const changeMethodRefAfter = async (event) => {
         methodRefAfter.value =  Array.from(event.target.files);
+    }
+    const changeSaveDispositionFile = async (event) => {
+        dispositionFile.value =  Array.from(event.target.files);
     }
     const saveMethod = async () => {
         let formData = new FormData();
@@ -1287,15 +1333,20 @@
             modal.SaveMethod.hide();
         });
     }
-    const saveExternalDisposition = async () => {
+    const saveDisposition = async () => {
         let formData = new FormData();
-        externalDisposition.value.forEach((file, index) => {
-            formData.append('externalDisposition[]', file);
-        });
-        formData.append("ecrsId", selectedEcrsId.value);
+        if(externalDisposition.value.length > 0){
+            externalDisposition.value.forEach((file, index) => {
+                formData.append('externalDisposition[]', file);
+            });
+        }
+        formData.append("ecrsId",frmSaveDisposition.value.ecrsId);
+        formData.append("status", frmSaveDisposition.value.status);
+        formData.append("remarks", frmSaveDisposition.value.remarks);
+
 
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
-            modal.ExternalDisposition.hide();
+            modal.SaveDisposition.hide();
             tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
         });
     }

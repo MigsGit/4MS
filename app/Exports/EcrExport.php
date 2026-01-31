@@ -445,9 +445,6 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                 }
 
 
-                // Set border for range
-                // echo 'true';
-                // exit;
                 // === Apply borders to specific cells ===
                 $allThinBorder = [
                     "A26:H26",
