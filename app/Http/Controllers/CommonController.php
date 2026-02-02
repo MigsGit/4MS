@@ -364,7 +364,7 @@ class CommonController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-    }
+}
     public function loadPmiInternalApprovalSummary(Request $request){
         try {
             $ecrsId = $request->ecrsId ?? "";

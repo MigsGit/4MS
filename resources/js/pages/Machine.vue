@@ -501,7 +501,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
+                                <a href="#" class="link-primary d-none" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
                                     Download Internal Machine
                                 </a>
                             </td>
@@ -900,7 +900,6 @@
     // aatamolang TS ENGG
     // jmfaraon PPD ENGG
     const { axiosSaveData,axiosSaveDataImgFile } = useForm(); // Call the useForm function
-
     const {
         modalEcr,
         ecrVar,

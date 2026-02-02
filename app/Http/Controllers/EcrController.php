@@ -1305,22 +1305,25 @@ class EcrController extends Controller
             'id' => $ecrRequirementsId,
         ];
         $data = $this->resourceInterface->readCustomEloquent(EcrRequirement::class,[],[],$conditions);
-        $materialRefByEcrsId = $data
+        $ecrRequirementEcrsId = $data
         ->first([
             'filtered_document_name',
+            'original_filename',
             'ecrs_id',
         ]);
         //Get the Category
         $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,['category'],[],
             [
-                'id' => $materialRefByEcrsId->ecrs_id  ?? 0,
+                'id' => $ecrRequirementEcrsId->ecrs_id  ?? 0,
             ]
         );
         $ecr = $ecr->first();
         $path = "ecr_requirement/".$ecr->category."/".$ecrRequirementsId."/";
 
-        if(filled($materialRefByEcrsId)){
-            $arrFilteredDocumentName = explode(' | ' ,$materialRefByEcrsId->filtered_document_name);
+        if(filled($ecrRequirementEcrsId)){
+            $arrFilteredDocumentName = explode(' | ' ,$ecrRequirementEcrsId->filtered_document_name);
+            $arrOriginalFilename = explode(' | ' ,$ecrRequirementEcrsId[0]->original_filename);
+            $selectedOriginalFilename =  $arrOriginalFilename[$request->index];
             $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
             $filePathWithEcrRequirementsId = $path;
             $pdfPath = storage_path("app/public/".$filePathWithEcrRequirementsId.$selectedFilteredDocumentName);
@@ -1330,12 +1333,7 @@ class EcrController extends Controller
             $headers = array(
                 'Content-Type: application/pdf',
               );
-            return Response::download($pdfPath, 'filename.pdf', $headers);
-            // To read the ENCRYPTED PDF,you can simply serve the PDF file to the browser and let the browser's built-in PDF viewer handle it.
-            return response()->file($pdfPath);
-
-            // This function cannot read the ENCRYPTED PDF, I cannot install the "composer require setasign/fpdi-pdf-parser"
-            $this->commonInterface->viewPdfFile($pdfPath);
+            return Response::download($pdfPath, $selectedOriginalFilename, $headers);
         }
     } catch (Exception $e) {
         throw $e;
@@ -1365,22 +1363,25 @@ class EcrController extends Controller
                 'id' => $ecrsId,
             ];
             $data = $this->resourceInterface->readCustomEloquent(Ecr::class,[],[],$conditions);
-          $ecrRefByEcrsId = $data
+            $ecrRefByEcrsId = $data
             ->get([
                 'filtered_document_name',
+                'original_filename',
                 'category',
             ]);
             if(count($ecrRefByEcrsId) != 0){
                 $arrFilteredDocumentName = explode(' | ' ,$ecrRefByEcrsId[0]->filtered_document_name);
+                $arrOriginalFilename = explode(' | ' ,$ecrRefByEcrsId[0]->original_filename);
+                $selectedOriginalFilename =  $arrOriginalFilename[$request->index];
                 $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
                 $filePathWithEcrsId = $ecrRefByEcrsId[0]->file_path."/".$ecrsId."/".$selectedFilteredDocumentName;
                 $path = "app/public/ecr/".$ecrRefByEcrsId[0]->category."/".$filePathWithEcrsId;
                 $pdfPath = storage_path($path);
-                // $headers = array(
-                //     'Content-Type: application/pdf',
-                //   );
-                // return Response::download($pdfPath, 'filename.pdf', $headers);
-                $this->commonInterface->viewPdfFile($pdfPath);
+                $headers = array(
+                    'Content-Type: application/pdf',
+                );
+                return Response::download($pdfPath, $selectedOriginalFilename, $headers);
+
             }
         } catch (Exception $e) {
             throw $e;

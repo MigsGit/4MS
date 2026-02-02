@@ -78,6 +78,7 @@ class EnvironmentController extends Controller
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadEnvironmentRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
+                // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
                 if($pmiApprovalsPending === session('rapidx_user_id') || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
