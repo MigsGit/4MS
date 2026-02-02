@@ -109,15 +109,20 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
         date_default_timezone_set('Asia/Manila');
         return [
             AfterSheet::class => function(AfterSheet $event) {
+
                 $requestedByDeptCollection = $this->ecr['requestedByDeptCollection'];
                 $ecrCollection = $this->ecr['ecrCollection'];
+
                 // $detailsFourM = $this->ecr['detailsFourM'];
                 $detailsFourMCollection = $this->ecr['detailsFourMCollection'];
                 $detailsFourMApprovalByDeptCollection = $this->ecr['detailsFourMApprovalByDeptCollection'];
                 $pmiApprovalCollection = collect($ecrCollection['pmi_approvals'])->groupBy('approval_status')->toArray();
-                // echo json_encode($pmiApprovalCollection);
-                // exit;
-                $beforeAfterFileStorage = $this->ecr['beforeAfterFileStorage'][0];
+                $isImageRefExist = $ecrCollection->category === "Method" || $ecrCollection->category === "Machine";
+
+                if( $isImageRefExist) {
+                    $beforeAfterFileStorage = $this->ecr['beforeAfterFileStorage'][0];
+                }
+
                 $ecrApprovalsCollection = $ecrCollection->ecr_approvals;
                 $ecrDetailsCollection = $ecrCollection->ecr_details;
                 $documentDetails = $ecrCollection->document_details;
@@ -181,6 +186,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     '56',
                     '62',
                 ];
+
                 $sectionHeadersCount = 0;
                 foreach ($sectionHeaders as $cell => $value) {
                     $sheet->setCellValue($cell, $value);
@@ -231,6 +237,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     ]);
                     $categoryRow+=2;
                 }
+
                 // exit;
                 // === 4M CATEGORY DETAILS SECTION
                 $categoryDetailsCol = "B";
@@ -255,97 +262,98 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
 
                  // ======= Insert Before and After Image ========
                 // Retrieve the image path
-                $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
-                $storageImageDirBefore= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/');
-                if(file_exists($storageImageDirBefore) ){
+                if( $isImageRefExist) {
+                    $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
+                    $storageImageDirBefore= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/');
+                    if(file_exists($storageImageDirBefore) ){
 
-                    $startBeforeImageCol = "A";
-                    $startBeforeImageRow = "24";
-                    foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
-                        $imagePathBefore[]= $storageImageDirBefore.$valueBefore;
-                    }
+                        $startBeforeImageCol = "A";
+                        $startBeforeImageRow = "24";
+                        foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
+                            $imagePathBefore[]= $storageImageDirBefore.$valueBefore;
+                        }
 
-                    foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
-                            // Resize the image (optional, requires Intervention Image package)
-                            $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
-                            $tempPath = storage_path("app/temp_resized_image_$key.jpg");
-                            $image->save($tempPath);
+                        foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
+                                // Resize the image (optional, requires Intervention Image package)
+                                $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
+                                $tempPath = storage_path("app/temp_resized_image_$key.jpg");
+                                $image->save($tempPath);
 
-                            // Calculate the cell coordinates dynamically
-                            $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
+                                // Calculate the cell coordinates dynamically
+                                $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
 
-                            // Merge cells to accommodate the image
-                            $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+                                // Merge cells to accommodate the image
+                                $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
 
-                            // Dynamically adjust column widths and row heights
-                            $imageWidth = $image->width();
-                            $imageHeight = $image->height();
+                                // Dynamically adjust column widths and row heights
+                                $imageWidth = $image->width();
+                                $imageHeight = $image->height();
 
-                            $columnWidth = $imageWidth / 9.5; // Approximation for column width
+                                $columnWidth = $imageWidth / 9.5; // Approximation for column width
 
-                            $rowHeight = $imageHeight / 1.5; // Approximation for row height
-                            $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
-                            $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+                                $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                                $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                                $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
 
-                            // Insert the image into the merged cells
-                            $drawing = new Drawing();
+                                // Insert the image into the merged cells
+                                $drawing = new Drawing();
 
-                            $drawing->setName("Image $key");
+                                $drawing->setName("Image $key");
 
-                            $drawing->setDescription("Image $key");
-                            $drawing->setPath($tempPath); // Path to the resized image
+                                $drawing->setDescription("Image $key");
+                                $drawing->setPath($tempPath); // Path to the resized image
 
-                            $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                                $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
 
-                            $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                                $drawing->setWorksheet($sheet); // Attach the image to the worksheet
 
-                    }
-
-                }
-
-                $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
-                $storageImageDirAfter= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/after/');
-                if(file_exists($storageImageDirBefore) ){
-                    $startAfterImageCol = "E";
-                    $startAfterImageRow = "24";
-                    foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
-                        $imagePathAfter[]= $storageImageDirAfter.$valueAfter;
-                    }
-
-                    foreach ($imagePathAfter as $index => $imagePathAfterValue) {
-                            // Resize the image (optional, requires Intervention Image package)
-                            $image = Image::make($imagePathAfterValue)->resize(600,600); // Resize to 300x300 pixels
-                            $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
-                            $image->save($tempPath);
-
-                            // Calculate the cell coordinates dynamically
-                            $currentRow = $startAfterImageRow + ($index*1); // Move down 5 rows for each image
-
-                            // Merge cells to accommodate the image
-                            $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-
-                            // Dynamically adjust column widths and row heights
-                            $imageWidth = $image->width();
-                            $imageHeight = $image->height();
-
-                            $columnWidth = $imageWidth / 10.5; // Approximation for column width
-
-                            $rowHeight = $imageHeight / 1.5; // Approximation for row height
-                            $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
-                            $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
-
-                            // Insert the image into the merged cells
-                            $drawing = new Drawing();
-                            $drawing->setName("Image $index");
-                            $drawing->setDescription("Image $index");
-                            $drawing->setPath($tempPath); // Path to the resized image
-                            $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
-                            $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                        }
 
                     }
 
-                }
+                    $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
+                    $storageImageDirAfter= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/after/');
+                    if(file_exists($storageImageDirBefore) ){
+                        $startAfterImageCol = "E";
+                        $startAfterImageRow = "24";
+                        foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
+                            $imagePathAfter[]= $storageImageDirAfter.$valueAfter;
+                        }
 
+                        foreach ($imagePathAfter as $index => $imagePathAfterValue) {
+                                // Resize the image (optional, requires Intervention Image package)
+                                $image = Image::make($imagePathAfterValue)->resize(600,600); // Resize to 300x300 pixels
+                                $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
+                                $image->save($tempPath);
+
+                                // Calculate the cell coordinates dynamically
+                                $currentRow = $startAfterImageRow + ($index*1); // Move down 5 rows for each image
+
+                                // Merge cells to accommodate the image
+                                $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+
+                                // Dynamically adjust column widths and row heights
+                                $imageWidth = $image->width();
+                                $imageHeight = $image->height();
+
+                                $columnWidth = $imageWidth / 10.5; // Approximation for column width
+
+                                $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                                $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                                $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+
+                                // Insert the image into the merged cells
+                                $drawing = new Drawing();
+                                $drawing->setName("Image $index");
+                                $drawing->setDescription("Image $index");
+                                $drawing->setPath($tempPath); // Path to the resized image
+                                $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                                $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+
+                        }
+
+                    }
+             }
                 // === Section Information Content ===
                 $sectionContents = [
                     'A4' => 'Customer Name:',
@@ -422,6 +430,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     ],
                 ]);
                 //Ecr Collection Exist
+
                 if(filled($ecrCollection)) {
                     $ecrCollectionContent = [
                         'B4' => $ecrCollection->customer_name,
@@ -478,6 +487,42 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                             $remarks = $requestedByDeptCollection[$index]['remarks'] ?? "N/A";
 
 
+                            if (str_contains($approvalStatus, 'OTRB')) {
+                                $sheet->setCellValue("A{$startRowRequestedByApprovalsCollection}", $division);
+                                $sheet->setCellValue("C{$startRowRequestedByApprovalsCollection}", $ecrApprover);
+                                $sheet->setCellValue("E{$startRowRequestedByApprovalsCollection}",$this->getEcrApprovalStatus($approvalStatus));
+                                $sheet->setCellValue("H{$startRowRequestedByApprovalsCollection}", $approvedDate);
+                                $sheet->setCellValue("I{$startRowOtherApprovalsCollection}", $remarks);
+                                // === Insert e-signature
+                                // $imageEsigPath = 'public/e_signatures/';
+
+                                $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
+                                $this->insertEsignatureImageIntoSheet(
+                                    $imageEsigWithEmpNumberPath,
+                                    "F".$startRowRequestedByApprovalsCollection,
+                                    50,
+                                    50,
+                                    $sheet,
+                                    'ecr_requestedby'.$index
+                                );
+                                $sheet->getStyle("A{$startRowRequestedByApprovalsCollection}:I{$startRowRequestedByApprovalsCollection}")->applyFromArray([
+                                    'alignment' => [
+                                        'horizontal' => Alignment::HORIZONTAL_LEFT,
+                                        'vertical' => Alignment::VERTICAL_CENTER,
+                                    ],
+                                    'borders' => [
+                                        'allBorders' => [
+                                            'borderStyle' => Border::BORDER_THIN,
+                                        ],
+                                    ],
+                                    'fill' => [
+                                        // 'fillType' => 'solid',
+                                        // 'startColor' => ['rgb' => 'D3D3D3' ], // White background
+                                        'wrapText' => true,
+                                    ],
+                                ]);
+                                $startRowRequestedByApprovalsCollection++;
+                            }
                             if ( str_contains($approvalStatus, 'OTTE')) {
                                 $sheet->setCellValue("A{$startRowOtherApprovalsCollection}", $division);
                                 $sheet->setCellValue("C{$startRowOtherApprovalsCollection}", $ecrApprover);
@@ -516,8 +561,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                         }
 
                     }
-
-                    if( $detailsFourMCollection != "NOTEXISTS") {
+                    if( $isImageRefExist) {
                         // echo json_encode(count($detailsFourMApprovalByDeptCollection));
                         foreach ($detailsFourMCollection as $index => $value) {
                             $division = $detailsFourMApprovalByDeptCollection[$index]['division'] ?? "";
@@ -563,9 +607,15 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                             $sheet->getRowDimension($startRowQaApprovalCollection)->setRowHeight(105);
                             $startRowQaApprovalCollection++;
                         }
+                    }else{
+                        $sheet->setCellValue("A{$startRowQaApprovalCollection}", 'N/A');
+                        $sheet->setCellValue("C{$startRowQaApprovalCollection}", 'N/A');
+                        $sheet->setCellValue("E{$startRowQaApprovalCollection}", 'N/A');
+                        $sheet->setCellValue("H{$startRowQaApprovalCollection}", 'N/A');
+                        $sheet->setCellValue("I{$startRowQaApprovalCollection}", 'N/A');
                     }
-                    // exit;
                 }
+
                 // 5.  DOCUMENT REVISION
                 if(filled($documentDetails)){
                     $startRowDocDetailsCollection = 58;
@@ -967,9 +1017,10 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 $requestedByDeptCollection = $this->ecr['requestedByDeptCollection'];
                 $ecrCollection = $this->ecr['ecrCollection'];
                 $pmiApprovalCollection = collect($ecrCollection['pmi_approvals'])->groupBy('approval_status')->toArray();
-                // echo json_encode($pmiApprovalCollection);
-                // exit;
+                // echo json_encode($ecrCollection);
+                // exit ;
                 $beforeAfterFileStorage = $this->ecr['beforeAfterFileStorage'][0];
+
                 $ecrApprovalsCollection = $ecrCollection->ecr_approvals;
                 $ecrDetailsCollection = $ecrCollection->ecr_details;
                 $documentDetails = $ecrCollection->document_details;

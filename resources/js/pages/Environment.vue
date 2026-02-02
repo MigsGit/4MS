@@ -262,6 +262,55 @@
                         </tr>
                     </tbody>
                 </table>
+                <!-- <table class="table" v-show="currentStatus === 'OK'"> -->
+                <table class="table" >
+                    <thead>
+
+                        <tr>
+                            <th scope="col">
+                                Internal Material
+                            </th>
+                            <th scope="col">
+                                External Material
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
+                                    Download Internal Export
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
+                                    Download External Export
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table d-none">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                External Disposition
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameExternalDisposition, index) in arrOriginalFilenameExternalDispositions" :key="arrOriginalFilenameExternalDisposition.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewExternalDisposition" @click="btnLinkViewExternalDisposition(selectedEcrsId,index)">
+                                    {{ arrOriginalFilenameExternalDisposition }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </template>
         <template #footer>
@@ -682,6 +731,7 @@
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
     const modalSaveDisposition = ref(null);
+    const selectedEcrsIdEcrypted = ref(null);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -757,6 +807,8 @@
                 if(btnViewEnvironmentRef != null){
                     btnViewEnvironmentRef.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecr-id');
+                        let ecrsIdEncrypted = this.getAttribute('encrypted-ecr-id');
+                        selectedEcrsIdEcrypted.value  = ecrsIdEncrypted;
                         getEnvironmentRefByEcrsId(ecrsId);
                     });
                 }
@@ -819,6 +871,20 @@
         });
     })
     // === Functions
+    const btnLinkDownloadInternal = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId
+        }
+        var queryString = $.param(params);
+        window.location.href="api/download_internal_excel_by_ecrs_id?" + queryString;
+    }
+    const btnLinkDownloadExternal = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId,
+        };
+        var queryString = $.param(params);
+        window.location.href="api/download_excel_by_ecrs_id?" + queryString;
+    }
     const onChangeAdminAccess = async (selectedParams)=>{
         tblEcrByStatus.value.dt.ajax.url("api/load_ecr_environment_by_status?category=Environment"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;

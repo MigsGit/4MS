@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Method;
 use App\Models\Machine;
 use App\Models\Material;
+use App\Models\EcrDetail;
 use App\Models\ManDetail;
 use App\Exports\EcrExport;
 use App\Models\RapidxUser;
@@ -81,7 +82,7 @@ class CommonController extends Controller
             DB::beginTransaction();
             $ecrsId = $request->ecrsId;
             //Get Current Ecr Approval is equal to Current Session
-           $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
+            $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
@@ -97,6 +98,17 @@ class CommonController extends Controller
             $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecr[0]->created_by ?? '');
 
             $isCategory = $ecr[0]->category;
+
+            if($isCategory == 'Environment'){
+               $ecrDetail =  $this->resourceInterface->readCustomEloquent(EcrDetail::class,[],[],[
+                'ecrs_id' => $ecrsId
+               ]);
+               $ecrDetail->count();
+               if($ecrDetail === 0){
+                    return response()->json(['isSuccess' => 'false','msg' => 'Please update the ECR Details Above!'],500);
+               }
+            }
+
             switch ($isCategory) {
                 case 'Man':
                     $currentModel = Man::class;
@@ -112,12 +124,6 @@ class CommonController extends Controller
                     break;
                 case 'Environment':
                     $currentModel = Environment::class;
-                    $isEnvironmentRefFileExist = Environment::where('ecrs_id',$ecrsId)
-                    ->whereNotNull('original_filename')
-                    ->count();
-                    if ( $isEnvironmentRefFileExist === 0){
-                        return response()->json(['isSuccess' => 'false','msg' => 'Please upload Environment Reference File !'],500);
-                    }
                     break;
                 default:
                     return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
@@ -712,7 +718,6 @@ class CommonController extends Controller
             'material.material_approvals.rapidx_user',
             'machine.machine_approvals.rapidx_user',
             'method.method_approvals.rapidx_user',
-            'environment.environment_approvals.rapidx_user',
             // 'method',
             // 'man_detail',
             // 'material',
@@ -735,7 +740,7 @@ class CommonController extends Controller
         $ecrDetails = $ecr->get();
         $beforeAfterFileStorage =  BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->get();
         // return  $ecrDetails = $ecr->get();
-        $ecrCollection = collect($ecrDetails)
+       $ecrCollection = collect($ecrDetails)
         ->flatMap(function ($ecrCollectionRow) use($beforeAfterFileStorage){
             $ecrApprovals = $ecrCollectionRow->ecr_approvals ?? '';
             //Get the Department / Section of the user
@@ -744,8 +749,8 @@ class CommonController extends Controller
                 return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
             }); //removed the NULL Value
 
-            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->method->method_approvals ?? $ecrCollectionRow->environment->environment_approvals ?? 'NOEXISTS';
-            if($detailsFourMCollection != 'NOEXISTS'){
+            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->method->method_approvals ?? 'NOTEXISTS';
+            if($detailsFourMCollection != 'NOTEXISTS'){
                 $detailsFourMApprovalByDeptCollection = collect($detailsFourMCollection)->map(function ($detailsFourMRow){
                    $departmentId = $detailsFourMRow->rapidx_user->department_id ?? '';
                    return  $approvalByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);

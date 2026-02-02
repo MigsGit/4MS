@@ -198,7 +198,7 @@
                 </div>
                 <!-- Document Revision -->
                 <div class="container-fluid px-4">
-                    <button @click="btnSaveEcrDocument" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create Document</button>
+                    <button  v-show="modalTitle === 'Edit'"  @click="btnSaveEcrDocument" type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create Document</button>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item active">Document Details</li>
                     </ol>
@@ -1052,7 +1052,7 @@
                 <div class="col-sm-6">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Document No:</span>
-                        <input v-model="frmEcrDocument.documentNo" type="text" class="form-control form-control" aria-describedby="addon-wrapping">
+                        <input v-model="frmEcrDocument.documentNo" type="text" class="form-control form-control" aria-describedby="addon-wrapping" >
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Person In Charge: {{ isSelectReadonly }}</span>
@@ -1481,6 +1481,7 @@
 
         modalEcr.SaveEcr.show();
         isSelectReadonly.value = false;
+        frmEcrDocument.ecrsId = '';
         await generateControlNumber();
 
     }
