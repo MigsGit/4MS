@@ -659,6 +659,7 @@ class EcrController extends Controller
                     }
                 }
                 $html = '';
+                $html .= '<p class="card-text"><strong>'. $row->internal_external.'</strong></p>';
                 $html .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
                 // $html .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
                 // $html .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';

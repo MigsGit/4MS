@@ -514,8 +514,6 @@ class MethodController extends Controller
                 if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')  || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id')  ){
                     $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
-
-
                 $result .= '</ul>';
                 $result .= '</div>';
 
@@ -568,6 +566,7 @@ class MethodController extends Controller
                     }
                 }
                 $result = '';
+                $result .= '<p class="card-text"><strong>'. $row->internal_external.'</strong></p>';
                 $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
                 $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
                 $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';

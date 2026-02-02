@@ -471,7 +471,7 @@ class MaterialController extends Controller
                 }
 
                 $result = '';
-                $result .= '<p class="card-text"><strong>Customer Name:</strong> ' . $row->customer_name . '</p>';
+                $result .= '<p class="card-text"><strong>'. $row->internal_external.'</strong></p>';
                 $result .= '<p class="card-text"><strong>Part Number:</strong> ' . $row->part_no . '</p>';
                 $result .= '<p class="card-text"><strong>Part Name:</strong> ' . $row->part_name . '</p>';
                 $result .= '<p class="card-text"><strong>Device Code:</strong> ' . $row->device_name . '</p>';
