@@ -81,7 +81,7 @@ class CommonController extends Controller
             DB::beginTransaction();
             $ecrsId = $request->ecrsId;
             //Get Current Ecr Approval is equal to Current Session
-           $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
+            $pmiInternalApprovalCurrent = PmiApproval::where('ecrs_id',$ecrsId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
@@ -112,12 +112,6 @@ class CommonController extends Controller
                     break;
                 case 'Environment':
                     $currentModel = Environment::class;
-                    $isEnvironmentRefFileExist = Environment::where('ecrs_id',$ecrsId)
-                    ->whereNotNull('original_filename')
-                    ->count();
-                    if ( $isEnvironmentRefFileExist === 0){
-                        return response()->json(['isSuccess' => 'false','msg' => 'Please upload Environment Reference File !'],500);
-                    }
                     break;
                 default:
                     return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
@@ -358,7 +352,7 @@ class CommonController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-    }
+}
     public function loadPmiInternalApprovalSummary(Request $request){
         try {
             $ecrsId = $request->ecrsId ?? "";

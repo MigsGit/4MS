@@ -478,7 +478,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
+                                <a  href="#" class="link-primary d-none" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
                                     Download Internal Export
                                 </a>
                             </td>
