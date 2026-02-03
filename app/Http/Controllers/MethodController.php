@@ -501,7 +501,7 @@ class MethodController extends Controller
                     //Upload External Disposition
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     // $result .= '<li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
-                    return $result;
+                    // return $result;
                 }
                 // if($methodStatus === 'EXDISPO' && session('rapidx_department_id') === 22){
                 // if($methodStatus === 'EXDISPO'){

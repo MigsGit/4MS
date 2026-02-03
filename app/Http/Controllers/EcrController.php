@@ -1322,7 +1322,7 @@ class EcrController extends Controller
 
         if(filled($ecrRequirementEcrsId)){
             $arrFilteredDocumentName = explode(' | ' ,$ecrRequirementEcrsId->filtered_document_name);
-            $arrOriginalFilename = explode(' | ' ,$ecrRequirementEcrsId[0]->original_filename);
+            $arrOriginalFilename = explode(' | ' ,$ecrRequirementEcrsId->original_filename);
             $selectedOriginalFilename =  $arrOriginalFilename[$request->index];
             $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
             $filePathWithEcrRequirementsId = $path;

@@ -463,7 +463,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" v-show="currentStatus === 'OK'">
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
 
                         <tr>
@@ -478,7 +478,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <a  href="#" class="link-primary d-none" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
                                     Download Internal Export
                                 </a>
                             </td>
