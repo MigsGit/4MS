@@ -224,7 +224,7 @@
             pmiApprovalMethod.value = pmiApproval.method;
             pmiApprovalEnvironment.value = pmiApproval.environment;
 
-            approvedEcr.value = data.approvedEcr;
+            approvedEcr.value = data.approvedEcr+1;
             pendingEcr.value = data.pendingEcr;
             pendingMan.value =  data.pendingMan
             approvedMan.value =  data.approvedMan
@@ -232,14 +232,14 @@
             pendingMaterial.value =  data.pendingMaterial
             approvedMaterial.value =  data.approvedMaterial
 
-            // pendingMethod.value =  data.pendingMethod
-            // approvedMethod.value =  data.approvedMethod
-
+            pendingMethod.value =  data.pendingMethod
+            approvedMethod.value =  data.approvedMethod
+            //pendingEnvironment pendingEnvironment
             pendingMachine.value =  data.pendingMachine
             approvedMachine.value =  data.approvedMachine
 
-            // pendingEnvironment =  data.pendingEnvironment
-            // approvedEnvironment.value =  data.approvedEnvironment
+            pendingEnvironment.value =  data.pendingEnvironment
+            approvedEnvironment.value =  data.approvedEnvironment
         });
     })
 </script>
