@@ -224,7 +224,7 @@
             pmiApprovalMethod.value = pmiApproval.method;
             pmiApprovalEnvironment.value = pmiApproval.environment;
 
-            approvedEcr.value = data.approvedEcr+1;
+            approvedEcr.value = data.approvedEcr;
             pendingEcr.value = data.pendingEcr;
             pendingMan.value =  data.pendingMan
             approvedMan.value =  data.approvedMan

@@ -655,7 +655,7 @@ class CommonController extends Controller
     }
     public function downloadExcelByEcrsId(Request $request){
         $iqc_dropdown_category_section = 'TS';
-        $ecrsId = decrypt($request->selectedId);
+        $ecrsId = decrypt($request->ecrsId);
 
        $getEcrById = $this->resourceInterface->readWithRelationsConditions(
             Ecr::class,
@@ -892,6 +892,7 @@ class CommonController extends Controller
 
 
             $pendingEcr = Ecr::where('status','!=','OK')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 

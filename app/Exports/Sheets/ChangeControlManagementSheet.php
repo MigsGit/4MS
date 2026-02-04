@@ -73,7 +73,11 @@ WithEvents
                 $categoryDetails = $this->ecrsCategoryDetailsCollection['detailsByCategory'];
                 $approvalsGroupByMethod = $ecrsDetails->method->method_approvals  ?? NULL;
                 $approvalsGroupByMachine = $ecrsDetails->machine->machine_approvals ?? NULL;
-                $beforeAfterFileStorage = $this->ecrsCategoryDetailsCollection['beforeAfterFileStorage'][0];
+                $isImageRefExist = $ecrsDetails->category === "Method" || $ecrsDetails->category === "Machine";
+                if( $isImageRefExist) {
+                    $beforeAfterFileStorage = $this->ecrsCategoryDetailsCollection['beforeAfterFileStorage'][0];
+                }
+              
                 // echo json_encode($beforeAfterFileStorage);
                 // exit;
                 // $approvalsGroupByMaterial = $ecrsDetails->material->method_approvals;
@@ -186,100 +190,101 @@ WithEvents
 
                 // ======= Insert Before and After Image ========
                 // Retrieve the image path
-                $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
-                $storageImageDirBefore= Storage::path('public/'.strtolower($ecrsDetails->category).'/'.$ecrsDetails->id.'/before/');
+                if( $isImageRefExist) {
+                    $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
+                    $storageImageDirBefore= Storage::path('public/'.strtolower($ecrsDetails->category).'/'.$ecrsDetails->id.'/before/');
 
-                if(file_exists($storageImageDirBefore) ){
+                    if(file_exists($storageImageDirBefore) ){
 
-                    $startBeforeImageCol = "A";
-                    $startBeforeImageRow = "22";
-                    foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
-                       $valueBefore;
-                        $imagePathBefore[]= $storageImageDirBefore.$valueBefore;
+                        $startBeforeImageCol = "A";
+                        $startBeforeImageRow = "22";
+                        foreach ($filteredDocumentNameBefore as $key => $valueBefore) {
+                        $valueBefore;
+                            $imagePathBefore[]= $storageImageDirBefore.$valueBefore;
+                        }
+
+                        foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
+                            // Resize the image (optional, requires Intervention Image package)
+                            // echo json_encode($imagePathBeforeValue);
+                            // exit;
+                            if(file_exists($imagePathBeforeValue)){
+                                $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
+                                $tempPath = storage_path("app/temp_resized_image_$key.jpg");
+                                $image->save($tempPath);
+
+                                // Calculate the cell coordinates dynamically
+                                $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
+
+                                // Merge cells to accommodate the image
+                                $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+
+                                // Dynamically adjust column widths and row heights
+                                $imageWidth = $image->width();
+                                $imageHeight = $image->height();
+
+                                $columnWidth = $imageWidth / 9.5; // Approximation for column width
+
+
+                                $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                                $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                                $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+
+                                // Insert the image into the merged cells
+                                $drawing = new Drawing();
+                                $drawing->setName("Image $key");
+                                $drawing->setDescription("Image $key");
+                                $drawing->setPath($tempPath); // Path to the resized image
+                                $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                                $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                            }
+                        }
                     }
 
-                    foreach ($imagePathBefore as $key => $imagePathBeforeValue) {
-                        // Resize the image (optional, requires Intervention Image package)
-                        echo json_encode($imagePathBeforeValue);
-                        exit;
-                        if(file_exists($imagePathBeforeValue)){
-                            $image = Image::make($imagePathBeforeValue)->resize(600,600); // Resize to 300x300 pixels
-                            $tempPath = storage_path("app/temp_resized_image_$key.jpg");
-                            $image->save($tempPath);
+                    $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
+                    $storageImageDirAfter= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/after/');
+                    if(file_exists($storageImageDirBefore) ){
+                        $startAfterImageCol = "F";
+                        $startAfterImageRow = "22";
+                        foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
+                            $imagePathAfter[]= $storageImageDirAfter.$valueAfter;
+                        }
 
-                            // Calculate the cell coordinates dynamically
-                            $currentRow = $startBeforeImageRow + ($key*1); // Move down 5 rows for each image
+                        foreach ($imagePathAfter as $index => $imagePathAfterValue) {
+                            // Resize the image (optional, requires Intervention Image package)
+                            if(file_exists($imagePathAfterValue)){
+                                $image = Image::make($imagePathAfterValue)->resize(600,600); // Resize to 300x300 pixels
+                                $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
+                                $image->save($tempPath);
 
-                            // Merge cells to accommodate the image
-                            $endColumn = chr(ord($startBeforeImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
+                                // Calculate the cell coordinates dynamically
+                                $currentRow = $startAfterImageRow + ($index*1); // Move down 5 rows for each image
 
-                            // Dynamically adjust column widths and row heights
-                            $imageWidth = $image->width();
-                            $imageHeight = $image->height();
-
-                            $columnWidth = $imageWidth / 9.5; // Approximation for column width
+                                // Merge cells to accommodate the image
+                                $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
 
 
-                            $rowHeight = $imageHeight / 1.5; // Approximation for row height
-                            $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
-                            $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+                                // Dynamically adjust column widths and row heights
+                                $imageWidth = $image->width();
+                                $imageHeight = $image->height();
 
-                            // Insert the image into the merged cells
-                            $drawing = new Drawing();
-                            $drawing->setName("Image $key");
-                            $drawing->setDescription("Image $key");
-                            $drawing->setPath($tempPath); // Path to the resized image
-                            $drawing->setCoordinates("$startBeforeImageCol$currentRow"); // Place the image at the top-left of the merged cells
-                            $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                                $columnWidth = $imageWidth / 10.5; // Approximation for column width
+
+
+                                $rowHeight = $imageHeight / 1.5; // Approximation for row height
+                                $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
+                                $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
+
+                                // Insert the image into the merged cells
+                                $drawing = new Drawing();
+                                $drawing->setName("Image $index");
+                                $drawing->setDescription("Image $index");
+                                $drawing->setPath($tempPath); // Path to the resized image
+                                $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
+                                $drawing->setWorksheet($sheet); // Attach the image to the worksheet
+                            }
                         }
                     }
                 }
-
-                $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
-                $storageImageDirAfter= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/after/');
-                if(file_exists($storageImageDirBefore) ){
-                    $startAfterImageCol = "F";
-                    $startAfterImageRow = "22";
-                    foreach ($filteredDocumentNameAfter as $index => $valueAfter) {
-                        $imagePathAfter[]= $storageImageDirAfter.$valueAfter;
-                    }
-
-                    foreach ($imagePathAfter as $index => $imagePathAfterValue) {
-                        // Resize the image (optional, requires Intervention Image package)
-                        if(file_exists($imagePathAfterValue)){
-                            $image = Image::make($imagePathAfterValue)->resize(600,600); // Resize to 300x300 pixels
-                            $tempPath = storage_path("app/temp_resized_image_after_$index.jpg");
-                            $image->save($tempPath);
-
-                            // Calculate the cell coordinates dynamically
-                            $currentRow = $startAfterImageRow + ($index*1); // Move down 5 rows for each image
-
-                            // Merge cells to accommodate the image
-                            $endColumn = chr(ord($startAfterImageCol) + 2); // Merge 3 columns (e.g., A, B, C)
-
-
-                            // Dynamically adjust column widths and row heights
-                            $imageWidth = $image->width();
-                            $imageHeight = $image->height();
-
-                            $columnWidth = $imageWidth / 10.5; // Approximation for column width
-
-
-                            $rowHeight = $imageHeight / 1.5; // Approximation for row height
-                            $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
-                            $sheet->getRowDimension($currentRow + 1)->setRowHeight($rowHeight);
-
-                            // Insert the image into the merged cells
-                            $drawing = new Drawing();
-                            $drawing->setName("Image $index");
-                            $drawing->setDescription("Image $index");
-                            $drawing->setPath($tempPath); // Path to the resized image
-                            $drawing->setCoordinates("$startAfterImageCol$currentRow"); // Place the image at the top-left of the merged cells
-                            $drawing->setWorksheet($sheet); // Attach the image to the worksheet
-                        }
-                    }
-                }
-
                 // === Document Type
                 $docTypes = [
                     '☐ QC Process Flow Chart',

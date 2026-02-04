@@ -781,12 +781,12 @@ class EcrController extends Controller
                         $bgColor = 'badge rounded-pill bg-warning';
                         break;
                     case 'APP':
-                        $status = 'APPROVED - '.$row->updated_at;
+                        $status = 'APPROVED - '. $row->updated_at;
                         // $status = 'APPROVED";
                         $bgColor = 'badge rounded-pill bg-success';
                         break;
                     case 'DIS':
-                        $status = 'DISAPPROVED';
+                        $status = 'DISAPPROVED - '. $row->updated_at;
                         $bgColor = 'badge rounded-pill bg-danger';
                         break;
                     default:
