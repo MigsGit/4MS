@@ -611,16 +611,16 @@ class EcrController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
-                // if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
+                if($row->status === "IA" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
-                // }
+                }
                 if($row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
                 }
-                // if($currentApprover === session('rapidx_user_id') || $row->created_by === session('rapidx_user_id')   || session('rapidx_department_id') === 22){
+                if($currentApprover === session('rapidx_user_id') || $row->created_by === session('rapidx_user_id')   || session('rapidx_department_id') === 22){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item'  id='btnViewEcrId'> <i class='fa-solid fa-eye'></i> View/Approval</button>
                     </li>";
-                // }
+                }
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';

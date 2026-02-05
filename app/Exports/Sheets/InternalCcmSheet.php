@@ -263,8 +263,9 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                  // ======= Insert Before and After Image ========
                 // Retrieve the image path
                 if( $isImageRefExist) {
-                    $
-                    ' | ',$beforeAfterFileStorage->filtered_document_name_before);
+                    $filteredDocumentNameBefore = explode(' | ',$beforeAfterFileStorage->filtered_document_name_before);
+                    // echo json_encode($filteredDocumentNameBefore);
+                    // exit;
                     $storageImageDirBefore= Storage::path('public/'.strtolower($ecrCollection->category).'/'.$ecrCollection->id.'/before/');
                     if(file_exists($storageImageDirBefore) ){
 

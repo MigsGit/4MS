@@ -240,8 +240,17 @@ WithEvents
                         }
                     }
 
-                    $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
-                    $storageImageDirAfter= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/after/');
+                    // $filteredDocumentNameAfter = explode(' | ',$beforeAfterFileStorage->filtered_document_name_after);
+                    // $storageImageDirAfter= Storage::path('public/'.$categoryDetails->file_path.'/'.$categoryDetails->id.'/after/');
+                    /**
+                     * 
+                     * 
+                     */
+                    $filteredDocumentNameAfter = explode(' | ',
+                    $beforeAfterFileStorage->filtered_document_name_after);
+                    $storageImageDirAfter= Storage::path('public/'.strtolower($ecrsDetails->category).'/'.$ecrsDetails->id.'/after/');
+                    // echo json_encode($storageImageDirAfter);
+                    // exit;
                     if(file_exists($storageImageDirBefore) ){
                         $startAfterImageCol = "F";
                         $startAfterImageRow = "22";
