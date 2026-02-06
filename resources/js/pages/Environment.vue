@@ -241,7 +241,7 @@
     <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Environment Reference" ref="modalViewEnvironmentRef">
         <template #body>
             <div class="row mt-3">
-                <table class="table">
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -269,9 +269,9 @@
                             <th scope="col">
                                 Internal Material
                             </th>
-                            <th scope="col">
+                            <!-- <th scope="col">
                                 External Material
-                            </th>
+                            </th> -->
                         </tr>
                     </thead>
                     <tbody>
@@ -281,11 +281,11 @@
                                     Download Internal Export
                                 </a>
                             </td>
-                            <td>
+                            <!-- <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
-                            </td>
+                            </td> -->
                         </tr>
                     </tbody>
                 </table>

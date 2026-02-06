@@ -1036,31 +1036,31 @@
     <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Man Reference" ref="modalViewRef">
         <template #body>
             <div class="row mt-3">
-                <!-- <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'"> -->
-                <table class="table">
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
+                <!-- <table class="table"> -->
                     <thead>
 
                         <tr>
                             <th scope="col">
                                 Internal Material
                             </th>
-                            <th scope="col">
+                            <!-- <th scope="col">
                                 External Material
-                            </th>
+                            </th> -->
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>
-                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEncrypted)">
                                     Download Internal Export
                                 </a>
                             </td>
-                            <td>
+                            <!-- <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
-                            </td>
+                            </td> -->
                         </tr>
                     </tbody>
                 </table>
@@ -1073,17 +1073,6 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- v-for -->
-                        <tr v-for="(arrOriginalFilenameExternalDisposition, index) in arrOriginalFilenameExternalDispositions" :key="arrOriginalFilenameExternalDisposition.index">
-                            <th scope="row">{{ index+1 }}</th>
-                            <td>
-                                <a href="#" class="link-primary" ref="aViewExternalDisposition" @click="btnLinkViewExternalDisposition(selectedEcrsId,index)">
-                                    {{ arrOriginalFilenameExternalDisposition }}
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
                 </table>
             </div>
         </template>
@@ -1286,7 +1275,6 @@
                 let btnViewManRef = cell.querySelector('#btnViewManRef');
                 if(btnViewManRef != null){
                     btnViewManRef.addEventListener('click',function(){
-                        alert('asdsada')
                         let ecrsIdEncrypted = this.getAttribute('encrypted-ecr-id');
                         selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
                         modal.ViewRef.show();

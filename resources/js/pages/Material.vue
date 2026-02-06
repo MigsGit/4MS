@@ -774,15 +774,15 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table">
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
                         <tr>
                             <th class=""  scope="col">
                                 Internal Material
                             </th>
-                            <th scope="col">
+                            <!-- <th scope="col">
                                 External Material
-                            </th>
+                            </th> -->
                         </tr>
                     </thead>
                     <tbody>
@@ -792,11 +792,11 @@
                                     Download Internal
                                 </a>
                             </td>
-                            <td>
+                            <!-- <td>
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsId)">
                                     Download External
                                 </a>
-                            </td>
+                            </td> -->
                         </tr>
                     </tbody>
                 </table>
