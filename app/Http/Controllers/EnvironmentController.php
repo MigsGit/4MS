@@ -135,6 +135,7 @@ class EnvironmentController extends Controller
                 $result .= '</center>';
                 return $result;
             })
+            
             ->rawColumns([
                 'get_actions',
                 'get_status',

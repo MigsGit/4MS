@@ -33,12 +33,14 @@
                                 ]
                             }"
                         >
+
                             <thead>
                                 <tr>
                                     <th>
                                         <font-awesome-icon class="nav-icon" icon="fa-cogs" />
                                     </th>
                                     <th style=""width="10%">Status</th>
+                                    <th style=""width="20%">Attachment</th>
                                     <th style=""width="20%">ECR Ctrl No.</th>
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
@@ -1031,6 +1033,63 @@
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+    <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Man Reference" ref="modalViewRef">
+        <template #body>
+            <div class="row mt-3">
+                <!-- <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'"> -->
+                <table class="table">
+                    <thead>
+
+                        <tr>
+                            <th scope="col">
+                                Internal Material
+                            </th>
+                            <th scope="col">
+                                External Material
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEcrypted)">
+                                    Download Internal Export
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
+                                    Download External Export
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table d-none">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                External Disposition
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameExternalDisposition, index) in arrOriginalFilenameExternalDispositions" :key="arrOriginalFilenameExternalDisposition.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewExternalDisposition" @click="btnLinkViewExternalDisposition(selectedEcrsId,index)">
+                                    {{ arrOriginalFilenameExternalDisposition }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template #footer>
+        </template>
+    </ModalComponent>
 </template>
 
 <script setup>
@@ -1117,6 +1176,7 @@
     const isSelectReadonly  = ref(true);
     const currentStatus = ref('Edit');
     const selectedEcrsId = ref(null);
+    const selectedEcrsIdEncrypted = ref(null);
     const selectedAdminAccess = ref(null);
     const tblManDetails = ref(null);
     const modalSaveMan = ref(null);
@@ -1134,6 +1194,7 @@
     const approvalRemarks = ref(null);
 
     const modalSaveDisposition = ref(null);
+    const modalViewRef = ref(null);
 
     const ecrColumns = [
         {   data: 'get_actions',
@@ -1218,6 +1279,21 @@
             }
         } ,
         {   data: 'get_status'} ,
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewManRef = cell.querySelector('#btnViewManRef');
+                if(btnViewManRef != null){
+                    btnViewManRef.addEventListener('click',function(){
+                        alert('asdsada')
+                        let ecrsIdEncrypted = this.getAttribute('encrypted-ecr-id');
+                        selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
+                        modal.ViewRef.show();
+                    });
+                }
+            }
+        } ,
         {   data: 'ecr_no'} ,
         {   data: 'get_details'} ,
         {   data: 'category'} ,
@@ -1345,6 +1421,7 @@
     };
 
     onMounted( async ()=>{
+        modal.ViewRef = new Modal(modalViewRef.value.modalRef,{ keyboard: false });
         modal.SaveDisposition = new Modal(modalSaveDisposition.value.modalRef,{ keyboard: false });
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
         modalEcr.SaveEcrDetail = new Modal(modalSaveEcrDetail.value.modalRef,{ keyboard: false });
@@ -1383,6 +1460,20 @@
         }
     )
     // === Functions
+    const btnLinkDownloadInternal = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId
+        }
+        var queryString = $.param(params);
+        window.location.href="api/download_internal_excel_by_ecrs_id?" + queryString;
+    }
+    const btnLinkDownloadExternal = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId,
+        };
+        var queryString = $.param(params);
+        window.location.href="api/download_excel_by_ecrs_id?" + queryString;
+    }
     const reloadInspector = async ()=>{
         await getRapidxUserByIdOpt(specialInsQcInspectorParams);
     }
