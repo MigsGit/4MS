@@ -27,7 +27,7 @@
                                     class="table mt-2"
                                     ref="tblEcrByStatus"
                                     :columns="tblEcrByStatusColumns"
-                                    ajax="api/load_ecr_environment_by_status?category=Environment && adminAccess=all"
+                                    ajax="api/load_ecr_environment_by_status?category=Environment"
                                     :options="{
                                         serverSide: true, //Serverside true will load the network
                                         columnDefs:[
@@ -262,8 +262,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <!-- <table class="table" v-show="currentStatus === 'OK'"> -->
-                <table class="table" >
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
 
                         <tr>

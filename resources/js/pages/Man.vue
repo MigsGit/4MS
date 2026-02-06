@@ -25,7 +25,7 @@
                             class="table mt-2"
                             ref="tblEcrByStatus"
                             :columns="ecrColumns"
-                            ajax="api/load_ecr_man_by_status?category=Man && adminAccess=all"
+                            ajax="api/load_ecr_man_by_status?category=Man"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[

@@ -364,6 +364,7 @@ class MachineController extends Controller
                 $relations = [
                     'pmi_approvals_pending',
                     'machine',
+                    'rapidx_user_created_by',
                 ];
                 $conditions = [
                     'status' => 'OK',

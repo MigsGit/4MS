@@ -31,14 +31,13 @@
                     <font-awesome-icon class="nav-icon" icon="tree" />&nbsp; Environment
                 </router-link>
                 <div class="sb-sidenav-menu-heading">Settings</div>
+                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'DropdownMaster' }">
+                    <font-awesome-icon class="nav-icon" icon="square-caret-down" />&nbsp; Dropdown Master
+                </router-link>
 
                 <router-link v-if="departmentGroup === 'ISS' || departmentGroup === 'QAD'" class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }">
                 <!-- <router-link v-show="true" class="sb-nav-link-icon nav-link" :to="{ name: 'UserMaster' }"> -->
                     <font-awesome-icon class="nav-icon" icon="users" />&nbsp; User Master
-                </router-link>
-
-                <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'DropdownMaster' }">
-                    <font-awesome-icon class="nav-icon" icon="square-caret-down" />&nbsp; Dropdown Master
                 </router-link>
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'EcrRequirementMaster' }">
                     <font-awesome-icon class="nav-icon" icon="clipboard-list" />&nbsp; Ecr Requirement List
