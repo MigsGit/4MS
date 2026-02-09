@@ -453,7 +453,7 @@ class MaterialController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' id='btnViewMaterialRef'>Attachment</a>";
+                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' encrypted-ecr-id='".encrypt($row->id)."' id='btnViewMaterialRef'>Attachment</a>";
                 $result .= '</center>';
                 return $result;
             })

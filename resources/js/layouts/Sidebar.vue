@@ -42,9 +42,9 @@
                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'EcrRequirementMaster' }">
                     <font-awesome-icon class="nav-icon" icon="clipboard-list" />&nbsp; Ecr Requirement List
                 </router-link>
-                <!--  <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'Settings' }">
-                    <i class="fas fa-tasks"></i>&nbsp; Settings
-                </router-link> -->
+                 <router-link class="sb-nav-link-icon nav-link" :to="{ name: 'UserManual' }">
+                    <font-awesome-icon class="nav-icon" icon="fa-book-reader" />&nbsp; User Manual
+                </router-link>
             </div>
         </div>
         <div class="sb-sidenav-footer">

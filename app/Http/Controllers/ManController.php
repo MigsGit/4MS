@@ -397,10 +397,18 @@ class ManController extends Controller
             $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
             return $result;
         })
+        ->addColumn('get_attachment',function ($row) use ($request){
+            $result = '';
+            $result .= '<center>';
+            $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' encrypted-ecr-id='".encrypt($row->id)."' id='btnViewManRef'>Attachment</a>";
+            $result .= '</center>';
+            return $result;
+        })
         ->rawColumns([
             'get_actions',
             'get_status',
-            'get_details'
+            'get_details',
+            'get_attachment',
         ])
         ->make(true);
         try {

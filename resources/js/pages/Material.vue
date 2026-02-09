@@ -31,7 +31,7 @@
                             class="table mt-2"
                             ref="tblEcrByCategoryStatus"
                             :columns="tblEcrByCategoryStatusColumns"
-                            ajax="api/load_ecr_material_by_status?category=Material"
+                            ajax="api/load_ecr_material_by_status?category=Material && adminAccess=all"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -43,7 +43,7 @@
                                 <tr>
                                     <th style=""width="5%">Action</th>
                                     <th style=""width="10%">Status</th>
-                                    <!-- <th style=""width="10%">Attachment</th> -->
+                                    <th style=""width="10%">Attachment</th>
                                     <th style=""width="20%">ECR Ctrl No.</th>
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
@@ -774,30 +774,29 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table">
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
-
                         <tr>
-                            <!-- <th class="d-none"  scope="col">
+                            <th class=""  scope="col">
                                 Internal Material
-                            </th> -->
-                            <th scope="col">
-                                External Material
                             </th>
+                            <!-- <th scope="col">
+                                External Material
+                            </th> -->
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <!-- <td  class="d-none">
-                                <a href="#" class="link-primary" @click="btnLinkDownloadInternalMaterial(selectedEcrsId)">
-                                    Download Internal Material
-                                </a>
-                            </td> -->
-                            <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadExternalMaterial(selectedEcrsId)">
-                                    Download External Material
+                            <td  class="">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
+                                    Download Internal
                                 </a>
                             </td>
+                            <!-- <td>
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsId)">
+                                    Download External
+                                </a>
+                            </td> -->
                         </tr>
                     </tbody>
                 </table>
@@ -1357,19 +1356,21 @@
             }
         , title: 'Requirement'} ,
         {   data: 'get_status'} ,
-        // {   data: 'get_attachment',
-        //     orderable: false,
-        //     searchable: false,
-        //     createdCell(cell){
-        //         let btnViewMaterialRef = cell.querySelector('#btnViewMaterialRef');
-        //         if(btnViewMaterialRef != null){
-        //             btnViewMaterialRef.addEventListener('click',function(){
-        //                 let ecrsId = this.getAttribute('ecrs-id');
-        //                 getMaterialRefByEcrsId(ecrsId);
-        //             });
-        //         }
-        //     }
-        // } ,
+        {   data: 'get_attachment',
+            orderable: false,
+            searchable: false,
+            createdCell(cell){
+                let btnViewMaterialRef = cell.querySelector('#btnViewMaterialRef');
+                if(btnViewMaterialRef != null){
+                    btnViewMaterialRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let ecrsIdEncrypted = this.getAttribute('encrypted-ecr-id');
+                        selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
+                        getMaterialRefByEcrsId(ecrsId);
+                    });
+                }
+            }
+        } ,
         {   data: 'ecr_no'} ,
         {   data: 'get_details'} ,
         {   data: 'category'} ,
@@ -1588,6 +1589,22 @@
         await getCategoryAdminAccessOpt();
     })
 
+    // === Functions
+     const btnLinkDownloadInternal = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId
+        }
+        var queryString = $.param(params);
+        window.location.href="api/download_internal_excel_by_ecrs_id?" + queryString;
+    }
+    const btnLinkDownloadExternal = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId,
+        };
+        var queryString = $.param(params);
+        window.location.href="api/download_excel_by_ecrs_id?" + queryString;
+    }
+
     const reloadDropdownMaster = async (dropdownMastersDetails) => {
         let stringToVal = '';
         switch (dropdownMastersDetails) {
@@ -1723,7 +1740,7 @@
             let ecrsId = data.ecrsId;
             let originalFilename = data.originalFilename;
             arrOriginalFilenames.value = originalFilename;
-            selectedEcrsIdEncrypted.value = ecrsId;
+            // selectedEcrsIdEncrypted.value = ecrsId;
             modal.ViewMaterialRef.show();
         });
     }
