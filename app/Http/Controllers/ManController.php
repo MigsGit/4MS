@@ -447,7 +447,7 @@ class ManController extends Controller
             })
             ->addColumn('qc_inspector_operator',function ($row){
                 $result = '';
-                $result .= $row->rapidx_user_qc_inspector_operator->name ?? null;
+                $result .= $row->qc_inspector_operator ?? 'N/A';
                 return $result;
             })
             ->addColumn('trainer',function ($row){

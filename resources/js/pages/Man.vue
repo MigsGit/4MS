@@ -377,16 +377,7 @@
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Qc Inspector/ Operator:</span>
-                        <Multiselect
-                            v-model="frmMan.qcInspectorOperator"
-                            :options="commonVar.optUserMaster"
-                            placeholder="Select an option"
-                            :searchable="true"
-                            :close-on-select="true"
-                        />
-                        <button @click="reloadRapidxUserDropdown()" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
-                            <font-awesome-icon class="nav-icon" icon="refresh" />
-                        </button>
+                        <input v-model="frmMan.qcInspectorOperator" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Process Change Factor:</span>
