@@ -10,6 +10,7 @@ import Environment from '../../js/pages/Environment.vue'
 import UserMaster from '../../js/pages/UserMaster.vue'
 import DropdownMaster from '../../js/pages/DropdownMaster.vue'
 import EcrRequirementMaster from '../../js/pages/EcrRequirementMaster.vue'
+import UserManual from '../../js/pages/UserManual.vue'
 import useFetch from '../../js/composables/utils/useFetch';
 const { axiosFetchData } = useFetch(); // Call  the useFetch function
 
@@ -103,6 +104,12 @@ export default [
                 name: 'EcrRequirementMaster',
                 beforeEnter: checkIfSessionExist,
                 component: EcrRequirementMaster,
+            },
+            {
+                path: 'user_manual',
+                name: 'UserManual',
+                beforeEnter: checkIfSessionExist,
+                component: UserManual,
             },
         ]
     }

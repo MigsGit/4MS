@@ -505,11 +505,11 @@
                                     Download Internal Machine
                                 </a>
                             </td>
-                            <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadExternalMachine(selectedEcrsId)">
-                                    Download External Machine
-                                </a>
-                            </td>
+                        <td>
+                            <a href="#" class="link-primary" @click="btnLinkDownloadExternalMachine(selectedEcrsId)">
+                                Download External Machine
+                            </a>
+                        </td>
                         </tr>
                     </tbody>
                 </table>
