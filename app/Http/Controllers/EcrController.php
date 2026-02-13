@@ -449,7 +449,6 @@ class EcrController extends Controller
                 $emailDataEcrRequirement = [
                     // "to" =>"cpagtalunan@pricon.ph",
                     // "bcc" =>"mclegaspi@pricon.ph",
-
                     "to" =>$to,
                     "cc" =>"",
                     "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
