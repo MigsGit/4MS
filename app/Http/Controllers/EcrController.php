@@ -616,10 +616,10 @@ class EcrController extends Controller
                 if($row->status === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item' id='btnGetEcrId'> <i class='fa-solid fa-pen-to-square'></i> Edit</button> </li>";
                 }
-                if($currentApprover === session('rapidx_user_id') || $row->created_by === session('rapidx_user_id')   || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1){
+                // if($currentApprover === session('rapidx_user_id') || $row->created_by === session('rapidx_user_id')   || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1){
                     $result .= "<li> <button ecr-id='".$row->id."' ecr-status='".$row->status."' class='dropdown-item'  id='btnViewEcrId'> <i class='fa-solid fa-eye'></i> View/Approval</button>
                     </li>";
-                }
+                // }
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';

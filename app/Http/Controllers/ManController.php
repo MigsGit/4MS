@@ -332,7 +332,7 @@ class ManController extends Controller
             if($manDetailStatus === 'EXDISPO' || $manDetailStatus === 'EXDISAPP' || $manDetailStatus === 'OK'){
                 //Upload External Disposition
                 $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                // $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                // $result .= '<li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 return $result;
             }
             if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id') || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
@@ -455,7 +455,7 @@ class ManController extends Controller
             })
             ->addColumn('qc_inspector_operator',function ($row){
                 $result = '';
-                $result .= $row->rapidx_user_qc_inspector_operator->name ?? null;
+                $result .= $row->qc_inspector_operator ?? 'N/A';
                 return $result;
             })
             ->addColumn('trainer',function ($row){

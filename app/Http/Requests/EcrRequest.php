@@ -35,6 +35,8 @@ class EcrRequest extends FormRequest
             'section'=> 'required',
             'customer_ec_no'=> 'required',
             'date_of_request'=> 'required',
+            // => 'file|mimes:jpeg,png',
+            //=> 'file|mimes:jpeg,png',
         ];
     }
 }
