@@ -38,16 +38,10 @@
         <div class="col-sm-6">
             <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Inspector:</span>
-                <Multiselect
-                    v-model="frmSpecialInspection.inspector"
-                    :options="commonVar.optUserMaster"
-                    placeholder="Select an option"
-                    :searchable="true"
-                    :close-on-select="true"
-                />
-                <button @click="clickReloadInspector" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
+                <input v-model="frmSpecialInspection.inspector" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                <!-- <button @click="clickReloadInspector" class="btn btn-outline-warning btn-sm" type="button" data-item-process="remove">
                     <font-awesome-icon class="nav-icon" icon="refresh" />
-                </button>
+                </button> -->
             </div>
             <div class="input-group flex-nowrap mb-2 input-group-sm">
                 <span class="input-group-text" id="addon-wrapping">Samples:</span>

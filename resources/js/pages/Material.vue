@@ -688,7 +688,7 @@
              <EcrChangeComponent :isSelectReadonly="isSelectReadonly" :frmEcrReasonRows="frmEcrReasonRows" :optDescriptionOfChange="ecrVar.optDescriptionOfChange" :optReasonOfChange="ecrVar.optReasonOfChange">
             </EcrChangeComponent>
             <div class="row d-none">
-                <div class="input-group flex-nowrap mb-2 input-group-sm d-none">
+                <div class="input-group flex-nowrap mb-2 input-group-sm">
                     <span class="input-group-text" id="addon-wrapping">ECR Details Id:</span>
                     <input :disabled="isModalView" v-model="frmEcrDetails.ecrDetailsId"  type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                 </div>
