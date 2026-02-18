@@ -13,7 +13,7 @@ class CreateManTable extends Migration
      */
     public function up()
     {
-        Schema::create('man', function (Blueprint $table) {
+        Schema::create('man_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
             $table->string('first_assign');

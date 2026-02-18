@@ -416,7 +416,7 @@ class MaterialController extends Controller
                 }
                 if($materialStatus === "RUP" || $materialStatus === "DIS" ){
                     if( $row->created_by === session('rapidx_user_id')){
-                        $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                        $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-edit"></i> &nbsp;Upload</button></li>';
                     }
                 }
 
@@ -617,28 +617,7 @@ class MaterialController extends Controller
             throw $e;
         }
     }
-    public function getMaterialRefByEcrsId(Request $request){
-        try {
-            $ecrsId = $request->ecrsId;
-            $conditions = [
-                'ecrs_id' => $ecrsId,
-            ];
-            $data = $this->resourceInterface->readCustomEloquent(Material::class,[],[],$conditions);
-            $materialRefByEcrsId = $data
-            ->get([
-                'id',
-                'ecrs_id',
-                'original_filename',
-            ]);
-            return response()->json([
-                'isSuccess' => 'true',
-                'originalFilename'=> explode(' | ',$materialRefByEcrsId[0]->original_filename),
-                'ecrsId'=> encrypt($materialRefByEcrsId[0]->ecrs_id),
-            ]);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
+  
     public function viewMaterialRef(Request $request){
         try {
             $ecrsId = decrypt($request->ecrsId);
@@ -649,6 +628,7 @@ class MaterialController extends Controller
             $materialRefByEcrsId = $data
             ->get([
                 'filtered_document_name',
+                'original_filename',
                 'file_path',
             ]);
             if(count($materialRefByEcrsId) != 0){

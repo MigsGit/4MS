@@ -19,11 +19,6 @@ class CreateMethodsTable extends Migration
             $table->string('approval_status')->default('RUP')->comment('RUP - For Requestor Update');
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';
             $table->foreignId('before_after_file_storages_id')->references('id')->on('before_after_file_storages')->comment ='beforeAfterFileStorages';
-            // $table->longText('filtered_document_name_before')->nullable();
-            // $table->longText('original_filename_before')->nullable();
-            // $table->longText('filtered_document_name_after')->nullable();
-            // $table->longText('original_filename_after')->nullable();
-            // $table->string('file_path')->default('method');
             $table->timestamps();
             $table->softDeletes();
         });

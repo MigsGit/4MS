@@ -268,6 +268,97 @@ class ManController extends Controller
             throw $e;
         }
     }
+    public function getManRefByEcrsId(Request $request){
+        try {
+            $ecrsId = decrypt($request->ecrsId);
+            $conditions = [
+                'ecrs_id' => $ecrsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Man::class,[],[],$conditions);
+            $manRefByEcrsId = $data
+            ->first([
+                'id',
+                'ecrs_id',
+                'original_filename',
+            ]);
+            return response()->json([
+                'isSuccess' => 'true',
+                'originalFilename'=> explode(' | ',$manRefByEcrsId->original_filename),
+                'ecrsId'=> encrypt($manRefByEcrsId->ecrs_id),
+            ]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    // public function getManRefByEcrsId(Request $request){
+    //     try {
+    //         $ecrsId = $request->ecrsId;
+    //         $conditions = [
+    //             'ecrs_id' => $ecrsId,
+    //         ];
+    //         $data = $this->resourceInterface->readCustomEloquent(Man::class,[],[],$conditions);
+    //         $manRefByEcrsId = $data
+    //         ->first([
+    //             'id',
+    //             'ecrs_id',
+    //             'original_filename',
+    //         ]);
+    //         return response()->json([
+    //             'isSuccess' => 'true',
+    //             'originalFilename'=> explode(' | ',$manRefByEcrsId->original_filename),
+    //             'ecrsId'=> encrypt($manRefByEcrsId->ecrs_id),
+    //         ]);
+    //     } catch (Exception $e) {
+    //         throw $e;
+    //     }
+    // }
+   public function viewManRefByEcrsId(Request $request){
+        try {
+            $ecrsId = decrypt($request->ecrsId);
+            $conditions = [
+                'ecrs_id' => $ecrsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Man::class,[],[],$conditions);
+            $manRefByEcrsId = $data
+            ->first([
+                'filtered_document_name',
+                'original_filename',
+            ]);
+            if(count($manRefByEcrsId) != 0){
+               $arrFilteredDocumentName = explode(' | ' ,$manRefByEcrsId->filtered_document_name);
+                return  $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                $filePathWithEcrsId ="/man"."/".$ecrsId."/".$selectedFilteredDocumentName;
+                return  $pdfPath = storage_path("app/public/".$filePathWithEcrsId."");
+                return Storage::response($pdfPath);
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+   }
+    public function uploadManRef(Request $request){
+        try {
+            date_default_timezone_set('Asia/Manila');
+            DB::beginTransaction();
+            if($request->hasfile('man_ref') ){
+                $arrUploadFile = $this->commonInterface->uploadFile($request->man_ref,$request->ecrsId,'man');
+                $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
+                $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
+
+                $conditions = [
+                   'ecrs_id' =>  $request->ecrsId
+                ];
+                // return 'true';
+                $manRequestValidated['original_filename'] = $impOriginalFilename;
+                $manRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
+                $this->resourceInterface->updateConditions(Man::class,$conditions,$manRequestValidated);
+            }
+            DB::commit();
+            return response()->json(['is_success' => 'true']);
+        } catch (Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
     public function loadEcrManByStatus(Request $request){
         $adminAccess = $request->adminAccess;
         $data = [];
@@ -338,12 +429,14 @@ class ManController extends Controller
             if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id') || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
                 $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
             }
-            if($manDetailStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
-                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+            if($manDetailStatus === "RUP" || $manDetailStatus === "DIS"){
+                if($row->created_by === session('rapidx_user_id')){
+                    $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" id="btnUploadRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload Reference</button></li>';
+                }
+
             }
-            if($manDetailStatus === "DIS" && $row->created_by === session('rapidx_user_id')){
-                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
-            }
+
 
             $result .= '</ul>';
             $result .= '</div>';

@@ -13,8 +13,10 @@ class CreateManDetailsTable extends Migration
      */
     public function up()
     {
-        Schema::create('man_details', function (Blueprint $table) {
+        Schema::create('man', function (Blueprint $table) {
             $table->id();
+            $table->longText('filtered_document_name')->nullable();
+            $table->longText('original_filename')->nullable();
             $table->string('status')->default('RUP')->comment('RUP - For Requestor Update');
             $table->string('approval_status')->default('RUP')->comment('RUP - For Requestor Update');
             $table->foreignId('ecrs_id')->references('id')->on('ecrs')->comment ='Ecr Id';

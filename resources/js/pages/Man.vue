@@ -1027,6 +1027,27 @@
     <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Man Reference" ref="modalViewRef">
         <template #body>
             <div class="row mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                Excel Attachment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilename, index) in arrOriginalFilenames" :key="arrOriginalFilename.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewMaterialRef" @click="btnLinkViewMaterialRef(selectedEcrsIdEncrypted,index)">
+                                    {{ arrOriginalFilename }}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
                 <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                 <!-- <table class="table"> -->
                     <thead>
@@ -1070,6 +1091,22 @@
         <template #footer>
         </template>
     </ModalComponent>
+     <ModalComponent icon="fa-upload" modalDialog="modal-dialog modal-md" title="Upload Man Reference" ref="modalUploadRef" @add-event="frmUploadManRef()">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                        <input @change="changeManRef" multiple type="file" accept=".xlsm,.xlsx, .xls, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
+    
 </template>
 
 <script setup>
@@ -1175,6 +1212,9 @@
 
     const modalSaveDisposition = ref(null);
     const modalViewRef = ref(null);
+    const modalUploadRef = ref(null);
+    const manRef = ref(null);
+    const arrOriginalFilenames = ref(null);
 
     const ecrColumns = [
         {   data: 'get_actions',
@@ -1256,6 +1296,14 @@
                         modal.SaveDisposition.show();
                     });
                 }
+                let btnUploadRef = cell.querySelector('#btnUploadRef');
+                if(btnUploadRef != null){
+                    btnUploadRef.addEventListener('click',function(){
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        selectedEcrsId.value = ecrsId;
+                        modal.UploadRef.show();
+                    });
+                }
             }
         } ,
         {   data: 'get_status'} ,
@@ -1267,7 +1315,11 @@
                 if(btnViewManRef != null){
                     btnViewManRef.addEventListener('click',function(){
                         let ecrsIdEncrypted = this.getAttribute('encrypted-ecr-id');
+                        let manParams = {
+                            ecrsId : ecrsIdEncrypted
+                        }
                         selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
+                        getManRefByEcrsId(manParams)
                         modal.ViewRef.show();
                     });
                 }
@@ -1400,6 +1452,7 @@
     };
 
     onMounted( async ()=>{
+        modal.UploadRef = new Modal(modalUploadRef.value.modalRef,{ keyboard: false });
         modal.ViewRef = new Modal(modalViewRef.value.modalRef,{ keyboard: false });
         modal.SaveDisposition = new Modal(modalSaveDisposition.value.modalRef,{ keyboard: false });
         modal.SaveMan = new Modal(modalSaveMan.value.modalRef,{ keyboard: false });
@@ -1523,6 +1576,19 @@
             tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=8 && manDetailsId="+currentManDetailsId.value).draw();
         });
     }
+    const getManRefByEcrsId = async (params) => {
+        let apiParams = {
+            ecrsId : params.ecrsId
+        }
+        axiosFetchData(apiParams,'api/get_man_ref_by_ecrs_id',function(response){
+            let data = response.data;
+            let ecrsId = data.ecrsId;
+            let originalFilename = data.originalFilename;
+            arrOriginalFilenames.value = originalFilename;
+            // selectedEcrsIdEncrypted.value = ecrsId;
+            modal.ViewRef.show();
+        });
+    } 
     const saveManDetails = async () => {
     //     alert(frmMan.value.isUpdateManApprover);
     //         return;
@@ -1617,6 +1683,21 @@
             modal.SaveDisposition.hide();
             tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedAdminAccess.value).draw();
 
+        });
+    }
+    
+    const changeManRef = async (event)  => {
+        manRef.value =  Array.from(event.target.files);
+    }
+    const frmUploadManRef = async () => {
+        let formData = new FormData();
+        manRef.value.forEach((file, index) => {
+            formData.append('man_ref[]', file);
+        });
+        formData.append("ecrsId", selectedEcrsId.value);
+
+        axiosSaveData(formData,'api/upload_man_ref',(response) =>{
+            console.log(response);
         });
     }
 </script>

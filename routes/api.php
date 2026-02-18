@@ -106,6 +106,8 @@ Route::middleware('auth')->group(function(){
 
     Route::controller(ManController::class)->group(function () {
         Route::post('save_man', 'saveMan')->name('save_man');
+        Route::post('upload_man_ref', 'uploadManRef')->name('upload_man_ref');
+
         Route::get('save_man_approval', 'saveManApproval')->name('save_man_approval');
         Route::get('load_ecr_man_by_status', 'loadEcrManByStatus')->name('load_ecr_man_by_status');
         Route::get('load_man_approver_summary_ecrs_id', 'loadManApproverSummaryEcrsId')->name('load_man_approver_summary_ecrs_id');
@@ -113,6 +115,8 @@ Route::middleware('auth')->group(function(){
         Route::get('load_man_checklist', 'loadManChecklist')->name('load_man_checklist');
         Route::get('get_man_by_id', 'getManById')->name('get_man_by_id');
         Route::get('man_checklist_decision_change', 'manChecklistDecisionChange')->name('man_checklist_decision_change');
+        Route::get('get_man_ref_by_ecrs_id', 'getManRefByEcrsId')->name('get_man_ref_by_ecrs_id');
+
     });
 
     Route::controller(MaterialController::class)->group(function () {
