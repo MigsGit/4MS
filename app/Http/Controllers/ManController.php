@@ -68,7 +68,7 @@ class ManController extends Controller
                 'CHCK' => session('rapidx_user_id'), //Checklist Update
             ];
             $manApprovalRequestCtr = 0; //assigned counter
-           $manApprovalRequest = collect($manApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$manApprovalRequestCtr,$ecrsId){
+            $manApprovalRequest = collect($manApprovalTypes)->flatMap(function ($users,$approval_status) use ($request,&$manApprovalRequestCtr,$ecrsId){
                     return collect($users)->map(function ($userId) use ($request,$approval_status,&$manApprovalRequestCtr,$ecrsId){
                         return [
                             'ecrs_id' =>  $ecrsId,
@@ -201,22 +201,46 @@ class ManController extends Controller
                 return response()->json(['isSuccess' => 'true']);
             }
             if ( count($manApproval) === 0){
-                $manConditions = [
-                    'ecrs_id' => $ecrsId,
+                //nmodify //
+                $specialInspection = $this->resourceInterface->readCustomEloquent(SpecialInspection::class,[],[],[
+                    'ecrs_id' =>  $manCurrent->ecrs_id
+                ])->first(['lqc_section_head']);
+
+                $manApprovalRequest =  [
+                    'ecrs_id' =>  $ecrsId,
+                    'rapidx_user_id' => $specialInspection['lqc_section_head'] ?? NULL,
+                    'approval_status' => 'QCSECHEAD',
+                    'status' => 'PEN',
+                    'created_at' => now(),
                 ];
-                $manValidated = [
-                    'status' => 'PMIAPP',
-                    'approval_status' => 'PB',
-                ];
-                $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
-                    //Send APPROVED Email to Requestor
-                $to = $requestedBy['email'] ?? '';
-                $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
-                $from = 'issinfoservice@pricon.ph';
-                $from_name = "4M Change Control Management System";
-                $subject = "APPROVED: MACHINE (4M CMS)";
-                $header = "Your MACHINE 4M  has been APPROVED";
-                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($manCurrent->ecrs_id,$header);
+                if($manApprovalCurrent['approval_status'] != 'QCSECHEAD'){
+                    ManApproval::insert($manApprovalRequest);
+                    //Send For Approval Email
+                    $to = $currentApproval['email'] ?? '';
+                    $from = $createdByEmail['email'] ?? '';
+                    $subject = "FOR APPROVAL: MAN (4M)";
+                    $from_name = "4M Change Control Management System";
+                    $msg = $this->emailInterface->ecrEmailMsgByCategory($ecrsId,'MAN');
+                }else{
+                    $manConditions = [
+                        'ecrs_id' => $ecrsId,
+                    ];
+                    $manValidated = [
+                        'status' => 'PMIAPP',
+                        'approval_status' => 'PB',
+                    ];
+                    $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
+                    //Send APPROVED Email to Requestor jdpatriarca cbcoracero
+                    $to = $requestedBy['email'] ?? '';
+                    $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+                    $from = 'issinfoservice@pricon.ph';
+                    $from_name = "4M Change Control Management System";
+                    $subject = "APPROVED: MACHINE (4M CMS)";
+                    $header = "Your MACHINE 4M  has been APPROVED";
+                    $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($manCurrent->ecrs_id,$header);
+                }
+              
+                
             }
             if ( count($manApproval) != 0){
                 $currentApproval = $this->emailInterface->getEmailByRapidxUserId($manApproval[0]->rapidx_user_id);
@@ -325,10 +349,10 @@ class ManController extends Controller
                 'original_filename',
             ]);
             if(count($manRefByEcrsId) != 0){
-               $arrFilteredDocumentName = explode(' | ' ,$manRefByEcrsId->filtered_document_name);
-                return  $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
+                $arrFilteredDocumentName = explode(' | ' ,$manRefByEcrsId->filtered_document_name);
+                $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
                 $filePathWithEcrsId ="/man"."/".$ecrsId."/".$selectedFilteredDocumentName;
-                return  $pdfPath = storage_path("app/public/".$filePathWithEcrsId."");
+                $pdfPath = storage_path("app/public/".$filePathWithEcrsId."");
                 return Storage::response($pdfPath);
             }
         } catch (Exception $e) {
@@ -964,6 +988,9 @@ class ManController extends Controller
                     break;
                 case 'CHCK':
                     $approvalStatus = 'For Checklist Update:';
+                    break;
+                case 'QCSECHEAD':
+                    $approvalStatus = 'LQC Section Head:';
                     break;
                  default:
                      $approvalStatus = '';
