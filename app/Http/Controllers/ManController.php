@@ -196,8 +196,8 @@ class ManController extends Controller
                     "created_by" => session('rapidx_username'),
                     "system_name" => "rapidx_4M",
                 ];
-                DB::commit();
-                $this->emailInterface->sendEmail($emailData);
+                // DB::commit();
+                // $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
             if ( count($manApproval) === 0){
@@ -285,7 +285,7 @@ class ManController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            $this->emailInterface->sendEmail($emailData);
+            // $this->emailInterface->sendEmail($emailData);
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
