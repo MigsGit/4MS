@@ -371,7 +371,7 @@
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Process Name:</span>
-                        <input v-model="frmMan.processName" type="date" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input v-model="frmMan.processName" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Working Time</span>

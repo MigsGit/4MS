@@ -81,10 +81,13 @@ class ManController extends Controller
                     });
 
             })->toArray();
-            $manDetailCount = ManDetail::where('ecrs_id', $ecrsId)
-            ->whereNull('deleted_at')
+            // $manDetailCount = ManDetail::where('ecrs_id', $ecrsId)
+            // ->whereNull('deleted_at')
+            // ->count();
+            $manApprovalCount = ManApproval::where('ecrs_id',$ecrsId)
+            ->whereNotNull('rapidx_user_id')
             ->count();
-            if($request->is_update_man_approver === 'YES'){
+            if($request->is_update_man_approver === 'YES' || $manApprovalCount  <= 1){
                 ManApproval::where('ecrs_id',$ecrsId)
                 ->whereNull('deleted_at')
                 ->delete();
@@ -132,6 +135,17 @@ class ManController extends Controller
             ]);
             if($request->status === 'APP'){
                 if($manApprovalCurrent->approval_status === 'RUP'){
+                    // return  $qcInspectorOperator = ManDetail::where('ecrs_id',$ecrsId)
+                    // ->whereNotNull('qc_inspector_operator')
+                    // ->get();
+                    // collect($qcInspectorOperator)->map(function($items) use ($ecrsId){
+                    //     ManApproval::where('ecrs_id',$ecrsId)
+                    //     ->where('approval_status','RUP')
+                    //     ->whereNotNull('rapidx_user_id')
+                    //     ->update([
+                    //         'rapidx_user_id' => $items->qc_inspector_operator,
+                    //     ]);
+                    // });
                     $isManRequirementsComplete = $this->isManRequirementsComplete($ecrsId);
                     if(  $isManRequirementsComplete['isSuccess'] === 'false'){
                         return response()->json(['isSuccess' => 'false','msg' => $isManRequirementsComplete['msg'] ],500);
@@ -197,16 +211,20 @@ class ManController extends Controller
                     "created_by" => session('rapidx_username'),
                     "system_name" => "rapidx_4M",
                 ];
-                DB::commit();
-                $this->emailInterface->sendEmail($emailData);
+                // DB::commit();
+                // $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
             if ( count($manApproval) === 0){
                 //nmodify //
                 $specialInspection = $this->resourceInterface->readCustomEloquent(SpecialInspection::class,[],[],[
                     'ecrs_id' =>  $manCurrent->ecrs_id
-                ])->first(['lqc_section_head']);
-
+                ])
+                ->whereNotNull('lqc_section_head')
+                ->first(['lqc_section_head']);
+                if(count($specialInspection) === 0){
+                    return response()->json(['isSuccess' => 'false','msg' => 'Please input the LQC Section Head to the Special Inspection' ],500);
+                }
                 $manApprovalRequest =  [
                     'ecrs_id' =>  $ecrsId,
                     'rapidx_user_id' => $specialInspection['lqc_section_head'] ?? NULL,
@@ -285,8 +303,8 @@ class ManController extends Controller
                 "created_by" => session('rapidx_username'),
                 "system_name" => "rapidx_4M",
             ];
-            DB::commit();
-            $this->emailInterface->sendEmail($emailData);
+            // DB::commit();
+            // $this->emailInterface->sendEmail($emailData);
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
