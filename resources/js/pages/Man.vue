@@ -996,7 +996,7 @@
                 <div class="col-md-6 d-none">
                     <div class="input-group flex-nowrap mb-2 input-group-sm">
                         <span class="input-group-text" id="addon-wrapping">Upload File:</span>
-                        <input @change="changeExternalDisposition" multiple type="file" accept=".xlsx" class="form-control form-control-lg" aria-describedby="addon-wrapping">
+                        <input @change="changeExternalDisposition" multiple type="file" accept=".xlsm,.xlsx, .xls, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control form-control-lg" aria-describedby="addon-wrapping">
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -1697,7 +1697,7 @@
         formData.append("ecrsId", selectedEcrsId.value);
 
         axiosSaveData(formData,'api/upload_man_ref',(response) =>{
-            console.log(response);
+            modal.UploadRef.hide();
         });
     }
 </script>

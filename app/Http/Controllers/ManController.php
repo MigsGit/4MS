@@ -11,6 +11,7 @@ use App\Models\ManApproval;
 use App\Models\ManChecklist;
 use Illuminate\Http\Request;
 use App\Http\Requests\ManRequest;
+use App\Http\Requests\ManFileRequest;
 use App\Models\SpecialInspection;
 use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
@@ -197,7 +198,7 @@ class ManController extends Controller
                     "system_name" => "rapidx_4M",
                 ];
                 // DB::commit();
-                // $this->emailInterface->sendEmail($emailData);
+                $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
             if ( count($manApproval) === 0){
@@ -285,7 +286,7 @@ class ManController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -359,17 +360,18 @@ class ManController extends Controller
             throw $e;
         }
    }
-    public function uploadManRef(Request $request){
+    public function uploadManRef(ManFileRequest $manFileRequest){
         try {
+            return $manFileRequest->validated();
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
-            if($request->hasfile('man_ref') ){
-                $arrUploadFile = $this->commonInterface->uploadFile($request->man_ref,$request->ecrsId,'man');
+            if($manFileRequest->hasfile('man_ref') ){
+                $arrUploadFile = $this->commonInterface->uploadFile($manFileRequest->man_ref,$manFileRequest->ecrsId,'man');
                 $impOriginalFilename = implode(' | ',$arrUploadFile['arr_original_filename']);
                 $impFilteredDocumentName = implode(' | ',$arrUploadFile['arr_filtered_document_name']);
 
                 $conditions = [
-                   'ecrs_id' =>  $request->ecrsId
+                   'ecrs_id' =>  $manFileRequest->ecrsId
                 ];
                 // return 'true';
                 $manRequestValidated['original_filename'] = $impOriginalFilename;
