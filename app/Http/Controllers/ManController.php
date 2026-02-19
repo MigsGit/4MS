@@ -196,8 +196,8 @@ class ManController extends Controller
                     "created_by" => session('rapidx_username'),
                     "system_name" => "rapidx_4M",
                 ];
-                // DB::commit();
-                // $this->emailInterface->sendEmail($emailData);
+                DB::commit();
+                $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
             if ( count($manApproval) === 0){
@@ -239,8 +239,8 @@ class ManController extends Controller
                     $header = "Your MACHINE 4M  has been APPROVED";
                     $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($manCurrent->ecrs_id,$header);
                 }
-              
-                
+
+
             }
             if ( count($manApproval) != 0){
                 $currentApproval = $this->emailInterface->getEmailByRapidxUserId($manApproval[0]->rapidx_user_id);
@@ -285,7 +285,7 @@ class ManController extends Controller
                 "system_name" => "rapidx_4M",
             ];
             DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -452,6 +452,7 @@ class ManController extends Controller
             }
             if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id') || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
                 $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" id="btnUploadRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload Reference</button></li>';
             }
             if($manDetailStatus === "RUP" || $manDetailStatus === "DIS"){
                 if($row->created_by === session('rapidx_user_id')){
