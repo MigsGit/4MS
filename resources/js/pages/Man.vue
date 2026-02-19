@@ -1697,7 +1697,7 @@
         formData.append("ecrsId", selectedEcrsId.value);
 
         axiosSaveData(formData,'api/upload_man_ref',(response) =>{
-            console.log(response);
+            modal.UploadRef.hide();
         });
     }
 </script>
