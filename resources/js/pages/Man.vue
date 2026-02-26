@@ -46,6 +46,7 @@
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
                                     <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">Created by</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -1048,7 +1049,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
+                <table class="table" >
                 <!-- <table class="table"> -->
                     <thead>
 
@@ -1330,6 +1331,8 @@
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
+        {   data: 'created_by',
+        } ,
     ];
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
@@ -1651,8 +1654,8 @@
             }
             axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
                 modal.Approval.hide();
-                modal.SaveMachine.hide();
-                tblEcrByStatus.value.dt.draw();
+                modal.SaveMan.hide();
+                tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedAdminAccess.value).draw();
             });
             return;
         }

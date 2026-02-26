@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\EnvironmentRequest;
+use App\Interfaces\CommonInterface;
+use App\Interfaces\EmailInterface;
+use App\Interfaces\ResourceInterface;
 use App\Models\Ecr;
 use App\Models\Environment;
+use App\Models\RapidxUser;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Interfaces\EmailInterface;
 use Illuminate\Support\Facades\DB;
-use App\Interfaces\CommonInterface;
-use App\Http\Controllers\Controller;
-use App\Interfaces\ResourceInterface;
-use App\Http\Requests\EnvironmentRequest;
 
 class EnvironmentController extends Controller
 {
@@ -135,8 +136,22 @@ class EnvironmentController extends Controller
                 $result .= '</center>';
                 return $result;
             })
+            ->addColumn('created_by', function ($row) {
+                // Keeping your code exactly as you asked
+                $rapidx = RapidxUser::where('id', $row->created_by)->first();
+                return '<center><p>' . ($rapidx->name ?? '') . '</p></center>';
+            })
+            ->filterColumn('created_by', function($query, $keyword) {
+                // 1. Go to the RapidX database and find all User IDs that match the name
+                $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
+                    ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
+                    ->toArray();
             
+                // 2. Tell the main query to only show rows where 'created_by' is in that list
+                $query->whereIn('created_by', $userIds);
+            })
             ->rawColumns([
+                'created_by',
                 'get_actions',
                 'get_status',
                 'get_attachment',

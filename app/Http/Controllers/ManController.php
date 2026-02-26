@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ManFileRequest;
+use App\Http\Requests\ManRequest;
+use App\Interfaces\CommonInterface;
+use App\Interfaces\EmailInterface;
+use App\Interfaces\ResourceInterface;
+use App\Models\DropdownMasterDetail;
 use App\Models\Ecr;
-use App\Models\Man;
 use App\Models\EcrDetail;
-use App\Models\ManDetail;
+use App\Models\Man;
 use App\Models\ManApproval;
 use App\Models\ManChecklist;
-use Illuminate\Http\Request;
-use App\Http\Requests\ManRequest;
-use App\Http\Requests\ManFileRequest;
+use App\Models\ManDetail;
+use App\Models\RapidxUser;
 use App\Models\SpecialInspection;
-use App\Interfaces\EmailInterface;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Interfaces\CommonInterface;
-use App\Http\Controllers\Controller;
-use App\Models\DropdownMasterDetail;
-use App\Interfaces\ResourceInterface;
 
 class ManController extends Controller
 {
@@ -88,6 +89,11 @@ class ManController extends Controller
             ->whereNotNull('rapidx_user_id')
             ->count();
             if($request->is_update_man_approver === 'YES' || $manApprovalCount  <= 1){
+                Man::where('ecrs_id', $ecrsId)->first()
+                ->update([
+                    'approval_status' => 'RUP',
+                    'status' => 'RUP',
+                ]);
                 ManApproval::where('ecrs_id',$ecrsId)
                 ->whereNull('deleted_at')
                 ->delete();
@@ -211,23 +217,23 @@ class ManController extends Controller
                     "created_by" => session('rapidx_username'),
                     "system_name" => "rapidx_4M",
                 ];
-                // DB::commit();
-                // $this->emailInterface->sendEmail($emailData);
+                DB::commit();
+                $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
             if ( count($manApproval) === 0){
                 //nmodify //
-                $specialInspection = $this->resourceInterface->readCustomEloquent(SpecialInspection::class,[],[],[
+               $specialInspection = $this->resourceInterface->readCustomEloquent(SpecialInspection::class,[],[],[
                     'ecrs_id' =>  $manCurrent->ecrs_id
                 ])
-                ->whereNotNull('lqc_section_head')
-                ->first(['lqc_section_head']);
+                ->where('lqc_section_head', '!=',0)
+                ->get(['lqc_section_head']);
                 if(count($specialInspection) === 0){
                     return response()->json(['isSuccess' => 'false','msg' => 'Please input the LQC Section Head to the Special Inspection' ],500);
                 }
                 $manApprovalRequest =  [
                     'ecrs_id' =>  $ecrsId,
-                    'rapidx_user_id' => $specialInspection['lqc_section_head'] ?? NULL,
+                    'rapidx_user_id' => $specialInspection[0]['lqc_section_head'] ?? NULL,
                     'approval_status' => 'QCSECHEAD',
                     'status' => 'PEN',
                     'created_at' => now(),
@@ -236,10 +242,19 @@ class ManController extends Controller
                     ManApproval::insert($manApprovalRequest);
                     //Send For Approval Email
                     $to = $currentApproval['email'] ?? '';
-                    $from = $createdByEmail['email'] ?? '';
+                    $from = 'issinfoservice@pricon.ph';
                     $subject = "FOR APPROVAL: MAN (4M)";
                     $from_name = "4M Change Control Management System";
                     $msg = $this->emailInterface->ecrEmailMsgByCategory($ecrsId,'MAN');
+                     //Update the ECR Approval Status
+                    $manConditions = [
+                        'ecrs_id' => $ecrsId,
+                    ];
+                    $manValidated = [
+                        'status' => 'PMIAPP',
+                        'approval_status' => '',
+                    ];
+                    $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
                 }else{
                     $manConditions = [
                         'ecrs_id' => $ecrsId,
@@ -282,7 +297,7 @@ class ManController extends Controller
 
                 //Send Approval Email
                 $to = $currentApproval['email'] ?? '';
-                $from = $createdByEmail['email'] ?? '';
+                $from = 'issinfoservice@pricon.ph';
                 $subject = "FOR APPROVAL: MAN (4M)";
                 $from_name = "4M Change Control Management System";
                 $msg = $this->emailInterface->ecrEmailMsgByCategory($ecrsId,'MAN');
@@ -303,8 +318,8 @@ class ManController extends Controller
                 "created_by" => session('rapidx_username'),
                 "system_name" => "rapidx_4M",
             ];
-            // DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            DB::commit();
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['isSuccess' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -396,7 +411,7 @@ class ManController extends Controller
                 $manRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
                 $this->resourceInterface->updateConditions(Man::class,$conditions,$manRequestValidated);
             }
-            DB::commit();
+            // DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -409,6 +424,8 @@ class ManController extends Controller
         $relations = [
             'man_detail.man_approvals_pending',
             'man_detail',
+            'rapidx_user_created_by',
+
         ];
         $conditions = [
             'status' => 'OK',
@@ -448,6 +465,8 @@ class ManController extends Controller
                 ->where('rapidx_user_id',session('rapidx_user_id'));
             });
         }
+          // This tells the search bar to look at the 'name' column in the related table
+        // return     RapidxUser::where('name', 'like', "%'Miguel'%")->get();
         $ecr->whereNull('deleted_at');
         $ecr->get();
 
@@ -532,7 +551,6 @@ class ManController extends Controller
             $result .= '<p class="card-text"><strong>Product Line:</strong> ' . $row->product_line . '</p>';
             $result .= '<p class="card-text"><strong>Date of Request:</strong> ' . $row->date_of_request . '</p>';
             $result .= '<p class="card-text"><strong>Target Completion:</strong> ' .$date->toDateString(). '</p>';
-            $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
             return $result;
         })
         ->addColumn('get_attachment',function ($row) use ($request){
@@ -542,18 +560,28 @@ class ManController extends Controller
             $result .= '</center>';
             return $result;
         })
+        ->addColumn('created_by', function ($row) {
+            // Keeping your code exactly as you asked
+            $rapidx = RapidxUser::where('id', $row->created_by)->first();
+            return '<center><p>' . ($rapidx->name ?? '') . '</p></center>';
+        })
+        ->filterColumn('created_by', function($query, $keyword) {
+            // 1. Go to the RapidX database and find all User IDs that match the name
+            $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
+                ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
+                ->toArray();
+        
+            // 2. Tell the main query to only show rows where 'created_by' is in that list
+            $query->whereIn('created_by', $userIds);
+        })
         ->rawColumns([
+            'created_by',
             'get_actions',
             'get_status',
             'get_details',
             'get_attachment',
         ])
         ->make(true);
-        try {
-            return response()->json(['is_success' => 'true']);
-        } catch (Exception $e) {
-            return response()->json(['is_success' => 'false', 'exceptionError' => $e->getMessage()]);
-        }
     }
     public function loadManByEcrId(Request $request){
         try {

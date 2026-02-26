@@ -43,6 +43,7 @@
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
                                     <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">Created by</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -1028,10 +1029,12 @@
                         selectedMethodsId.value = methodsId;
                         isModal.value = 'View';
                         currentStatus.value = methodStatus;
-                        getCurrentApprover(methodApproverParams);
-                        tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
 
-                        if( methodStatus === 'PMIAPP' || methodStatus === 'OK'){
+                        if( machineStatus != 'PMIAPP'){
+                            getCurrentApprover(methodApproverParams);
+                            tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
+                        }
+                        if( machineStatus === 'PMIAPP'){
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
@@ -1092,6 +1095,7 @@
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
+        {   data: 'created_by'} ,
     ];
     const tblEcrDetailColumns = [
         {   data: 'get_actions',

@@ -45,6 +45,7 @@
                                             <th style=""width="10%">Category</th>
                                             <th style=""width="10%">Section</th>
                                             <th style=""width="10%">Customer EC No</th>
+                                            <th style=""width="10%">Created by</th>
                                         </tr>
                                     </thead>
                                 </DataTable>
@@ -819,6 +820,7 @@
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
+        {   data: 'created_by'} ,
     ];
     const tblPmiInternalApproverSummaryColumns = [
         {   data: 'get_count'} ,
@@ -917,21 +919,17 @@
         });
     }
     const frmSavePmiInternalApproval = async () => {
-        let formData = new FormData();
-        //Append form data
-        [
-            ["ecrsId", selectedEcrsId.value],
-            ["status", isPmiInternalApproved.value],
-            ["remarks", approvalRemarks.value],
-        ].forEach(([key, value]) =>
-            formData.append(key, value)
-        );
-        axiosSaveData(formData,'api/save_pmi_internal_approval', (response) =>{
-            // tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecr_id="+selectedEcrsId.value).draw()
+        let apiParams = {
+                ecrsId : selectedEcrsId.value,
+                status : isApprovedDisappproved.value,
+                remarks : remarks.value,
+            }
+        axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
             tblEcrByStatus.value.dt.ajax.url("api/load_ecr_environment_by_status?category=Environment"+"&& adminAccess="+selectedAdminAccess.value).draw();
             modal.PmiInternalApproval.hide();
             modal.SaveEnvironment.hide();
         });
+        return;
     }
     const frmUploadEnvironmentRef = async () => {
         let formData = new FormData();

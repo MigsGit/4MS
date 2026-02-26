@@ -43,6 +43,7 @@
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
                                     <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">Created by</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -1038,12 +1039,18 @@
                         isModal.value = 'View';
                         currentStatus.value = machineStatus;
 
-                        getCurrentApprover(machineApproverParams);
-                        if( machineStatus === 'PMIAPP' || machineStatus === 'OK'){
+
+                        if( machineStatus != 'PMIAPP'){
+                            getCurrentApprover(machineApproverParams);
+                            tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_id?machinesId="+machinesId).draw();
+                        }
+                        if( machineStatus === 'PMIAPP'){
+                            getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
+
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_id?machinesId="+machinesId).draw();
+
                         //Load ECR Requirement by Category and Ecrs Id
                         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
                         tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
@@ -1087,6 +1094,7 @@
                         let ecrsId = this.getAttribute('ecrs-id');
                         selectedEcrsId.value = ecrsId;
                         selectedEcrsIdEncrypted.value = ecrsIdEcrypted;
+
                         getBeforeAfterRefByEcrsId(ecrsIdEcrypted);
                     });
                 }
@@ -1097,6 +1105,7 @@
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
+        {   data: 'created_by'} ,
     ];
     const tblEcrDetailColumns = [
         {   data: 'get_actions',

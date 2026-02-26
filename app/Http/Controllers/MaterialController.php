@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\MaterialApprovalRequest;
+use App\Http\Requests\MaterialRequest;
+use App\Interfaces\CommonInterface;
+use App\Interfaces\EmailInterface;
+use App\Interfaces\ResourceInterface;
 use App\Models\Ecr;
 use App\Models\Material;
-use App\Models\PmiApproval;
-use Illuminate\Http\Request;
 use App\Models\MaterialApproval;
-use App\Interfaces\EmailInterface;
+use App\Models\PmiApproval;
+use App\Models\RapidxUser;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Interfaces\CommonInterface;
-use App\Http\Controllers\Controller;
-use App\Interfaces\ResourceInterface;
-use App\Http\Requests\MaterialRequest;
-use App\Http\Requests\MaterialApprovalRequest;
 
 class MaterialController extends Controller
 {
@@ -403,6 +404,13 @@ class MaterialController extends Controller
                 $result .= '    Action';
                 $result .= '</button>';
                 $result .= '<ul class="dropdown-menu">';
+                if($materialStatus === "RUP" || $materialStatus === "DIS" ){
+                    if( $row->created_by === session('rapidx_user_id')){
+                        $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload</button></li>';
+                        $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                    }
+                }
+
                 if($materialStatus === 'EXDISPO' || $materialStatus === 'EXDISAPP' || $materialStatus === 'OK'){
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" method-status= "'.$materialStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                     // $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
@@ -413,11 +421,6 @@ class MaterialController extends Controller
 
                     $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
-                }
-                if($materialStatus === "RUP" || $materialStatus === "DIS" ){
-                    if( $row->created_by === session('rapidx_user_id')){
-                        $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" id="btnDownloadMaterialRef"><i class="fa-solid fa-edit"></i> &nbsp;Upload</button></li>';
-                    }
                 }
 
 
@@ -483,7 +486,22 @@ class MaterialController extends Controller
 
                 return $result;
             })
+               ->addColumn('created_by', function ($row) {
+                // Keeping your code exactly as you asked
+                $rapidx = RapidxUser::where('id', $row->created_by)->first();
+                return '<center><p>' . ($rapidx->name ?? '') . '</p></center>';
+            })
+            ->filterColumn('created_by', function($query, $keyword) {
+                // 1. Go to the RapidX database and find all User IDs that match the name
+                $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
+                    ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
+                    ->toArray();
+            
+                // 2. Tell the main query to only show rows where 'created_by' is in that list
+                $query->whereIn('created_by', $userIds);
+            })
             ->rawColumns([
+                'created_by',
                 'get_actions',
                 'get_status',
                 'get_attachment',
@@ -617,7 +635,29 @@ class MaterialController extends Controller
             throw $e;
         }
     }
-  
+
+    public function getMaterialRefByEcrsId(Request $request){
+        try {
+            $ecrsId = $request->ecrsId;
+            $conditions = [
+                'ecrs_id' => $ecrsId,
+            ];
+            $data = $this->resourceInterface->readCustomEloquent(Material::class,[],[],$conditions);
+            $materialRefByEcrsId = $data
+            ->get([
+                'id',
+                'ecrs_id',
+                'original_filename',
+            ]);
+            return response()->json([
+                'isSuccess' => 'true',
+                'originalFilename'=> explode(' | ',$materialRefByEcrsId[0]->original_filename),
+                'ecrsId'=> encrypt($materialRefByEcrsId[0]->ecrs_id),
+            ]);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
     public function viewMaterialRef(Request $request){
         try {
             $ecrsId = decrypt($request->ecrsId);

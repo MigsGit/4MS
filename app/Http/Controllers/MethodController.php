@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Ecr;
-use App\Models\Method;
-use Illuminate\Http\Request;
-use App\Models\MethodApproval;
-use App\Models\MachineApproval;
-use App\Interfaces\EmailInterface;
-use Illuminate\Support\Facades\DB;
-use App\Interfaces\CommonInterface;
-use App\Models\ExternalDisposition;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MethodApprovalRequest;
+use App\Http\Requests\MethodFileRequest;
+use App\Interfaces\CommonInterface;
+use App\Interfaces\EmailInterface;
 use App\Interfaces\ResourceInterface;
 use App\Models\BeforeAfterFileStorage;
-use App\Http\Requests\MethodFileRequest;
-use App\Http\Requests\MethodApprovalRequest;
+use App\Models\Ecr;
+use App\Models\ExternalDisposition;
+use App\Models\MachineApproval;
+use App\Models\Method;
+use App\Models\MethodApproval;
+use App\Models\RapidxUser;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MethodController extends Controller
 {
@@ -42,14 +43,15 @@ class MethodController extends Controller
             $methodsId = $methodFileRequest->methodsId;
 
             if($methodFileRequest->hasfile('methodRefBefore') && $methodFileRequest->hasfile('methodRefAfter')){
-               $arrUploadFile = $this->commonInterface->uploadFileImg($methodFileRequest->methodRefBefore,$methodFileRequest->methodRefAfter,$ecrsId,'method'); //nchange
+                $arrUploadFile = $this->commonInterface->uploadFileImg($methodFileRequest->methodRefBefore,$methodFileRequest->methodRefAfter,$ecrsId,'method'); //nchange
                 $impOriginalFilenameBefore = implode(' | ',$arrUploadFile['arr_original_filename_before']);
                 $impFilteredDocumentNameBefore = implode(' | ',$arrUploadFile['arr_filtered_document_name_before']);
                 $impOriginalFilenameAfter = implode(' | ',$arrUploadFile['arr_original_filename_after']);
                 $impFilteredDocumentNameAfter = implode(' | ',$arrUploadFile['arr_filtered_document_name_after']);
 
-                $beforeAfterFileStorageId =$this->resourceInterface->create(BeforeAfterFileStorage::class,$fileRequestValidated);
-                $fileRequestValidated = [
+                // $beforeAfterFileStorageId =$this->resourceInterface->create(BeforeAfterFileStorage::class,$fileRequestValidated);
+
+              return  $fileRequestValidated = [
                     'ecrs_id' => $ecrsId,
                     'original_filename_before' => $impOriginalFilenameBefore,
                     'filtered_document_name_before' => $impFilteredDocumentNameBefore,
@@ -577,7 +579,22 @@ class MethodController extends Controller
                 $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })
+            ->addColumn('created_by', function ($row) {
+                // Keeping your code exactly as you asked
+                $rapidx = RapidxUser::where('id', $row->created_by)->first();
+                return '<center><p>' . ($rapidx->name ?? '') . '</p></center>';
+            })
+            ->filterColumn('created_by', function($query, $keyword) {
+                // 1. Go to the RapidX database and find all User IDs that match the name
+                $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
+                    ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
+                    ->toArray();
+            
+                // 2. Tell the main query to only show rows where 'created_by' is in that list
+                $query->whereIn('created_by', $userIds);
+            })
             ->rawColumns([
+                'created_by',
                 'get_actions',
                 'get_status',
                 'get_attachment',

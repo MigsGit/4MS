@@ -262,7 +262,7 @@ class CommonController extends Controller
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
             $ecrsId = $request->ecrsId;
-            $dispositionStatus = $request->status;
+           $dispositionStatus = $request->status;
             $ecr = Ecr::find($ecrsId,['category']);
             switch ($ecr->category) {
                 case 'Man':
@@ -330,7 +330,7 @@ class CommonController extends Controller
     }
     public function loadSpecialInspectionByEcrId(Request $request){
         try {
-            $ecrsId = $request->ecrsId ?? "";
+           $ecrsId = $request->ecrsId ?? "";
             $data = [];
             $relations = [
                 'rapidx_user'
@@ -740,7 +740,7 @@ class CommonController extends Controller
         $ecrDetails = $ecr->get();
         $beforeAfterFileStorage =  BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->get();
         // return  $ecrDetails = $ecr->get();
-       $ecrCollection = collect($ecrDetails)
+        $ecrCollection = collect($ecrDetails)
         ->flatMap(function ($ecrCollectionRow) use($beforeAfterFileStorage){
             $ecrApprovals = $ecrCollectionRow->ecr_approvals ?? '';
             //Get the Department / Section of the user
@@ -749,20 +749,22 @@ class CommonController extends Controller
                 return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
             }); //removed the NULL Value
 
-            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->method->method_approvals ?? 'NOTEXISTS';
+            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->Collection;$method->method_approvals ?? 'NOTEXISTS';
             if($detailsFourMCollection != 'NOTEXISTS'){
-                $detailsFourMApprovalByDeptCollection = collect($detailsFourMCollection)->map(function ($detailsFourMRow){
-                   $departmentId = $detailsFourMRow->rapidx_user->department_id ?? '';
-                   return  $approvalByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
-                }); //removed the NULL Value
+                $detailsFourMCollectionFiltered = collect($detailsFourMCollection)->map(function ($detailsFourMRow){
+                    return $rapidxUser = $detailsFourMRow?? '';
+                })->whereNotNull('rapidx_user_id'); //removed the NULL Value
+                $detailsFourMApprovalByDeptCollection = collect($detailsFourMCollectionFiltered)->map(function ($detailsFourMCollectionFilteredRow){
+                    $departmentId = $detailsFourMCollectionFilteredRow->rapidx_user->department_id?? '';
+                    return  $approvalByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
+                })->filter(); //removed the NULL Value
             }
-            // })->filter()->all(); //removed the NULL Value
             return [
+                'detailsFourMCollectionFiltered' => $detailsFourMCollectionFiltered ?? [],
                 'detailsFourMApprovalByDeptCollection' => $detailsFourMApprovalByDeptCollection ?? [],
                 'requestedByDeptCollection' => $requestedByDeptCollection,
                 'ecrCollection' => $ecrCollectionRow,
                 'beforeAfterFileStorage' => $beforeAfterFileStorage,
-                'detailsFourMCollection' => $detailsFourMCollection,
 
             ];
         });
