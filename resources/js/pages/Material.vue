@@ -776,8 +776,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" >
-                <!-- <table class="table"> -->
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
 
                         <tr>
@@ -796,7 +795,7 @@
                                     Download Internal Export
                                 </a>
                             </td>
-                            <!-- <td>
+                            <!--  <td v-show="internalExternal === 'External'">
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
@@ -1382,6 +1381,8 @@
                         let params = {
                             ecrsId : ecrsId
                         };
+                        let materialStatus = this.getAttribute('material-status');
+                        currentStatus.value = materialStatus;
                         selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
                         getMaterialRefByEcrsId(params);
                     });

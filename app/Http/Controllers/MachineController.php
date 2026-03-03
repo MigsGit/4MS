@@ -441,7 +441,7 @@ class MachineController extends Controller
                 $machineStatus = $row->machine->status ?? "";
                 $result = '';
                 $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" selected-ecrs-id-encrypted = "'.encrypt($row->id).'"  ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" selected-ecrs-id-encrypted = "'.encrypt($row->id).'"  ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'"  internal-external="'.$row->internal_external.'"  id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })

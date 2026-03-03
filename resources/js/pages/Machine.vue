@@ -471,7 +471,7 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">
-                                After Image Attachment
+                                After Image Attachment  {{currentStatus}}
                             </th>
                         </tr>
                     </thead>
@@ -487,30 +487,51 @@
                         </tr>
                     </tbody>
                 </table>
-                <table v-show="currentStatus === 'OK'" class="table">
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
 
                         <tr>
                             <th scope="col">
-                                Internal Machine
+                                Internal Material
                             </th>
                             <th scope="col">
-                                External Machine
+                                External Material
                             </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>
-                                <a href="#" class="link-primary d-none" @click="btnLinkDownloadInternalMachine(selectedEcrsId)">
-                                    Download Internal Machine
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEncrypted)">
+                                    Download Internal Export
                                 </a>
                             </td>
-                        <td>
-                            <a href="#" class="link-primary" @click="btnLinkDownloadExternalMachine(selectedEcrsId)">
-                                Download External Machine
-                            </a>
-                        </td>
+                            <td v-show="internalExternal === 'External'">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEncrypted)">
+                                    Download External Export
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table d-none">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                External Disposition
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- v-for -->
+                        <tr v-for="(arrOriginalFilenameExternalDisposition, index) in arrOriginalFilenameExternalDispositions" :key="arrOriginalFilenameExternalDisposition.index">
+                            <th scope="row">{{ index+1 }}</th>
+                            <td>
+                                <a href="#" class="link-primary" ref="aViewExternalDisposition" @click="btnLinkViewExternalDisposition(selectedEcrsId,index)">
+                                    {{ arrOriginalFilenameExternalDisposition }}
+                                </a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -931,6 +952,7 @@
         isEmptyTblEcrOthersRequirements,
         btnLinkViewEcrRequirementRef,
         btnEcrRequirement,
+        getEcrById,
     } = useEcr();
     const {
         machineVar,
@@ -983,10 +1005,11 @@
     const currentStatus = ref(null);
     const arrOriginalFilenameExternalDispositions = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
-
+    
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
     const modalSaveDisposition = ref(null);
+    const internalExternal = ref(null);
 
 
     const tblEcrByStatusColumns = [
@@ -1092,9 +1115,12 @@
                     btnViewMachineRef.addEventListener('click',function(){
                         let ecrsIdEcrypted = this.getAttribute('selected-ecrs-id-encrypted');
                         let ecrsId = this.getAttribute('ecrs-id');
+                        let machineStatus = this.getAttribute('machine-status');
+                        let selectInternalExternal = this.getAttribute('internal-external');
+                        internalExternal.value = selectInternalExternal;
                         selectedEcrsId.value = ecrsId;
                         selectedEcrsIdEncrypted.value = ecrsIdEcrypted;
-
+                        currentStatus.value = machineStatus;
                         getBeforeAfterRefByEcrsId(ecrsIdEcrypted);
                     });
                 }
@@ -1214,7 +1240,8 @@
             resetEcrForm(frmEcrDetails.value);
         });
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            frmSpecialInspection.value.ecrsId;
+            frmSpecialInspection.value.ecrsId
+            frmSpecialInspection.value.specialInspectionsId = '';
         });
 
         await getDropdownMasterByOpt(descriptionOfChangeParams);
@@ -1267,7 +1294,7 @@
     const btnLinkViewRefAfter = async (selectedEcrsIdEncrypted,index) => { //TODO: View Image
         window.open(`api/view_before_after_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEncrypted} && index=${index} && imageType=after`, '_blank');
     }
-    const btnLinkDownloadInternalMachine = async (selectedEcrsId) => {
+    const btnLinkDownloadInternal = async (selectedEcrsId) => {
         let params = {
             ecrsId : selectedEcrsId
         }

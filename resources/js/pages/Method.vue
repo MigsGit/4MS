@@ -483,7 +483,7 @@
                                     Download Internal Export
                                 </a>
                             </td>
-                            <td>
+                            <td v-show="internalExternal === 'External'">
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
@@ -968,8 +968,8 @@
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
     const modalSaveDisposition = ref(null);
-
     const dispositionFile = ref([]);
+    const internalExternal = ref(null);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -1030,11 +1030,11 @@
                         isModal.value = 'View';
                         currentStatus.value = methodStatus;
 
-                        if( machineStatus != 'PMIAPP'){
+                        if( methodStatus != 'PMIAPP'){
                             getCurrentApprover(methodApproverParams);
                             tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
                         }
-                        if( machineStatus === 'PMIAPP'){
+                        if( methodStatus === 'PMIAPP'){
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
@@ -1082,6 +1082,8 @@
                         let ecrsId = this.getAttribute('ecrs-id');
                         let methodStatus = this.getAttribute('method-status');
                         let ecrsIdEcrypted = this.getAttribute('selected-ecrs-id-encrypted');
+                        let selectInternalExternal = this.getAttribute('internal-external');
+                        internalExternal.value = selectInternalExternal;
                         selectedEcrsIdEcrypted.value = ecrsIdEcrypted;
                         currentStatus.value = methodStatus;
                         selectedEcrsId.value = ecrsId;
@@ -1202,6 +1204,10 @@
         });
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             frmSpecialInspection.value.ecrsId;
+        });
+        modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            frmSpecialInspection.value.ecrsId
+            frmSpecialInspection.value.specialInspectionsId = '';
         });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);

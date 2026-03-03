@@ -391,7 +391,7 @@
                 <div class="col-sm-6">
                     <!-- Unnecessary value binding used alongside v-model. It will interfere with v-model's behavior.  v-if="currentStatus === 'RUP'"-->
                     <div  class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text text-danger" id="addon-wrapping">Update Approver? {{ currentStatus }}</span>
+                        <span class="input-group-text text-danger" id="addon-wrapping">Update Approver? </span>
                         <Multiselect
                             v-model="frmMan.isUpdateManApprover"
                             :options="commonVar.optYesNo"
@@ -1049,8 +1049,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" >
-                <!-- <table class="table"> -->
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
 
                         <tr>
@@ -1069,7 +1068,7 @@
                                     Download Internal Export
                                 </a>
                             </td>
-                            <!-- <td>
+                            <!-- <td v-show="internalExternal === 'External'">
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
@@ -1157,6 +1156,7 @@
         isEmptyTblEcrOthersRequirements,
         btnLinkViewEcrRequirementRef,
         btnEcrRequirement,
+        getEcrById,
     } = useEcr();
 
     const {
@@ -1216,6 +1216,7 @@
     const modalUploadRef = ref(null);
     const manRef = ref(null);
     const arrOriginalFilenames = ref(null);
+    const internalExternal = ref(null);
 
     const ecrColumns = [
         {   data: 'get_actions',
@@ -1316,11 +1317,16 @@
                 if(btnViewManRef != null){
                     btnViewManRef.addEventListener('click',function(){
                         let ecrsIdEncrypted = this.getAttribute('encrypted-ecr-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let selectInternalExternal = this.getAttribute('internal-external');
                         let manParams = {
                             ecrsId : ecrsIdEncrypted
                         }
-                        selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
+                        let manStatus = this.getAttribute('man-status');
                         getManRefByEcrsId(manParams)
+                        currentStatus.value = manStatus;
+                        selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
+                        internalExternal.value = selectInternalExternal;
                         modal.ViewRef.show();
                     });
                 }
@@ -1470,7 +1476,8 @@
         })
 
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            frmSpecialInspection.value.ecrsId;
+            frmSpecialInspection.value.ecrsId
+            frmSpecialInspection.value.specialInspectionsId = '';
         });
         modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcrDetails.value);

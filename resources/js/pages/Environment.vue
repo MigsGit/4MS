@@ -247,7 +247,7 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">
-                                PDF Attachment
+                                PDF Attachment {{ currentStatus }}
                             </th>
                         </tr>
                     </thead>
@@ -732,6 +732,7 @@
     const modalViewEcrRequirementRef = ref(null);
     const modalSaveDisposition = ref(null);
     const selectedEcrsIdEcrypted = ref(null);
+    const currentStatus = ref(null);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',

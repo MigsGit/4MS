@@ -51,7 +51,7 @@ class MethodController extends Controller
 
                 // $beforeAfterFileStorageId =$this->resourceInterface->create(BeforeAfterFileStorage::class,$fileRequestValidated);
 
-              return  $fileRequestValidated = [
+                $fileRequestValidated = [
                     'ecrs_id' => $ecrsId,
                     'original_filename_before' => $impOriginalFilenameBefore,
                     'filtered_document_name_before' => $impFilteredDocumentNameBefore,
@@ -551,7 +551,7 @@ class MethodController extends Controller
                 $methodStatus = $row->method->status ?? "";
                 $result = '';
                 $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" methods-id="'.$row->method->id.'" selected-ecrs-id-encrypted = "'.encrypt($row->id).'"  ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnViewMethodRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" methods-id="'.$row->method->id.'" selected-ecrs-id-encrypted = "'.encrypt($row->id).'"  ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'"  internal-external="'.$row->internal_external.'"  id="btnViewMethodRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })
