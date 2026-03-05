@@ -116,6 +116,7 @@ export default function useCommon(){
         {  title: "Judgement" , data: 'judgement' } ,
         {  title: "Inspection Date" , data: 'inspection_date' } ,
         {  title: "Inspector" , data: 'get_inspector' } ,
+        // {  title: "get_sec_head" , data: 'get_sec_head' } ,
         {  title: "Remarks" , data: 'remarks' } ,
     ];
     //Functions

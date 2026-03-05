@@ -510,7 +510,7 @@ class MethodController extends Controller
                 //     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
                 //     return $result;
                 // }
-                if($methodStatus === "RUP" && $row->created_by === session('rapidx_user_id')){
+                if($methodStatus === "RUP" || $methodStatus === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" methods-id="'.$row->method->id.'" ecrs-id="'.$row->id.'" method-status= "'.$methodStatus.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                 }
                 if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id')  || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id')  ){
@@ -589,7 +589,7 @@ class MethodController extends Controller
                 $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
                     ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
                     ->toArray();
-            
+
                 // 2. Tell the main query to only show rows where 'created_by' is in that list
                 $query->whereIn('created_by', $userIds);
             })

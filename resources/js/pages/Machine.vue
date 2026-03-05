@@ -1005,7 +1005,7 @@
     const currentStatus = ref(null);
     const arrOriginalFilenameExternalDispositions = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
-    
+
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
     const modalSaveDisposition = ref(null);
@@ -1063,12 +1063,12 @@
                         currentStatus.value = machineStatus;
 
 
-                        if( machineStatus != 'PMIAPP'){
+                        // if( machineStatus != 'PMIAPP'){
                             getCurrentApprover(machineApproverParams);
                             tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_id?machinesId="+machinesId).draw();
-                        }
+                        // }
                         if( machineStatus === 'PMIAPP'){
-                            getCurrentApprover(pmiApproverParams);
+                            // getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
 

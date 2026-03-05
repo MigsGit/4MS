@@ -990,7 +990,8 @@
 
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw();
-                        getRapidxUserByIdOpt(prdnAssessedByParams);
+
+                        getRapidxUserByIdOpt(prdnAssessedByParams); //nmodify watch
                         getRapidxUserByIdOpt(prdnCheckedByParams);
                         getRapidxUserByIdOpt(ppcAssessedByParams);
                         getRapidxUserByIdOpt(ppcCheckedByParams);
@@ -1000,6 +1001,7 @@
                         getRapidxUserByIdOpt(proEnggCheckedByParams);
                         getRapidxUserByIdOpt(qcAssessedByParams);
                         getRapidxUserByIdOpt(qcCheckedByParams);
+
 
                         //Load ECR Requirement by Category and Ecrs Id
                         tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
@@ -1030,12 +1032,12 @@
                         isModal.value = 'View';
                         currentStatus.value = methodStatus;
 
-                        if( methodStatus != 'PMIAPP'){
+                        // if( methodStatus != 'PMIAPP'){
                             getCurrentApprover(methodApproverParams);
                             tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
-                        }
+                        // }
                         if( methodStatus === 'PMIAPP'){
-                            getCurrentApprover(pmiApproverParams);
+                            // getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
 
@@ -1358,6 +1360,17 @@
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
             modal.SaveDisposition.hide();
             tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
+        });
+    }
+
+    const getMethodByEcrsId =  (params) => {
+        let apiParams = {
+            ecrsId : params.ecrsId
+        }
+        axiosFetchData(apiParams,'get_method_by_ecrs_id',function(response){
+            let data = response.data;
+
+            console.log('response',response);
         });
     }
 </script>

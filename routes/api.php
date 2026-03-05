@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_man_by_id', 'getManById')->name('get_man_by_id');
         Route::get('man_checklist_decision_change', 'manChecklistDecisionChange')->name('man_checklist_decision_change');
         Route::get('get_man_ref_by_ecrs_id', 'getManRefByEcrsId')->name('get_man_ref_by_ecrs_id');
+        Route::get('view_man_ref_by_ecrs_id', 'viewManRefByEcrsId')->name('viewManRefByEcrsId');
 
     });
 
@@ -149,7 +150,7 @@ Route::middleware('auth')->group(function(){
 
         Route::get('load_method_ecr_by_status', 'loadMethodEcrByStatus')->name('load_method_ecr_by_status');
         Route::get('load_method_approver_summary_material_id', 'loadMethodApproverSummaryMaterialId')->name('load_method_approver_summary_material_id');
-        // Route::get('get_method_ref_by_id', 'getMethodRefById')->name('get_method_ref_by_id');
+        Route::get('get_method_by_ecrs_id', 'getMethodByEcrsId')->name('get_method_by_ecrs_id');
 
         Route::get('save_method_approval', 'saveMethodApproval')->name('save_method_approval');
     });

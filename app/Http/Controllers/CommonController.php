@@ -351,6 +351,13 @@ class CommonController extends Controller
             ->addColumn('get_inspector',function ($row){
                 $result = '';
                 $result .= '<center>';
+                $result .= $row->inspector?? "---";
+                $result .= '</center>';
+                return $result;
+            })
+            ->addColumn('get_sec_head',function ($row){
+                $result = '';
+                $result .= '<center>';
                 $result .= $row->rapidx_user['name'] ?? "---";
                 $result .= '</center>';
                 return $result;
@@ -358,6 +365,7 @@ class CommonController extends Controller
             ->rawColumns([
                 'get_actions',
                 'get_inspector',
+                'get_sec_head',
             ])
             ->make(true);
             return response()->json(['is_success' => 'true']);
@@ -894,6 +902,8 @@ class CommonController extends Controller
 
 
             $pendingEcr = Ecr::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
             ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
@@ -903,6 +913,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingMan = Man::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 
@@ -911,6 +924,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingMaterial = Material::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 
@@ -919,6 +935,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingMethod = Method::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 
@@ -927,6 +946,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingMachine = Machine::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 
@@ -935,6 +957,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingEnvironment = Environment::where('approval_status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 

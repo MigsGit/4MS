@@ -178,7 +178,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3"  v-show="isModal === 'View'">
+            <div class="row mt-3"  v-show="isModal === 'View'" >
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManApproverSummary" aria-expanded="true" aria-controls="collapseManApproverSummary">
@@ -1042,7 +1042,7 @@
                         <tr v-for="(arrOriginalFilename, index) in arrOriginalFilenames" :key="arrOriginalFilename.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="#" class="link-primary" ref="aViewMaterialRef" @click="btnLinkViewMaterialRef(selectedEcrsIdEncrypted,index)">
+                                <a href="#" class="link-primary" ref="aViewMaterialRef" @click="btnLinkViewManRef(selectedEcrsIdEncrypted,index)">
                                     {{ arrOriginalFilename }}
                                 </a>
                             </td>
@@ -1217,6 +1217,7 @@
     const manRef = ref(null);
     const arrOriginalFilenames = ref(null);
     const internalExternal = ref(null);
+    const modalViewEcrRequirementRef = ref(null);
 
     const ecrColumns = [
         {   data: 'get_actions',
@@ -1340,6 +1341,7 @@
         {   data: 'created_by',
         } ,
     ];
+
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -1363,6 +1365,7 @@
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
     ];
+
     const tblManColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -1461,6 +1464,7 @@
     };
 
     onMounted( async ()=>{
+
         modal.UploadRef = new Modal(modalUploadRef.value.modalRef,{ keyboard: false });
         modal.ViewRef = new Modal(modalViewRef.value.modalRef,{ keyboard: false });
         modal.SaveDisposition = new Modal(modalSaveDisposition.value.modalRef,{ keyboard: false });
@@ -1471,9 +1475,12 @@
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modalEcr.ViewEcrRequirementRef = new Modal(modalViewEcrRequirementRef.value.modalRef,{ keyboard: false });
+
         modalSaveManDetails.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMan.value);
         })
+
 
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             frmSpecialInspection.value.ecrsId
@@ -1584,6 +1591,10 @@
             params.btnChangeManChecklistDecisionClass.remove("is-invalid");
             tblManChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=7 && manDetailsId="+currentManDetailsId.value).draw();
             tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=8 && manDetailsId="+currentManDetailsId.value).draw();
+            tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=9 && manDetailsId="+currentManDetailsId.value).draw();
+            tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=10 && manDetailsId="+currentManDetailsId.value).draw();
+            tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=11 && manDetailsId="+currentManDetailsId.value).draw();
+            modal.ManChecklist.show();
         });
     }
     const getManRefByEcrsId = async (params) => {
@@ -1709,6 +1720,9 @@
         axiosSaveData(formData,'api/upload_man_ref',(response) =>{
             modal.UploadRef.hide();
         });
+    }
+    const btnLinkViewManRef = async (selectedEcrsIdEncrypted,index) => {
+        window.open(`api/view_man_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
     }
 </script>
 

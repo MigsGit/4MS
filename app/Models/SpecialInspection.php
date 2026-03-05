@@ -9,6 +9,6 @@ class SpecialInspection extends Model
 {
     public function rapidx_user()
     {
-        return $this->hasOne(RapidxUser::class, 'id', 'inspector');
+        return $this->hasOne(RapidxUser::class, 'id', 'lqc_section_head');
     }
 }

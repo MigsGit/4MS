@@ -20,6 +20,7 @@ use App\Models\SpecialInspection;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ManController extends Controller
 {
@@ -251,7 +252,7 @@ class ManController extends Controller
                         'ecrs_id' => $ecrsId,
                     ];
                     $manValidated = [
-                        'status' => 'PMIAPP',
+                        'status' => 'QCSECHEAD',
                         'approval_status' => '',
                     ];
                     $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
@@ -273,8 +274,6 @@ class ManController extends Controller
                     $header = "Your MACHINE 4M  has been APPROVED";
                     $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($manCurrent->ecrs_id,$header);
                 }
-
-
             }
             if ( count($manApproval) != 0){
                 $currentApproval = $this->emailInterface->getEmailByRapidxUserId($manApproval[0]->rapidx_user_id);
@@ -382,12 +381,24 @@ class ManController extends Controller
                 'filtered_document_name',
                 'original_filename',
             ]);
-            if(count($manRefByEcrsId) != 0){
+            if(filled($manRefByEcrsId)){
                 $arrFilteredDocumentName = explode(' | ' ,$manRefByEcrsId->filtered_document_name);
+                $arrOrigDocumentName = explode(' | ' ,$manRefByEcrsId->original_filename);
+
                 $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
-                $filePathWithEcrsId ="/man"."/".$ecrsId."/".$selectedFilteredDocumentName;
-                $pdfPath = storage_path("app/public/".$filePathWithEcrsId."");
-                return Storage::response($pdfPath);
+                $arrOrigDocumentName =  $arrOrigDocumentName[$request->index];
+
+                $filePathWithEcrsId ="man"."/".$ecrsId."/".$selectedFilteredDocumentName;
+
+                $pdfPathStoragePath = storage_path("app/public/".$filePathWithEcrsId.""); //
+                $pdfPath = "public/".$filePathWithEcrsId.""; //
+
+                if (Storage::exists($pdfPathStoragePath)) {
+                    return response()->download($pdfPathStoragePath, $arrOrigDocumentName, [
+                        'Content-Type' => 'application/vnd.ms-excel', // Optional: Set appropriate MIME type
+                    ]);
+                }
+                return response()->json(['is_success' => 'false','msg'=>'File not Found!'],500);
             }
         } catch (Exception $e) {
             throw $e;
@@ -395,7 +406,7 @@ class ManController extends Controller
    }
     public function uploadManRef(ManFileRequest $manFileRequest){
         try {
-            return $manFileRequest->validated();
+            // return $manFileRequest->validated();
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
             if($manFileRequest->hasfile('man_ref') ){
@@ -406,12 +417,12 @@ class ManController extends Controller
                 $conditions = [
                    'ecrs_id' =>  $manFileRequest->ecrsId
                 ];
-                // return 'true';
+                // return 'true';getManRefByEcrsId
                 $manRequestValidated['original_filename'] = $impOriginalFilename;
                 $manRequestValidated['filtered_document_name'] = $impFilteredDocumentName;
                 $this->resourceInterface->updateConditions(Man::class,$conditions,$manRequestValidated);
             }
-            // DB::commit();
+            DB::commit();
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -486,7 +497,8 @@ class ManController extends Controller
             if($manDetailStatus === 'EXDISPO' || $manDetailStatus === 'EXDISAPP' || $manDetailStatus === 'OK'){
                 //Upload External Disposition
                 $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                // $result .= '<li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                $result .= '   <li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
+                $result .= '<li><button class="dropdown-item" type="button" man-status= "'.$manDetailStatus.'" ecrs-id="'.$row->id.'" man-details-id="'.$row->man_detail->id.'"id="btnViewManById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 return $result;
             }
             if($pmiApprovalsPending === session('rapidx_user_id') || $currentApprover ===  session('rapidx_user_id') || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
@@ -556,7 +568,7 @@ class ManController extends Controller
         ->addColumn('get_attachment',function ($row) use ($request){
             $result = '';
             $result .= '<center>';
-            $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' encrypted-ecr-id='".encrypt($row->id)."' man-status='".$row->status."' 
+            $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' encrypted-ecr-id='".encrypt($row->id)."' man-status='".$row->status."'
             internal-external='".$row->internal_external."' id='btnViewManRef'>Attachment</a>";
             $result .= '</center>';
             return $result;
@@ -571,7 +583,7 @@ class ManController extends Controller
             $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
                 ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
                 ->toArray();
-        
+
             // 2. Tell the main query to only show rows where 'created_by' is in that list
             $query->whereIn('created_by', $userIds);
         })
