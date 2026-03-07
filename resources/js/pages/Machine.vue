@@ -1063,25 +1063,29 @@
                         currentStatus.value = machineStatus;
 
 
-                        // if( machineStatus != 'PMIAPP'){
+                        if( machineStatus != 'PMIAPP'){
                             getCurrentApprover(machineApproverParams);
+                        }
+
                             tblMachineApproverSummary.value.dt.ajax.url("api/load_machine_approver_summary_id?machinesId="+machinesId).draw();
-                        // }
-                        if( machineStatus === 'PMIAPP'){
-                            // getCurrentApprover(pmiApproverParams);
+                        if( machineStatus === 'PMIAPP' || machineStatus === 'OK'){
+                            getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
 
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
 
                         //Load ECR Requirement by Category and Ecrs Id
-                        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
-                        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
-                        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
-                        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
-                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
-                        modalEcr.EcrRequirements.show();
+                        btnEcrRequirement(ecrsId);
+
+                        // tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
+                        // tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+                        // tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+                        // tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+                        // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
+                        // tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+                        // modalEcr.EcrRequirements.show();
+                        
                         modal.SaveMachine.show();
                     });
                 }

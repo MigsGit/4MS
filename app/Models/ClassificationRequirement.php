@@ -17,5 +17,6 @@ class ClassificationRequirement extends Model
     {
         return $this->hasOne(EcrRequirement::class, 'classification_requirements_id', 'id');
     }
-
+    //SELECT * FROM `classification_requirements` WHERE `classifications_id` = 1
+    //UPDATE `classification_requirements` SET `deleted_at` = NULL WHERE `classification_requirements`.`id` = 1;
 }

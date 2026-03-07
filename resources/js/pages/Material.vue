@@ -1347,7 +1347,9 @@
                         isModalView.value = true;
                         getMaterialEcrById(ecrsId);
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        getCurrentApprover(materialApproverParams);
+                        if( materialStatus != 'PMIAPP'){
+                            getCurrentApprover(materialApproverParams);
+                        }
                         tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
                         if( materialStatus === 'PMIAPP' || materialStatus === 'OK'){
                             getCurrentApprover(pmiApproverParams);
@@ -1781,13 +1783,14 @@
             let internalExternal = data.internalExternal;
             let materialApprovalCollection = data.materialApprovalCollection;
             //Load ECR Requirement by Category and Ecrs Id
-            tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+material.ecrs_id).draw();
-            tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+material.ecrs_id).draw();
-            tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+material.ecrs_id).draw();
-            tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+material.ecrs_id).draw();
-            tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+material.ecrs_id).draw();
-            tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+material.ecrs_id).draw();
-            modalEcr.EcrRequirements.show();
+            btnEcrRequirement(ecrsId);
+            // tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+material.ecrs_id).draw();
+            // tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+material.ecrs_id).draw();
+            // tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+material.ecrs_id).draw();
+            // tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+material.ecrs_id).draw();
+            // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+material.ecrs_id).draw();
+            // tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+material.ecrs_id).draw();
+            // modalEcr.EcrRequirements.show();
 
             console.log(material.ecrs_id);
             frmMaterial.value.ecrsId = material.ecrs_id;

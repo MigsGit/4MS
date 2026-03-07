@@ -580,10 +580,10 @@ class CommonController extends Controller
                     //TODO:Error Handling
                     break;
             }
-
+            // return $currentModel;
             $relations = [];
             $approvalQuery = $this->resourceInterface->readCustomEloquent($currentModel,$data,$relations,$conditions);
-           $approval = $approvalQuery
+            $approval = $approvalQuery
             ->whereNotNull('rapidx_user_id')
             ->get();
           if( count($approval) ){
