@@ -1048,7 +1048,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
+                <table class="table" >
                 <!-- <table class="table"> -->
                     <thead>
 
