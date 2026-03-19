@@ -28,6 +28,7 @@ export default function useEcr(){
         approvedBy: [],
 
         optTypeOfPart: [],
+        optBatchDisapproval: [],
         documentAffectedExternal: [
             {value: '1' , label:"QC Process Flow Chart"},
             {value: '2' , label:"Packaging Specification"},

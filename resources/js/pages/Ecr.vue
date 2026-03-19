@@ -25,11 +25,19 @@
             <div class="tab-content mt-2" id="myTabContent">
                 <div class="tab-pane fade show active" id="menu1" role="tabpanel" aria-labelledby="menu1-tab">
                     <div class="container-fluid px-4">
-                        <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create ECR</button>
+                        <div class="row d-flex justify-content-between">
+                            <div class="col-6">
+                                <button @click="btnBatchDisapproval"type="button" class="btn btn-danger btn-sm mb-2" ><i class="fas fa-plus"></i> Batch Disapproval</button>
+                            </div>
+                            <div class="col-6">
+                                <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create ECR</button>
+                            </div>
+                        </div>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Engineering Change Request</li>
                         </ol>
-                        <div class="table-responsive">
+
+                        <div class="table-responsive mt-3">
                         <DataTable
                             width="100%" cellspacing="0"
                             class="table mt-2"
@@ -1038,6 +1046,7 @@
         <template #footer>
         </template>
     </ModalComponent>
+
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" title="Document Details" ref="modalSaveEcrDocument" @add-event="frmSaveEcrDocument()">
         <template #body>
             <div class="row  d-none">
@@ -1080,6 +1089,30 @@
         <template #footer>
             <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
+        </template>
+    </ModalComponent>
+    <ModalComponent icon="fa-thumbs-down" modalDialog="modal-dialog modal-md" title="Batch Disapproval" ref="modalBatchDisapproval">
+        <template #body>
+            <div class="row mt-3">
+                <div class="col-sm-12">
+                    <div class="input-group flex-nowrap mb-2 input-group-sm">
+                       <span class="input-group-text">
+                        Remarks
+                       </span>
+                            <Multiselect
+                                placeholder="-Select an Option-"
+                                :close-on-select="true"
+                                :searchable="true"
+                                :options="ecrVar.optBatchDisapproval"
+                                v-model="batchDisapproval"
+                                mode="tags"
+                            />
+                       <!-- nmodify -->
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #footer>
         </template>
     </ModalComponent>
 </template>
@@ -1166,8 +1199,8 @@
     const selectedAdminAccess = ref(null);
     const arrOriginalFilenames = ref(null);
     const arrFilteredDocumentName = ref(null);
-
-
+    const batchDisapproval = ref(null);
+    const modalBatchDisapproval = ref(null);
     //Table Column btnViewEcrRef
     const tblEcrColumns = [
         {   data: 'get_actions',
@@ -1315,6 +1348,7 @@
         //ModalRef inside the ModalComponent.vue
         //Do not name the Modal it is same new Modal js class
         modalEcr.SaveEcr = new Modal(modalSaveEcr.value.modalRef,{ keyboard: false });
+        modalEcr.BatchDisapproval = new Modal(modalBatchDisapproval.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
         modalEcr.SaveEcrDocument = new Modal(modalSaveEcrDocument.value.modalRef,{ keyboard: false });
         modal.EcrApproval = new Modal(modalEcrApproval.value.modalRef,{ keyboard: false });
@@ -1440,7 +1474,6 @@
     );
 
     //Functions
-
     const getEcrRefDownload = async (params)  => {
         let apiParams = {
             ecrsId : params.ecrsId,
@@ -1781,4 +1814,28 @@
             tblDocuments.value.dt.draw();
         });
     }
+    const btnBatchDisapproval = () => {
+        let apiParams = {
+
+        }
+        axiosFetchData(apiParams,'api/get_ecr_ctrl_no',function(response){
+            let data = response.data;
+            let ecrCollection = data.ecrCollection;
+            console.log(ecrCollection);
+
+            ecrVar.optBatchDisapproval.splice(0, ecrVar.optBatchDisapproval.length,
+                { value: '', label: '-Select an option-', disabled:true }, // Push "" option at the start
+                // { value: 0, label: 'N/A' }, // Push "N/A" option at the start
+                    ...ecrCollection.map((value) => {
+                    return {
+                        value: value.id,
+                        label: value.ecr_no
+                    }
+                }),
+            );
+            modalEcr.BatchDisapproval.show();
+            // ecrVar.optBatchDisapproval
+        });
+    }
+
 </script>

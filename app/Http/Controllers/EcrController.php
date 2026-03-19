@@ -1397,5 +1397,19 @@ class EcrController extends Controller
        }
    }
 
-
+   public function getEcrCtrlNo(Request $request){
+       try {
+            $ecr =  $this->resourceInterface->readCustomEloquent(Ecr::class,[
+                'ecr_no',
+                'id',
+                'category',
+            ],[],[]);
+           return response()->json([
+            'is_success' => 'true',
+            'ecrCollection' => $ecr->get(),
+        ]);
+       } catch (Exception $e) {
+           throw $e;
+       }
+   }
 }
