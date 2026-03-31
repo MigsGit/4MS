@@ -29,29 +29,29 @@
                                         {{index+1}}
                                     </td>
                                     <td>
-                                         <textarea v-show="isSelectReadonly" v-model="frmEcrReasonRow.descriptionOfChangeView" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" :disabled="isSelectReadonly">
+                                         <textarea v-show="true" v-model="frmEcrReasonRow.descriptionOfChangeView" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" :disabled="isSelectReadonly">
                                         </textarea>
 
-                                        <Multiselect v-show="isSelectReadonly === false"
+                                        <!-- <Multiselect v-show="isSelectReadonly === false"
                                             v-model="frmEcrReasonRow.descriptionOfChange"
                                             :options="optDescriptionOfChange"
                                             placeholder="Select an option"
                                             :searchable="true"
                                             :close-on-select="true"
                                             :disabled="isSelectReadonly"
-                                        />
+                                        /> -->
                                     </td>
                                     <td>
-                                         <textarea v-show="isSelectReadonly" v-model="frmEcrReasonRow.reasonOfChangeView" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" :disabled="isSelectReadonly">
+                                         <textarea v-show="true" v-model="frmEcrReasonRow.reasonOfChangeView" type="text" class="form-control form-control-lg" aria-describedby="addon-wrapping" :disabled="isSelectReadonly">
                                         </textarea>
-                                        <Multiselect v-show="isSelectReadonly ===false"
+                                        <!-- <Multiselect v-show="isSelectReadonly ===false"
                                             v-model="frmEcrReasonRow.reasonOfChange"
                                             :close-on-select="true"
                                             :searchable="true"
                                             :options="optReasonOfChange"
                                             placeholder="Select an option"
                                             :disabled="isSelectReadonly"
-                                        />
+                                        /> -->
                                     </td>
                                     <td class="d-flex justify-content-between">
                                         <button v-show="isSelectReadonly === false" @click="$emit('removeEcrReasonRowsEvent')" class="btn btn-outline-danger btn-sm" type="button" data-item-process="add">

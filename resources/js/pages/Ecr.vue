@@ -27,7 +27,7 @@
                     <div class="container-fluid px-4">
                         <div class="row d-flex justify-content-between">
                             <div class="col-6">
-                                <button @click="btnBatchDisapproval"type="button" class="btn btn-danger btn-sm mb-2" ><i class="fas fa-plus"></i> Batch Disapproval</button>
+                                <!-- <button @click="btnBatchDisapproval"type="button" class="btn btn-danger btn-sm mb-2" ><i class="fas fa-plus"></i> Batch Disapproval</button> -->
                             </div>
                             <div class="col-6">
                                 <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create ECR</button>
@@ -73,48 +73,6 @@
                                 </tr>
                             </thead>
                         </DataTable>
-                        </div>
-                    </div>
-                </div>
-                <div v-show="commonVar.rapidxUserDeptGroup ==='ISS' || commonVar.rapidxUserDeptGroup ==='QA'" class="tab-pane fade" id="menu2" role="tabpanel" aria-labelledby="menu1-tab">
-                    <div class="container-fluid px-4">
-                            <ol class="breadcrumb mb-4">
-                                <li class="breadcrumb-item active">QA Approval</li>
-                            </ol>
-                            <div class="table-responsive">
-                            <DataTable
-                                width="100%" cellspacing="0"
-                                class="table mt-2"
-                                ref="tblEcrQa"
-                                :searching="true"
-                                :columns="tblEcrColumns"
-                                ajax="api/load_ecr?status=QA"
-                                :options="{
-                                    serverSide: true, //Serverside true will load the network
-                                    columnDefs:[
-                                        {orderable:false,target:[0]}
-                                    ],
-                                    language: {
-                                        zeroRecords: 'No data available',
-                                        emptyTable: 'No data available'
-                                    }
-                                }"
-                            >
-                                <thead>
-                                    <tr>
-                                        <th style=""width="5%">Action</th>
-                                        <th style=""width="10%">Ecr Status</th>
-                                        <th style=""width="10%">Attachment</th>
-                                        <th style=""width="10%">ECR Ctrl No.</th>
-                                        <th style=""width="10%">Part Code.</th>
-                                         <th style=""width="10%">Partname.</th>
-                                        <th style=""width="25%">Details</th>
-                                        <th style=""width="10%">Category</th>
-                                        <th style=""width="10%">Section</th>
-                                        <th style=""width="10%">Customer EC No</th>
-                                    </tr>
-                                </thead>
-                            </DataTable>
                         </div>
                     </div>
                 </div>
@@ -1610,7 +1568,6 @@
     }
     const onChangeAdminAccess = async (selectedParams)=>{
         tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA"+"&& adminAccess="+selectedParams).draw();
-        tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;
     }
     const ecrReqDecisionChange = async (ecrReqDecisionParams)=>{
@@ -1693,7 +1650,6 @@
         axiosSaveData(formData,'api/save_ecr_approval', (response) =>{
             tblEcrApproverSummary.value.dt.draw();
             tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA").draw();
-            tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA").draw();
 
             modal.EcrApproval.hide();
             modalEcr.SaveEcr.hide();
@@ -1736,10 +1692,11 @@
                 ].forEach(([key, value]) =>
                     formData.append(key, value)
                 );
-
+                // console.log('frmEcrReasonRows',frmEcrReasonRows);
+                // return;
                 for (let index = 0; index < frmEcrReasonRows.value.length; index++) {
-                    const descriptionOfChange = frmEcrReasonRows.value[index].descriptionOfChange;
-                    const reasonOfChange = frmEcrReasonRows.value[index].reasonOfChange;
+                    const descriptionOfChange = frmEcrReasonRows.value[index]['descriptionOfChangeView'];
+                    const reasonOfChange = frmEcrReasonRows.value[index]['descriptionOfChangeView'];
                     [
                         ["description_of_change[]", descriptionOfChange],
                         ["reason_of_change[]", reasonOfChange],
@@ -1794,7 +1751,6 @@
                 //TODO: Save Successfully
                 axiosSaveData(formData,'api/save_ecr', (response) =>{
                     tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA && adminAccess="+selectedAdminAccess.value).load();
-                    tblEcrQa.value.dt.ajax.url("api/load_ecr?status=QA && adminAccess="+selectedAdminAccess.value).load();
                     modalEcr.SaveEcr.hide();
                 });
             }
