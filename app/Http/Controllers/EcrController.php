@@ -313,8 +313,8 @@ class EcrController extends Controller
                 "created_by" => session('rapidx_username'),
                 "system_name" => "rapidx_4M",
             ];
-            // DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            DB::commit();
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -397,7 +397,7 @@ class EcrController extends Controller
                     "created_by" => session('rapidx_username'),
                     "system_name" => "rapidx_4M",
                 ];
-                // $this->emailInterface->sendEmail($emailData);
+                $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
              //Update APPROVED and Next PENDING Approval
@@ -498,9 +498,9 @@ class EcrController extends Controller
 
             DB::commit();
             if ( count($ecrApproval) === 0){
-                // $this->emailInterface->sendEmail($emailDataEcrRequirement);
+                $this->emailInterface->sendEmail($emailDataEcrRequirement);
             }
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
