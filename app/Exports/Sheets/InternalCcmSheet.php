@@ -118,7 +118,6 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 $detailsFourMApprovalByDeptCollection = $this->ecr['detailsFourMApprovalByDeptCollection'];
                 $pmiApprovalCollection = collect($ecrCollection['pmi_approvals'])->groupBy('approval_status')->toArray();
                 $isImageRefExist = $ecrCollection->category === "Method" || $ecrCollection->category === "Machine";
-
                 if( $isImageRefExist) {
                     $beforeAfterFileStorage = $this->ecr['beforeAfterFileStorage'][0];
                 }

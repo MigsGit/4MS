@@ -28,6 +28,7 @@ export default function useEcr(){
         approvedBy: [],
 
         optTypeOfPart: [],
+        optBatchDisapproval: [],
         documentAffectedExternal: [
             {value: '1' , label:"QC Process Flow Chart"},
             {value: '2' , label:"Packaging Specification"},
@@ -214,16 +215,18 @@ export default function useEcr(){
             let pmiApprovalCollection = data.pmiApprovalCollection;
             let pmiExternalApprovalCollection = data.pmiExternalApprovalCollection;
             let ecrDetails = ecr.ecr_details;
+            console.log('ecrDetails',ecrDetails);
 
             setTimeout(() => {  //Cannot display data immediately, need to wait for the DOM to be updated
                 //Reasons
+
                 if (ecrDetails.length != 0){
                     ecrDetails.forEach((ecrDetailsEl,index) =>{
                         frmEcrReasonRows.value.push({
                             descriptionOfChange : ecrDetailsEl.description_of_change,
                             reasonOfChange : ecrDetailsEl.reason_of_change,
-                            descriptionOfChangeView : ecrDetailsEl.dropdown_master_detail_description_of_change.dropdown_masters_details,
-                            reasonOfChangeView : ecrDetailsEl.dropdown_master_detail_reason_of_change.dropdown_masters_details
+                            descriptionOfChangeView : ecrDetailsEl.dropdown_master_detail_description_of_change != null ? ecrDetailsEl.dropdown_master_detail_description_of_change.dropdown_masters_details : ecrDetailsEl.description_of_change,
+                            reasonOfChangeView : ecrDetailsEl.dropdown_master_detail_reason_of_change != null ? ecrDetailsEl.dropdown_master_detail_reason_of_change.dropdown_masters_details :  ecrDetailsEl.reason_of_change,
                         });
                     })
                 }

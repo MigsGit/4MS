@@ -215,6 +215,17 @@ class EcrController extends Controller
                 'CB' => $request->checked_by,
                 'AB' => $request->approved_by,
             ];
+            $qaManagers = [625, 564];
+            $approvedBy = collect($request->input('approved_by', []));
+
+            $allPresent = collect($qaManagers)->every(function ($id) use ($approvedBy) {
+                return $approvedBy->contains($id);
+            });
+
+            if (!$allPresent) {
+                return response()->json(['is_success' => 'false','msg'=>"Please Include Ma'am Ni-an Lim & Sir Yoichi Matsuzaki  as 4M PMI Approvers",],500);
+            }
+
             $pmiApprovalRequestCtr = 0;
             $pmiApprovalRequest = collect($approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                 //return array users id as array value
@@ -232,12 +243,13 @@ class EcrController extends Controller
                 });
             })->toArray();
 
-            //Save PMI Internal Approval
+            //Save PMI Internal Approval getEcrById
             PmiApproval::where('ecrs_id', $currenErcId)->delete();
             PmiApproval::insert($pmiApprovalRequest);
             PmiApproval::where('counter', 0)
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
+
             if($request->internal_external === "External"){
 
                 $validator = Validator::make($request->all(), (new PmiExternalApprovalRequest)->rules());
@@ -1080,6 +1092,7 @@ class EcrController extends Controller
             ];
 
             $ecr = $this->resourceInterface->readWithRelationsConditionsActive(Ecr::class,$data,$relations,$conditions);
+        //   return  $ecr[0];
             $ecrApprovalCollection = collect($ecr[0]->ecr_approvals)->groupBy('approval_status')->toArray();
             $pmiApprovalCollection = collect($ecr[0]->pmi_approvals)->groupBy('approval_status')->toArray();
             return response()->json(['is_success' => 'true', 'ecr' => $ecr[0] ,
@@ -1397,5 +1410,19 @@ class EcrController extends Controller
        }
    }
 
-
+   public function getEcrCtrlNo(Request $request){
+       try {
+            $ecr =  $this->resourceInterface->readCustomEloquent(Ecr::class,[
+                'ecr_no',
+                'id',
+                'category',
+            ],[],[]);
+           return response()->json([
+            'is_success' => 'true',
+            'ecrCollection' => $ecr->get(),
+        ]);
+       } catch (Exception $e) {
+           throw $e;
+       }
+   }
 }
