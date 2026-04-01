@@ -65,7 +65,8 @@ Route::middleware('auth')->group(function(){
     Route::controller(CommonController::class)->group(function (): void {
         Route::post('save_special_inspection', 'saveSpecialInspection')->name('save_special_inspection');
         Route::post('save_external_disposition', 'saveExternalDisposition')->name('save_external_disposition');
-        Route::post('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
+
+        Route::get('save_pmi_internal_approval', 'savePmiInternalApproval')->name('save_pmi_internal_approval');
 
         Route::get('test_email', 'testEmail')->name('test_email'); //test function
         Route::get('get_special_inspection_by_id', 'getSpecialInspectionById')->name('get_special_inspection_by_id');
@@ -117,6 +118,7 @@ Route::middleware('auth')->group(function(){
         Route::get('get_man_by_id', 'getManById')->name('get_man_by_id');
         Route::get('man_checklist_decision_change', 'manChecklistDecisionChange')->name('man_checklist_decision_change');
         Route::get('get_man_ref_by_ecrs_id', 'getManRefByEcrsId')->name('get_man_ref_by_ecrs_id');
+        Route::get('view_man_ref_by_ecrs_id', 'viewManRefByEcrsId')->name('viewManRefByEcrsId');
 
     });
 
@@ -149,7 +151,7 @@ Route::middleware('auth')->group(function(){
 
         Route::get('load_method_ecr_by_status', 'loadMethodEcrByStatus')->name('load_method_ecr_by_status');
         Route::get('load_method_approver_summary_material_id', 'loadMethodApproverSummaryMaterialId')->name('load_method_approver_summary_material_id');
-        // Route::get('get_method_ref_by_id', 'getMethodRefById')->name('get_method_ref_by_id');
+        Route::get('get_method_by_ecrs_id', 'getMethodByEcrsId')->name('get_method_by_ecrs_id');
 
         Route::get('save_method_approval', 'saveMethodApproval')->name('save_method_approval');
     });

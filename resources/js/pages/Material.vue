@@ -49,6 +49,7 @@
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
                                     <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">Created by</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -750,6 +751,7 @@
             <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" />&nbsp; Save</button>
         </template>
     </ModalComponent>
+
     <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Material Reference" ref="modalViewMaterialRef">
         <template #body>
             <div class="row mt-3">
@@ -776,8 +778,9 @@
                 </table>
                 <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
+
                         <tr>
-                            <th class=""  scope="col">
+                            <th scope="col">
                                 Internal Material
                             </th>
                             <!-- <th scope="col">
@@ -787,18 +790,28 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td  class="">
-                                <a href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsId)">
-                                    Download Internal
+                            <td>
+                                <a  href="#" class="link-primary" @click="btnLinkDownloadInternal(selectedEcrsIdEncrypted)">
+                                    Download Internal Export
                                 </a>
                             </td>
-                            <!-- <td>
-                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsId)">
-                                    Download External
+                            <!--  <td v-show="internalExternal === 'External'">
+                                <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
+                                    Download External Export
                                 </a>
                             </td> -->
                         </tr>
                     </tbody>
+                </table>
+                <table class="table d-none">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">
+                                External Disposition
+                            </th>
+                        </tr>
+                    </thead>
                 </table>
             </div>
         </template>
@@ -1334,7 +1347,9 @@
                         isModalView.value = true;
                         getMaterialEcrById(ecrsId);
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
-                        getCurrentApprover(materialApproverParams);
+                        if( materialStatus != 'PMIAPP'){
+                            getCurrentApprover(materialApproverParams);
+                        }
                         tblMaterialApproval.value.dt.ajax.url("api/load_material_approval_by_meterial_id?materialsId="+materialsId).draw();
                         if( materialStatus === 'PMIAPP' || materialStatus === 'OK'){
                             getCurrentApprover(pmiApproverParams);
@@ -1365,8 +1380,13 @@
                     btnViewMaterialRef.addEventListener('click',function(){
                         let ecrsId = this.getAttribute('ecrs-id');
                         let ecrsIdEncrypted = this.getAttribute('encrypted-ecr-id');
+                        let params = {
+                            ecrsId : ecrsId
+                        };
+                        let materialStatus = this.getAttribute('material-status');
+                        currentStatus.value = materialStatus;
                         selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
-                        getMaterialRefByEcrsId(ecrsId);
+                        getMaterialRefByEcrsId(params);
                     });
                 }
             }
@@ -1376,6 +1396,7 @@
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
+        {   data: 'created_by'} ,
     ];
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
@@ -1731,9 +1752,9 @@
     const changeMaterialRef = async (event)  => {
         materialRef.value =  Array.from(event.target.files);
     }
-    const getMaterialRefByEcrsId = async (ecrsId) => {
+    const getMaterialRefByEcrsId = async (params) => {
         let apiParams = {
-            ecrsId : ecrsId
+            ecrsId : params.ecrsId
         }
         axiosFetchData(apiParams,'api/get_material_ref_by_ecrs_id',function(response){
             let data = response.data;
@@ -1762,13 +1783,14 @@
             let internalExternal = data.internalExternal;
             let materialApprovalCollection = data.materialApprovalCollection;
             //Load ECR Requirement by Category and Ecrs Id
-            tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+material.ecrs_id).draw();
-            tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+material.ecrs_id).draw();
-            tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+material.ecrs_id).draw();
-            tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+material.ecrs_id).draw();
-            tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+material.ecrs_id).draw();
-            tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+material.ecrs_id).draw();
-            modalEcr.EcrRequirements.show();
+            btnEcrRequirement(ecrsId);
+            // tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+material.ecrs_id).draw();
+            // tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+material.ecrs_id).draw();
+            // tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+material.ecrs_id).draw();
+            // tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+material.ecrs_id).draw();
+            // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+material.ecrs_id).draw();
+            // tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+material.ecrs_id).draw();
+            // modalEcr.EcrRequirements.show();
 
             console.log(material.ecrs_id);
             frmMaterial.value.ecrsId = material.ecrs_id;

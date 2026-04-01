@@ -43,6 +43,7 @@
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
                                     <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">Created by</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -482,7 +483,7 @@
                                     Download Internal Export
                                 </a>
                             </td>
-                            <td>
+                            <td v-show="internalExternal === 'External'">
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
@@ -967,8 +968,8 @@
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
     const modalSaveDisposition = ref(null);
-
     const dispositionFile = ref([]);
+    const internalExternal = ref(null);
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -989,7 +990,8 @@
 
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw();
-                        getRapidxUserByIdOpt(prdnAssessedByParams);
+
+                        getRapidxUserByIdOpt(prdnAssessedByParams); //nmodify watch
                         getRapidxUserByIdOpt(prdnCheckedByParams);
                         getRapidxUserByIdOpt(ppcAssessedByParams);
                         getRapidxUserByIdOpt(ppcCheckedByParams);
@@ -1000,14 +1002,16 @@
                         getRapidxUserByIdOpt(qcAssessedByParams);
                         getRapidxUserByIdOpt(qcCheckedByParams);
 
+
                         //Load ECR Requirement by Category and Ecrs Id
-                        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
-                        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
-                        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
-                        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
-                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-                        tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
-                        modalEcr.EcrRequirements.show();
+                        btnEcrRequirement(ecrsId);
+                        // tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
+                        // tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+                        // tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+                        // tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+                        // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
+                        // tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+                        // modalEcr.EcrRequirements.show();
                         modal.SaveMethod.show();
                     });
                 }
@@ -1028,9 +1032,11 @@
                         selectedMethodsId.value = methodsId;
                         isModal.value = 'View';
                         currentStatus.value = methodStatus;
-                        getCurrentApprover(methodApproverParams);
-                        tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
 
+                        if( methodStatus != 'PMIAPP'){
+                            getCurrentApprover(methodApproverParams);
+                        }
+                            tblMethodApproverSummary.value.dt.ajax.url("api/load_method_approver_summary_material_id?methodsId="+methodsId).draw();
                         if( methodStatus === 'PMIAPP' || methodStatus === 'OK'){
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
@@ -1038,13 +1044,15 @@
 
                         tblEcrDetails.value.dt.ajax.url("api/load_ecr_details_by_ecr_id?ecr_id="+ecrsId).draw();
                         //Load ECR Requirement by Category and Ecrs Id
-                        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
-                        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
-                        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
-                        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
-                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-                        tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
-                        modalEcr.EcrRequirements.show();
+                        btnEcrRequirement(ecrsId);
+
+                        // tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
+                        // tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+                        // tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+                        // tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+                        // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
+                        // tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+                        // modalEcr.EcrRequirements.show();
                         modal.SaveMethod.show();
                     });
                 }
@@ -1079,6 +1087,8 @@
                         let ecrsId = this.getAttribute('ecrs-id');
                         let methodStatus = this.getAttribute('method-status');
                         let ecrsIdEcrypted = this.getAttribute('selected-ecrs-id-encrypted');
+                        let selectInternalExternal = this.getAttribute('internal-external');
+                        internalExternal.value = selectInternalExternal;
                         selectedEcrsIdEcrypted.value = ecrsIdEcrypted;
                         currentStatus.value = methodStatus;
                         selectedEcrsId.value = ecrsId;
@@ -1092,6 +1102,7 @@
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
+        {   data: 'created_by'} ,
     ];
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
@@ -1198,6 +1209,10 @@
         });
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
             frmSpecialInspection.value.ecrsId;
+        });
+        modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
+            frmSpecialInspection.value.ecrsId
+            frmSpecialInspection.value.specialInspectionsId = '';
         });
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
@@ -1348,6 +1363,17 @@
         axiosSaveData(formData,'api/save_external_disposition',(response) =>{
             modal.SaveDisposition.hide();
             tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedAdminAccess.value).draw();
+        });
+    }
+
+    const getMethodByEcrsId =  (params) => {
+        let apiParams = {
+            ecrsId : params.ecrsId
+        }
+        axiosFetchData(apiParams,'get_method_by_ecrs_id',function(response){
+            let data = response.data;
+
+            console.log('response',response);
         });
     }
 </script>

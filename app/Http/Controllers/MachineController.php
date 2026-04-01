@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Ecr;
-use App\Models\Machine;
-use Illuminate\Http\Request;
-use App\Models\MachineApproval;
-use App\Interfaces\EmailInterface;
-use Illuminate\Support\Facades\DB;
-use App\Interfaces\CommonInterface;
-use App\Models\ExternalDisposition;
-use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Interfaces\ResourceInterface;
 use App\Exports\InternalMachineExport;
-use App\Models\BeforeAfterFileStorage;
-use App\Http\Requests\MachineFileRequest;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\MachineApprovalRequest;
+use App\Http\Requests\MachineFileRequest;
+use App\Interfaces\CommonInterface;
+use App\Interfaces\EmailInterface;
+use App\Interfaces\ResourceInterface;
+use App\Models\BeforeAfterFileStorage;
+use App\Models\Ecr;
+use App\Models\ExternalDisposition;
+use App\Models\Machine;
+use App\Models\MachineApproval;
+use App\Models\RapidxUser;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MachineController extends Controller
 {
@@ -440,7 +441,7 @@ class MachineController extends Controller
                 $machineStatus = $row->machine->status ?? "";
                 $result = '';
                 $result .= '<center>';
-                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" selected-ecrs-id-encrypted = "'.encrypt($row->id).'"  ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
+                $result .= '<a class="btn btn-outline-danger btn-sm mr-1 mt-3" type="button" machine-id="'.$row->machine->id.'" selected-ecrs-id-encrypted = "'.encrypt($row->id).'"  ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'"  internal-external="'.$row->internal_external.'"  id="btnViewMachineRef"><i class="fa-solid fa-download"></i>Attachment</a>';
                 $result .= '</center>';
                 return $result;
             })
@@ -469,7 +470,22 @@ class MachineController extends Controller
                 $result .= '<p class="card-text"><strong>Created By:</strong> ' . $row->rapidx_user_created_by->name ?? '' . '</p>';
                 return $result;
             })
+            ->addColumn('created_by', function ($row) {
+                // Keeping your code exactly as you asked
+                $rapidx = RapidxUser::where('id', $row->created_by)->first();
+                return '<center><p>' . ($rapidx->name ?? '') . '</p></center>';
+            })
+            ->filterColumn('created_by', function($query, $keyword) {
+                // 1. Go to the RapidX database and find all User IDs that match the name
+                $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
+                    ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
+                    ->toArray();
+            
+                // 2. Tell the main query to only show rows where 'created_by' is in that list
+                $query->whereIn('created_by', $userIds);
+            })
             ->rawColumns([
+                'created_by',
                 'get_actions',
                 'get_status',
                 'get_attachment',

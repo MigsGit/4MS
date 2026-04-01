@@ -262,7 +262,7 @@ class CommonController extends Controller
             date_default_timezone_set('Asia/Manila');
             DB::beginTransaction();
             $ecrsId = $request->ecrsId;
-            $dispositionStatus = $request->status;
+           $dispositionStatus = $request->status;
             $ecr = Ecr::find($ecrsId,['category']);
             switch ($ecr->category) {
                 case 'Man':
@@ -330,7 +330,7 @@ class CommonController extends Controller
     }
     public function loadSpecialInspectionByEcrId(Request $request){
         try {
-            $ecrsId = $request->ecrsId ?? "";
+           $ecrsId = $request->ecrsId ?? "";
             $data = [];
             $relations = [
                 'rapidx_user'
@@ -351,6 +351,13 @@ class CommonController extends Controller
             ->addColumn('get_inspector',function ($row){
                 $result = '';
                 $result .= '<center>';
+                $result .= $row->inspector?? "---";
+                $result .= '</center>';
+                return $result;
+            })
+            ->addColumn('get_sec_head',function ($row){
+                $result = '';
+                $result .= '<center>';
                 $result .= $row->rapidx_user['name'] ?? "---";
                 $result .= '</center>';
                 return $result;
@@ -358,6 +365,7 @@ class CommonController extends Controller
             ->rawColumns([
                 'get_actions',
                 'get_inspector',
+                'get_sec_head',
             ])
             ->make(true);
             return response()->json(['is_success' => 'true']);
@@ -572,10 +580,10 @@ class CommonController extends Controller
                     //TODO:Error Handling
                     break;
             }
-
+            // return $currentModel;
             $relations = [];
             $approvalQuery = $this->resourceInterface->readCustomEloquent($currentModel,$data,$relations,$conditions);
-           $approval = $approvalQuery
+            $approval = $approvalQuery
             ->whereNotNull('rapidx_user_id')
             ->get();
           if( count($approval) ){
@@ -740,7 +748,7 @@ class CommonController extends Controller
         $ecrDetails = $ecr->get();
         $beforeAfterFileStorage =  BeforeAfterFileStorage::where('ecrs_id',$ecrsId)->get();
         // return  $ecrDetails = $ecr->get();
-       $ecrCollection = collect($ecrDetails)
+        $ecrCollection = collect($ecrDetails)
         ->flatMap(function ($ecrCollectionRow) use($beforeAfterFileStorage){
             $ecrApprovals = $ecrCollectionRow->ecr_approvals ?? '';
             //Get the Department / Section of the user
@@ -749,20 +757,22 @@ class CommonController extends Controller
                 return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
             }); //removed the NULL Value
 
-            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->method->method_approvals ?? 'NOTEXISTS';
+            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->Collection;$method->method_approvals ?? 'NOTEXISTS';
             if($detailsFourMCollection != 'NOTEXISTS'){
-                $detailsFourMApprovalByDeptCollection = collect($detailsFourMCollection)->map(function ($detailsFourMRow){
-                   $departmentId = $detailsFourMRow->rapidx_user->department_id ?? '';
-                   return  $approvalByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
-                }); //removed the NULL Value
+                $detailsFourMCollectionFiltered = collect($detailsFourMCollection)->map(function ($detailsFourMRow){
+                    return $rapidxUser = $detailsFourMRow?? '';
+                })->whereNotNull('rapidx_user_id'); //removed the NULL Value
+                $detailsFourMApprovalByDeptCollection = collect($detailsFourMCollectionFiltered)->map(function ($detailsFourMCollectionFilteredRow){
+                    $departmentId = $detailsFourMCollectionFilteredRow->rapidx_user->department_id?? '';
+                    return  $approvalByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
+                })->filter(); //removed the NULL Value
             }
-            // })->filter()->all(); //removed the NULL Value
             return [
+                'detailsFourMCollectionFiltered' => $detailsFourMCollectionFiltered ?? [],
                 'detailsFourMApprovalByDeptCollection' => $detailsFourMApprovalByDeptCollection ?? [],
                 'requestedByDeptCollection' => $requestedByDeptCollection,
                 'ecrCollection' => $ecrCollectionRow,
                 'beforeAfterFileStorage' => $beforeAfterFileStorage,
-                'detailsFourMCollection' => $detailsFourMCollection,
 
             ];
         });
@@ -892,6 +902,8 @@ class CommonController extends Controller
 
 
             $pendingEcr = Ecr::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
             ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
@@ -901,6 +913,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingMan = Man::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 
@@ -909,6 +924,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingMaterial = Material::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 
@@ -917,6 +935,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingMethod = Method::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 
@@ -925,6 +946,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingMachine = Machine::where('status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 
@@ -933,6 +957,9 @@ class CommonController extends Controller
             ->count();
 
             $pendingEnvironment = Environment::where('approval_status','!=','OK')
+            ->where('status','!=','DIS')
+            ->where('status','!=','EXDISAPP')
+            ->where('status','!=','CAN')
             ->whereNull('deleted_at')
             ->count();
 

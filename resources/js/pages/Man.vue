@@ -46,6 +46,7 @@
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
                                     <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">Created by</th>
                                 </tr>
                             </thead>
                         </DataTable>
@@ -177,7 +178,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3"  v-show="isModal === 'View'">
+            <div class="row mt-3"  v-show="isModal === 'View'" >
                 <div class="card mb-2">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManApproverSummary" aria-expanded="true" aria-controls="collapseManApproverSummary">
@@ -390,7 +391,7 @@
                 <div class="col-sm-6">
                     <!-- Unnecessary value binding used alongside v-model. It will interfere with v-model's behavior.  v-if="currentStatus === 'RUP'"-->
                     <div  class="input-group flex-nowrap mb-2 input-group-sm">
-                        <span class="input-group-text text-danger" id="addon-wrapping">Update Approver? {{ currentStatus }}</span>
+                        <span class="input-group-text text-danger" id="addon-wrapping">Update Approver? </span>
                         <Multiselect
                             v-model="frmMan.isUpdateManApprover"
                             :options="commonVar.optYesNo"
@@ -1041,15 +1042,14 @@
                         <tr v-for="(arrOriginalFilename, index) in arrOriginalFilenames" :key="arrOriginalFilename.index">
                             <th scope="row">{{ index+1 }}</th>
                             <td>
-                                <a href="#" class="link-primary" ref="aViewMaterialRef" @click="btnLinkViewMaterialRef(selectedEcrsIdEncrypted,index)">
+                                <a href="#" class="link-primary" ref="aViewMaterialRef" @click="btnLinkViewManRef(selectedEcrsIdEncrypted,index)">
                                     {{ arrOriginalFilename }}
                                 </a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" >
-                <!-- <table class="table"> -->
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
                     <thead>
 
                         <tr>
@@ -1068,7 +1068,7 @@
                                     Download Internal Export
                                 </a>
                             </td>
-                            <!-- <td>
+                            <!-- <td v-show="internalExternal === 'External'">
                                 <a href="#" class="link-primary" @click="btnLinkDownloadExternal(selectedEcrsIdEcrypted)">
                                     Download External Export
                                 </a>
@@ -1156,6 +1156,7 @@
         isEmptyTblEcrOthersRequirements,
         btnLinkViewEcrRequirementRef,
         btnEcrRequirement,
+        getEcrById,
     } = useEcr();
 
     const {
@@ -1215,6 +1216,8 @@
     const modalUploadRef = ref(null);
     const manRef = ref(null);
     const arrOriginalFilenames = ref(null);
+    const internalExternal = ref(null);
+    const modalViewEcrRequirementRef = ref(null);
 
     const ecrColumns = [
         {   data: 'get_actions',
@@ -1266,21 +1269,22 @@
                         tblSpecialInspection.value.dt.ajax.url("api/load_special_inspection_by_ecr_id?ecrsId="+ecrsId).draw()
                         if( manStatus != 'PMIAPP'){
                             getCurrentApprover(manApproverParams);
-                            tblManApproverSummary.value.dt.ajax.url("api/load_man_approver_summary_ecrs_id?ecrsId="+ecrsId).draw();
                         }
-                        if( manStatus === 'PMIAPP'){
+                            tblManApproverSummary.value.dt.ajax.url("api/load_man_approver_summary_ecrs_id?ecrsId="+ecrsId).draw();
+                        if( manStatus === 'PMIAPP' || manStatus === 'OK'){
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }
                         modal.SaveMan.show();
 
                         //Load ECR Requirement by Category and Ecrs Id
-                        tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
-                        tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
-                        tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
-                        tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
-                        tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
-                        tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
+                        btnEcrRequirement(ecrsId);
+                        // tblEcrManRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=1&ecrsId="+ecrsId).draw();
+                        // tblEcrMatRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=2&ecrsId="+ecrsId).draw();
+                        // tblEcrMachineRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=3&ecrsId="+ecrsId).draw();
+                        // tblEcrMethodRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=4&ecrsId="+ecrsId).draw();
+                        // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
+                        // tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
                         modalEcr.EcrRequirements.show();
                     });
                 }
@@ -1315,11 +1319,16 @@
                 if(btnViewManRef != null){
                     btnViewManRef.addEventListener('click',function(){
                         let ecrsIdEncrypted = this.getAttribute('encrypted-ecr-id');
+                        let ecrsId = this.getAttribute('ecrs-id');
+                        let selectInternalExternal = this.getAttribute('internal-external');
                         let manParams = {
                             ecrsId : ecrsIdEncrypted
                         }
-                        selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
+                        let manStatus = this.getAttribute('man-status');
                         getManRefByEcrsId(manParams)
+                        currentStatus.value = manStatus;
+                        selectedEcrsIdEncrypted.value = ecrsIdEncrypted;
+                        internalExternal.value = selectInternalExternal;
                         modal.ViewRef.show();
                     });
                 }
@@ -1330,7 +1339,10 @@
         {   data: 'category'} ,
         {   data: 'section'} ,
         {   data: 'customer_ec_no'} ,
+        {   data: 'created_by',
+        } ,
     ];
+
     const tblEcrDetailColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -1354,6 +1366,7 @@
         {   data: 'doc_to_be_sub'} ,
         {   data: 'remarks'} ,
     ];
+
     const tblManColumns = [
         {   data: 'get_actions',
             orderable: false,
@@ -1452,6 +1465,7 @@
     };
 
     onMounted( async ()=>{
+
         modal.UploadRef = new Modal(modalUploadRef.value.modalRef,{ keyboard: false });
         modal.ViewRef = new Modal(modalViewRef.value.modalRef,{ keyboard: false });
         modal.SaveDisposition = new Modal(modalSaveDisposition.value.modalRef,{ keyboard: false });
@@ -1462,12 +1476,16 @@
         modal.SaveSpecialInspection = new Modal(modalSaveSpecialInspection.value.modalRef,{ keyboard: false });
         modal.Approval = new Modal(modalApproval.value.modalRef,{ keyboard: false });
         modalEcr.EcrRequirements = new Modal(modalEcrRequirements.value.modalRef,{ keyboard: false });
+        modalEcr.ViewEcrRequirementRef = new Modal(modalViewEcrRequirementRef.value.modalRef,{ keyboard: false });
+
         modalSaveManDetails.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmMan.value);
         })
 
+
         modalSaveSpecialInspection.value.modalRef.addEventListener('hidden.bs.modal', event => {
-            frmSpecialInspection.value.ecrsId;
+            frmSpecialInspection.value.ecrsId
+            frmSpecialInspection.value.specialInspectionsId = '';
         });
         modalSaveEcrDetail.value.modalRef.addEventListener('hidden.bs.modal', event => {
             resetEcrForm(frmEcrDetails.value);
@@ -1574,6 +1592,10 @@
             params.btnChangeManChecklistDecisionClass.remove("is-invalid");
             tblManChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=7 && manDetailsId="+currentManDetailsId.value).draw();
             tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=8 && manDetailsId="+currentManDetailsId.value).draw();
+            tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=9 && manDetailsId="+currentManDetailsId.value).draw();
+            tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=10 && manDetailsId="+currentManDetailsId.value).draw();
+            tblMatChecklist.value.dt.ajax.url("api/load_man_checklist?dropdown_masters_id=11 && manDetailsId="+currentManDetailsId.value).draw();
+            modal.ManChecklist.show();
         });
     }
     const getManRefByEcrsId = async (params) => {
@@ -1651,8 +1673,8 @@
             }
             axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
                 modal.Approval.hide();
-                modal.SaveMachine.hide();
-                tblEcrByStatus.value.dt.draw();
+                modal.SaveMan.hide();
+                tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedAdminAccess.value).draw();
             });
             return;
         }
@@ -1699,6 +1721,9 @@
         axiosSaveData(formData,'api/upload_man_ref',(response) =>{
             modal.UploadRef.hide();
         });
+    }
+    const btnLinkViewManRef = async (selectedEcrsIdEncrypted,index) => {
+        window.open(`api/view_man_ref_by_ecrs_id?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
     }
 </script>
 

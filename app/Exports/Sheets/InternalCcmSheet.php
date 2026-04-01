@@ -114,7 +114,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 $ecrCollection = $this->ecr['ecrCollection'];
 
                 // $detailsFourM = $this->ecr['detailsFourM'];
-                $detailsFourMCollection = $this->ecr['detailsFourMCollection'];
+                $detailsFourMCollection = $this->ecr['detailsFourMCollectionFiltered'];
                 $detailsFourMApprovalByDeptCollection = $this->ecr['detailsFourMApprovalByDeptCollection'];
                 $pmiApprovalCollection = collect($ecrCollection['pmi_approvals'])->groupBy('approval_status')->toArray();
                 $isImageRefExist = $ecrCollection->category === "Method" || $ecrCollection->category === "Machine";
@@ -562,15 +562,20 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                         }
 
                     }
+                    //                'detailsFourMCollection' => $detailsFourMCollection,
 
-                    if( count($detailsFourMApprovalByDeptCollection) != 0) {
+                    // echo json_encode($detailsFourMCollectionFiltered);
+                    // exit;
+                    if( count($detailsFourMCollection) != 0) {
+
                         foreach ($detailsFourMCollection as $index => $value) {
-                            $division = $detailsFourMApprovalByDeptCollection[$index]['division'] ?? "";
-                            $rapidxFullName = $value->rapidx_user->name;
-                            $departmentId = $value->rapidx_user->department_id;
-                            $approvedDate = Carbon::parse($value->updated_at)->format('m-d-Y') ?? "";
-                            $approvalStatus = $value->approval_status;
-                            $remarks = $value->remarks;
+
+                           $division = $detailsFourMApprovalByDeptCollection[$index]['division'] ?? "";
+                            $rapidxFullName = $detailsFourMCollection[$index]->rapidx_user->name ?? "";
+                            $departmentId = $detailsFourMCollection[$index]->rapidx_user->department_id ?? "";
+                            $approvedDate = Carbon::parse($detailsFourMCollection[$index]->updated_at)->format('m-d-Y') ?? "";
+                            $approvalStatus = $detailsFourMCollection[$index]->approval_status ?? "";
+                            $remarks = $detailsFourMCollection[$index]->remarks ?? "";
 
                             $sheet->setCellValue("A{$startRowQaApprovalCollection}", $division);
                             $sheet->setCellValue("C{$startRowQaApprovalCollection}", $rapidxFullName);
@@ -578,7 +583,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                             $sheet->setCellValue("H{$startRowQaApprovalCollection}", $approvedDate);
                             $sheet->setCellValue("I{$startRowQaApprovalCollection}", $remarks);
                             // === Insert e-signature
-                            $imageEsigWithEmpNumberPath = $value->rapidx_user->employee_number;
+                            $imageEsigWithEmpNumberPath = $detailsFourMCollection[$index]->rapidx_user->employee_number;
                             $this->insertEsignatureImageIntoSheet(
                                 $imageEsigWithEmpNumberPath,
                                 "F".$startRowQaApprovalCollection,
