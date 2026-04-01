@@ -437,9 +437,9 @@
                                         <thead>
                                             <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col" style="width: 25%;">Prepared By</th>
-                                            <th scope="col" style="width: 25%;">Checked By</th>
-                                            <th scope="col" style="width: 30%;">Approved By</th>
+                                            <th scope="col" style="width: 25%;"> Prepared By / User</th>
+                                            <th scope="col" style="width: 25%;">Checked By / User Manager</th>
+                                            <th scope="col" style="width: 30%;">Approved By / QAS</th>
                                             <th scope="col">Action</th>
                                             </tr>
                                         </thead>
