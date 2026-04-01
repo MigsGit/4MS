@@ -397,7 +397,7 @@ class MachineController extends Controller
                 if($machineStatus === 'EXDISPO' || $machineStatus === 'EXDISAPP' || $machineStatus === 'OK'){
                     //Upload External Disposition
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                    // $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" machines-id="'.$row->machine->id.'" ecrs-id="'.$row->id.'" machine-status= "'.$machineStatus.'" id="btnViewMachineById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
 
@@ -480,7 +480,7 @@ class MachineController extends Controller
                 $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
                     ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
                     ->toArray();
-            
+
                 // 2. Tell the main query to only show rows where 'created_by' is in that list
                 $query->whereIn('created_by', $userIds);
             })

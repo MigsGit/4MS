@@ -1660,6 +1660,8 @@
         axiosSaveData(formData,'api/save_man', (response) =>{
             modal.SaveManDetails.hide();
             tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw();
+            tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedAdminAccess.value).draw();
+
         });
 
     }

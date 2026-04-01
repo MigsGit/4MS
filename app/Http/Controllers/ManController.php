@@ -90,7 +90,8 @@ class ManController extends Controller
             ->whereNotNull('rapidx_user_id')
             ->count();
             if($request->is_update_man_approver === 'YES' || $manApprovalCount  <= 1){
-                Man::where('ecrs_id', $ecrsId)->first()
+                // return 'true';
+                Man::where('ecrs_id', $ecrsId)
                 ->update([
                     'approval_status' => 'RUP',
                     'status' => 'RUP',
@@ -131,7 +132,10 @@ class ManController extends Controller
             ->first();
             $manCurrent = Man::where('ecrs_id',$ecrsId)->first();
             $ecrDetails= Ecr::where('id',$manCurrent->ecrs_id)->get();
-            $createdByEmail= $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by ?? '');
+            $requestedBy= $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by ?? '');
+
+            // $requestedBy = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
+
             if($manApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
@@ -192,11 +196,11 @@ class ManController extends Controller
                     'status' => 'DIS',
                     'approval_status' => 'DIS', //Repeat the status
                 ];
-                $this->resourceInterface->updateConditions(Man::class,$conditions,$requestValidated);
+                 $this->resourceInterface->updateConditions(Man::class,$conditions,$requestValidated);
                 //Send DISAPPROVED Email to Requestor
                 $to = $requestedBy['email'] ?? '';
                 $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
-                $from = $currentSession;
+                $from = $currentSession['email'] ??'';
                 $from_name = "4M Change Control Management System";
                 $subject = "DISAPPROVED: MAN (4M CMS)";
                 $header = "Your MAN 4M has been DISAPPROVED";
@@ -252,8 +256,7 @@ class ManController extends Controller
                         'ecrs_id' => $ecrsId,
                     ];
                     $manValidated = [
-                        'status' => 'QCSECHEAD',
-                        'approval_status' => '',
+                        'approval_status' => 'QCSECHEAD',
                     ];
                     $this->resourceInterface->updateConditions(Man::class,$manConditions,$manValidated);
                 }else{
@@ -270,8 +273,8 @@ class ManController extends Controller
                     $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
                     $from = 'issinfoservice@pricon.ph';
                     $from_name = "4M Change Control Management System";
-                    $subject = "APPROVED: MACHINE (4M CMS)";
-                    $header = "Your MACHINE 4M  has been APPROVED";
+                    $subject = "APPROVED: MAN (4M CMS)";
+                    $header = "Your MAN 4M  has been APPROVED";
                     $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($manCurrent->ecrs_id,$header);
                 }
             }
@@ -279,6 +282,7 @@ class ManController extends Controller
                 $currentApproval = $this->emailInterface->getEmailByRapidxUserId($manApproval[0]->rapidx_user_id);
                 $manApprovalValidated = [
                     'status' => 'PEN',
+                    'remarks' => $request->remarks,
                 ];
                 $manApprovalConditions = [
                     'id' => $manApproval[0]->id,
@@ -375,7 +379,7 @@ class ManController extends Controller
             $conditions = [
                 'ecrs_id' => $ecrsId,
             ];
-            $data = $this->resourceInterface->readCustomEloquent(Man::class,[],[],$conditions);
+           $data = $this->resourceInterface->readCustomEloquent(Man::class,[],[],$conditions);
             $manRefByEcrsId = $data
             ->first([
                 'filtered_document_name',
@@ -383,7 +387,7 @@ class ManController extends Controller
             ]);
             if(filled($manRefByEcrsId)){
                 $arrFilteredDocumentName = explode(' | ' ,$manRefByEcrsId->filtered_document_name);
-                $arrOrigDocumentName = explode(' | ' ,$manRefByEcrsId->original_filename);
+                 $arrOrigDocumentName = explode(' | ' ,$manRefByEcrsId->original_filename);
 
                 $selectedFilteredDocumentName =  $arrFilteredDocumentName[$request->index];
                 $arrOrigDocumentName =  $arrOrigDocumentName[$request->index];
@@ -393,7 +397,7 @@ class ManController extends Controller
                 $pdfPathStoragePath = storage_path("app/public/".$filePathWithEcrsId.""); //
                 $pdfPath = "public/".$filePathWithEcrsId.""; //
 
-                if (Storage::exists($pdfPathStoragePath)) {
+                if (Storage::exists($pdfPath)) {
                     return response()->download($pdfPathStoragePath, $arrOrigDocumentName, [
                         'Content-Type' => 'application/vnd.ms-excel', // Optional: Set appropriate MIME type
                     ]);

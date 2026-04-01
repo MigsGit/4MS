@@ -45,7 +45,6 @@ export default function useMaterial(){
     });
     const frmMaterial = ref ({
         ecrsId : 'N/A',
-        materialId : 'N/A',
         pdMaterial : 'N/A',
         msds : 'N/A',
         icp : 'N/A',

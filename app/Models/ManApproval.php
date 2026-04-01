@@ -13,6 +13,7 @@ class ManApproval extends Model
         'status',
         'rapidx_user_id',
         'approval_status',
+        'remarks',
     ];
     public function rapidx_user()
     {
