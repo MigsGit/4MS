@@ -94,7 +94,8 @@ export default function useForm ()
             if( response.status === 409 ){
                 Swal.fire({
                     title: "System Alert !",
-                    text: errorMsg ?? "Please Contact ISS ! ",
+                    // text: errorMsg ?? "Please Contact ISS ! ",
+                    html: errorMsg ?? 'Please Contact ISS',
                     icon: "error",
                     timer: 3000,
                     showConfirmButton: false
@@ -103,7 +104,8 @@ export default function useForm ()
             if( response.status === 500){
                 Swal.fire({
                     title: "System Alert !",
-                    text: errorMsg ?? "Please Contact ISS ! ",
+                    // text: errorMsg ?? "Please Contact ISS ! ",
+                    html: errorMsg ?? 'Please Contact ISS',
                     icon: "error",
                     timer: 3000,
                     showConfirmButton: false
@@ -112,7 +114,7 @@ export default function useForm ()
             if( response.status === 422 ){
                 Swal.fire({
                     title: "System Alert !",
-                    text: errorMsg ?? "Please Fill up all required input / Invalid Image File Input ",
+                    html: errorMsg ?? 'Please Fill up all required input / Invalid Image File Input',
                     icon: "error",
                     timer: 3000,
                     showConfirmButton: false
