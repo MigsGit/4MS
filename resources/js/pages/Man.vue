@@ -1054,7 +1054,7 @@
 
                         <tr>
                             <th scope="col">
-                                Internal Material
+                                Internal Material {{ currentStatus }}
                             </th>
                             <!-- <th scope="col">
                                 External Material

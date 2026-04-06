@@ -225,7 +225,6 @@ class EcrController extends Controller
             if (!$allPresent) {
                 return response()->json(['is_success' => 'false','msg'=>"Please Include Ma'am Ni-an Lim & Sir Yoichi Matsuzaki  as 4M PMI Approvers",],500);
             }
-
             $pmiApprovalRequestCtr = 0;
             $pmiApprovalRequest = collect($approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                 //return array users id as array value
@@ -313,8 +312,8 @@ class EcrController extends Controller
                 "created_by" => session('rapidx_username'),
                 "system_name" => "rapidx_4M",
             ];
-            // DB::commit();
-            // $this->emailInterface->sendEmail($emailData);
+            DB::commit();
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();
@@ -397,7 +396,7 @@ class EcrController extends Controller
                     "created_by" => session('rapidx_username'),
                     "system_name" => "rapidx_4M",
                 ];
-                // $this->emailInterface->sendEmail($emailData);
+                $this->emailInterface->sendEmail($emailData);
                 return response()->json(['isSuccess' => 'true']);
             }
              //Update APPROVED and Next PENDING Approval
@@ -498,9 +497,9 @@ class EcrController extends Controller
 
             DB::commit();
             if ( count($ecrApproval) === 0){
-                // $this->emailInterface->sendEmail($emailDataEcrRequirement);
+                $this->emailInterface->sendEmail($emailDataEcrRequirement);
             }
-            // $this->emailInterface->sendEmail($emailData);
+            $this->emailInterface->sendEmail($emailData);
             return response()->json(['is_success' => 'true']);
         } catch (Exception $e) {
             DB::rollback();

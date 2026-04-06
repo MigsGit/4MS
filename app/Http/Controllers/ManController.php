@@ -572,7 +572,7 @@ class ManController extends Controller
         ->addColumn('get_attachment',function ($row) use ($request){
             $result = '';
             $result .= '<center>';
-            $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' encrypted-ecr-id='".encrypt($row->id)."' man-status='".$row->status."'
+            $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' encrypted-ecr-id='".encrypt($row->id)."' man-status='".$row->man_detail->status."'
             internal-external='".$row->internal_external."' id='btnViewManRef'>Attachment</a>";
             $result .= '</center>';
             return $result;
