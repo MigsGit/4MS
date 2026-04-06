@@ -3,8 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Authenticate extends Middleware
 {
@@ -19,6 +20,19 @@ class Authenticate extends Middleware
     {
         session_start();
         if (!$_SESSION) {
+            return redirect('../');
+        }
+        $rapidxUser = DB::connection('mysql_rapidx')->select('SELECT users.*,user_accesses.
+            module_id,departments.department_name,departments.department_group
+            FROM  users
+            LEFT JOIN user_accesses user_accesses ON user_accesses.user_id = users.id
+            LEFT JOIN departments departments ON departments.department_id = users.department_id
+            WHERE 1=1
+            AND users.id = "'.$_SESSION['rapidx_user_id'].'"
+            AND users.user_stat = 1
+            AND user_accesses.module_id = 46'
+        );
+        if($rapidxUser == null){
             return redirect('../');
         }
         session([

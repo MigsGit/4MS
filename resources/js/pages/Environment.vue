@@ -725,7 +725,7 @@
     const modalPmiInternalApproval = ref(null);
     const tblPmiInternalApproverSummary = ref(null);
     const tblEcrByStatus = ref(null);
-    const approvalRemarks = ref(null);
+    const approvalRemarks = ref(null); //pmi
     const selectedEcrsId = ref(null);
     const isPmiInternalApproved = ref(null);
     const modalEcrRequirements = ref(null);
@@ -873,6 +873,7 @@
         });
     })
     // === Functions
+
     const btnLinkDownloadInternal = async (selectedEcrsId) => {
         let params = {
             ecrsId : selectedEcrsId
@@ -922,8 +923,8 @@
     const frmSavePmiInternalApproval = async () => {
         let apiParams = {
                 ecrsId : selectedEcrsId.value,
-                status : isApprovedDisappproved.value,
-                remarks : remarks.value,
+                status : isPmiInternalApproved.value,
+                remarks : approvalRemarks.value,
             }
         axiosFetchData(apiParams,'api/save_pmi_internal_approval',function(response){
             tblEcrByStatus.value.dt.ajax.url("api/load_ecr_environment_by_status?category=Environment"+"&& adminAccess="+selectedAdminAccess.value).draw();
