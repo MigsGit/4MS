@@ -715,25 +715,31 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     ]);
                 }
                 // ==== PMI APPROVAL ====
+
                 $internalPbCol = "A";
                 $internalPb = $pmiApprovalCollection['PB'] ?? null;
+
                 if(filled($internalPb)){
                     $pmiCustomerApprovalRowRowStart = $pmiCustomerApprovalRow-2;
                     $pmiCustomerApprovalRowRowStartValue = $pmiCustomerApprovalRow-1;
                     foreach ($internalPb as $key => $internalPbValue) {
-                        $this->insertEsignatureImageIntoSheet(
-                            $internalPbValue['rapidx_user']['employee_number'],
-                            $internalPbCol.$pmiCustomerApprovalRowRowStart,
-                            50,
-                            50,
-                            $sheet,
-                            'pb_head'.$key
-                        );
+                       if($internalPbValue['rapidx_user']['employee_number'] != null){
+                            $this->insertEsignatureImageIntoSheet(
+                                $internalPbValue['rapidx_user']['employee_number'],
+                                $internalPbCol.$pmiCustomerApprovalRowRowStart,
+                                50,
+                                50,
+                                $sheet,
+                                'pb_head'.$key
+                            );
+                       }
 
-                        $sheet->setCellValue($internalPbCol.$pmiCustomerApprovalRowRowStartValue, $internalPbValue['rapidx_user']['name']);
+                        $sheet->setCellValue($internalPbCol.$pmiCustomerApprovalRowRowStart, $internalPbValue['rapidx_user']['name'] ?? 'NOT FOUND');
+                        //  echo json_encode(getType($internalPbValue['rapidx_user']['name']));
                         $pmiCustomerApprovalRowRowStart++; //Adjust the Column
                     }
                 }
+                        // exit;
 
                 $startInternalCbCol = "E";
                 $internalCb = $pmiApprovalCollection['CB'] ?? null;
@@ -741,39 +747,49 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     $pmiCustomerApprovalRowRowStart = $pmiCustomerApprovalRow-2;
                     $pmiCustomerApprovalRowRowStartValue = $pmiCustomerApprovalRow-1;
                     foreach ($internalCb as $key => $internalCbValue) {
-                        $this->insertEsignatureImageIntoSheet(
-                            $internalCbValue['rapidx_user']['employee_number'],
-                            $startInternalCbCol.$pmiCustomerApprovalRowRowStart,
-                            50,
-                            50,
-                            $sheet,
-                            'cb_head'.$key
-                        );
+                       if($internalCbValue['rapidx_user']['employee_number'] != null){
+                            $this->insertEsignatureImageIntoSheet(
+                                $internalCbValue['rapidx_user']['employee_number'],
+                                $startInternalCbCol.$pmiCustomerApprovalRowRowStart,
+                                50,
+                                50,
+                                $sheet,
+                                'cb_head'.$key
+                            );
+                       }
 
-                        $sheet->setCellValue($startInternalCbCol.$pmiCustomerApprovalRowRowStartValue, $internalCbValue['rapidx_user']['name']);
+
+
+                        $sheet->setCellValue($startInternalCbCol.$pmiCustomerApprovalRowRowStart, $internalCbValue['rapidx_user']['name']);
                         $pmiCustomerApprovalRowRowStart++; //Adjust the Column
                     }
                 }
 
                 $startInternalAbCol = "H";
-                $internalAb = $pmiApprovalCollection['AB'] ?? null;
+                 $internalAb = $pmiApprovalCollection['AB'] ?? null;
                 if(filled($internalAb)){
                     foreach ($internalAb as $key => $internalAbValue) {
                         $pmiCustomerApprovalRowRowStart = $pmiCustomerApprovalRow-2;
                         $pmiCustomerApprovalRowRowStartValue = $pmiCustomerApprovalRow-1;
-                        $this->insertEsignatureImageIntoSheet(
-                            $internalAbValue['rapidx_user']['employee_number'],
-                            $startInternalAbCol.$pmiCustomerApprovalRowRowStart,
-                            50,
-                            50,
-                            $sheet,
-                            'ab_head'.$key
-                        );
-
-                        $sheet->setCellValue($startInternalAbCol.$pmiCustomerApprovalRowRowStartValue, $internalAbValue['rapidx_user']['name']);
+                       if($internalAbValue['rapidx_user']['employee_number'] != null){
+                        $test= $internalAbValue['rapidx_user']['name'];
+                        echo json_encode($test);
+                            $this->insertEsignatureImageIntoSheet(
+                                $internalAbValue['rapidx_user']['employee_number'],
+                                $startInternalAbCol.$pmiCustomerApprovalRowRowStart,
+                                50,
+                                50,
+                                $sheet,
+                                'ab_head'.$key
+                            );
+                       }
+                        $sheet->setCellValue($startInternalAbCol.$pmiCustomerApprovalRowRowStart, $internalAbValue['rapidx_user']['name']);
                         $pmiCustomerApprovalRowRowStart++; //Adjust the Column
                     }
                 }
+                        exit;
+
+
                 // === Specific Merged Cells ===
                 $mergeCells = [
                     'A3:E3',
@@ -996,6 +1012,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
 
                 // === Column Widths ===
                 $columnWidths = [
+                    'A' => 20,
                     'B' => 13,
                     'C' => 6,
                     'D' => 35,
@@ -1507,6 +1524,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     }
                 }
 
+
                 // ==== PMI APPROVAL ====
                 $internalPbCol = "A";
                 $internalPb = $pmiApprovalCollection['PB'] ?? null;
@@ -1522,6 +1540,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                         );
 
                         $sheet->setCellValue($internalPbCol.'70', $internalPbValue['rapidx_user']['name']);
+
                         $internalPbCol++; //Adjust the Column
                     }
                 }
