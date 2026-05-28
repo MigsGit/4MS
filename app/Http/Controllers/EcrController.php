@@ -110,7 +110,6 @@ class EcrController extends Controller
         try {
             //TODO:  DELETE, InsertById, N/A in Dropdown
             DB::beginTransaction();
-
             $generatedControlNumber =  $this->generateControlNumber();
             $ecrsId = $request->ecrs_id;
             $ecrRequest = $ecrRequest->validated();
@@ -832,6 +831,7 @@ class EcrController extends Controller
                 'ecrs_id' => $request->ecr_id
             ];
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
+            // return          $ecrDetail;
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
                 if($row->ecr->created_by === session('rapidx_user_id')){
@@ -844,12 +844,12 @@ class EcrController extends Controller
             })
             ->addColumn('reason_of_change',function ($row){
                 $result = '';
-                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? '';
+                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? $row->description_of_change ;
                 return $result;
             })
             ->addColumn('description_of_change',function ($row){
                 $result = '';
-                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details ?? '';
+                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details ?? $row->reason_of_change;
                 return $result;
             })
             ->addColumn('type_of_part',function ($row){

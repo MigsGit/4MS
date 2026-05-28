@@ -281,8 +281,9 @@ class EcrExport implements WithEvents, WithTitle, ShouldAutoSize, WithStrictNull
                         $startRowRocCollection = 17;
                         $startColumnEcrDetailsCollection = 'A';
                         foreach ($ecrDetailsCollection as $index => $value) {
-                            $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
-                            $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details;
+                            $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details ?? $value->description_of_change ;
+
+                            $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? $value->reason_of_change ;
                             $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowDocCollection}", $descriptionOfChange);
                             $startRowDocCollection++;
 

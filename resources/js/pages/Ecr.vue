@@ -1696,7 +1696,7 @@
                 // return;
                 for (let index = 0; index < frmEcrReasonRows.value.length; index++) {
                     const descriptionOfChange = frmEcrReasonRows.value[index]['descriptionOfChangeView'];
-                    const reasonOfChange = frmEcrReasonRows.value[index]['descriptionOfChangeView'];
+                    const reasonOfChange = frmEcrReasonRows.value[index]['reasonOfChangeView'];
                     [
                         ["description_of_change[]", descriptionOfChange],
                         ["reason_of_change[]", reasonOfChange],

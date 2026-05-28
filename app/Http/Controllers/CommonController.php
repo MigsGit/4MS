@@ -776,7 +776,7 @@ class CommonController extends Controller
 
             ];
         });
-
+        // return $ecrCollection;
         return Excel::download(new InternalCcmExport($ecrCollection),"Internal Export.xlsx");
     }
 

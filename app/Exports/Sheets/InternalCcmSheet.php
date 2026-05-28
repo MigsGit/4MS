@@ -53,9 +53,8 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
         // $defaultSignature = Storage::path($imagePath.'.png'); $imageEsigPath
 
         if( !file_exists($imageStoragePath) ){
-            echo  ''.$imageStoragePath.'Signature not found: Please as the HR for the E-Signature then Please file a ticket to http://rapidx/iss_service_request/my_tickets';
-
-            exit;
+             $imageStoragePath = '../RapidX_E-Signature/default.png';
+            // echo  ''.$imageStoragePath.'Signature not found: Please as the HR for the E-Signature then Please file a ticket to http://rapidx/iss_service_request/my_tickets';
         }
         // Resize the image
         $image = Image::make($imageStoragePath)->resize($width, $height);
@@ -462,8 +461,8 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                         $startRowRocCollection = 34;
                         $startColumnEcrDetailsCollection = 'A';
                         foreach ($ecrDetailsCollection as $index => $value) {
-                            $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details;
-                            $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details;
+                            $descriptionOfChange = $value->dropdown_master_detail_description_of_change->dropdown_masters_details ?? $value->description_of_change ;
+                            $reasonOfChange = $value->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? $value->reason_of_change ;
                             $sheet->setCellValue("{$startColumnEcrDetailsCollection}{$startRowDocCollection}", $descriptionOfChange);
                             $startRowDocCollection++;
 

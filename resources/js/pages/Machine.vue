@@ -17,7 +17,7 @@
                 <div class="container-fluid px-4">
                     <div class="table-responsive">
                         <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">Machine Table</li>
+                            <li class="breadcrumb-item active">Machine Tablesss</li>
                         </ol>
                         <!-- :ajax="api/load_ecr_by_status?status=AP" -->
                         <DataTable
@@ -321,7 +321,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP'" >
+                    <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP' ||  currentStatus === 'OK'" >
                         <div class="card mb-2">
                                 <h5 class="mb-0">
                                     <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
@@ -1085,7 +1085,7 @@
                         // tblEcrEnvironmentRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=5&ecrsId="+ecrsId).draw();
                         // tblEcrOthersRequirements.value.dt.ajax.url("api/load_ecr_requirements?category=6&ecrsId="+ecrsId).draw();
                         // modalEcr.EcrRequirements.show();
-                        
+
                         modal.SaveMachine.show();
                     });
                 }
@@ -1304,6 +1304,13 @@
         }
         var queryString = $.param(params);
         window.location.href="api/download_internal_excel_by_ecrs_id?" + queryString;
+    }
+     const btnLinkDownloadExternal = async (selectedEcrsId) => {
+        let params = {
+            ecrsId : selectedEcrsId,
+        };
+        var queryString = $.param(params);
+        window.location.href="api/download_excel_by_ecrs_id?" + queryString;
     }
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
