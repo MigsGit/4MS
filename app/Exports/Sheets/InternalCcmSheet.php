@@ -722,8 +722,10 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                 if(filled($internalPb)){
                     $pmiCustomerApprovalRowRowStart = $pmiCustomerApprovalRow-2;
                     $pmiCustomerApprovalRowRowStartValue = $pmiCustomerApprovalRow-1;
+
                     foreach ($internalPb as $key => $internalPbValue) {
-                       if($internalPbValue['rapidx_user']['employee_number'] != null){
+
+                       if($internalPbValue['rapidx_user_id'] != null){
                             $this->insertEsignatureImageIntoSheet(
                                 $internalPbValue['rapidx_user']['employee_number'],
                                 $internalPbCol.$pmiCustomerApprovalRowRowStart,
@@ -734,7 +736,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                             );
                        }
 
-                        $sheet->setCellValue($internalPbCol.$pmiCustomerApprovalRowRowStart, $internalPbValue['rapidx_user']['name'] ?? 'NOT FOUND');
+                        $sheet->setCellValue($internalPbCol.$pmiCustomerApprovalRowRowStart, $internalPbValue['rapidx_user']['name'] ?? '');
                         //  echo json_encode(getType($internalPbValue['rapidx_user']['name']));
                         $pmiCustomerApprovalRowRowStart++; //Adjust the Column
                     }
@@ -747,7 +749,7 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                     $pmiCustomerApprovalRowRowStart = $pmiCustomerApprovalRow-2;
                     $pmiCustomerApprovalRowRowStartValue = $pmiCustomerApprovalRow-1;
                     foreach ($internalCb as $key => $internalCbValue) {
-                       if($internalCbValue['rapidx_user']['employee_number'] != null){
+                       if($internalCbValue['rapidx_user_id'] != null){
                             $this->insertEsignatureImageIntoSheet(
                                 $internalCbValue['rapidx_user']['employee_number'],
                                 $startInternalCbCol.$pmiCustomerApprovalRowRowStart,
@@ -757,23 +759,22 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                                 'cb_head'.$key
                             );
                        }
-
-
-
-                        $sheet->setCellValue($startInternalCbCol.$pmiCustomerApprovalRowRowStart, $internalCbValue['rapidx_user']['name']);
+                        $sheet->setCellValue($startInternalCbCol.$pmiCustomerApprovalRowRowStart, $internalCbValue['rapidx_user']['name'] ?? '');
                         $pmiCustomerApprovalRowRowStart++; //Adjust the Column
                     }
                 }
 
                 $startInternalAbCol = "H";
                  $internalAb = $pmiApprovalCollection['AB'] ?? null;
+
+
                 if(filled($internalAb)){
+                    $pmiCustomerApprovalRowRowStart = $pmiCustomerApprovalRow-2;
+                    $pmiCustomerApprovalRowRowStartValue = $pmiCustomerApprovalRow-1;
                     foreach ($internalAb as $key => $internalAbValue) {
-                        $pmiCustomerApprovalRowRowStart = $pmiCustomerApprovalRow-2;
-                        $pmiCustomerApprovalRowRowStartValue = $pmiCustomerApprovalRow-1;
-                       if($internalAbValue['rapidx_user']['employee_number'] != null){
-                        $test= $internalAbValue['rapidx_user']['name'];
-                        echo json_encode($test);
+                       if($internalAbValue['rapidx_user_id'] != null){
+                        // $test= $internalAbValue['rapidx_user']['name'];
+                        // echo json_encode($test);
                             $this->insertEsignatureImageIntoSheet(
                                 $internalAbValue['rapidx_user']['employee_number'],
                                 $startInternalAbCol.$pmiCustomerApprovalRowRowStart,
@@ -783,11 +784,13 @@ class InternalCcmSheet implements WithEvents, WithTitle, ShouldAutoSize, WithStr
                                 'ab_head'.$key
                             );
                        }
-                        $sheet->setCellValue($startInternalAbCol.$pmiCustomerApprovalRowRowStart, $internalAbValue['rapidx_user']['name']);
-                        $pmiCustomerApprovalRowRowStart++; //Adjust the Column
+
+                       $sheet->setCellValue($startInternalAbCol.$pmiCustomerApprovalRowRowStart, $internalAbValue['rapidx_user']['name'] ?? '');
+                        // echo json_encode($pmiCustomerApprovalRowRowStart);
+                       $pmiCustomerApprovalRowRowStart++; //Adjust the Column
                     }
                 }
-                        exit;
+                        // exit;
 
 
                 // === Specific Merged Cells ===
