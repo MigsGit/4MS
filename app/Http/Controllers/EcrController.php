@@ -898,7 +898,7 @@ class EcrController extends Controller
                'id' =>  $ecrsId,
                'status' =>  'OK'
             ]);
-            $ecrApprovedCount = $ecr->count();
+            $ecrApprovedCount = $ecr->get();
 
             $data = [];
             $relations = [
@@ -911,7 +911,7 @@ class EcrController extends Controller
 
             $classificationRequirement = $this->resourceInterface->readCustomEloquent(ClassificationRequirement::class,$data,$relations,$conditions);
             //If ECR Approved, show the CHECK decision only per Category
-            if( $ecrApprovedCount === 1){
+            if( count($ecrApprovedCount) === 1){
                 $classificationRequirement = $classificationRequirement->whereHas('ecr_requirement', function ($query) use ($ecrsId) {
                     $query->where('decision', 'C');
                     $query->where('ecrs_id', $ecrsId);
@@ -930,6 +930,8 @@ class EcrController extends Controller
                 ]
             );
             $classificationRequirement->get();
+
+
             return DataTables($classificationRequirement)
             ->addColumn('get_actions',function ($row) use($ecrRequirement,$request) {
                 $ecrRequirementCollection = collect($ecrRequirement);
@@ -972,6 +974,7 @@ class EcrController extends Controller
             ->addColumn('get_view_ecr_req_ref',function ($row) {
                 $filteredDocumentName = $row->ecr_requirement->filtered_document_name ?? null;
                 $result = "";
+
                 if($filteredDocumentName != null){
                     $result .= ' <a ecr-requirements-id="'.$row->ecr_requirement->id.'" ecrs-id="'.$row->ecr_requirement->ecrs_id.'" href="#" id="btnViewEcrRequirementRef" class="link-primary"> View Reference </a>';
                 }

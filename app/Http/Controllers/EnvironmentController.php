@@ -72,7 +72,7 @@ class EnvironmentController extends Controller
                 if($statusEnvironment === 'EXDISPO' || $statusEnvironment === 'EXDISAPP' || $statusEnvironment === 'OK'){
                     //Upload External Disposition
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                    // $result .= '<li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
                 if($approvalStatus === "PB" && $row->created_by === session('rapidx_user_id')){
@@ -146,7 +146,7 @@ class EnvironmentController extends Controller
                 $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
                     ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
                     ->toArray();
-            
+
                 // 2. Tell the main query to only show rows where 'created_by' is in that list
                 $query->whereIn('created_by', $userIds);
             })
