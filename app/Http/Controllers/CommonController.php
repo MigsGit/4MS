@@ -91,12 +91,11 @@ class CommonController extends Controller
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
             $isEcrDetailsActiveCount = EcrDetail::where('ecrs_id',$ecrsId)
-            ->whereNull('deleted_at')
-            ->count();
+            ->whereNull('deleted_at');
+            // ->count();
              $ecrRequired = [
                "type_of_part",
                "change_imp_date",
-               "first_approver_3",
                "doc_sub_date",
                "doc_to_be_sub",
                "customer_approval",

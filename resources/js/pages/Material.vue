@@ -31,7 +31,7 @@
                             class="table mt-2"
                             ref="tblEcrByCategoryStatus"
                             :columns="tblEcrByCategoryStatusColumns"
-                            ajax="api/load_ecr_material_by_status?category=Material && adminAccess=all"
+                            ajax="api/load_ecr_material_by_status?category=Material"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
