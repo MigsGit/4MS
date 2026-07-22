@@ -16,7 +16,7 @@
             <div class="card-body overflow-auto">
                 <div class="container-fluid px-4">
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Man Table</li>
+                        <li class="breadcrumb-item active">Man Tables</li>
                     </ol>
                     <div class="table-responsive">
                         <!-- :ajax="api/load_ecr_by_status?status=AP" -->

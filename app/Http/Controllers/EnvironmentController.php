@@ -64,7 +64,7 @@ class EnvironmentController extends Controller
                 $approvalStatus = $row->approval_status;
                 $statusEnvironment = $row->environment->status;
                 $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? '';
-                // return     $test = "";
+                // return     $test = $statusEnvironment;
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
                 $result .= '<button type="button" class="btn btn-secondary dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-expanded="false">';
@@ -78,7 +78,7 @@ class EnvironmentController extends Controller
                     return $result;
                 }
 
-                if($approvalStatus === "PB" && $row->created_by === session('rapidx_user_id')){
+                if($approvalStatus === "PB"  || $statusEnvironment === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadEnvironmentRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }

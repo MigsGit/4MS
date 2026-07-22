@@ -90,6 +90,25 @@ class CommonController extends Controller
             if($pmiInternalApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
+            $isEcrDetailsActiveCount = EcrDetail::where('ecrs_id',$ecrsId)
+            ->whereNull('deleted_at')
+            ->count();
+             $ecrRequired = [
+               "type_of_part",
+               "change_imp_date",
+               "first_approver_3",
+               "doc_sub_date",
+               "doc_to_be_sub",
+               "customer_approval",
+            ];
+            collect($ecrRequired)->each(function ($rowEcrRequired) use ($isEcrDetailsActiveCount) {
+                $isEcrDetailsActiveCount->whereNotNull($rowEcrRequired);
+            });
+            $isEcrDetailsActiveCount->count();
+            if($isEcrDetailsActiveCount === 0){
+                return response()->json(['isSuccess' => 'false','msg' => 'Please complete the Ecr Details Above, TypeOfPart,Change Imp Date, etc !'],500);
+            }
+
             //Get the ECR Category
             $ecr = Ecr::where('id',$ecrsId)
             ->whereNull('deleted_at')

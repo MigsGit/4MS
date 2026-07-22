@@ -101,11 +101,13 @@
                                 <div class="row mt-3">
                                     <div class="col-md-6">
                                         <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                            <span class="input-group-text" id="addon-wrapping">Before Image:</span>
                                             <input @change="changeMachineRefBefore" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="input-group flex-nowrap mb-2 input-group-sm">
+                                            <span class="input-group-text" id="addon-wrapping">After Image:</span>
                                             <input @change="changeMachineRefAfter" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                                         </div>
                                     </div>
