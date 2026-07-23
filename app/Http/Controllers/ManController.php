@@ -872,7 +872,7 @@ class ManController extends Controller
         $arrColumnEcrDetails = [
             'type_of_part',
             'change_imp_date',
-            'doc_sub_date',
+            // 'doc_sub_date',
             'doc_to_be_sub',
             'customer_approval',
         ];
