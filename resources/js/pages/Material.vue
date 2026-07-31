@@ -31,7 +31,7 @@
                             class="table mt-2"
                             ref="tblEcrByCategoryStatus"
                             :columns="tblEcrByCategoryStatusColumns"
-                            ajax="api/load_ecr_material_by_status?category=Material && adminAccess=all"
+                            ajax="api/load_ecr_material_by_status?category=Material"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -1780,6 +1780,7 @@
         axiosFetchData(apiParams,'api/get_material_ecr_by_id',function(response){
             let data = response.data;
             let material = data.material[0];
+            let ecrsId = material.ecrs_id;
             let internalExternal = data.internalExternal;
             let materialApprovalCollection = data.materialApprovalCollection;
             //Load ECR Requirement by Category and Ecrs Id
@@ -1793,7 +1794,7 @@
             // modalEcr.EcrRequirements.show();
 
             console.log(material.ecrs_id);
-            frmMaterial.value.ecrsId = material.ecrs_id;
+            frmMaterial.value.ecrsId = material.ecrs_id; //ecrsId
             frmMaterial.value.materialId = material.id;
             frmMaterial.value.pdMaterial = material.pd_material;
             frmMaterial.value.msds = material.msds;

@@ -31,7 +31,7 @@ function checkIfSessionExist(to, from, next) {
 }
 export default [
     {
-        path: '/4M2x',
+        path: '/4M',
         beforeEnter: checkIfSessionExist,
         components: {
             default: IndexComponent,

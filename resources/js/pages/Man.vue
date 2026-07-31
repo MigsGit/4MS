@@ -16,7 +16,7 @@
             <div class="card-body overflow-auto">
                 <div class="container-fluid px-4">
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item active">Man Table</li>
+                        <li class="breadcrumb-item active">Man Tables</li>
                     </ol>
                     <div class="table-responsive">
                         <!-- :ajax="api/load_ecr_by_status?status=AP" -->
@@ -1054,7 +1054,7 @@
 
                         <tr>
                             <th scope="col">
-                                Internal Material
+                                Internal Material {{ currentStatus }}
                             </th>
                             <!-- <th scope="col">
                                 External Material
@@ -1660,6 +1660,8 @@
         axiosSaveData(formData,'api/save_man', (response) =>{
             modal.SaveManDetails.hide();
             tblManDetails.value.dt.ajax.url("api/load_man_by_ecr_id?ecrsId="+frmMan.value.ecrsId).draw();
+            tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedAdminAccess.value).draw();
+
         });
 
     }

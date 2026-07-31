@@ -102,13 +102,13 @@
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                    <span class="input-group-text" id="addon-wrapping">Before:</span>
+                                    <span class="input-group-text" id="addon-wrapping">Before Image:</span>
                                     <input @change="changeMethodRefBefore" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="input-group flex-nowrap mb-2 input-group-sm">
-                                    <span class="input-group-text" id="addon-wrapping">After:</span>
+                                    <span class="input-group-text" id="addon-wrapping">After Image:</span>
                                     <input @change="changeMethodRefAfter" multiple type="file" accept=".jpg" class="form-control form-control-lg" aria-describedby="addon-wrapping" required>
                                 </div>
                             </div>
@@ -250,7 +250,7 @@
                         </h5>
                     <div id="collapseMachineApproverSummary" class="collapse show" data-bs-parent="#accordionMain">
                         <div class="card-header">
-                            <h5> Machine Approver </h5>
+                            <h5> Method Approver </h5>
                         </div>
                         <div class="card-body">
                             <div class="row">

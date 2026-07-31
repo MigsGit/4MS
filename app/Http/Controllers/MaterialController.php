@@ -42,10 +42,10 @@ class MaterialController extends Controller
 
             if ( isset($materialsId)){
                 //Validate Before Edit: FORAPP status -On going approval cannot update
-                $material = Material::where('id',$materialsId)
-                ->whereIn('status',['RUP','DIS'])
+                $material = Material::where('ecrs_id',$currentEcrsId)
+                ->where('status','FORAPP')
                 ->count();
-                if ( $material === 0 ){
+                if ( $material === 1 ){
                     DB::rollback();
                     return response()->json(['isSuccess' => 'false','msg' => "On going approval ! You cannot update this request "],500);
                 }
@@ -168,7 +168,7 @@ class MaterialController extends Controller
                 $firstPmiApproval->update(['status' => 'PEN']);
             }
             //Auto Email 4M Approval Based on Category
-            $ecrApprovalCurrent = MaterialApproval::where('ecrs_id',$currentEcrsId)
+                $ecrApprovalCurrent = MaterialApproval::where('ecrs_id',$currentEcrsId)
             ->whereNotNull('rapidx_user_id')
             ->where('status','PEN')
             ->first();
@@ -220,6 +220,7 @@ class MaterialController extends Controller
             if($materialApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
+
             //Update the Material Approval Status
             $materialApprovalCurrent->update([
                 'status' => $request->status,
@@ -413,7 +414,7 @@ class MaterialController extends Controller
 
                 if($materialStatus === 'EXDISPO' || $materialStatus === 'EXDISAPP' || $materialStatus === 'OK'){
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" method-status= "'.$materialStatus.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                    // $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '   <li><button class="dropdown-item" type="button" material-status= "'.$materialStatus.'" ecrs-id="'.$row->id.'" materials-id="'.$row->material->id.'"id="btnViewMaterialById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
 
@@ -456,7 +457,7 @@ class MaterialController extends Controller
             ->addColumn('get_attachment',function ($row) use ($request){
                 $result = '';
                 $result .= '<center>';
-                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' encrypted-ecr-id='".encrypt($row->id)."' material-status='".$row->status."'  id='btnViewMaterialRef'>Attachment</a>";
+                $result .= "<a class='btn btn-outline-danger btn-sm mr-1 mt-3' ecrs-id='".$row->id."' encrypted-ecr-id='".encrypt($row->id)."' material-status='".$row->material->status."'  id='btnViewMaterialRef'>Attachment</a>";
                 $result .= '</center>';
                 return $result;
             })
@@ -496,7 +497,7 @@ class MaterialController extends Controller
                 $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
                     ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
                     ->toArray();
-            
+
                 // 2. Tell the main query to only show rows where 'created_by' is in that list
                 $query->whereIn('created_by', $userIds);
             })

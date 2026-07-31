@@ -111,7 +111,6 @@ class EcrController extends Controller
         try {
             //TODO:  DELETE, InsertById, N/A in Dropdown
             DB::beginTransaction();
-
             $generatedControlNumber =  $this->generateControlNumber();
             $ecrsId = $request->ecrs_id;
             $ecrRequest = $ecrRequest->validated();
@@ -226,7 +225,6 @@ class EcrController extends Controller
             if (!$allPresent) {
                 return response()->json(['is_success' => 'false','msg'=>"Please Include Ma'am Ni-an Lim & Sir Yoichi Matsuzaki  as 4M PMI Approvers",],500);
             }
-
             $pmiApprovalRequestCtr = 0;
             $pmiApprovalRequest = collect($approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                 //return array users id as array value
@@ -834,6 +832,7 @@ class EcrController extends Controller
                 'ecrs_id' => $request->ecr_id
             ];
             $ecrDetail = $this->resourceInterface->readWithRelationsConditionsActive(EcrDetail::class,$data,$relations,$conditions);
+            // return          $ecrDetail;
             return DataTables($ecrDetail)
             ->addColumn('get_actions',function ($row){
                 if($row->ecr->created_by === session('rapidx_user_id')){
@@ -846,12 +845,12 @@ class EcrController extends Controller
             })
             ->addColumn('reason_of_change',function ($row){
                 $result = '';
-                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? '';
+                $result .= $row->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? $row->description_of_change ;
                 return $result;
             })
             ->addColumn('description_of_change',function ($row){
                 $result = '';
-                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details ?? '';
+                $result .= $row->dropdown_master_detail_description_of_change->dropdown_masters_details ?? $row->reason_of_change;
                 return $result;
             })
             ->addColumn('type_of_part',function ($row){
@@ -900,7 +899,7 @@ class EcrController extends Controller
                'id' =>  $ecrsId,
                'status' =>  'OK'
             ]);
-            $ecrApprovedCount = $ecr->count();
+            $ecrApprovedCount = $ecr->get();
 
             $data = [];
             $relations = [
@@ -913,7 +912,7 @@ class EcrController extends Controller
 
             $classificationRequirement = $this->resourceInterface->readCustomEloquent(ClassificationRequirement::class,$data,$relations,$conditions);
             //If ECR Approved, show the CHECK decision only per Category
-            if( $ecrApprovedCount === 1){
+            if( count($ecrApprovedCount) === 1){
                 $classificationRequirement = $classificationRequirement->whereHas('ecr_requirement', function ($query) use ($ecrsId) {
                     $query->where('decision', 'C');
                     $query->where('ecrs_id', $ecrsId);
@@ -932,6 +931,8 @@ class EcrController extends Controller
                 ]
             );
             $classificationRequirement->get();
+
+
             return DataTables($classificationRequirement)
             ->addColumn('get_actions',function ($row) use($ecrRequirement,$request) {
                 $ecrRequirementCollection = collect($ecrRequirement);
@@ -974,6 +975,7 @@ class EcrController extends Controller
             ->addColumn('get_view_ecr_req_ref',function ($row) {
                 $filteredDocumentName = $row->ecr_requirement->filtered_document_name ?? null;
                 $result = "";
+
                 if($filteredDocumentName != null){
                     $result .= ' <a ecr-requirements-id="'.$row->ecr_requirement->id.'" ecrs-id="'.$row->ecr_requirement->ecrs_id.'" href="#" id="btnViewEcrRequirementRef" class="link-primary"> View Reference </a>';
                 }
@@ -1369,7 +1371,7 @@ class EcrController extends Controller
             throw $e;
         }
    }
-   public function viewEcrRef(Request $request){
+   public function viewEcrRef(Request $request){ //viewManRefByEcrsId
         try {
             $ecrsId = decrypt($request->ecrsId);
             $conditions = [

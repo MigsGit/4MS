@@ -311,6 +311,7 @@ export default function useEcr(){
         }
         axiosFetchData(params,'api/get_ecr_details_id',function(response){
             let ecrDetails = response.data.ecrDetail;
+            console.log('ecrDetails',ecrDetails);
             frmEcrDetails.value.ecrDetailsId = ecrDetailsId;
             frmEcrDetails.value.changeImpDate =ecrDetails.change_imp_date
             frmEcrDetails.value.docSubDate =ecrDetails.doc_sub_date
@@ -318,10 +319,17 @@ export default function useEcr(){
             frmEcrDetails.value.customerApproval = ecrDetails.customer_approval
             frmEcrDetails.value.remarks =ecrDetails.remarks
             frmEcrDetails.value.typeOfPart = ecrDetails.dropdown_master_detail_type_of_part  === null ? 0: ecrDetails.dropdown_master_detail_type_of_part.id;
-            frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id;
-            frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
-            frmEcrReasonRows.value[0].descriptionOfChangeView = ecrDetails.dropdown_master_detail_description_of_change.dropdown_masters_details;
-            frmEcrReasonRows.value[0].reasonOfChangeView = ecrDetails.dropdown_master_detail_reason_of_change.dropdown_masters_details;
+
+            // frmEcrReasonRows.value[0].descriptionOfChange = ecrDetails.dropdown_master_detail_description_of_change.id; // description_of_change
+
+            // frmEcrReasonRows.value[0].reasonOfChange = ecrDetails.dropdown_master_detail_reason_of_change.id;
+            // frmEcrReasonRows.value[0].descriptionOfChangeView = ecrDetails.dropdown_master_detail_description_of_change.dropdown_masters_details;
+            // frmEcrReasonRows.value[0].reasonOfChangeView = ecrDetails.dropdown_master_detail_reason_of_change.dropdown_masters_details;
+
+            frmEcrReasonRows.value[0].descriptionOfChangeView = ecrDetails.dropdown_master_detail_description_of_change != null ? ecrDetails.dropdown_master_detail_description_of_change.dropdown_masters_details : ecrDetails.description_of_change;
+
+            frmEcrReasonRows.value[0].reasonOfChangeView = ecrDetails.dropdown_master_detail_reason_of_change != null ? ecrDetails.dropdown_master_detail_reason_of_change.dropdown_masters_details :  ecrDetails.reason_of_change;
+
         });
     }
     const saveEcrDetails = async () => {

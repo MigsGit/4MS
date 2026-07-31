@@ -129,7 +129,12 @@ export default function useCommon(){
             commonVar.rapidxUserDeptId = data.department_id;
             commonVar.rapidxUserDeptGroup = userDeptGroup;
             rapidxUserDeptGroup.value = userDeptGroup;
+            // commonVar.optAdminAccess = [
+            //     {"value":"all","label":"Show All"},
+            //     {"value":"created","label":"Show my request"},
+            // ];
             // departmentGroup
+            // return;
             if(userDeptGroup === "ISS" ||  userDeptGroup === "QAD"){
                 commonVar.optAdminAccess = [
                     {"value":"all","label":"Show All"},
@@ -151,6 +156,13 @@ export default function useCommon(){
             commonVar.rapidxUserDeptId = data.department_id;
             commonVar.rapidxUserDeptGroup = userDeptGroup;
             rapidxUserDeptGroup.value = userDeptGroup;
+                // commonVar.optCategoryAdminAccess = [
+                //     {"value":"all","label":"Show All"},
+                //     {"value":"created","label":"Show my request"},
+                //     {"value":"pmi","label":"Pending PMI Approval"},
+                // ];
+
+            // return;
             if(userDeptGroup === "ISS" ||  userDeptGroup === "QAD"){
                 commonVar.optCategoryAdminAccess = [
                     {"value":"all","label":"Show All"},
