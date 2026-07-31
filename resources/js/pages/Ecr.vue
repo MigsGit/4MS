@@ -7,7 +7,7 @@
                         placeholder="-Select an Option-"
                     :close-on-select="true"
                     :searchable="true"
-                    :options="commonVar.optAdminAccess"
+                    :options="optFilterOptions"
                     @change="onChangeAdminAccess($event)"
                 />
             </div>
@@ -29,7 +29,7 @@
                         <div class="row d-flex justify-content-between">
                             <div class="col-6">
                                 <button @click="btnExportMasterlist"
-                                data-bs-toggle="modal" data-bs-target="#modalExportMasterlist" aria-expanded="true" aria-controls="export-masterlist"type="button" class="btn btn-success btn-sm mb-2" ><i class="fas fa-plus"></i> Export Masterlist</button>
+                                data-bs-toggle="modal" data-bs-target="#modalExportMasterlist" aria-expanded="true" aria-controls="export-masterlist"type="button" class="btn btn-success btn-sm mb-2 d-none" ><i class="fas fa-plus"></i> Export Masterlist</button>
                             </div>
                             <div class="col-6">
                                 <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create ECR</button>
@@ -1099,7 +1099,7 @@
 </template>
 
 <script setup>
-    import {ref , onMounted,reactive, toRef,watch} from 'vue';
+    import {ref , onMounted,reactive, toRef,watch, computed} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useCommon from '../composables/common.js';
@@ -1178,6 +1178,18 @@
     const isApproved = ref(null);
     const currentEcrsId = ref(null);
     const selectedAdminAccess = ref(null);
+    const isLoadingEcr = ref(false);
+
+    const ecrStatusOptions = [
+        { value: 'status:IA', label: 'Internal Approval' },
+        { value: 'status:QA', label: 'QA Approval' },
+        { value: 'status:OK', label: 'Approved' },
+        { value: 'status:DIS', label: 'Disapproved' },
+        { value: 'status:CAN', label: 'Cancelled' },
+    ];
+    const optFilterOptions = computed(() => {
+        return [ ...commonVar.optAdminAccess, ...ecrStatusOptions ];
+    });
     const arrOriginalFilenames = ref(null);
     const arrFilteredDocumentName = ref(null);
     const batchDisapproval = ref(null);
@@ -1597,8 +1609,31 @@
         });
     }
     const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA"+"&& adminAccess="+selectedParams).draw();
         selectedAdminAccess.value = selectedParams;
+        let adminAccessParam = null;
+        let statusParam = null;
+        if(selectedParams && typeof selectedParams === 'string' && selectedParams.startsWith('status:')){
+            statusParam = selectedParams.replace('status:','');
+        } else {
+            adminAccessParam = selectedParams;
+        }
+
+        // build url
+        let url = 'api/load_ecr';
+        const params = [];
+        if(statusParam){ params.push('status='+statusParam); }
+        if(adminAccessParam){ params.push('adminAccess='+adminAccessParam); }
+        if(params.length){ url += '?' + params.join('&&'); }
+
+        try{
+            isLoadingEcr.value = true;
+            tblEcr.value.dt.ajax.url(url).load(function(){
+                isLoadingEcr.value = false;
+            }, false);
+        } catch (err){
+            isLoadingEcr.value = false;
+            if(window.Toast){ window.Toast.open({message: 'Failed to load ECRs', type: 'error'}); }
+        }
     }
     const ecrReqDecisionChange = async (ecrReqDecisionParams)=>{
         let apiParams = {
