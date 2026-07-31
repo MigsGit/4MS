@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Exports\MasterlistExport;
 use DateTime;
 use Carbon\Carbon;
 use App\Models\Ecr;
@@ -1409,7 +1410,6 @@ class EcrController extends Controller
            throw $e;
        }
    }
-
    public function getEcrCtrlNo(Request $request){
        try {
             $ecr =  $this->resourceInterface->readCustomEloquent(Ecr::class,[
@@ -1424,5 +1424,40 @@ class EcrController extends Controller
        } catch (Exception $e) {
            throw $e;
        }
+   }
+   public function exportMasterlist(Request $request){
+    $masterlistFromDate = $request->masterlistFromDate;
+    $masterlistToDate = $request->masterlistToDate;
+    // $startOfMonth = Carbon::parse($masterlistFromDate)->startOfMonth();
+    // $endOfMonth = Carbon::parse($masterlistToDate)->endOfMonth();
+    $data = [];
+    $relations = [
+        'ecr_approval_pending',
+        'rapidx_user_created_by',
+        'man_detail',
+        'environment',
+        'material',
+        'machine',
+        'method',
+    ];
+    $conditions = [];
+    $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+    $ecr->whereBetween('created_at',[$masterlistFromDate, $masterlistToDate]);
+    $ecr->whereNull('deleted_at');
+    $ecr->limit(1);
+    $ecr->get();
+    $ecrDetails =  $ecr;
+
+   return $ecrCollection = collect($ecrDetails)->map(function ($ecrCollectionRow){
+        return $ecrCollectionRow;
+        // return $detailsFourMCollection = $ecrCollectionRow->man_detail ?? $ecrCollectionRow->material ?? $ecrCollectionRow->machine ?? $ecrCollectionRow->$method ?? 'NOTEXISTS';
+    });
+
+    return Excel::download(new MasterlistExport($ecr),"ECR.xlsx");
+    try {
+        return response()->json(['is_success' => 'true']);
+    } catch (Exception $e) {
+        throw $e;
+    }
    }
 }

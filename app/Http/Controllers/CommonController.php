@@ -757,7 +757,8 @@ class CommonController extends Controller
                 return $requestedByDept = $this->commonInterface->getRapidxUserDeptByDeptId($departmentId);
             }); //removed the NULL Value
 
-            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->Collection;$method->method_approvals ?? 'NOTEXISTS';
+            // $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->Collection;$method->method_approvals ?? 'NOTEXISTS';
+            $detailsFourMCollection = $ecrCollectionRow->man_detail->man_detail_approvals ?? $ecrCollectionRow->material->material_approvals ?? $ecrCollectionRow->machine->machine_approvals ?? $ecrCollectionRow->$method->method_approvals ?? 'NOTEXISTS';
             if($detailsFourMCollection != 'NOTEXISTS'){
                 $detailsFourMCollectionFiltered = collect($detailsFourMCollection)->map(function ($detailsFourMRow){
                     return $rapidxUser = $detailsFourMRow?? '';

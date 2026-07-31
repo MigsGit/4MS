@@ -12,6 +12,7 @@
                 />
             </div>
         </div>
+
         <div class="card mt-5" style="width: 100%;">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
@@ -27,7 +28,8 @@
                     <div class="container-fluid px-4">
                         <div class="row d-flex justify-content-between">
                             <div class="col-6">
-                                <!-- <button @click="btnBatchDisapproval"type="button" class="btn btn-danger btn-sm mb-2" ><i class="fas fa-plus"></i> Batch Disapproval</button> -->
+                                <button @click="btnExportMasterlist"
+                                data-bs-toggle="modal" data-bs-target="#modalExportMasterlist" aria-expanded="true" aria-controls="export-masterlist"type="button" class="btn btn-success btn-sm mb-2" ><i class="fas fa-plus"></i> Export Masterlist</button>
                             </div>
                             <div class="col-6">
                                 <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create ECR</button>
@@ -79,6 +81,27 @@
             </div>
         </div>
     </div>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" :title="modalTitle+' '+'ECR'" id="modalExportMasterlist">
+        <template #body>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="input flex-nowrap mb-2 input-group-sm">
+                            <input  v-model="masterlistFromDate" type="date" class="form-control form-control" aria-describedby="addon-wrapping">
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="input flex-nowrap mb-2 input-group-sm">
+                            <input  v-model="masterlistToDate" type="date" class="form-control form-control" aria-describedby="addon-wrapping">
+                        </div>
+                    </div>
+                </div>
+        </template>
+        <template #footer>
+                <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" @click="exportMasterlist(masterlistFromDate,masterlistToDate)" />&nbsp;Export</button>
+            </template>
+    </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" :title="modalTitle+' '+'ECR'" @add-event="frmSaveEcr()" ref="modalSaveEcr">
         <template #body>
                 <div class="row d-none">
@@ -1159,6 +1182,8 @@
     const arrFilteredDocumentName = ref(null);
     const batchDisapproval = ref(null);
     const modalBatchDisapproval = ref(null);
+    const masterlistFromDate = ref(null);
+    const masterlistToDate = ref(null);
     //Table Column btnViewEcrRef
     const tblEcrColumns = [
         {   data: 'get_actions',
@@ -1448,6 +1473,11 @@
             }
             selectedEcrsIdEncrypted.value = data.ersIdEncryted;
         });
+    }
+    const btnExportMasterlist = async (params)  => {
+    }
+    const exportMasterlist = async (masterlistFromDate,masterlistToDate) => {
+        window.open(`api/export_masterlist?masterlistFromDate=${masterlistFromDate} && masterlistToDate=${masterlistToDate}`, '_blank');
     }
     const btnLinkViewEcrRef = async (selectedEcrsIdEncrypted,index)  => {
         window.open(`api/view_ecr_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');

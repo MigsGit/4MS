@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\Sheets;
 
 use Maatwebsite\Excel\Concerns\FromCollection;
 
-class InternalMaterialExport implements FromCollection
+class MasterlistSheet implements FromCollection
 {
     /**
     * @return \Illuminate\Support\Collection
