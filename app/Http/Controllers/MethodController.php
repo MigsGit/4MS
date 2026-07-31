@@ -250,7 +250,7 @@ class MethodController extends Controller
                 'remarks' => $request->remarks,
             ]);
             //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
-           $methodApproval = MethodApproval::where('methods_id',$selectedId)
+            $methodApproval = MethodApproval::where('methods_id',$selectedId)
            ->whereNotNull('rapidx_user_id')
            ->where('status','-')
            ->limit(1)
@@ -296,7 +296,7 @@ class MethodController extends Controller
                 $from_name = "4M Change Control Management System";
                 $subject = "APPROVED: METHOD (4M CMS)";
                 $header = "Your METHOD 4M  has been APPROVED";
-                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($selectedId,$header);
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($methodCurrent->ecrs_id,$header);
 
             }
              //DISAPPROVED ECR
@@ -316,7 +316,7 @@ class MethodController extends Controller
                 $from_name = "4M Change Control Management System";
                 $subject = "DISAPPROVED: METHOD (4M CMS)";
                 $header = "Your METHOD 4M has been DISAPPROVED";
-                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($selectedId,$header);
+                $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($methodCurrent->ecrs_id,$header);
                  //Array Send Email
                  $emailData = [
                     "to" =>$to,

@@ -56,13 +56,15 @@ class EnvironmentController extends Controller
             if( $adminAccess === 'all') {
                 $ecr->get();
             }
+            //    return $ecr->get();
 
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
+                $result = "";
                 $approvalStatus = $row->approval_status;
                 $statusEnvironment = $row->environment->status;
-                $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id;
-                $result = "";
+                $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? '';
+                // return     $test = $statusEnvironment;
                 $result .= '<center>';
                 $result .= '<div class="btn-group dropstart mt-4">';
                 $result .= '<button type="button" class="btn btn-secondary dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-expanded="false">';
@@ -72,17 +74,20 @@ class EnvironmentController extends Controller
                 if($statusEnvironment === 'EXDISPO' || $statusEnvironment === 'EXDISAPP' || $statusEnvironment === 'OK'){
                     //Upload External Disposition
                     $result .= '<li><button class="dropdown-item" type="button" ecrs-id="'.$row->id.'" id="btnSaveDisposition"><i class="fa-solid fa-edit"></i> &nbsp;Add/Edit Disposition</button></li>';
-                    // $result .= '<li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
+                    $result .= '<li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                     return $result;
                 }
-                if($approvalStatus === "PB" && $row->created_by === session('rapidx_user_id')){
+
+                if($approvalStatus === "PB"  || $statusEnvironment === "DIS" && $row->created_by === session('rapidx_user_id')){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnGetEcrId"><i class="fa-solid fa-edit"></i> &nbsp;Edit</button></li>';
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnDownloadEnvironmentRef"><i class="fa-solid fa-upload"></i> &nbsp;Upload File</button></li>';
                 }
+
                 // if($row->pmi_approvals_pending[0]->rapidx_user->id === session('rapidx_user_id')){
                 if($pmiApprovalsPending === session('rapidx_user_id') || session('rapidx_department_id') === 22 || session('rapidx_department_id') === 1 || $row->created_by === session('rapidx_user_id') ){
                     $result .= '   <li><button class="dropdown-item" type="button" ecr-id="'.$row->id.'" id="btnViewEcrById"><i class="fa-solid fa-eye"></i> &nbsp;View/Approval</button></li>';
                 }
+
                 $result .= '</ul>';
                 $result .= '</div>';
                 $result .= '</center>';
@@ -98,7 +103,9 @@ class EnvironmentController extends Controller
                 $result .= '<center>';
                 $result .= '<span class="'.$getStatus['bgStatus'].'"> '.$getStatus['status'].' </span>';
                 $result .= '<br>';
-                $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                if($currentApprover != ''){
+                    $result .= '<span class="badge rounded-pill bg-danger"> '.$getApprovalStatus['approvalStatus'].' '.$currentApprover.' </span>';
+                }
                 $result .= '</center>';
                 $result .= '</br>';
                 return $result;
@@ -146,7 +153,7 @@ class EnvironmentController extends Controller
                 $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
                     ->pluck('id') // Get just the IDs (e.g., [1, 5, 12])
                     ->toArray();
-            
+
                 // 2. Tell the main query to only show rows where 'created_by' is in that list
                 $query->whereIn('created_by', $userIds);
             })

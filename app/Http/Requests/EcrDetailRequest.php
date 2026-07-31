@@ -28,7 +28,7 @@ class EcrDetailRequest extends FormRequest
             // 'reason_of_change' => 'required',
             'change_imp_date' => 'required',
             'type_of_part' => 'required',
-            'doc_sub_date' => 'required',
+            // 'doc_sub_date' => 'required',
             'doc_to_be_sub' => 'required',
         ];
     }

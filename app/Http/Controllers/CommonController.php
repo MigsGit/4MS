@@ -90,6 +90,24 @@ class CommonController extends Controller
             if($pmiInternalApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
+            $isEcrDetailsActiveCount = EcrDetail::where('ecrs_id',$ecrsId)
+            ->whereNull('deleted_at');
+            // ->count();
+             $ecrRequired = [
+               "type_of_part",
+               "change_imp_date",
+               "doc_sub_date",
+               "doc_to_be_sub",
+               "customer_approval",
+            ];
+            collect($ecrRequired)->each(function ($rowEcrRequired) use ($isEcrDetailsActiveCount) {
+                $isEcrDetailsActiveCount->whereNotNull($rowEcrRequired);
+            });
+            $isEcrDetailsActiveCount->count();
+            if($isEcrDetailsActiveCount === 0){
+                return response()->json(['isSuccess' => 'false','msg' => 'Please complete the Ecr Details Above, TypeOfPart,Change Imp Date, etc !'],500);
+            }
+
             //Get the ECR Category
             $ecr = Ecr::where('id',$ecrsId)
             ->whereNull('deleted_at')
@@ -129,7 +147,7 @@ class CommonController extends Controller
                     return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
                     break;
             }
-            //DISAPPROVED ECR
+            //DISAPPROVED ECR EMAIL NOTIF
             if($request->status === "DIS"){
                 $categoryConditions = [
                     'ecrs_id' => $ecrsId,
@@ -179,6 +197,7 @@ class CommonController extends Controller
            ->where('status','-')
            ->limit(1)
            ->get();
+           //APPROVED EMAIL NOTIF
             if ( count($pmiInternalApproval) === 0){
                 $categoryConditions = [
                     'ecrs_id' => $ecrsId,
@@ -201,11 +220,13 @@ class CommonController extends Controller
                 $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
                 $from = 'issinfoservice@pricon.ph';
                 $from_name = "4M Change Control Management System";
-                $subject = "APPROVED: MACHINE (4M CMS)";
-                $header = "Your MACHINE 4M  has been APPROVED";
+                // $subject = "APPROVED: MACHINE (4M CMS)";
+                // $header = "Your MACHINE 4M  has been APPROVED";
+                $subject = "APPROVED: " .$ecr[0]->category. " 4M";
+                 $header = "Your" .$ecr[0]->category. ' 4M has been APPROVED.';
                 $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
             }
-            //Update next approval
+            //Update next approval EMAIL NOTIF
             if ( count($pmiInternalApproval) != 0){
                 $currentApproval = $this->emailInterface->getEmailByRapidxUserId($pmiInternalApproval[0]->rapidx_user_id);
 
@@ -229,8 +250,8 @@ class CommonController extends Controller
                  $to = $currentApproval['email'] ?? '';
                  $from = $createdByEmail['email'] ?? '';
                  $from_name = "4M Change Control Management System";
-                 $subject = "FOR PMI Internal APPROVAL:" .$ecr[0]->category. " 4M";
-                 $header = "Please see the" .$ecr[0]->category. ' 4Mfor your approval.';
+                 $subject = "FOR PMI Internal APPROVAL: " .$ecr[0]->category. " 4M";
+                 $header = "Please see the" .$ecr[0]->category. ' 4M for your approval.';
                  $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
             }
             $emailData = [
@@ -776,7 +797,7 @@ class CommonController extends Controller
 
             ];
         });
-
+        // return $ecrCollection;
         return Excel::download(new InternalCcmExport($ecrCollection),"Internal Export.xlsx");
     }
 
