@@ -335,6 +335,14 @@ class MachineController extends Controller
     public function loadEcrMachineByStatus(Request $request){
         try {
             $adminAccess = $request->adminAccess;
+            $statusArray = [];
+            if ($request->filled('status')) {
+                if (is_array($request->status)) {
+                    $statusArray = $request->status;
+                } else {
+                    $statusArray = array_filter(explode(',', $request->status));
+                }
+            }
             $data = [];
             $relations = [
                 'machine.machine_approvals_pending',
@@ -346,9 +354,20 @@ class MachineController extends Controller
                 'category' => $request->category
             ];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+            if (!empty($statusArray)){
+                $statusArray1 = $statusArray[0];
 
-            if( $adminAccess === 'null' || blank($adminAccess) ){
-               $ecr->whereHas('machine.machine_approvals_pending',function($query){
+                if($statusArray1 != 'OK' && $statusArray1 != 'DIS' && $statusArray1 != 'CAN' ){
+                    $statusArray = ['FORAPP','PB','RUP',];
+                }
+                $ecr->whereHas('machine',function($query) use ($statusArray){
+                    // if is adminAccess exist deactivate the session condition
+                    $query->whereIn('status', $statusArray);
+                });
+            }
+
+            if( blank($adminAccess) && blank($statusArray) ){
+                $ecr->whereHas('machine.machine_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
                 });
@@ -360,12 +379,12 @@ class MachineController extends Controller
             if( $adminAccess === 'all') {
                 $ecr;
             }
-            if ( $adminAccess === 'pmi') {
+            //If the Man Approval is OK / Zero, PMI Approvals Pending displayed
+            if ( $adminAccess === 'pmi' || $ecr->count() === 0) {
                 $data = [];
                 $relations = [
                     'pmi_approvals_pending',
                     'machine',
-                    'rapidx_user_created_by',
                 ];
                 $conditions = [
                     'status' => 'OK',

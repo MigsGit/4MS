@@ -32,6 +32,14 @@ class EnvironmentController extends Controller
         try {
             $adminAccess = $request->adminAccess;
             $data = [];
+             $statusArray = [];
+            if ($request->filled('status')) {
+                if (is_array($request->status)) {
+                    $statusArray = $request->status;
+                } else {
+                    $statusArray = array_filter(explode(',', $request->status));
+                }
+            }
             $relations = [
                 'pmi_approvals_pending',
                 'environment',
@@ -41,23 +49,32 @@ class EnvironmentController extends Controller
                 'category' => $request->category
             ];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+            if (!empty($statusArray)){
+                $statusArray1 = $statusArray[0];
 
-            $ecr->whereNull('deleted_at');
+                if($statusArray1 != 'OK' && $statusArray1 != 'DIS' && $statusArray1 != 'CAN' ){
+                    $statusArray = ['FORAPP','PB','RUP',];
+                }
+                $ecr->whereHas('environment',function($query) use ($statusArray){
+                    // if is adminAccess exist deactivate the session condition
+                    $query->whereIn('status', $statusArray);
+                });
+            }
 
-            if( $adminAccess === 'null' || blank($adminAccess) || $adminAccess === 'pmi' ){
+            // if( $adminAccess === 'null' || blank($adminAccess) || $adminAccess === 'pmi' ){
+            //If the Man Approval is OK / Zero, PMI Approvals Pending displayed
+            if ( $adminAccess === 'pmi' || $ecr->count() === 0) {
                 $ecr->whereHas('pmi_approvals_pending', function ($query) {
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
             if( $adminAccess === 'created'){
-                $ecr->where('created_by' , session('rapidx_user_id'))
-                ->get();
+                $ecr->where('created_by' , session('rapidx_user_id'));
             }
             if( $adminAccess === 'all') {
-                $ecr->get();
+                $ecr;
             }
-            //    return $ecr->get();
-
+            $ecr->whereNull('deleted_at');
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 $result = "";

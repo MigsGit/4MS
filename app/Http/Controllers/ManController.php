@@ -497,12 +497,8 @@ class ManController extends Controller
                 ->where('rapidx_user_id',session('rapidx_user_id'));
             });
         }
-
-          // This tells the search bar to look at the 'name' column in the related table
         // return     RapidxUser::where('name', 'like', "%'Miguel'%")->get();
         $ecr->whereNull('deleted_at');
-        // return $ecr->toSql();
-
         return DataTables($ecr)
         ->addColumn('get_actions',function ($row) use ($request){
             $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";

@@ -734,6 +734,8 @@
     const modalSaveDisposition = ref(null);
     const selectedEcrsIdEcrypted = ref(null);
     const currentStatus = ref(null);
+    const isLoadingEcr  = ref(null);
+
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -889,9 +891,36 @@
         var queryString = $.param(params);
         window.location.href="api/download_excel_by_ecrs_id?" + queryString;
     }
+    // const onChangeAdminAccess = async (selectedParams)=>{
+    //     tblEcrByStatus.value.dt.ajax.url("api/load_ecr_environment_by_status?category=Environment"+"&& adminAccess="+selectedParams).draw();
+    //     selectedAdminAccess.value = selectedParams;
+    // }
     const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcrByStatus.value.dt.ajax.url("api/load_ecr_environment_by_status?category=Environment"+"&& adminAccess="+selectedParams).draw();
-        selectedAdminAccess.value = selectedParams;
+        // normalize to primitive value if component returned an object
+        const raw = (selectedParams && typeof selectedParams === 'object' && selectedParams.value) ? selectedParams.value : selectedParams;
+        selectedAdminAccess.value = raw;
+        let adminAccessParam = null;
+        let statusParam = null;
+        if(raw && typeof raw === 'string' && raw.startsWith('status:')){
+            statusParam = raw.replace('status:','');
+        } else {
+            adminAccessParam = raw;
+        }
+
+        // build url
+        let url = 'api/load_ecr_environment_by_status?category=Environment';
+        const params = [];
+        if(statusParam){ params.push('status='+statusParam); }
+        if(adminAccessParam){ params.push('adminAccess='+adminAccessParam); }
+        if(params.length){ url += '&&' + params.join('&&'); }
+        try{
+            isLoadingEcr.value = true;
+            tblEcrByStatus.value.dt.ajax.url(url).load(function(){
+                isLoadingEcr.value = false;
+            }, false);
+        } catch (err){
+            isLoadingEcr.value = false;
+        }
     }
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {

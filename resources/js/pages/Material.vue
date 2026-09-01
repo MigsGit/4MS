@@ -1272,6 +1272,8 @@
     const modalEcrRequirements = ref(null);
     const modalViewEcrRequirementRef = ref(null);
     const modalSaveDisposition = ref(null);
+    const isLoadingEcr = ref(false);
+
 
     //Columns
      const tblEcrByCategoryStatusColumns = [
@@ -1711,9 +1713,37 @@
     });
 
     //Functions
+    // const onChangeAdminAccess = async (selectedParams)=>{
+    //     tblEcrByCategoryStatus.value.dt.ajax.url("api/load_ecr_material_by_status?category=Material"+"&& adminAccess="+selectedParams).draw();
+    //     selectedAdminAccess.value = selectedParams;
+    // }
+
     const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcrByCategoryStatus.value.dt.ajax.url("api/load_ecr_material_by_status?category=Material"+"&& adminAccess="+selectedParams).draw();
-        selectedAdminAccess.value = selectedParams;
+        // normalize to primitive value if component returned an object
+        const raw = (selectedParams && typeof selectedParams === 'object' && selectedParams.value) ? selectedParams.value : selectedParams;
+        selectedAdminAccess.value = raw;
+        let adminAccessParam = null;
+        let statusParam = null;
+        if(raw && typeof raw === 'string' && raw.startsWith('status:')){
+            statusParam = raw.replace('status:','');
+        } else {
+            adminAccessParam = raw;
+        }
+
+        // build url
+        let url = 'api/load_ecr_material_by_status?category=Material';
+        const params = [];
+        if(statusParam){ params.push('status='+statusParam); }
+        if(adminAccessParam){ params.push('adminAccess='+adminAccessParam); }
+        if(params.length){ url += '&&' + params.join('&&'); }
+        try{
+            isLoadingEcr.value = true;
+            tblEcrByCategoryStatus.value.dt.ajax.url(url).load(function(){
+                isLoadingEcr.value = false;
+            }, false);
+        } catch (err){
+            isLoadingEcr.value = false;
+        }
     }
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {

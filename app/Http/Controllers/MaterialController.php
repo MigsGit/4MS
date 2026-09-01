@@ -348,6 +348,15 @@ class MaterialController extends Controller
     public function loadEcrMaterialByStatus(Request $request){
         try {
             $adminAccess = $request->adminAccess;
+            // Parse status parameter: accept single value or comma-separated list
+            $statusArray = [];
+            if ($request->filled('status')) {
+                if (is_array($request->status)) {
+                    $statusArray = $request->status;
+                } else {
+                    $statusArray = array_filter(explode(',', $request->status));
+                }
+            }
             $data = [];
             $relations = [
                 'material.material_approvals_pending',
@@ -357,23 +366,35 @@ class MaterialController extends Controller
                 'status' => 'OK',
                 'category' => $request->category
             ];
+            $test = '';
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-            $ecr->whereNull('deleted_at');
 
-            if( $adminAccess === 'null' || blank($adminAccess) ){
+            if (!empty($statusArray)){
+                $statusArray1 = $statusArray[0];
+                if($statusArray1 != 'OK' && $statusArray1 != 'DIS' && $statusArray1 != 'CAN' ){
+                    $statusArray = ['FORAPP','PB','RUP',];
+                }
+                $ecr->whereHas('material',function($query) use ($statusArray){
+                    // if is adminAccess exist deactivate the session condition
+                    $query->whereIn('status', $statusArray);
+                    });
+            }
+
+            if( blank($adminAccess) && blank($statusArray) ){
                 $ecr->whereHas('material.material_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
 
-            if( $adminAccess === 'created'){
+            if( $adminAccess === 'created') {
                 $ecr->where('created_by' , session('rapidx_user_id'));
             }
             if( $adminAccess === 'all') {
                 $ecr;
             }
-            if ( $adminAccess === 'pmi') {
+            //If the Man Approval is OK / Zero, PMI Approvals Pending displayed
+            if ( $adminAccess === 'pmi' || $ecr->count() === 0) {
                 $data = [];
                 $relations = [
                     'pmi_approvals_pending',
@@ -391,7 +412,7 @@ class MaterialController extends Controller
                 });
             }
             $ecr->whereNull('deleted_at');
-            $ecr->get();
+        //    $ecr->get();
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row) use ($request){
                 $materialStatus = $row->material->status ?? "";

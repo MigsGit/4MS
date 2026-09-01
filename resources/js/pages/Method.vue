@@ -971,6 +971,8 @@
     const modalSaveDisposition = ref(null);
     const dispositionFile = ref([]);
     const internalExternal = ref(null);
+    const isLoadingEcr = ref(false);
+
 
     const tblEcrByStatusColumns = [
         {   data: 'get_actions',
@@ -1228,9 +1230,36 @@
     const reloadLqc = async ()=>{
         await getRapidxUserByIdOpt(specialInsLqcParams,);
     }
-    const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedParams).draw();
-        selectedAdminAccess.value = selectedParams;
+        // const onChangeAdminAccess = async (selectedParams)=>{
+        //     tblEcrByStatus.value.dt.ajax.url("api/load_method_ecr_by_status?category=Method"+"&& adminAccess="+selectedParams).draw();
+        //     selectedAdminAccess.value = selectedParams;
+        // }
+     const onChangeAdminAccess = async (selectedParams) =>{
+        // normalize to primitive value if component returned an object
+        const raw = (selectedParams && typeof selectedParams === 'object' && selectedParams.value) ? selectedParams.value : selectedParams;
+        selectedAdminAccess.value = raw;
+        let adminAccessParam = null;
+        let statusParam = null;
+        if(raw && typeof raw === 'string' && raw.startsWith('status:')){
+            statusParam = raw.replace('status:','');
+        } else {
+            adminAccessParam = raw;
+        }
+
+        // build url
+        let url = 'api/load_method_ecr_by_status?category=Method';
+        const params = [];
+        if(statusParam){ params.push('status='+statusParam); }
+        if(adminAccessParam){ params.push('adminAccess='+adminAccessParam); }
+        if(params.length){ url += '&&' + params.join('&&'); }
+        try{
+            isLoadingEcr.value = true;
+            tblEcrByStatus.value.dt.ajax.url(url).load(function(){
+                isLoadingEcr.value = false;
+            }, false);
+        } catch (err){
+            isLoadingEcr.value = false;
+        }
     }
     const resetEcrForm = async (frmElement) => {
         for (const key in frmElement) {

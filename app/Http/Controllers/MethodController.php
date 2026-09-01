@@ -441,6 +441,14 @@ class MethodController extends Controller
             // return 'true';
             $adminAccess = $request->adminAccess;
             $data = [];
+            $statusArray = [];
+            if ($request->filled('status')) {
+                if (is_array($request->status)) {
+                    $statusArray = $request->status;
+                } else {
+                    $statusArray = array_filter(explode(',', $request->status));
+                }
+            }
             $relations = [
                 'method.method_approvals_pending',
                 'method',
@@ -450,13 +458,23 @@ class MethodController extends Controller
                 'category' => $request->category
             ];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+            if (!empty($statusArray)){
+                $statusArray1 = $statusArray[0];
 
-            if( $adminAccess === 'null' || blank($adminAccess) ){
+                if($statusArray1 != 'OK' && $statusArray1 != 'DIS' && $statusArray1 != 'CAN' ){
+                    $statusArray = ['FORAPP','PB','RUP',];
+                }
+                $ecr->whereHas('method',function($query) use ($statusArray){
+                    // if is adminAccess exist deactivate the session condition
+                    $query->whereIn('status', $statusArray);
+                });
+            }
+
+            if( blank($adminAccess) && blank($statusArray) ){
                 $ecr->whereHas('method.method_approvals_pending',function($query){
                     // if is adminAccess exist deactivate the session condition
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
                 });
-
             }
 
             if( $adminAccess === 'created'){
@@ -465,12 +483,12 @@ class MethodController extends Controller
             if( $adminAccess === 'all') {
                 $ecr;
             }
-            if ( $adminAccess === 'pmi') {
+            //If the Man Approval is OK / Zero, PMI Approvals Pending displayed
+            if ( $adminAccess === 'pmi' || $ecr->count() === 0) {
                 $data = [];
                 $relations = [
                     'pmi_approvals_pending',
                     'method',
-                    'rapidx_user_created_by',
                 ];
                 $conditions = [
                     'status' => 'OK',

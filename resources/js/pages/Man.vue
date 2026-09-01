@@ -1573,7 +1573,6 @@
             }, false);
         } catch (err){
             isLoadingEcr.value = false;
-            if(window.Toast){ window.Toast.open({message: 'Failed to load ECRs', type: 'error'}); }
         }
     }
     const btnApprovedDisapproved = async (decision) => {
