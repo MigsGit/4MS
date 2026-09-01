@@ -12,7 +12,7 @@
                             placeholder="-Select an Option-"
                             :close-on-select="true"
                             :searchable="true"
-                            :options="commonVar.optCategoryAdminAccess"
+                            :options="optFilterOptions"
                             @change="onChangeAdminAccess($event)"
                         />
                     </div>
@@ -1243,6 +1243,7 @@
         frmSaveDisposition,
         commonSaveDisposition,
         getDisposition,
+        optFilterOptions,
     } = useCommon();
 
     const modalSaveEcrDetail = ref(null);

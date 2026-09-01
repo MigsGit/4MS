@@ -1,4 +1,4 @@
-import { ref, inject,reactive,nextTick,toRef } from 'vue'
+import { ref, inject,reactive,nextTick,toRef,computed } from 'vue'
 import useFetch from './utils/useFetch';
 import useForm from "./utils/useForm";
 export default function useCommon(){
@@ -119,8 +119,17 @@ export default function useCommon(){
         // {  title: "get_sec_head" , data: 'get_sec_head' } ,
         {  title: "Remarks" , data: 'remarks' } ,
     ];
-    //Functions
 
+    const ecrStatusOptions = [
+            { value: 'status:IA', label: 'Internal Approval' },
+            { value: 'status:OK', label: 'Approved' },
+            { value: 'status:DIS', label: 'Disapproved' },
+            { value: 'status:CAN', label: 'Cancelled' },
+    ];
+    const optFilterOptions = computed(() => {
+        return [ ...commonVar.optCategoryAdminAccess, ...ecrStatusOptions ];
+    });
+    //Functions
     const getAdminAccessOpt = async (category=null) => {
         let apiParams = {};
         axiosFetchData(apiParams,'api/get_admin_access_opt',function(response){
@@ -148,6 +157,7 @@ export default function useCommon(){
 
         });
     }
+
     const getCategoryAdminAccessOpt = async (category=null) => {
         let apiParams = {};
         axiosFetchData(apiParams,'api/get_admin_access_opt',function(response){
@@ -162,7 +172,12 @@ export default function useCommon(){
                 //     {"value":"pmi","label":"Pending PMI Approval"},
                 // ];
 
-            // return;
+            commonVar.optCategoryAdminAccess = [
+                {"value":"all","label":"Show All"},
+                {"value":"created","label":"Show my request"},
+                {"value":"pmi","label":"Pending PMI Approval"},
+            ];
+            return;
             if(userDeptGroup === "ISS" ||  userDeptGroup === "QAD"){
                 commonVar.optCategoryAdminAccess = [
                     {"value":"all","label":"Show All"},
@@ -178,6 +193,7 @@ export default function useCommon(){
             }
         });
     }
+
     const getCurrentApprover = async (params) => {
         let apiParams = {
             selectedId : params.selectedId,
@@ -311,6 +327,8 @@ export default function useCommon(){
         getDisposition,
         commonSaveDisposition,
         frmSaveDisposition,
+
+        optFilterOptions,
     }
 
 }

@@ -48,7 +48,7 @@
                             :ordering="true"
                             :processing="true"
                             :columns="tblEcrColumns"
-                            ajax="api/load_ecr?status=IA,DIS,QA"
+                            ajax="api/load_ecr?"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -1154,6 +1154,7 @@
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         getAdminAccessOpt,
+        optFilterOptions,
     } = useCommon();
 
     // const item = ref();
@@ -1180,16 +1181,7 @@
     const selectedAdminAccess = ref(null);
     const isLoadingEcr = ref(false);
 
-    const ecrStatusOptions = [
-        { value: 'status:IA', label: 'Internal Approval' },
-        { value: 'status:QA', label: 'QA Approval' },
-        { value: 'status:OK', label: 'Approved' },
-        { value: 'status:DIS', label: 'Disapproved' },
-        { value: 'status:CAN', label: 'Cancelled' },
-    ];
-    const optFilterOptions = computed(() => {
-        return [ ...commonVar.optAdminAccess, ...ecrStatusOptions ];
-    });
+
     const arrOriginalFilenames = ref(null);
     const arrFilteredDocumentName = ref(null);
     const batchDisapproval = ref(null);
@@ -1609,13 +1601,15 @@
         });
     }
     const onChangeAdminAccess = async (selectedParams)=>{
-        selectedAdminAccess.value = selectedParams;
+        // normalize to primitive value if component returned an object
+        const raw = (selectedParams && typeof selectedParams === 'object' && selectedParams.value) ? selectedParams.value : selectedParams;
+        selectedAdminAccess.value = raw;
         let adminAccessParam = null;
         let statusParam = null;
-        if(selectedParams && typeof selectedParams === 'string' && selectedParams.startsWith('status:')){
-            statusParam = selectedParams.replace('status:','');
+        if(raw && typeof raw === 'string' && raw.startsWith('status:')){
+            statusParam = raw.replace('status:','');
         } else {
-            adminAccessParam = selectedParams;
+            adminAccessParam = raw;
         }
 
         // build url

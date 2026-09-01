@@ -575,8 +575,18 @@ class EcrController extends Controller
     }
     public function loadEcr(Request $request){
         try {
-            $status = explode(',',$request->status) ?? "";
             $adminAccess = $request->adminAccess;
+
+            // Parse status parameter: accept single value or comma-separated list
+            $statusArray = [];
+            if ($request->filled('status')) {
+                if (is_array($request->status)) {
+                    $statusArray = $request->status;
+                } else {
+                    $statusArray = array_filter(explode(',', $request->status));
+                }
+            }
+
             $data = [];
             $relations = [
                 'ecr_approval_pending',
@@ -590,26 +600,28 @@ class EcrController extends Controller
             $conditions = [];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
 
-            if( $adminAccess === 'null' || blank($adminAccess) ){
-                // $ecr->whereIn('status',$status);
-                $ecr->whereHas('ecr_approval',function($query) use ($request,$status){
-                    // if is adminAccess exist deactivate the session condition
-                    $query->where('status','PEN');
+            if( blank($adminAccess) && blank($statusArray) ){
+                // scope to approvals pending for current session user
+                $ecr->whereHas('ecr_approval_pending',function($query){
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
             if( $adminAccess === 'created'){
-                $status =  array_merge($status,['OK']);
-                // $ecr->whereIn('status',$status);
+                // $statusArray = array_unique(array_merge($statusArray,['OK']));
                 $ecr->where('created_by' , session('rapidx_user_id'));
             }
-            if( $adminAccess === 'all') {
-                $status =  array_merge($status,['OK']);
-                // $ecr->whereIn('status',$status);
+
+            if (!empty($statusArray)){
+                if($statusArray === 'IA'){
+                    $statusArray = array_unique(array_merge($statusArray,['FORAPP','IA']));
+                }
+                $ecr->whereIn('status', $statusArray);
             }
+
             $ecr->whereNull('deleted_at');
             $ecr->orderBy('id','DESC');
-            $ecr->get();
+        //  return  $ecr = $ecr->toSql();
+
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
                 $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
@@ -1019,7 +1031,7 @@ class EcrController extends Controller
             WHERE department_id = '".session('rapidx_department_id')."'
         ");
         $hris_data = DB::connection('mysql_systemone_hris')
-        ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
+        ->select("SELECT Department,Division,Section FROM vw_employeeinfo  info WHERE EmpNo = '".session('rapidx_employee_number')."'");
         $subcon_data = DB::connection('mysql_systemone_subcon')
         ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
         if(count($hris_data) > 0 && count($rapidx_user)> 0){

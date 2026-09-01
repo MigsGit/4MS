@@ -7,7 +7,7 @@
                     placeholder="-Select an Option-"
                     :close-on-select="true"
                     :searchable="true"
-                    :options="commonVar.optCategoryAdminAccess"
+                    :options="optFilterOptions"
                     @change="onChangeAdminAccess($event)"
                 />
             </div>
@@ -1182,6 +1182,8 @@
         frmSaveDisposition,
         commonSaveDisposition,
         getDisposition,
+        optFilterOptions,
+
     } = useCommon();
     const {
         getRapidxUserByIdOpt,
@@ -1218,6 +1220,8 @@
     const arrOriginalFilenames = ref(null);
     const internalExternal = ref(null);
     const modalViewEcrRequirementRef = ref(null);
+    const isLoadingEcr = ref(false);
+
 
     const ecrColumns = [
         {   data: 'get_actions',
@@ -1539,9 +1543,38 @@
         };
         await getRapidxUserByIdOpt(rapidxUserOpt);
     }
+    // const onChangeAdminAccess = async (selectedParams)=>{
+    //     tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedParams).draw();
+    //     selectedAdminAccess.value = selectedParams;
+    // }
     const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcrByStatus.value.dt.ajax.url("api/load_ecr_man_by_status?category=Man"+"&& adminAccess="+selectedParams).draw();
-        selectedAdminAccess.value = selectedParams;
+        // normalize to primitive value if component returned an object
+        const raw = (selectedParams && typeof selectedParams === 'object' && selectedParams.value) ? selectedParams.value : selectedParams;
+        selectedAdminAccess.value = raw;
+        let adminAccessParam = null;
+        let statusParam = null;
+        if(raw && typeof raw === 'string' && raw.startsWith('status:')){
+            statusParam = raw.replace('status:','');
+        } else {
+            adminAccessParam = raw;
+        }
+
+        // build url
+        let url = 'api/load_ecr_man_by_status?category=Man';
+        const params = [];
+        if(statusParam){ params.push('status='+statusParam); }
+        if(adminAccessParam){ params.push('adminAccess='+adminAccessParam); }
+        if(params.length){ url += '&&' + params.join('&&'); }
+
+        try{
+            isLoadingEcr.value = true;
+            tblEcrByStatus.value.dt.ajax.url(url).load(function(){
+                isLoadingEcr.value = false;
+            }, false);
+        } catch (err){
+            isLoadingEcr.value = false;
+            if(window.Toast){ window.Toast.open({message: 'Failed to load ECRs', type: 'error'}); }
+        }
     }
     const btnApprovedDisapproved = async (decision) => {
         isApprovedDisappproved.value = decision;
