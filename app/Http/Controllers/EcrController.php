@@ -104,7 +104,7 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function saveEcr(Request $request,EcrApprovalRequest $ecrApprovalRequest, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest,EcrFileRequest $ecrFileRequest){
+    public function saveEcr(Request $request,EcrApprovalRequest $ecrApprovalRequest, EcrRequest $ecrRequest,EcrFileRequest $ecrFileRequest){
     // public function saveEcr(Request $request,EcrFileRequest $ecrFileRequest){ //nmodify
         date_default_timezone_set('Asia/Manila');
 
@@ -210,7 +210,7 @@ class EcrController extends Controller
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
             //PMI Approvers
-            $approval_status = [
+           /** $approval_status = [
                 'PB' => $request->prepared_by,
                 'CB' => $request->checked_by,
                 'AB' => $request->approved_by,
@@ -236,35 +236,39 @@ class EcrController extends Controller
                         'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
                         'approval_status' => $approval_status,
                         'counter' => $pmiApprovalRequestCtr++,
-                        // 'remarks' => $request->remarks,
                         'created_at' => now(),
                     ];
                 });
             })->toArray();
-
             //Save PMI Internal Approval getEcrById
             PmiApproval::where('ecrs_id', $currenErcId)->delete();
             PmiApproval::insert($pmiApprovalRequest);
             PmiApproval::where('counter', 0)
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
+            */
 
-            if($request->internal_external === "External"){
+            // if($request->internal_external === "External"){
 
-                $validator = Validator::make($request->all(), (new PmiExternalApprovalRequest)->rules());
+                // $validator = Validator::make($request->all(), (new PmiExternalApprovalRequest)->rules());
 
-                if ($validator->fails()) {
-                    return response()->json([
-                        'isSuccess' => 'false',
-                        'errors' => $validator->errors(),
-                    ], 422);
-                }
+                // if ($validator->fails()) {
+                //     return response()->json([
+                //         'isSuccess' => 'false',
+                //         'errors' => $validator->errors(),
+                //     ], 422);
+                // }
 
                 $external_approval_status = [
-                    'EXQC' => $request->external_prepared_by,
-                    'EXOH' => $request->external_checked_by,
-                    'EXQA' => $request->external_approved_by,
+                    'EXQC' => 74,
+                    'EXOH' => 564, //169 - masbad / ni-an
+                    'EXQA' => 625,
                 ];
+                // $external_approval_status = [
+                //     'EXQC' => $request->external_prepared_by,
+                //     'EXOH' => $request->external_checked_by,
+                //     'EXQA' => $request->external_approved_by,
+                // ];
 
                $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                     //return array users id as array value
@@ -283,7 +287,7 @@ class EcrController extends Controller
                 })->toArray();
                 //Save PMI Internal Approval
                 PmiApproval::insert($pmiApprovalRequest);
-            }
+            // }
 
             //Send For Approval Email to Next Approver
             $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$currenErcId)

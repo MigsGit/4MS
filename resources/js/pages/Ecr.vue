@@ -443,7 +443,7 @@
                     </div>
                 </div>
                 <!-- PMI Approvers -->
-                <div class="card mb-2" v-show="isSelectReadonly === false">
+                <div class="card mb-2" v-show="false">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="true" aria-controls="collapse4">
                                 PMI Approvers (Please fill up, for the 4M Approval Only.)
