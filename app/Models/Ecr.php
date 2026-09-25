@@ -26,6 +26,10 @@ class Ecr extends Model
     {
         return $this->hasMany(EcrDetail::class, 'ecrs_id', 'id')->whereNull('deleted_at');
     }
+    public function ecr_detail()
+    {
+        return $this->hasOne(EcrDetail::class, 'ecrs_id', 'id')->whereNull('deleted_at');
+    }
     public function before_after_file_storage()
     {
         return $this->hasOne(BeforeAfterFileStorage::class, 'ecrs_id', 'ecrs_id')->whereNull('deleted_at');

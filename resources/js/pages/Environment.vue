@@ -44,7 +44,7 @@
                                             <th style=""width="25%">Details</th>
                                             <th style=""width="10%">Category</th>
                                             <th style=""width="10%">Section</th>
-                                            <th style=""width="10%">Customer EC No</th>
+                                            <th style=""width="10%">Change Details</th>
                                             <th style=""width="10%">Created by</th>
                                         </tr>
                                     </thead>
@@ -820,7 +820,7 @@
         {   data: 'get_details'} ,
         {   data: 'category'} ,
         {   data: 'section'} ,
-        {   data: 'customer_ec_no'} ,
+        {   data: 'change_details'} ,
         {   data: 'created_by'} ,
     ];
     const tblPmiInternalApproverSummaryColumns = [

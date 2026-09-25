@@ -45,7 +45,7 @@
                                     <th style=""width="25%">Details</th>
                                     <th style=""width="10%">Category</th>
                                     <th style=""width="10%">Section</th>
-                                    <th style=""width="10%">Customer EC No</th>
+                                    <th style=""width="10%">Change Details</th>
                                     <th style=""width="10%">Created by</th>
                                 </tr>
                             </thead>
@@ -220,7 +220,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP'">
+            <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP' ||currentStatus === 'OK'" >
             <!-- <div class="row mt-3"> -->
                 <div class="card mb-2">
                         <h5 class="mb-0">
@@ -1338,7 +1338,7 @@
         {   data: 'get_details'} ,
         {   data: 'category'} ,
         {   data: 'section'} ,
-        {   data: 'customer_ec_no'} ,
+        {   data: 'change_details'} ,
         {   data: 'created_by',
         } ,
     ];
@@ -1358,8 +1358,8 @@
                 }
             }
         } ,
-        {   data: 'description_of_change'} ,
         {   data: 'reason_of_change'} ,
+        {   data: 'description_of_change'} ,
         {   data: 'type_of_part'} ,
         {   data: 'change_imp_date'} ,
         {   data: 'doc_sub_date'} ,

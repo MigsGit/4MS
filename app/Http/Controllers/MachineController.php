@@ -340,6 +340,9 @@ class MachineController extends Controller
                 'machine.machine_approvals_pending',
                 'rapidx_user_created_by',
                 'machine',
+                'ecr_detail.dropdown_master_detail_description_of_change',
+                'ecr_detail.dropdown_master_detail_reason_of_change',
+
             ];
             $conditions = [
                 'status' => 'OK',
@@ -475,6 +478,19 @@ class MachineController extends Controller
                 $rapidx = RapidxUser::where('id', $row->created_by)->first();
                 return '<center><p>' . ($rapidx->name ?? '') . '</p></center>';
             })
+            ->addColumn('change_details', function ($row) {
+                if (!empty($row->ecr_detail) && count((array)$row->ecr_detail) > 0) {
+                    $reasonOfChange = $row->ecr_detail->dropdown_master_detail_reason_of_change->dropdown_masters_details ?? 'N/A';
+                    $descriptionOfChange = $row->ecr_detail->dropdown_master_detail_description_of_change->dropdown_masters_details ?? 'N/A';
+                } else {
+                    $reasonOfChange = 'N/A';
+                    $descriptionOfChange = 'N/A';
+                }
+                $result = '';
+                $result .= '<p class="card-text"><strong>Reason of Change:</strong> ' . $reasonOfChange . '</p>';
+                $result .= '<p class="card-text"><strong>Description of Change:</strong> ' . $descriptionOfChange . '</p>';
+                return $result;
+            })
             ->filterColumn('created_by', function($query, $keyword) {
                 // 1. Go to the RapidX database and find all User IDs that match the name
                 $userIds = RapidxUser::where('name', 'like', "%{$keyword}%")
@@ -490,6 +506,7 @@ class MachineController extends Controller
                 'get_status',
                 'get_attachment',
                 'get_details',
+                'change_details',
             ])
             ->make(true);
         } catch (Exception $e) {
