@@ -7,11 +7,12 @@
                         placeholder="-Select an Option-"
                     :close-on-select="true"
                     :searchable="true"
-                    :options="commonVar.optAdminAccess"
+                    :options="optFilterOptions"
                     @change="onChangeAdminAccess($event)"
                 />
             </div>
         </div>
+
         <div class="card mt-5" style="width: 100%;">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
@@ -27,7 +28,8 @@
                     <div class="container-fluid px-4">
                         <div class="row d-flex justify-content-between">
                             <div class="col-6">
-                                <!-- <button @click="btnBatchDisapproval"type="button" class="btn btn-danger btn-sm mb-2" ><i class="fas fa-plus"></i> Batch Disapproval</button> -->
+                                <button @click="btnExportMasterlist"
+                                data-bs-toggle="modal" data-bs-target="#modalExportMasterlist" aria-expanded="true" aria-controls="export-masterlist"type="button" class="btn btn-success btn-sm mb-2 d-none" ><i class="fas fa-plus"></i> Export Masterlist</button>
                             </div>
                             <div class="col-6">
                                 <button @click="btnEcr"type="button" class="btn btn-primary btn-sm mb-2" style="float: right !important;"><i class="fas fa-plus"></i> Create ECR</button>
@@ -46,7 +48,7 @@
                             :ordering="true"
                             :processing="true"
                             :columns="tblEcrColumns"
-                            ajax="api/load_ecr?status=IA,DIS,QA"
+                            ajax="api/load_ecr?"
                             :options="{
                                 serverSide: true, //Serverside true will load the network
                                 columnDefs:[
@@ -79,6 +81,27 @@
             </div>
         </div>
     </div>
+    <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-md" :title="modalTitle+' '+'ECR'" id="modalExportMasterlist">
+        <template #body>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="input flex-nowrap mb-2 input-group-sm">
+                            <input  v-model="masterlistFromDate" type="date" class="form-control form-control" aria-describedby="addon-wrapping">
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="input flex-nowrap mb-2 input-group-sm">
+                            <input  v-model="masterlistToDate" type="date" class="form-control form-control" aria-describedby="addon-wrapping">
+                        </div>
+                    </div>
+                </div>
+        </template>
+        <template #footer>
+                <button type="button" id= "closeBtn" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-success btn-sm"><font-awesome-icon class="nav-icon" icon="fas fa-save" @click="exportMasterlist(masterlistFromDate,masterlistToDate)" />&nbsp;Export</button>
+            </template>
+    </ModalComponent>
     <ModalComponent icon="fa-user" modalDialog="modal-dialog modal-lg" :title="modalTitle+' '+'ECR'" @add-event="frmSaveEcr()" ref="modalSaveEcr">
         <template #body>
                 <div class="row d-none">
@@ -420,7 +443,7 @@
                     </div>
                 </div>
                 <!-- PMI Approvers -->
-                <div class="card mb-2" v-show="isSelectReadonly === false">
+                <div class="card mb-2" v-show="false">
                         <h5 class="mb-0">
                             <button id="" class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="true" aria-controls="collapse4">
                                 PMI Approvers (Please fill up, for the 4M Approval Only.)
@@ -1076,7 +1099,7 @@
 </template>
 
 <script setup>
-    import {ref , onMounted,reactive, toRef,watch} from 'vue';
+    import {ref , onMounted,reactive, toRef,watch, computed} from 'vue';
     import ModalComponent from '../components/ModalComponent.vue';
     import EcrChangeComponent from '../components/EcrChangeComponent.vue';
     import useCommon from '../composables/common.js';
@@ -1131,6 +1154,7 @@
         getCurrentApprover,
         getCurrentPmiInternalApprover,
         getAdminAccessOpt,
+        optFilterOptions,
     } = useCommon();
 
     // const item = ref();
@@ -1155,10 +1179,15 @@
     const isApproved = ref(null);
     const currentEcrsId = ref(null);
     const selectedAdminAccess = ref(null);
+    const isLoadingEcr = ref(false);
+
+
     const arrOriginalFilenames = ref(null);
     const arrFilteredDocumentName = ref(null);
     const batchDisapproval = ref(null);
     const modalBatchDisapproval = ref(null);
+    const masterlistFromDate = ref(null);
+    const masterlistToDate = ref(null);
     //Table Column btnViewEcrRef
     const tblEcrColumns = [
         {   data: 'get_actions',
@@ -1449,6 +1478,11 @@
             selectedEcrsIdEncrypted.value = data.ersIdEncryted;
         });
     }
+    const btnExportMasterlist = async (params)  => {
+    }
+    const exportMasterlist = async (masterlistFromDate,masterlistToDate) => {
+        window.open(`api/export_masterlist?masterlistFromDate=${masterlistFromDate} && masterlistToDate=${masterlistToDate}`, '_blank');
+    }
     const btnLinkViewEcrRef = async (selectedEcrsIdEncrypted,index)  => {
         window.open(`api/view_ecr_ref?ecrsId=${selectedEcrsIdEncrypted} && index=${index}`, '_blank');
     }
@@ -1567,8 +1601,33 @@
         });
     }
     const onChangeAdminAccess = async (selectedParams)=>{
-        tblEcr.value.dt.ajax.url("api/load_ecr?status=IA,DIS,QA"+"&& adminAccess="+selectedParams).draw();
-        selectedAdminAccess.value = selectedParams;
+        // normalize to primitive value if component returned an object
+        const raw = (selectedParams && typeof selectedParams === 'object' && selectedParams.value) ? selectedParams.value : selectedParams;
+        selectedAdminAccess.value = raw;
+        let adminAccessParam = null;
+        let statusParam = null;
+        if(raw && typeof raw === 'string' && raw.startsWith('status:')){
+            statusParam = raw.replace('status:','');
+        } else {
+            adminAccessParam = raw;
+        }
+
+        // build url
+        let url = 'api/load_ecr';
+        const params = [];
+        if(statusParam){ params.push('status='+statusParam); }
+        if(adminAccessParam){ params.push('adminAccess='+adminAccessParam); }
+        if(params.length){ url += '?' + params.join('&&'); }
+
+        try{
+            isLoadingEcr.value = true;
+            tblEcr.value.dt.ajax.url(url).load(function(){
+                isLoadingEcr.value = false;
+            }, false);
+        } catch (err){
+            isLoadingEcr.value = false;
+            if(window.Toast){ window.Toast.open({message: 'Failed to load ECRs', type: 'error'}); }
+        }
     }
     const ecrReqDecisionChange = async (ecrReqDecisionParams)=>{
         let apiParams = {

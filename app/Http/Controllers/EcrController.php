@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Exports\MasterlistExport;
 use DateTime;
 use Carbon\Carbon;
 use App\Models\Ecr;
@@ -103,7 +104,7 @@ class EcrController extends Controller
             throw $e;
         }
     }
-    public function saveEcr(Request $request,EcrApprovalRequest $ecrApprovalRequest, EcrRequest $ecrRequest,PmiApprovalRequest $pmiApprovalRequest,EcrFileRequest $ecrFileRequest){
+    public function saveEcr(Request $request,EcrApprovalRequest $ecrApprovalRequest, EcrRequest $ecrRequest,EcrFileRequest $ecrFileRequest){
     // public function saveEcr(Request $request,EcrFileRequest $ecrFileRequest){ //nmodify
         date_default_timezone_set('Asia/Manila');
 
@@ -209,7 +210,7 @@ class EcrController extends Controller
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
             //PMI Approvers
-            $approval_status = [
+           /** $approval_status = [
                 'PB' => $request->prepared_by,
                 'CB' => $request->checked_by,
                 'AB' => $request->approved_by,
@@ -235,35 +236,39 @@ class EcrController extends Controller
                         'rapidx_user_id' =>  $userId == 0 ? NULL : $userId,
                         'approval_status' => $approval_status,
                         'counter' => $pmiApprovalRequestCtr++,
-                        // 'remarks' => $request->remarks,
                         'created_at' => now(),
                     ];
                 });
             })->toArray();
-
             //Save PMI Internal Approval getEcrById
             PmiApproval::where('ecrs_id', $currenErcId)->delete();
             PmiApproval::insert($pmiApprovalRequest);
             PmiApproval::where('counter', 0)
             ->where('ecrs_id', $currenErcId)
             ->update(['status'=>'PEN']);
+            */
 
-            if($request->internal_external === "External"){
+            // if($request->internal_external === "External"){
 
-                $validator = Validator::make($request->all(), (new PmiExternalApprovalRequest)->rules());
+                // $validator = Validator::make($request->all(), (new PmiExternalApprovalRequest)->rules());
 
-                if ($validator->fails()) {
-                    return response()->json([
-                        'isSuccess' => 'false',
-                        'errors' => $validator->errors(),
-                    ], 422);
-                }
+                // if ($validator->fails()) {
+                //     return response()->json([
+                //         'isSuccess' => 'false',
+                //         'errors' => $validator->errors(),
+                //     ], 422);
+                // }
 
                 $external_approval_status = [
-                    'EXQC' => $request->external_prepared_by,
-                    'EXOH' => $request->external_checked_by,
-                    'EXQA' => $request->external_approved_by,
+                    'EXQC' => 74,
+                    'EXOH' => 564, //169 - masbad / ni-an
+                    'EXQA' => 625,
                 ];
+                // $external_approval_status = [
+                //     'EXQC' => $request->external_prepared_by,
+                //     'EXOH' => $request->external_checked_by,
+                //     'EXQA' => $request->external_approved_by,
+                // ];
 
                $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                     //return array users id as array value
@@ -282,7 +287,7 @@ class EcrController extends Controller
                 })->toArray();
                 //Save PMI Internal Approval
                 PmiApproval::insert($pmiApprovalRequest);
-            }
+            // }
 
             //Send For Approval Email to Next Approver
             $ecrApprovalCurrent = EcrApproval::where('ecrs_id',$currenErcId)
@@ -574,8 +579,18 @@ class EcrController extends Controller
     }
     public function loadEcr(Request $request){
         try {
-            $status = explode(',',$request->status) ?? "";
             $adminAccess = $request->adminAccess;
+
+            // Parse status parameter: accept single value or comma-separated list
+            $statusArray = [];
+            if ($request->filled('status')) {
+                if (is_array($request->status)) {
+                    $statusArray = $request->status;
+                } else {
+                    $statusArray = array_filter(explode(',', $request->status));
+                }
+            }
+
             $data = [];
             $relations = [
                 'ecr_approval_pending',
@@ -589,26 +604,28 @@ class EcrController extends Controller
             $conditions = [];
             $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
 
-            if( $adminAccess === 'null' || blank($adminAccess) ){
-                // $ecr->whereIn('status',$status);
-                $ecr->whereHas('ecr_approval',function($query) use ($request,$status){
-                    // if is adminAccess exist deactivate the session condition
-                    $query->where('status','PEN');
+            if( blank($adminAccess) && blank($statusArray) ){
+                // scope to approvals pending for current session user
+                $ecr->whereHas('ecr_approval_pending',function($query){
                     $query->where('rapidx_user_id',session('rapidx_user_id'));
                 });
             }
             if( $adminAccess === 'created'){
-                $status =  array_merge($status,['OK']);
-                // $ecr->whereIn('status',$status);
+                // $statusArray = array_unique(array_merge($statusArray,['OK']));
                 $ecr->where('created_by' , session('rapidx_user_id'));
             }
-            if( $adminAccess === 'all') {
-                $status =  array_merge($status,['OK']);
-                // $ecr->whereIn('status',$status);
+
+            if (!empty($statusArray)){
+                if($statusArray === 'IA'){
+                    $statusArray = array_unique(array_merge($statusArray,['FORAPP','IA']));
+                }
+                $ecr->whereIn('status', $statusArray);
             }
+
             $ecr->whereNull('deleted_at');
             $ecr->orderBy('id','DESC');
-            $ecr->get();
+        //  return  $ecr = $ecr->toSql();
+
             return DataTables($ecr)
             ->addColumn('get_actions',function ($row){
                 $currentApprover = $row->ecr_approval_pending['rapidx_user']['name'] ?? '';
@@ -1018,7 +1035,7 @@ class EcrController extends Controller
             WHERE department_id = '".session('rapidx_department_id')."'
         ");
         $hris_data = DB::connection('mysql_systemone_hris')
-        ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
+        ->select("SELECT Department,Division,Section FROM vw_employeeinfo  info WHERE EmpNo = '".session('rapidx_employee_number')."'");
         $subcon_data = DB::connection('mysql_systemone_subcon')
         ->select("SELECT Department,Division,Section FROM vw_employeeinfo WHERE EmpNo = '".session('rapidx_employee_number')."'");
         if(count($hris_data) > 0 && count($rapidx_user)> 0){
@@ -1411,7 +1428,6 @@ class EcrController extends Controller
            throw $e;
        }
    }
-
    public function getEcrCtrlNo(Request $request){
        try {
             $ecr =  $this->resourceInterface->readCustomEloquent(Ecr::class,[
@@ -1426,5 +1442,40 @@ class EcrController extends Controller
        } catch (Exception $e) {
            throw $e;
        }
+   }
+   public function exportMasterlist(Request $request){
+    $masterlistFromDate = $request->masterlistFromDate;
+    $masterlistToDate = $request->masterlistToDate;
+    // $startOfMonth = Carbon::parse($masterlistFromDate)->startOfMonth();
+    // $endOfMonth = Carbon::parse($masterlistToDate)->endOfMonth();
+    $data = [];
+    $relations = [
+        'ecr_approval_pending',
+        'rapidx_user_created_by',
+        'man_detail',
+        'environment',
+        'material',
+        'machine',
+        'method',
+    ];
+    $conditions = [];
+    $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
+    $ecr->whereBetween('created_at',[$masterlistFromDate, $masterlistToDate]);
+    $ecr->whereNull('deleted_at');
+    $ecr->limit(1);
+    $ecr->get();
+    $ecrDetails =  $ecr;
+
+   return $ecrCollection = collect($ecrDetails)->map(function ($ecrCollectionRow){
+        return $ecrCollectionRow;
+        // return $detailsFourMCollection = $ecrCollectionRow->man_detail ?? $ecrCollectionRow->material ?? $ecrCollectionRow->machine ?? $ecrCollectionRow->$method ?? 'NOTEXISTS';
+    });
+
+    return Excel::download(new MasterlistExport($ecr),"ECR.xlsx");
+    try {
+        return response()->json(['is_success' => 'true']);
+    } catch (Exception $e) {
+        throw $e;
+    }
    }
 }

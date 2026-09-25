@@ -435,6 +435,15 @@ class ManController extends Controller
     }
     public function loadEcrManByStatus(Request $request){
         $adminAccess = $request->adminAccess;
+        // Parse status parameter: accept single value or comma-separated list
+        $statusArray = [];
+        if ($request->filled('status')) {
+            if (is_array($request->status)) {
+                $statusArray = $request->status;
+            } else {
+                $statusArray = array_filter(explode(',', $request->status));
+            }
+        }
         $data = [];
         $relations = [
             'man_detail.man_approvals_pending',
@@ -448,9 +457,17 @@ class ManController extends Controller
             'category' => $request->category
         ];
         $ecr = $this->resourceInterface->readCustomEloquent(Ecr::class,$data,$relations,$conditions);
-        //  ||
-
-        if( $adminAccess === 'null' || blank($adminAccess) ){
+        if (!empty($statusArray)){
+            $statusArray1 = $statusArray[0];
+            if($statusArray1 != 'OK' && $statusArray1 != 'DIS' && $statusArray1 != 'CAN' ){
+                $statusArray = ['FORAPP','PB','RUP',];
+            }
+            $ecr->whereHas('man_detail',function($query) use ($statusArray){
+                // if is adminAccess exist deactivate the session condition
+                $query->whereIn('status', $statusArray);
+            });
+        }
+        if( blank($adminAccess) && blank($statusArray) ){
             $ecr->whereHas('man_detail.man_approvals_pending',function($query){
                  // if is adminAccess exist deactivate the session condition
                  $query->where('rapidx_user_id',session('rapidx_user_id'));
@@ -481,11 +498,8 @@ class ManController extends Controller
                 ->where('rapidx_user_id',session('rapidx_user_id'));
             });
         }
-          // This tells the search bar to look at the 'name' column in the related table
         // return     RapidxUser::where('name', 'like', "%'Miguel'%")->get();
         $ecr->whereNull('deleted_at');
-        $ecr->get();
-
         return DataTables($ecr)
         ->addColumn('get_actions',function ($row) use ($request){
             $pmiApprovalsPending = $row->pmi_approvals_pending[0]->rapidx_user->id ?? "";

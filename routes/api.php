@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function(){
         Route::get('view_ecr_ref', 'viewEcrRef')->name('view_ecr_ref');
         Route::get('get_ecr_document_by_id', 'getEcrDocumentById')->name('get_ecr_document_by_id');
         Route::get('get_ecr_ctrl_no', 'getEcrCtrlNo')->name('get_ecr_ctrl_no');
+        Route::get('export_masterlist', 'exportMasterlist')->name('export_masterlist');
     });
 
     Route::controller(CommonController::class)->group(function (): void {
