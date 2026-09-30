@@ -455,6 +455,41 @@
                         />
                     </div>
                 </div>
+                <div class="row">
+                <div class="col-sm-12">
+                        <div class="container my-4">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-custom mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2" class="header-bg">
+                                                Man: Check the change as selecting from "F","L","C"
+                                            </th>
+                                        </tr>
+                                        <tr class="fw-bold">
+                                            <th class="col-level"></th>
+                                            <th class="col-criteria"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>F</td>
+                                            <td>First Assignment</td>
+                                        </tr>
+                                        <tr>
+                                            <td>L</td>
+                                            <td>After Long Interval (more than 3 months)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>C</td>
+                                            <td>Man Change, not "F" and "L"</td>
+                                        </tr>
+                                </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </template>
         <template #footer>

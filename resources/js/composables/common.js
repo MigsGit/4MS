@@ -121,7 +121,7 @@ export default function useCommon(){
     ];
 
     const ecrStatusOptions = [
-            { value: 'status:IA', label: 'Internal Approval' },
+            { value: 'status:IA', label: 'Pending' },
             { value: 'status:OK', label: 'Approved' },
             { value: 'status:DIS', label: 'Disapproved' },
             { value: 'status:CAN', label: 'Cancelled' },
