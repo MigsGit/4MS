@@ -225,7 +225,6 @@ class EcrController extends Controller
             if (!$allPresent) {
                 return response()->json(['is_success' => 'false','msg'=>"Please Include Ma'am Ni-an Lim & Sir Yoichi Matsuzaki  as 4M PMI Approvers",],500);
             }
-            $pmiApprovalRequestCtr = 0;
             $pmiApprovalRequest = collect($approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                 //return array users id as array value
                 return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
@@ -259,18 +258,19 @@ class EcrController extends Controller
                 //     ], 422);
                 // }
 
-                $external_approval_status = [
-                    'EXQC' => 74,
-                    'EXOH' => 564, //169 - masbad / ni-an
-                    'EXQA' => 625,
-                ];
+
                 // $external_approval_status = [
                 //     'EXQC' => $request->external_prepared_by,
                 //     'EXOH' => $request->external_checked_by,
                 //     'EXQA' => $request->external_approved_by,
                 // ];
-
-               $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
+                $external_approval_status = [
+                    'EXQC' => 74,
+                    'EXOH' => 564, //169 - masbad / ni-an
+                    'EXQA' => 625,
+                ];
+                $pmiApprovalRequestCtr = 0;
+                $pmiApprovalRequest = collect($external_approval_status)->flatMap(function ($users,$approval_status) use ($request,&$pmiApprovalRequestCtr,$currenErcId){
                     //return array users id as array value
                     return collect($users)->map(function ($userId) use ($approval_status, $request,&$pmiApprovalRequestCtr,$currenErcId) {
                         // $approval_status as a array name
