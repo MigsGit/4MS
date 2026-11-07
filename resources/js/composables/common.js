@@ -121,6 +121,7 @@ export default function useCommon(){
     ];
 
     const ecrStatusOptions = [
+            // { value: 'status:created', label: 'Show My Request' },
             { value: 'status:IA', label: 'Pending' },
             { value: 'status:OK', label: 'Approved' },
             { value: 'status:DIS', label: 'Disapproved' },
@@ -138,12 +139,11 @@ export default function useCommon(){
             commonVar.rapidxUserDeptId = data.department_id;
             commonVar.rapidxUserDeptGroup = userDeptGroup;
             rapidxUserDeptGroup.value = userDeptGroup;
-            // commonVar.optAdminAccess = [
-            //     {"value":"all","label":"Show All"},
-            //     {"value":"created","label":"Show my request"},
-            // ];
-            // departmentGroup
-            // return;
+            commonVar.optAdminAccess = [
+                {"value":"all","label":"Show All"},
+                {"value":"created","label":"Show my request"},
+            ];
+            return;
             if(userDeptGroup === "ISS" ||  userDeptGroup === "QAD"){
                 commonVar.optAdminAccess = [
                     {"value":"all","label":"Show All"},

@@ -323,7 +323,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP' ||  currentStatus === 'OK'" >
+                    <div class="row mt-3" v-show="isModal === 'View' && (currentStatus === 'PMIAPP' ||  currentStatus === 'OK' || currentStatus === 'DIS')" >
                         <div class="card mb-2">
                                 <h5 class="mb-0">
                                     <button id="" class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePmiInternalApprovalSummary" aria-expanded="true" aria-controls="collapsePmiInternalApprovalSummary">
@@ -488,7 +488,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO' || currentStatus === 'DIS'">
                     <thead>
 
                         <tr>

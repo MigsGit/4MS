@@ -286,7 +286,11 @@ class EcrController extends Controller
                     });
                 })->toArray();
                 //Save PMI Internal Approval
+                 PmiApproval::where('ecrs_id', $currenErcId)->delete();
                 PmiApproval::insert($pmiApprovalRequest);
+                PmiApproval::where('counter', 0)
+                ->where('ecrs_id', $currenErcId)
+                ->update(['status'=>'PEN']);
             // }
 
             //Send For Approval Email to Next Approver

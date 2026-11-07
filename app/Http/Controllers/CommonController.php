@@ -63,6 +63,53 @@ class CommonController extends Controller
                 ];
                 $specialInspectionRequestValidated['updated_by'] = session('rapidx_user_id');
                 $this->resourceInterface->updateConditions(SpecialInspection::class,$conditions,$specialInspectionRequestValidated);
+                //nmodify
+                ManApproval::updateOrCreate(
+                    ['ecrs_id' => $specialInspectionRequest->ecrs_id,
+                    'approval_status' => 'QCSECHEAD',
+                    ],
+                    [
+                        'status' => 'PEN',
+                        'rapidx_user_id' => $specialInspectionRequest->lqc_section_head,
+                    ]
+                );
+                $conditions = [
+                    'ecrs_id' => $specialInspectionRequest->ecrs_id
+                ];
+                $dateUpdate = [
+                    'status' => 'FORAPP',
+                    'approval_status' => 'QCSECHEAD',
+                ];
+                $this->resourceInterface->updateConditions(Man::class,$conditions,$dateUpdate);
+
+              /**
+
+                //Send APPROVED Email to Requestor
+                    $currentApproval = $this->emailInterface->getEmailByRapidxUserId($specialInspectionRequest->lqc_section_head ?? '');
+                    $createdByEmail= $this->emailInterface->getEmailByRapidxUserId(session(rapidx_user_id) ?? '' );
+                    $to = $currentApproval['email'] ?? '';
+                    $from = $createdByEmail['email'] ?? '';
+                    $from_name = "4M Change Control Management System";
+                    $subject = "FOR APPROVAL";
+                    $header = "Please see the 4M for your approval.';
+                    $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
+               return $emailData = [
+                    "to" =>$to,
+                    "cc" =>"",
+                    "bcc" =>"mclegaspi@pricon.ph,jggabuat@pricon.ph",
+                    "from" => $from,
+                    "from_name" => $from_name ?? "4M Change Control Management System",
+                    "subject" =>$subject,
+                    "message" =>  $msg,
+                    "attachment_filename" => "",
+                    "attachment" => "",
+                    "send_date_time" => now(),
+                    "date_time_sent" => "",
+                    "date_created" => now(),
+                    "created_by" => session('rapidx_username'),
+                    "system_name" => "rapidx_4M",
+                ];
+                */
             }else{ //Add
                 $specialInspectionRequestValidated = $specialInspectionRequest->validated();
                 $specialInspectionRequestValidated['created_at'] = now();
@@ -90,7 +137,7 @@ class CommonController extends Controller
             if($pmiInternalApprovalCurrent->rapidx_user_id != session('rapidx_user_id')){
                 return response()->json(['isSuccess' => 'false','msg' => 'You are not the current approver !'],500);
             }
-            $isEcrDetailsActiveCount = EcrDetail::where('ecrs_id',$ecrsId)
+           $isEcrDetailsActiveCount = EcrDetail::where('ecrs_id',$ecrsId)
             ->whereNull('deleted_at');
             // ->count();
              $ecrRequired = [
@@ -147,6 +194,10 @@ class CommonController extends Controller
                     return response()->json(['isSuccess' => 'false','msg' => 'Unknown Model!'],500);
                     break;
             }
+            $ecrDetails= Ecr::where('id',$ecrsId)->get(['id','approval_status','status','category','ecr_no','created_by']);
+
+            $requestedBy = $this->emailInterface->getEmailByRapidxUserId($ecrDetails[0]->created_by);
+
             //DISAPPROVED ECR EMAIL NOTIF
             if($request->status === "DIS"){
                 $categoryConditions = [
@@ -157,19 +208,34 @@ class CommonController extends Controller
                     'approval_status' => 'PB',
                 ];
                 $this->resourceInterface->updateConditions($currentModel,$categoryConditions,$categoryRequestValidated);
+                //Get the ECR Approval Status & Id, Update the Approval Status as PENDING
+                $pmiInternalApproval = PmiApproval::where('ecrs_id',$ecrsId)
+                ->whereNotNull('rapidx_user_id')
+                ->where('status','PEN')
+                ->limit(1)
+                ->get();
+                $pmiInternalApprovalValidated = [
+                    'status' => 'DIS',
+                    'remarks' => $request->remarks,
+                ];
+                $pmiInternalApprovalConditions = [
+                    'id' => $pmiInternalApproval[0]->id,
+                ];
+                $this->resourceInterface->updateConditions(PmiApproval::class,$pmiInternalApprovalConditions,$pmiInternalApprovalValidated);
                  //Send DISAPPROVED Email to Requestor
                  $to = $requestedBy['email'] ?? '';
                  $currentSession = $this->emailInterface->getEmailByRapidxUserId( session('rapidx_user_id'));
-                 $from = $currentSession;
+                 $from = $currentSession['email'] ?? '';
                  $from_name = "4M Change Control Management System";
                  $subject = "DISAPPROVED: " .$ecr[0]->category. " (4M CMS)";
                  $header = "Your " .$ecr[0]->category. " 4M has been DISAPPROVED";
                  $msg = $this->emailInterface->ecrEmailMsgByCategoryHeader($pmiInternalApprovalCurrent->ecrs_id,$header);
+
                  //Array Send Email
                 $emailData = [
                      "to" =>$to,
                      "cc" =>"",
-                     "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                     "bcc" =>"mclegaspi@pricon.ph,jggabuat@pricon.ph",
                      "from" => $from,
                      "from_name" => $from_name ?? "4M Change Control Management System",
                      "subject" =>$subject,
@@ -257,7 +323,7 @@ class CommonController extends Controller
             $emailData = [
                 "to" =>$to,
                 "cc" =>"",
-                "bcc" =>"mclegaspi@pricon.ph,rdahorro@pricon.ph,jggabuat@pricon.ph",
+                "bcc" =>"mclegaspi@pricon.ph,jggabuat@pricon.ph",
                 "from" => $from,
                 "from_name" => $from_name ?? "4M Change Control Management System",
                 "subject" =>$subject,
@@ -556,6 +622,7 @@ class CommonController extends Controller
                     $data = [
                         'rapidx_user_id'
                     ];
+
                     break;
                 case 'materialApproval':
                     $currentModel = MaterialApproval::class;
@@ -666,10 +733,10 @@ class CommonController extends Controller
                      $approvalStatus = 'QC Head:';
                      break;
                  case 'EXOH':
-                     $approvalStatus = 'Operation Head:';
+                     $approvalStatus = 'QA Head:';
                      break;
                  case 'EXQA':
-                     $approvalStatus = 'QA Head:';
+                     $approvalStatus = 'QMD Head:';
                      break;
                  default:
                      $approvalStatus = '---';
@@ -1038,7 +1105,7 @@ class CommonController extends Controller
             throw $e;
         }
     }
-    public function viewBeforeAfterRefByEcrsId(Request $request){ //nmodify
+    public function viewBeforeAfterRefByEcrsId(Request $request){
         try {
          $data = $this->resourceInterface->readCustomEloquent(BeforeAfterFileStorage::class,[
                 'ecrs_id',

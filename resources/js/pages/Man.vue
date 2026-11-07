@@ -220,7 +220,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3" v-show="isModal === 'View' && currentStatus === 'PMIAPP' ||currentStatus === 'OK'" >
+            <div class="row mt-3" v-show="isModal === 'View' && (currentStatus === 'PMIAPP' || currentStatus === 'OK' || currentStatus === 'DIS')" >
             <!-- <div class="row mt-3"> -->
                 <div class="card mb-2">
                         <h5 class="mb-0">
@@ -1310,7 +1310,7 @@
                             getCurrentApprover(manApproverParams);
                         }
                             tblManApproverSummary.value.dt.ajax.url("api/load_man_approver_summary_ecrs_id?ecrsId="+ecrsId).draw();
-                        if( manStatus === 'PMIAPP' || manStatus === 'OK'){
+                        if( manStatus === 'PMIAPP' || manStatus === 'OK'  || manStatus === 'DIS'){
                             getCurrentApprover(pmiApproverParams);
                             tblPmiInternalApproverSummary.value.dt.ajax.url("api/load_pmi_internal_approval_summary?ecrsId="+ecrsId).draw()
                         }

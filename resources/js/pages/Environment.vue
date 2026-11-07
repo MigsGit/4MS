@@ -243,7 +243,7 @@
     <ModalComponent icon="fa-download" modalDialog="modal-dialog modal-md" title="View Environment Reference" ref="modalViewEnvironmentRef">
         <template #body>
             <div class="row mt-3">
-                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO'">
+                <table class="table" v-show="currentStatus === 'OK' || currentStatus === 'EXDISPO' || currentStatus === 'DIS'">
                     <thead>
                         <tr>
                             <th scope="col">#</th>

@@ -219,10 +219,10 @@ class CommonService implements CommonInterface
                      $approvalStatus = 'QC Head:';
                      break;
                  case 'EXOH':
-                     $approvalStatus = 'Operation Head:';
+                     $approvalStatus = 'QA Head:';
                      break;
                  case 'EXQA':
-                     $approvalStatus = 'QA Head:';
+                     $approvalStatus = 'QMD Head:';
                      break;
                  default:
                      $approvalStatus = '---';

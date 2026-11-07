@@ -242,8 +242,8 @@ class SettingsController extends Controller
     public function getDropdownMasterCategory(Request $request){
         try {
             $dropdownMaster =  $this->resourceInterface->readCustomEloquent(DropdownMaster::class,['category'],[],[]);
-           $dropdownMaster->whereNull('deleted_at');
-           $dropdownMaster= $dropdownMaster->groupBy('category')->get();
+            $dropdownMaster->whereNull('deleted_at');
+            $dropdownMaster= $dropdownMaster->groupBy('category')->get();
             return response()->json([
                 'is_success' => 'true',
                 'dropdownMaster' => $dropdownMaster

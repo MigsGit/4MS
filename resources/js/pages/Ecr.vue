@@ -535,8 +535,8 @@
                                             <tr>
                                             <th scope="col">#</th>
                                             <th scope="col" style="width: 30%;">Qc Head</th>
-                                            <th scope="col" style="width: 30%;">Operation Head</th>
                                             <th scope="col" style="width: 30%;">QA Head</th>
+                                            <th scope="col" style="width: 30%;">QMD Head</th>
                                             <th scope="col">Action</th>
                                             </tr>
                                         </thead>
@@ -1153,7 +1153,8 @@
         commonVar,
         getCurrentApprover,
         getCurrentPmiInternalApprover,
-        getAdminAccessOpt,
+        // getAdminAccessOpt,
+        getCategoryAdminAccessOpt,
         optFilterOptions,
     } = useCommon();
 
@@ -1372,7 +1373,9 @@
         const btnChangeEcrReqDecision = toRef(btnChangeEcrReqDecision);
         await getDropdownMasterByOpt(descriptionOfChangeParams);
         await getDropdownMasterByOpt(reasonOfChangeParams);
-        await getAdminAccessOpt();
+        // await getAdminAccessOpt();
+        await getCategoryAdminAccessOpt();
+
         $('#collapse1').addClass('show');
     })
 
